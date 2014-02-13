@@ -2,37 +2,37 @@
 
 SceneTreeModel::SceneTreeModel(QObject *parent) : QAbstractItemModel(parent) {
 
-    headerDataStrings.append(new QVariant("Visibility"));
-    visibilityColumn = 0;
-    headerDataStrings.append(new QVariant("Name"));
-    nameColumn = 1;
+    m_headerData.append(new QVariant("Visibility"));
+    m_visibilityColumn = 0;
+    m_headerData.append(new QVariant("Name"));
+    m_nameColumn = 1;
 
-    modelListNames.append(new QString("blub 1"));
-    modelListVisibilities.append(true);
-    modelListNames.append(new QString("blub 2"));
-    modelListVisibilities.append(true);
-    modelListNames.append(new QString("blub 3"));
-    modelListVisibilities.append(true);
+    m_modelListNames.append(new QString("blub 1"));
+    m_modelListVisibilities.append(true);
+    m_modelListNames.append(new QString("blub 2"));
+    m_modelListVisibilities.append(true);
+    m_modelListNames.append(new QString("blub 3"));
+    m_modelListVisibilities.append(true);
 
     // emit layoutChanged(const QList<QPersistentModelIndex> &parents = QList<QPersistentModelIndex>(), QAbstractItemModel::LayoutChangeHint hint = QAbstractItemModel::NoLayoutChangeHint);
     emit dataChanged(QModelIndex(), QModelIndex());
 }
 
 SceneTreeModel::~SceneTreeModel() {
-    qDeleteAll(modelListNames);
-    qDeleteAll(headerDataStrings);
+    qDeleteAll(m_modelListNames);
+    qDeleteAll(m_headerData);
 }
 
 QModelIndex SceneTreeModel::index(int row, int column, const QModelIndex &parent) const {
-    if(row < 0 || row > modelListNames.size())
+    if(row < 0 || row > m_modelListNames.size())
         return QModelIndex();
     if(parent.isValid())
         //TODO: do something usefull here - up to now only list is used, no tree, therefore QModelIndex as return value
         return QModelIndex();
-    if(column == visibilityColumn)
-        return createIndex(row, column, (modelListVisibilities.at(row)));
+    if(column == m_visibilityColumn)
+        return createIndex(row, column, (m_modelListVisibilities.at(row)));
     else
-        return createIndex(row, column, modelListNames.at(row));
+        return createIndex(row, column, m_modelListNames.at(row));
 }
 
 /** Returns th parent of the model item with the given index.
@@ -64,20 +64,20 @@ int SceneTreeModel::rowCount(const QModelIndex &parent) const {
     if(parent.isValid())
         return 0;
     else
-        return modelListNames.size();
+        return m_modelListNames.size();
     //TODO!!!
 }
 
 int SceneTreeModel::columnCount(const QModelIndex &parent) const {
-    return headerDataStrings.size();
+    return m_headerData.size();
 }
 
 QVariant SceneTreeModel::data(const QModelIndex &index, int role) const {
     if(index.isValid() && role == Qt::DisplayRole) {
-        if(index.column() == nameColumn)
-            return QVariant(*(modelListNames.at(index.row())));
-        if(index.column() == visibilityColumn)
-            return QVariant(modelListVisibilities.at(index.row()));
+        if(index.column() == m_nameColumn)
+            return QVariant(*(m_modelListNames.at(index.row())));
+        if(index.column() == m_visibilityColumn)
+            return QVariant(m_modelListVisibilities.at(index.row()));
     }
     return QVariant();
 }
@@ -85,11 +85,11 @@ QVariant SceneTreeModel::data(const QModelIndex &index, int role) const {
 bool SceneTreeModel::setData(const QModelIndex &index, const QVariant &value, int role) {
     if(role != Qt::EditRole)
         return false;
-    if(index.column() == visibilityColumn) {
+    if(index.column() == m_visibilityColumn) {
         // toggleVisibility(index); TODO
-    } else if (index.column() == nameColumn) {
-        if(static_cast<QString*>(index.internalPointer()) == modelListNames.at(index.row())) {
-            modelListNames[index.row()] = new QString(value.toString());
+    } else if (index.column() == m_nameColumn) {
+        if(static_cast<QString*>(index.internalPointer()) == m_modelListNames.at(index.row())) {
+            m_modelListNames[index.row()] = new QString(value.toString());
         } else {
             return false;
         }
@@ -101,12 +101,12 @@ bool SceneTreeModel::setData(const QModelIndex &index, const QVariant &value, in
 }
 
 QVariant SceneTreeModel::headerData(int section, Qt::Orientation orientation, int role) const {
-    if(section < 0 || section >= headerDataStrings.size())
+    if(section < 0 || section >= m_headerData.size())
         return QVariant();
     if(role == Qt::ToolTipRole){
-        return *(headerDataStrings[section]); //TODO: use something suitable here!
+        return *(m_headerData[section]); //TODO: use something suitable here!
     } else if(role == Qt::DisplayRole) {
-        return *(headerDataStrings[section]);
+        return *(m_headerData[section]);
     } else {
         return QVariant();
     }
@@ -120,7 +120,7 @@ Qt::ItemFlags SceneTreeModel::flags(const QModelIndex &index) const {
     }
 }
 
-bool SceneTreeModel::addGeometry() {
+bool SceneTreeModel::addItem() {
     int lastRow = rowCount(QModelIndex());
     return insertRows(lastRow, 1, QModelIndex());
 }
@@ -132,19 +132,19 @@ bool SceneTreeModel::remove(QModelIndex index) {
 }
 
 bool SceneTreeModel::insertRows(int row, int count, const QModelIndex &parent) {
-    if(parent.isValid() || row > modelListNames.size() || row < 0)
+    if(parent.isValid() || row > m_modelListNames.size() || row < 0)
         return false;
     beginInsertRows(parent, row, count);
     for(int i = 0; i < count; ++i) {
-        modelListNames.insert(row, new QString("Unnamed Geometry"));
-        modelListVisibilities.insert(row, true);
+        m_modelListNames.insert(row, new QString("Unnamed Item"));
+        m_modelListVisibilities.insert(row, true);
     }
     endInsertRows();
     return true;
 }
 
 bool SceneTreeModel::removeRows(int row, int count, const QModelIndex &parent) {
-    if(parent.isValid() || row > modelListNames.size() || row < 0 || count < 0)
+    if(parent.isValid() || row > m_modelListNames.size() || row < 0 || count < 0)
         return false;
 
     //if count would be longer than children list, shorten it to the suitable size
@@ -159,9 +159,9 @@ bool SceneTreeModel::removeRows(int row, int count, const QModelIndex &parent) {
             removeRows(0, rowCount(indexToRemove), indexToRemove);
         }
         //delete row:
-        delete modelListNames.at(i);
-        modelListNames.removeAt(i);
-        modelListVisibilities.removeAt(i);
+        delete m_modelListNames.at(i);
+        m_modelListNames.removeAt(i);
+        m_modelListVisibilities.removeAt(i);
     }
     endRemoveRows();
 

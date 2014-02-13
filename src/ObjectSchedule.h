@@ -13,10 +13,10 @@ public:
     ObjectSchedule(QWidget *parent = 0);
     ~ObjectSchedule();
 public slots:
-    void addGeometry();
-    void removeGeometry();
+    void addItem();
+    void removeItems();
 private:
-    SceneTreeModel *sceneModel;
+    SceneTreeModel *m_sceneModel;
 };
 
 

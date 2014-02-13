@@ -8,21 +8,21 @@ ObjectSchedule::ObjectSchedule(QWidget *parent) : QTreeView(parent) {
 
     // QFileSystemModel *model = new QFileSystemModel;
     // model->setRootPath(QDir::currentPath());
-    sceneModel = new SceneTreeModel();
-    setModel(sceneModel);
+    m_sceneModel = new SceneTreeModel();
+    setModel(m_sceneModel);
 
 }
 
 ObjectSchedule::~ObjectSchedule() {
-    delete sceneModel;
+    delete m_sceneModel;
 }
 
-void ObjectSchedule::addGeometry() {
-    sceneModel->addGeometry();
+void ObjectSchedule::addItem() {
+    m_sceneModel->addItem();
 }
 
 
-//Helpermethod for removeGeometry
+//Helpermethod for removeItems()
 //TODO: put this method somewhere suitable!
 bool isBelow(QModelIndex &a, QModelIndex &b) {
     if(a.row() < b.row())
@@ -31,7 +31,7 @@ bool isBelow(QModelIndex &a, QModelIndex &b) {
         return true;
 }
 
-void ObjectSchedule::removeGeometry() {
+void ObjectSchedule::removeItems() {
     QModelIndexList selectedItems = selectedIndexes();
 
     //sort items from bottom to top, otherwise row number will be useless after first rows are deleted
@@ -45,8 +45,8 @@ void ObjectSchedule::removeGeometry() {
                 ++markedColumnsCounter;
             }
         }
-        if(markedColumnsCounter >= sceneModel->columnCount()) {
-            sceneModel->remove(index);
+        if(markedColumnsCounter >= m_sceneModel->columnCount()) {
+            m_sceneModel->remove(index);
         }
     }
 }

@@ -61,7 +61,7 @@ public:
      */
     Qt::ItemFlags flags(const QModelIndex &index) const; //The base class implementation returns a combination of flags that enables the item (ItemIsEnabled) and allows it to be selected (ItemIsSelectable). ItemIsEditable must be returned!
 
-    bool addGeometry();
+    bool addItem();
     bool remove(QModelIndex index);
 
     bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex());
@@ -72,11 +72,11 @@ signals:
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>());
 
 private:
-    QList<QString*> modelListNames;
-    QList<bool>     modelListVisibilities;
-    QList<QVariant*> headerDataStrings;
-    int nameColumn;
-    int visibilityColumn;
+    QList<QString*>  m_modelListNames;
+    QList<bool>      m_modelListVisibilities;
+    QList<QVariant*> m_headerData;
+    int m_nameColumn;
+    int m_visibilityColumn;
 };
 
 #endif // SCENE_TREE_MODEL
