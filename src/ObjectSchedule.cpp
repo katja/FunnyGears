@@ -13,7 +13,7 @@ ObjectSchedule::ObjectSchedule(QWidget *parent) : QTreeView(parent) {
 }
 
 ObjectSchedule::~ObjectSchedule() {
-
+    delete sceneModel;
 }
 
 void ObjectSchedule::addGeometry() {

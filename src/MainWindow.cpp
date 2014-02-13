@@ -3,7 +3,8 @@
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags) {
 
-    setGeometry(50, 20, 1000, 800);
+    setGeometry(50, 20, 300, 800); //TODO: delete this line and use next one instead!
+    // setGeometry(50, 20, 1000, 800);
     setWindowTitle("Funny Gears");
     setWindowIcon(QIcon("Gear.icns"));
     setUnifiedTitleAndToolBarOnMac(true);
