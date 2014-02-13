@@ -4,6 +4,7 @@
 ObjectSchedule::ObjectSchedule(QWidget *parent) : QTreeView(parent) {
 
     setSelectionMode(QAbstractItemView::ExtendedSelection); //this mode allows a selection of multiple items with mouse, ctrl-key and shift-key
+    setHeaderHidden(false);
 
     // QFileSystemModel *model = new QFileSystemModel;
     // model->setRootPath(QDir::currentPath());

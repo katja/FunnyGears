@@ -2,9 +2,9 @@
 
 SceneTreeModel::SceneTreeModel(QObject *parent) : QAbstractItemModel(parent) {
 
-    headerData.append(new QString("Visibility"));
+    headerDataStrings.append(new QVariant("Visibility"));
     visibilityColumn = 0;
-    headerData.append(new QString("Name"));
+    headerDataStrings.append(new QVariant("Name"));
     nameColumn = 1;
 
     modelListNames.append(new QString("blub 1"));
@@ -20,7 +20,7 @@ SceneTreeModel::SceneTreeModel(QObject *parent) : QAbstractItemModel(parent) {
 
 SceneTreeModel::~SceneTreeModel() {
     qDeleteAll(modelListNames);
-    qDeleteAll(headerData);
+    qDeleteAll(headerDataStrings);
 }
 
 QModelIndex SceneTreeModel::index(int row, int column, const QModelIndex &parent) const {
@@ -69,7 +69,7 @@ int SceneTreeModel::rowCount(const QModelIndex &parent) const {
 }
 
 int SceneTreeModel::columnCount(const QModelIndex &parent) const {
-    return headerData.size();
+    return headerDataStrings.size();
 }
 
 QVariant SceneTreeModel::data(const QModelIndex &index, int role) const {
@@ -98,6 +98,18 @@ bool SceneTreeModel::setData(const QModelIndex &index, const QVariant &value, in
     }
     emit dataChanged(index, index);
     return true;
+}
+
+QVariant SceneTreeModel::headerData(int section, Qt::Orientation orientation, int role) const {
+    if(section < 0 || section >= headerDataStrings.size())
+        return QVariant();
+    if(role == Qt::ToolTipRole){
+        return *(headerDataStrings[section]); //TODO: use something suitable here!
+    } else if(role == Qt::DisplayRole) {
+        return *(headerDataStrings[section]);
+    } else {
+        return QVariant();
+    }
 }
 
 Qt::ItemFlags SceneTreeModel::flags(const QModelIndex &index) const {

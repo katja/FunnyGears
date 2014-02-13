@@ -52,6 +52,11 @@ public:
      */
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole); //emit dataChanged() signal
 
+    /** Returns the data for the given role and section in the header
+     *  with the specified orientation.
+     */
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+
     /** Returns the item flags for the given index.
      */
     Qt::ItemFlags flags(const QModelIndex &index) const; //The base class implementation returns a combination of flags that enables the item (ItemIsEnabled) and allows it to be selected (ItemIsSelectable). ItemIsEditable must be returned!
@@ -69,7 +74,7 @@ signals:
 private:
     QList<QString*> modelListNames;
     QList<bool>     modelListVisibilities;
-    QList<QString*> headerData;
+    QList<QVariant*> headerDataStrings;
     int nameColumn;
     int visibilityColumn;
 };
