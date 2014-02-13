@@ -67,7 +67,11 @@ signals:
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>());
 
 private:
-    QList<QString*> *modelList;
+    QList<QString*> modelListNames;
+    QList<bool>     modelListVisibilities;
+    QList<QString*> headerData;
+    int nameColumn;
+    int visibilityColumn;
 };
 
 #endif // SCENE_TREE_MODEL
