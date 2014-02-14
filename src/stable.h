@@ -15,6 +15,7 @@
 #include <QAbstractItemModel>
 #include <QAction>
 #include <QApplication>
+#include <QDialog>
 #include <QDockWidget>
 #include <QDrag>
 #include <QFileDialog>

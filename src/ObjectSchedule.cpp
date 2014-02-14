@@ -34,19 +34,36 @@ bool isBelow(QModelIndex &a, QModelIndex &b) {
 void ObjectSchedule::removeItems() {
     QModelIndexList selectedItems = selectedIndexes();
 
-    //sort items from bottom to top, otherwise row number will be useless after first rows are deleted
-    qSort(selectedItems.begin(), selectedItems.end(), isBelow);
+    //Warn the user with a message box:
 
-    //only delete entries, whose line (row) was marked fully!
-    foreach(QModelIndex index, selectedItems) {
-        int markedColumnsCounter = 1;
-        foreach(QModelIndex index2, selectedItems) {
-            if(index.row() == index2.row() && index.column() < index2.column()) {
-                ++markedColumnsCounter;
+    QString messageText = "Do you really want to delete the selected ";
+    if(selectedItems.size() > 1)
+        messageText.append("items?");
+    else
+        messageText.append("item?");
+
+    QMessageBox askPermissionDialog(this);
+    askPermissionDialog.setText(messageText);
+    askPermissionDialog.setInformativeText("Selected items will have gone until doomsday! You can't undo this action!");
+    askPermissionDialog.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+    askPermissionDialog.setDefaultButton(QMessageBox::Yes);
+    int answer = askPermissionDialog.exec();
+    if(answer == QMessageBox::Yes) { // = 1 => dialog accepted => delete items
+
+        //sort items from bottom to top, otherwise row number will be useless after first rows are deleted
+        qSort(selectedItems.begin(), selectedItems.end(), isBelow);
+
+        //only delete entries, whose line (row) was marked fully!
+        foreach(QModelIndex index, selectedItems) {
+            int markedColumnsCounter = 1;
+            foreach(QModelIndex index2, selectedItems) {
+                if(index.row() == index2.row() && index.column() < index2.column()) {
+                    ++markedColumnsCounter;
+                }
             }
-        }
-        if(markedColumnsCounter >= m_sceneModel->columnCount()) {
-            m_sceneModel->remove(index);
+            if(markedColumnsCounter >= m_sceneModel->columnCount()) {
+                m_sceneModel->remove(index);
+            }
         }
     }
 }
