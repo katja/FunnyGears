@@ -2,6 +2,7 @@
 #define SCENE_TREE_MODEL
 
 #include "stable.h"
+#include "SceneTreeItem.h"
 
 class SceneTreeModel : public QAbstractItemModel {
 
@@ -10,6 +11,12 @@ Q_OBJECT
 public:
     SceneTreeModel(QObject *parent = 0);
     ~SceneTreeModel();
+
+    /** Sets a new root item. Root Item may be an item of quite another scene tree.
+     *  Return value is the old root item.
+     *  You have to delete it, if it isn't needed any longer!
+     */
+    SceneTreeItem* setRoot(SceneTreeItem *rootItem);
 
     /** Returns the index of the item in the model
      * specified by the given row, column and parent index.
@@ -72,8 +79,9 @@ signals:
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>());
 
 private:
-    QList<QString*>  m_modelListNames;
-    QList<bool>      m_modelListVisibilities;
+    SceneTreeItem* findItemBy(const QModelIndex &index) const;
+
+    SceneTreeItem   *m_rootItem;
     QList<QVariant*> m_headerData;
     int m_nameColumn;
     int m_visibilityColumn;

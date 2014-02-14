@@ -4,10 +4,15 @@ SceneTreeItem::SceneTreeItem() {
     m_isRoot = true;
 }
 
-SceneTreeItem::SceneTreeItem(Geometry *geometry, SceneTreeItem *parent) : m_geometry(geometry), m_parent(parent), m_isRoot(false) {
+SceneTreeItem::SceneTreeItem(Geometry *geometry, SceneTreeItem *parent) : m_geometry(geometry), m_isRoot(false), m_parent(parent) {
+    m_name = "Unnamed Item";
+    m_isVisible = true;
 }
 
 SceneTreeItem::~SceneTreeItem() {
+    // for(int i = 0; i < m_children.size(); ++i) {
+    //     delete m_children[i];
+    // } // is same as following line:
     qDeleteAll(m_children);
 }
 
@@ -23,13 +28,16 @@ SceneTreeItem* SceneTreeItem::addChild(Geometry *geometry) {
 
 bool SceneTreeItem::removeChild(SceneTreeItem *child) {
     int childIndex = m_children.indexOf(child);
-    if(childIndex < 0) {
-        return false; //child not found
-    } else if(child->isRemovable()) {
+    return removeChild(childIndex);
+}
+
+bool SceneTreeItem::removeChild(int childIndex) {
+    if(childIndex < 0 || childIndex >= numberOfChildren() || !child(childIndex)->isRemovable()) {
+        return false; //child not found/non-existent/not removable
+    } else {
+        delete child(childIndex);
         m_children.removeAt(childIndex);
         return true;
-    } else {
-        return false; //child is not removable
     }
 }
 

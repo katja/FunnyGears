@@ -13,8 +13,9 @@ public:
 
     bool            isRoot() const;
 
-    SceneTreeItem*  addChild(Geometry *geometry);
+    SceneTreeItem*  addChild(Geometry *geometry = new Geometry());
     bool            removeChild(SceneTreeItem *child);
+    bool            removeChild(int childIndex);
 
     SceneTreeItem*  parent() const;
     SceneTreeItem*  child(int number) const;
