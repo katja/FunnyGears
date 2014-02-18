@@ -79,3 +79,23 @@ bool SceneTreeItem::isVisible() const {
 bool SceneTreeItem::isRemovable() const {
     return true; //TODO: make suitable
 }
+
+QString SceneTreeItem::geometry() const {
+    return "m_geometry"; //TODO: return m_geometry instead of this stub! But implement the QMetaTypeClass before!!!
+}
+
+void SceneTreeItem::translate(const QVector2D &translation) {
+    m_translation += translation;
+}
+
+QVector2D SceneTreeItem::getTranslation() const {
+    return m_translation;
+}
+
+void SceneTreeItem::rotate(float angle) {
+    m_rotation += angle;
+}
+
+float SceneTreeItem::getRotation() const {
+    return m_rotation;
+}

@@ -29,6 +29,14 @@ public:
     bool            isVisible() const;
     bool            isRemovable() const;
 
+
+    QString         geometry() const;
+    void            translate(const QVector2D &translation);
+    QVector2D       getTranslation() const;
+    void            rotate(float angle);
+    float           getRotation() const;
+
+
 private:
     Geometry *m_geometry;
 
@@ -38,6 +46,10 @@ private:
 
     QString m_name;
     bool m_isVisible;
+
+    QVector2D m_translation; //translation
+    float m_rotation; //rotation counterclockwise
+
 };
 
 #endif //SCENE_TREE_ITEM

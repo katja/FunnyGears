@@ -2,10 +2,31 @@
 
 SceneTreeModel::SceneTreeModel(QObject *parent) : QAbstractItemModel(parent) {
 
-    m_headerData.append(new QVariant("Visibility"));
-    m_visibilityColumn = 0;
-    m_headerData.append(new QVariant("Name"));
-    m_nameColumn = 1;
+    QHash<Qt::ItemDataRole, QString> *dataHash = new QHash<Qt::ItemDataRole, QString>();
+
+    dataHash->insert(Qt::DisplayRole, "Name");
+    dataHash->insert(Qt::ToolTipRole, "Your given name for the item. You can change it.");
+    m_headHash.insert(NAME, *dataHash);
+
+    dataHash = new QHash<Qt::ItemDataRole, QString>();
+    dataHash->insert(Qt::DisplayRole, "Visibility");
+    dataHash->insert(Qt::ToolTipRole, "The item can be visible or not, which is shown here.");
+    m_headHash.insert(VISIBILITY, *dataHash);
+
+    dataHash = new QHash<Qt::ItemDataRole, QString>();
+    dataHash->insert(Qt::DisplayRole, "Type");
+    dataHash->insert(Qt::ToolTipRole, "Holds information about the whole geometry.");
+    m_headHash.insert(TYPE, *dataHash);
+
+    dataHash = new QHash<Qt::ItemDataRole, QString>();
+    dataHash->insert(Qt::DisplayRole, "Translation");
+    dataHash->insert(Qt::ToolTipRole, "Holds the position of the geometry.");
+    m_headHash.insert(TRANSLATION, *dataHash);
+
+    dataHash = new QHash<Qt::ItemDataRole, QString>();
+    dataHash->insert(Qt::DisplayRole, "Rotation");
+    dataHash->insert(Qt::ToolTipRole, "Holds the rotation of the geometry");
+    m_headHash.insert(ROTATION, *dataHash);
 
     m_rootItem = new SceneTreeItem();
 
@@ -73,7 +94,7 @@ int SceneTreeModel::rowCount(const QModelIndex &parent) const {
 }
 
 int SceneTreeModel::columnCount(const QModelIndex &parent) const {
-    return m_headerData.size();
+    return m_headHash.size();
 }
 
 QVariant SceneTreeModel::data(const QModelIndex &index, int role) const {
@@ -82,10 +103,20 @@ QVariant SceneTreeModel::data(const QModelIndex &index, int role) const {
     SceneTreeItem *item = findItemBy(index);
     if(item) {
         if(role == Qt::DisplayRole || role == Qt::ToolTipRole) { //TODO: do something more suitable for ToolTipRole
-            if(index.column() == m_nameColumn)
-                return item->name();
-            if(index.column() == m_visibilityColumn)
-                return item->isVisible();
+            switch(index.column()) {
+                case NAME:
+                    return item->name();
+                case VISIBILITY:
+                    return item->isVisible();
+                case TYPE:
+                    return item->geometry();
+                // case TRANSLATION:
+                //     return ...
+                // case ROTATION
+                //     return ...
+                default:
+                    return QVariant();
+            }
         }
     }
     return QVariant();
@@ -111,15 +142,12 @@ bool SceneTreeModel::setData(const QModelIndex &index, const QVariant &value, in
 }
 
 QVariant SceneTreeModel::headerData(int section, Qt::Orientation orientation, int role) const {
-    if(section < 0 || section >= m_headerData.size())
+    if(section < 0 || section >= m_headHash.size())
         return QVariant();
-    if(role == Qt::ToolTipRole){
-        return *(m_headerData[section]); //TODO: use something suitable for tool tips here!
-    } else if(role == Qt::DisplayRole) {
-        return *(m_headerData[section]);
-    } else {
+    if(m_headHash.contains(Data(section)) && m_headHash[Data(section)].contains(Qt::ItemDataRole(role)))
+        return m_headHash[Data(section)][Qt::ItemDataRole(role)];
+    else
         return QVariant();
-    }
 }
 
 Qt::ItemFlags SceneTreeModel::flags(const QModelIndex &index) const {

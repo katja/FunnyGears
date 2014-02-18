@@ -11,6 +11,10 @@ ObjectSchedule::ObjectSchedule(QWidget *parent) : QTreeView(parent) {
     m_sceneModel = new SceneTreeModel();
     setModel(m_sceneModel);
 
+    hideColumn(SceneTreeModel::TRANSLATION);
+    hideColumn(SceneTreeModel::ROTATION);
+    m_numberOfHiddenColumns = 2;
+
 }
 
 ObjectSchedule::~ObjectSchedule() {
@@ -61,7 +65,7 @@ void ObjectSchedule::removeItems() {
                     ++markedColumnsCounter;
                 }
             }
-            if(markedColumnsCounter >= m_sceneModel->columnCount()) {
+            if(markedColumnsCounter >= m_sceneModel->columnCount() - m_numberOfHiddenColumns) {
                 m_sceneModel->remove(index);
             }
         }

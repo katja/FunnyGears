@@ -12,6 +12,11 @@ public:
     SceneTreeModel(QObject *parent = 0);
     ~SceneTreeModel();
 
+
+    enum Data {
+        NAME, VISIBILITY, TYPE, TRANSLATION, ROTATION
+    };
+
     /** Sets a new root item. Root Item may be an item of quite another scene tree.
      *  Return value is the old root item.
      *  You have to delete it, if it isn't needed any longer!
@@ -81,8 +86,8 @@ signals:
 private:
     SceneTreeItem* findItemBy(const QModelIndex &index) const;
 
-    SceneTreeItem   *m_rootItem;
-    QList<QVariant*> m_headerData;
+    SceneTreeItem *m_rootItem;
+    QHash< Data, QHash<Qt::ItemDataRole, QString> > m_headHash;
     int m_nameColumn;
     int m_visibilityColumn;
 };

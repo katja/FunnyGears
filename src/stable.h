@@ -39,6 +39,7 @@
 #include <QToolTip>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
+#include <QVector2D>
 #include <QWidget>
 
 
