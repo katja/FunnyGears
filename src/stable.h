@@ -15,13 +15,16 @@
 #include <QAbstractItemModel>
 #include <QAction>
 #include <QApplication>
+#include <QBitmap>
 #include <QDialog>
 #include <QDockWidget>
 #include <QDrag>
 #include <QFileDialog>
 #include <QGraphicsColorizeEffect>
+#include <QGraphicsItem>
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <QGraphicsWidget>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -31,6 +34,7 @@
 #include <QMessageBox>
 #include <QMimeData>
 #include <QMouseEvent>
+#include <QPaintEngine>
 #include <QPalette>
 #include <QPushButton>
 #include <QStatusBar>

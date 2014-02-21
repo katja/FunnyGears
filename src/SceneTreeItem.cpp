@@ -4,7 +4,7 @@ SceneTreeItem::SceneTreeItem() {
     m_isRoot = true;
 }
 
-SceneTreeItem::SceneTreeItem(Geometry *geometry, SceneTreeItem *parent) : m_geometry(geometry), m_isRoot(false), m_parent(parent) {
+SceneTreeItem::SceneTreeItem(QGraphicsItem *geometry, SceneTreeItem *parent) : m_geometry(geometry), m_isRoot(false), m_parent(parent) {
     m_name = "Unnamed Item";
     m_isVisible = true;
 }
@@ -20,7 +20,7 @@ bool SceneTreeItem::isRoot() const {
     return m_isRoot;
 }
 
-SceneTreeItem* SceneTreeItem::addChild(Geometry *geometry) {
+SceneTreeItem* SceneTreeItem::addChild(QGraphicsItem *geometry) {
     SceneTreeItem *child = new SceneTreeItem(geometry, this);
     m_children.append(child);
     return child;

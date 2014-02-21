@@ -2,6 +2,8 @@
 #define MAIN_WINDOW
 
 #include "stable.h"
+#include "GraphicsView.h"
+#include "GraphicsScene.h"
 
 class MainWindow : public QMainWindow {
 
@@ -10,6 +12,11 @@ public:
     ~MainWindow();
 
     QIcon icon() const;
+
+
+private:
+    GraphicsView *view;
+    GraphicsScene *scene;
 };
 
 
