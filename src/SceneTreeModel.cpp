@@ -127,9 +127,9 @@ bool SceneTreeModel::setData(const QModelIndex &index, const QVariant &value, in
         return false;
     SceneTreeItem *item = findItemBy(index);
     if(item) {
-        if(index.column() == m_visibilityColumn) {
+        if(index.column() == VISIBILITY) {
             item->toggleVisibility();
-        } else if (index.column() == m_nameColumn) {
+        } else if (index.column() == NAME) {
             item->setName(value.toString());
         } else {
             return false;
