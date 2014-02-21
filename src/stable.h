@@ -16,6 +16,7 @@
 #include <QAction>
 #include <QApplication>
 #include <QBitmap>
+#include <QColorDialog>
 #include <QDialog>
 #include <QDockWidget>
 #include <QDrag>
