@@ -106,8 +106,8 @@ QVariant SceneTreeModel::data(const QModelIndex &index, int role) const {
             switch(index.column()) {
                 case NAME:
                     return item->name();
-                case VISIBILITY:
-                    return item->isVisible();
+                // case VISIBILITY: //TODO: maybe it would be good to give this boolean value here, too, but disabling it in the used QAbstractItemView or better the QAbstractItemDelegate (YesNoDelegate)
+                //     return item->isVisible();
                 case TYPE:
                     return item->geometry();
                 // case TRANSLATION:
@@ -132,9 +132,7 @@ bool SceneTreeModel::setData(const QModelIndex &index, const QVariant &value, in
         return false;
     SceneTreeItem *item = findItemBy(index);
     if(item) {
-        if(index.column() == VISIBILITY) {
-            item->toggleVisibility();
-        } else if (index.column() == NAME) {
+        if (index.column() == NAME) {
             item->setName(value.toString());
         } else {
             return false;
@@ -144,6 +142,17 @@ bool SceneTreeModel::setData(const QModelIndex &index, const QVariant &value, in
     }
     emit dataChanged(index, index);
     return true;
+}
+
+bool SceneTreeModel::toggleValue(const QModelIndex &index) {
+    SceneTreeItem *item = findItemBy(index);
+    if(item) {
+        if(index.column() == VISIBILITY)
+            item->toggleVisibility();
+        emit dataChanged(index, index);
+        return true;
+    }
+    return false;
 }
 
 QVariant SceneTreeModel::headerData(int section, Qt::Orientation orientation, int role) const {
@@ -163,6 +172,7 @@ Qt::ItemFlags SceneTreeModel::flags(const QModelIndex &index) const {
             return Qt::ItemIsUserCheckable | QAbstractItemModel::flags(index);
         if(index.column() == TYPE)
             return Qt::ItemIsSelectable | QAbstractItemModel::flags(index);
+        return Qt::NoItemFlags;
     } else {
         return Qt::NoItemFlags;
     }
@@ -220,7 +230,7 @@ bool SceneTreeModel::removeRows(int row, int count, const QModelIndex &parent) {
 
 SceneTreeItem* SceneTreeModel::findItemBy(const QModelIndex &index) const {
     if(index.isValid()) {
-        SceneTreeItem* item = static_cast<SceneTreeItem*>(index.internalPointer());
+        SceneTreeItem *item = static_cast<SceneTreeItem*>(index.internalPointer());
         if(item)
             return item;
     }

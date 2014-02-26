@@ -15,6 +15,7 @@ public:
 public slots:
     void addItem();
     void removeItems();
+
 private:
     SceneTreeModel *m_sceneModel;
     int m_numberOfHiddenColumns;

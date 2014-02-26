@@ -39,6 +39,7 @@
 #include <QPalette>
 #include <QPushButton>
 #include <QStatusBar>
+#include <QStyledItemDelegate>
 #include <QToolBar>
 #include <QToolButton>
 #include <QToolTip>

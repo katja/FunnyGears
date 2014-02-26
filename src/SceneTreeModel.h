@@ -64,6 +64,11 @@ public:
      */
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole); //emit dataChanged() signal
 
+    /** Toggles the boolean values (up to now there is only the visibility value).
+     *  Returns true, if toggling was possible.
+     */
+    bool toggleValue(const QModelIndex &index);
+
     /** Returns the data for the given role and section in the header
      *  with the specified orientation.
      */

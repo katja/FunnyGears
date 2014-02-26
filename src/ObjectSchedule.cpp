@@ -1,10 +1,14 @@
 #include "ObjectSchedule.h"
-#include <QFileSystemModel>
+#include "YesNoDelegate.h"
 
 ObjectSchedule::ObjectSchedule(QWidget *parent) : QTreeView(parent) {
 
-    setSelectionMode(QAbstractItemView::ExtendedSelection); //this mode allows a selection of multiple items with mouse, ctrl-key and shift-key
     setHeaderHidden(false);
+    setSelectionMode(QAbstractItemView::ExtendedSelection); //this mode allows a selection of multiple items with mouse, ctrl-key and shift-key
+    setSelectionBehavior(QAbstractItemView::SelectRows);
+    setEditTriggers(QAbstractItemView::DoubleClicked);
+
+    setItemDelegate(new YesNoDelegate());
 
     // QFileSystemModel *model = new QFileSystemModel;
     // model->setRootPath(QDir::currentPath());
@@ -14,7 +18,6 @@ ObjectSchedule::ObjectSchedule(QWidget *parent) : QTreeView(parent) {
     hideColumn(SceneTreeModel::TRANSLATION);
     hideColumn(SceneTreeModel::ROTATION);
     m_numberOfHiddenColumns = 2;
-
 }
 
 ObjectSchedule::~ObjectSchedule() {
