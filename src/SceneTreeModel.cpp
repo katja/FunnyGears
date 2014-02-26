@@ -117,6 +117,11 @@ QVariant SceneTreeModel::data(const QModelIndex &index, int role) const {
                 default:
                     return QVariant();
             }
+        } else if (role == Qt::DecorationRole && index.column() == VISIBILITY) {
+            if(item->isVisible())
+                return QIcon("images/EyeOpen.png");
+            else
+                return QIcon("images/EyeClosed.png");
         }
     }
     return QVariant();
@@ -152,7 +157,12 @@ QVariant SceneTreeModel::headerData(int section, Qt::Orientation orientation, in
 
 Qt::ItemFlags SceneTreeModel::flags(const QModelIndex &index) const {
     if(index.isValid()) {
-        return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
+        if(index.column() == NAME)
+            return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
+        if(index.column() == VISIBILITY)
+            return Qt::ItemIsUserCheckable | QAbstractItemModel::flags(index);
+        if(index.column() == TYPE)
+            return Qt::ItemIsSelectable | QAbstractItemModel::flags(index);
     } else {
         return Qt::NoItemFlags;
     }
