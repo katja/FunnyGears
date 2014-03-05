@@ -42,6 +42,8 @@ void ObjectSchedule::removeItems() {
     QModelIndexList selectedItems = selectedIndexes();
 
     //Warn the user with a message box:
+    if(selectedItems.empty())
+        return;
 
     QString messageText = "Do you really want to delete the selected ";
     if(selectedItems.size() > 1)

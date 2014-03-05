@@ -20,7 +20,6 @@ private:
     void updateAllViews(const QList<QRectF> &updateRegions) const;
     void initialize();
 
-    QBrush backgroundGridBrush;
 };
 
 #endif // GRAPHICS_SCENE
