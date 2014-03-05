@@ -5,6 +5,8 @@
 
 class GraphicsView : public QGraphicsView {
 
+Q_OBJECT
+
 public:
     GraphicsView(QWidget *parent = 0);
     GraphicsView(QGraphicsScene *scene, QWidget *parent = 0);

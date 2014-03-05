@@ -9,8 +9,10 @@ GraphicsView::GraphicsView(QGraphicsScene *scene, QWidget *parent) : QGraphicsVi
 }
 
 void GraphicsView::initialize() {
+    std::cout << "GraphicsView is created" << std::endl;
     // movingEnabled = false;
     setRenderHint(QPainter::Antialiasing);
+    setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
     setMouseTracking(false);
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     setDragMode(QGraphicsView::RubberBandDrag);
@@ -19,6 +21,7 @@ void GraphicsView::initialize() {
 }
 
 GraphicsView::~GraphicsView() {
+    std::cout << "GraphicsView is deleted" << std::endl;
 }
 
 void GraphicsView::wheelEvent(QWheelEvent *event) {

@@ -1,18 +1,17 @@
 #include "ObjectSchedule.h"
 #include "YesNoDelegate.h"
 
-ObjectSchedule::ObjectSchedule(QWidget *parent) : QTreeView(parent) {
+ObjectSchedule::ObjectSchedule(SceneTreeModel *sceneModel, QWidget *parent) : QTreeView(parent), m_sceneModel(sceneModel) {
+
+    std::cout << "ObjectSchedule is created" << std::endl;
 
     setHeaderHidden(false);
     setSelectionMode(QAbstractItemView::ExtendedSelection); //this mode allows a selection of multiple items with mouse, ctrl-key and shift-key
     setSelectionBehavior(QAbstractItemView::SelectRows);
     setEditTriggers(QAbstractItemView::DoubleClicked);
 
-    setItemDelegate(new YesNoDelegate());
+    setItemDelegate(new YesNoDelegate(this));
 
-    // QFileSystemModel *model = new QFileSystemModel;
-    // model->setRootPath(QDir::currentPath());
-    m_sceneModel = new SceneTreeModel();
     setModel(m_sceneModel);
 
     hideColumn(SceneTreeModel::TRANSLATION);
@@ -21,7 +20,8 @@ ObjectSchedule::ObjectSchedule(QWidget *parent) : QTreeView(parent) {
 }
 
 ObjectSchedule::~ObjectSchedule() {
-    delete m_sceneModel;
+    std::cout << "ObjectSchedule is deleted" << std::endl;
+    // delete m_sceneModel;
 }
 
 void ObjectSchedule::addItem() {

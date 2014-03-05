@@ -12,8 +12,12 @@ public:
 
     void drawForeground(QPainter *painter, const QRectF &rect);
     void drawBackground(QPainter *painter, const QRectF &rect);
+
+    void addItem(QGraphicsItem *item);
+
 private:
 
+    void updateAllViews(const QList<QRectF> &updateRegions) const;
     void initialize();
 
     QBrush backgroundGridBrush;

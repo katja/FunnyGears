@@ -4,6 +4,7 @@
 #include "stable.h"
 #include "GraphicsView.h"
 #include "GraphicsScene.h"
+#include "SceneTreeModel.h"
 
 class MainWindow : public QMainWindow {
 
@@ -27,6 +28,8 @@ private slots:
 
 
 private:
+    SceneTreeModel *m_sceneModel;
+
     GraphicsView  *m_view;
     GraphicsScene *m_scene;
 

@@ -1,10 +1,12 @@
 #include "SceneTreeItem.h"
 
 SceneTreeItem::SceneTreeItem() {
+    std::cout << "SceneTreeItem-Root is created" << std::endl;
     m_isRoot = true;
 }
 
 SceneTreeItem::SceneTreeItem(QGraphicsItem *geometry, SceneTreeItem *parent) : m_geometry(geometry), m_isRoot(false), m_parent(parent) {
+    std::cout << "SceneTreeItem is created" << std::endl;
     m_name = "Unnamed Item";
     m_isVisible = true;
 }
@@ -13,6 +15,7 @@ SceneTreeItem::~SceneTreeItem() {
     // for(int i = 0; i < m_children.size(); ++i) {
     //     delete m_children[i];
     // } // is same as following line:
+    std::cout << "SceneTreeItem is deleted" << std::endl;
     qDeleteAll(m_children);
 }
 
@@ -35,6 +38,7 @@ bool SceneTreeItem::removeChild(int childIndex) {
     if(childIndex < 0 || childIndex >= numberOfChildren() || !child(childIndex)->isRemovable()) {
         return false; //child not found/non-existent/not removable
     } else {
+        //children of child(childIndex) are deleted by Qt by deleting child(childIndex)
         delete child(childIndex);
         m_children.removeAt(childIndex);
         return true;
@@ -80,8 +84,12 @@ bool SceneTreeItem::isRemovable() const {
     return true; //TODO: make suitable
 }
 
-QString SceneTreeItem::geometry() const {
-    return "m_geometry"; //TODO: return m_geometry instead of this stub! But implement the QMetaTypeClass before!!!
+QString SceneTreeItem::type() const {
+    return "m_geometry"; //TODO: return suitable stuff instead of this stub!
+}
+
+QGraphicsItem* SceneTreeItem::geometry() const { //TODO: But implement the QMetaTypeClass before!!!
+    return m_geometry;
 }
 
 void SceneTreeItem::translate(const QVector2D &translation) {

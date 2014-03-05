@@ -10,12 +10,13 @@ GraphicsScene::GraphicsScene(qreal x, qreal y, qreal width, qreal height, QObjec
 }
 
 void GraphicsScene::initialize() {
+    std::cout << "GraphicsScene is created" << std::endl;
     setForegroundBrush(QColor(50, 50, 50, 50));
     setSceneRect(-1000, -1000, 2000, 2000);
 }
 
 GraphicsScene::~GraphicsScene() {
-
+    std::cout << "GraphicsScene is deleted" << std::endl;
 }
 
 void GraphicsScene::drawBackground(QPainter *painter, const QRectF &rect) {
@@ -68,4 +69,18 @@ void GraphicsScene::drawForeground(QPainter *painter, const QRectF &rect) {
     painter->drawLine(10, 140, 0, 150);
     painter->drawLine(-10, 140, 0, 150);
     painter->drawEllipse(-5, -5, 10, 10);
+}
+
+void GraphicsScene::addItem(QGraphicsItem *item) {
+    QGraphicsScene::addItem(item);
+    QList<QRectF> updateRegions;
+    updateRegions.append(item->sceneBoundingRect());
+    updateAllViews(updateRegions);
+}
+
+void GraphicsScene::updateAllViews(const QList<QRectF> &updateRegions) const {
+    QList<QGraphicsView*> views = QGraphicsScene::views();
+    foreach(QGraphicsView *view, views) {
+        view->updateScene(updateRegions);
+    }
 }

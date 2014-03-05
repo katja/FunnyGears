@@ -30,7 +30,8 @@ public:
     bool            isRemovable() const;
 
 
-    QString         geometry() const;
+    QString         type() const;
+    QGraphicsItem*  geometry() const;
 
     void            translate(const QVector2D &translation);
     QVector2D       getTranslation() const;

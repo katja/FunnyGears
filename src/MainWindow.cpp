@@ -3,6 +3,8 @@
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), projectChanged(true) {
 
+    std::cout << "MainWindow is created" << std::endl;
+
     setGeometry(50, 20, 1000, 800);
     setWindowTitle("Funny Gears");
     setWindowIcon(QIcon("Gear.icns"));
@@ -19,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(par
 }
 
 MainWindow::~MainWindow() {
+    std::cout << "MainWindow is deleted" << std::endl;
 }
 
 QIcon MainWindow::icon() const {
@@ -111,11 +114,22 @@ void MainWindow::createDialogs() {
 }
 
 void MainWindow::createLayout() {
+// GRAPHICS
+    m_scene = new GraphicsScene(this);
+    m_view = new GraphicsView(m_scene);
+
+    setCentralWidget(m_view);
+
+//ONLY FOR TESTING
+    m_scene->addRect(0, 0, 30, 50);
+
+    m_sceneModel = new SceneTreeModel(m_scene, this);
+
 // DOCK WIDGET OBJECT SCHEDULE
     m_objectScheduleDockWidget          = new QDockWidget(tr("Object Schedule"), this, Qt::Widget);
     QWidget *objectScheduleWidget       = new QWidget(m_objectScheduleDockWidget);
 
-    ObjectSchedule  *objectSchedule     = new ObjectSchedule(this);
+    ObjectSchedule  *objectSchedule     = new ObjectSchedule(m_sceneModel, this);
     QPushButton     *addItemButton      = new QPushButton("+");
     QPushButton     *removeItemButton   = new QPushButton("-");
 
@@ -150,12 +164,6 @@ void MainWindow::createLayout() {
     m_objectAttributesDockWidget->show();
 
     m_toggleObjectAttributesAction = m_objectAttributesDockWidget->toggleViewAction();
-
-// GRAPHICS
-
-    m_scene = new GraphicsScene();
-    m_view = new GraphicsView(m_scene);
-    setCentralWidget(m_view);
 
 };
 

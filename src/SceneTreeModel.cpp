@@ -1,6 +1,7 @@
 #include "SceneTreeModel.h"
 
-SceneTreeModel::SceneTreeModel(QObject *parent) : QAbstractItemModel(parent) {
+SceneTreeModel::SceneTreeModel(GraphicsScene *scene, QObject *parent) : QAbstractItemModel(parent), m_graphicsScene(scene) {
+    std::cout << "SceneTreeModel is created" << std::endl;
 
     QHash<Qt::ItemDataRole, QString> *dataHash = new QHash<Qt::ItemDataRole, QString>();
 
@@ -30,18 +31,27 @@ SceneTreeModel::SceneTreeModel(QObject *parent) : QAbstractItemModel(parent) {
 
     m_rootItem = new SceneTreeItem();
 
-    // emit layoutChanged(const QList<QPersistentModelIndex> &parents = QList<QPersistentModelIndex>(), QAbstractItemModel::LayoutChangeHint hint = QAbstractItemModel::NoLayoutChangeHint);
-    emit dataChanged(QModelIndex(), QModelIndex());
+    if(!m_graphicsScene->items().empty()) {
+        QList<QGraphicsItem*> sceneItems = m_graphicsScene->items();
+        foreach(QGraphicsItem *graphicsItem, sceneItems) {
+            m_rootItem->addChild(graphicsItem);
+        }
+        emit dataChanged(QModelIndex(), index(sceneItems.size() - 1, m_headHash.size() - 1, QModelIndex()));
+    } else {
+        emit dataChanged(QModelIndex(), QModelIndex());
+    }
 }
 
 SceneTreeModel::~SceneTreeModel() {
+    std::cout << "SceneTreeModel is deleted" << std::endl;
+    delete m_rootItem;
 }
 
 SceneTreeItem* SceneTreeModel::setRoot(SceneTreeItem *rootItem) {
     SceneTreeItem *oldRoot = m_rootItem;
     emit layoutAboutToBeChanged();
     m_rootItem = rootItem;
-    //read QAbstractItemModel - layoutChanged()
+    //read QAbstractItemModel - layoutChanged() TODO: include GraphicsScene here!
     //maybe more is necessary here!!!
     emit layoutChanged();
     return oldRoot;
@@ -109,7 +119,7 @@ QVariant SceneTreeModel::data(const QModelIndex &index, int role) const {
                 // case VISIBILITY: //TODO: maybe it would be good to give this boolean value here, too, but disabling it in the used QAbstractItemView or better the QAbstractItemDelegate (YesNoDelegate)
                 //     return item->isVisible();
                 case TYPE:
-                    return item->geometry();
+                    return item->type();
                 // case TRANSLATION:
                 //     return ...
                 // case ROTATION
@@ -178,9 +188,14 @@ Qt::ItemFlags SceneTreeModel::flags(const QModelIndex &index) const {
     }
 }
 
-bool SceneTreeModel::addItem() {
+bool SceneTreeModel::addItem(QGraphicsItem *graphicsItem) {
     int lastRow = rowCount(QModelIndex());
-    return insertRows(lastRow, 1, QModelIndex());
+
+    beginInsertRows(QModelIndex(), lastRow, 1);
+        m_graphicsScene->addItem(graphicsItem);
+        m_rootItem->addChild(graphicsItem);
+    endInsertRows();
+    return true;
 }
 
 bool SceneTreeModel::remove(QModelIndex index) {
@@ -221,6 +236,7 @@ bool SceneTreeModel::removeRows(int row, int count, const QModelIndex &parent) {
 
     beginRemoveRows(parent, row, lastItemToRemove);
     for(int i = row; i < lastItemToRemove; ++i) {
+        m_graphicsScene->removeItem(parentItem->child(i)->geometry());
         parentItem->removeChild(i);
     }
     endRemoveRows();

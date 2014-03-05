@@ -3,13 +3,14 @@
 
 #include "stable.h"
 #include "SceneTreeItem.h"
+#include "GraphicsScene.h"
 
 class SceneTreeModel : public QAbstractItemModel {
 
 Q_OBJECT
 
 public:
-    SceneTreeModel(QObject *parent = 0);
+    SceneTreeModel(GraphicsScene *scene, QObject *parent = 0);
     ~SceneTreeModel();
 
 
@@ -78,7 +79,7 @@ public:
      */
     Qt::ItemFlags flags(const QModelIndex &index) const; //The base class implementation returns a combination of flags that enables the item (ItemIsEnabled) and allows it to be selected (ItemIsSelectable). ItemIsEditable must be returned!
 
-    bool addItem();
+    bool addItem(QGraphicsItem *graphicsItem = new QGraphicsRectItem(0,0,-10,-80)); //TODO: remove this default value!
     bool remove(QModelIndex index);
 
     bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex());
@@ -89,12 +90,14 @@ signals:
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>());
 
 private:
-    SceneTreeItem* findItemBy(const QModelIndex &index) const;
-
     SceneTreeItem *m_rootItem;
     QHash< Data, QHash<Qt::ItemDataRole, QString> > m_headHash;
     int m_nameColumn;
     int m_visibilityColumn;
+
+    GraphicsScene *m_graphicsScene;
+
+    SceneTreeItem* findItemBy(const QModelIndex &index) const;
 };
 
 #endif // SCENE_TREE_MODEL

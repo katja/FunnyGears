@@ -10,7 +10,7 @@ class ObjectSchedule : public QTreeView {
 Q_OBJECT
 
 public:
-    ObjectSchedule(QWidget *parent = 0);
+    ObjectSchedule(SceneTreeModel *sceneModel, QWidget *parent = 0);
     ~ObjectSchedule();
 public slots:
     void addItem();
