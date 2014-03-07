@@ -24,6 +24,7 @@
 #include <QGraphicsColorizeEffect>
 #include <QGraphicsItem>
 #include <QGraphicsScene>
+#include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
 #include <QGraphicsWidget>
 #include <QGridLayout>

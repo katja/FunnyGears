@@ -68,12 +68,6 @@ QModelIndex SceneTreeModel::index(int row, int column, const QModelIndex &parent
     }
 }
 
-/** Returns th parent of the model item with the given index.
- *  If the item has no parent, an invalid QModelIndex is returned.
- *
- *  A common convention is that only the items in the first column have children.
- *  Therefore the column of the returned QModelIndex would always be 0.
- */
 QModelIndex SceneTreeModel::parent(const QModelIndex &index) const {
     SceneTreeItem *childItem = findItemBy(index);
     if(childItem) {
@@ -104,6 +98,7 @@ int SceneTreeModel::rowCount(const QModelIndex &parent) const {
 }
 
 int SceneTreeModel::columnCount(const QModelIndex &parent) const {
+    Q_UNUSED(parent);
     return m_headHash.size();
 }
 
@@ -166,6 +161,7 @@ bool SceneTreeModel::toggleValue(const QModelIndex &index) {
 }
 
 QVariant SceneTreeModel::headerData(int section, Qt::Orientation orientation, int role) const {
+    Q_UNUSED(orientation);
     if(section < 0 || section >= m_headHash.size())
         return QVariant();
     if(m_headHash.contains(Data(section)) && m_headHash[Data(section)].contains(Qt::ItemDataRole(role)))
@@ -234,9 +230,13 @@ bool SceneTreeModel::removeRows(int row, int count, const QModelIndex &parent) {
     int lastItemToRemove = (row + count > parentItem->numberOfChildren()) ?
                                 parentItem->numberOfChildren() : row + count;
 
-    beginRemoveRows(parent, row, lastItemToRemove);
+
     for(int i = row; i < lastItemToRemove; ++i) {
         m_graphicsScene->removeItem(parentItem->child(i)->geometry());
+    }
+
+    beginRemoveRows(parent, row, lastItemToRemove);
+    for(int i = row; i < lastItemToRemove; ++i) {
         parentItem->removeChild(i);
     }
     endRemoveRows();

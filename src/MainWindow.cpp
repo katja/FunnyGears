@@ -117,11 +117,7 @@ void MainWindow::createLayout() {
 // GRAPHICS
     m_scene = new GraphicsScene(this);
     m_view = new GraphicsView(m_scene);
-
     setCentralWidget(m_view);
-
-//ONLY FOR TESTING
-    m_scene->addRect(0, 0, 30, 50);
 
     m_sceneModel = new SceneTreeModel(m_scene, this);
 

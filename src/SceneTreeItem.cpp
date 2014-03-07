@@ -16,6 +16,7 @@ SceneTreeItem::~SceneTreeItem() {
     //     delete m_children[i];
     // } // is same as following line:
     std::cout << "SceneTreeItem is deleted" << std::endl;
+    delete m_geometry;
     qDeleteAll(m_children);
 }
 

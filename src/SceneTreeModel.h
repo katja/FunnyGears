@@ -4,6 +4,7 @@
 #include "stable.h"
 #include "SceneTreeItem.h"
 #include "GraphicsScene.h"
+#include "Spline.h"
 
 class SceneTreeModel : public QAbstractItemModel {
 
@@ -79,7 +80,7 @@ public:
      */
     Qt::ItemFlags flags(const QModelIndex &index) const; //The base class implementation returns a combination of flags that enables the item (ItemIsEnabled) and allows it to be selected (ItemIsSelectable). ItemIsEditable must be returned!
 
-    bool addItem(QGraphicsItem *graphicsItem = new QGraphicsRectItem(0,0,-10,-80)); //TODO: remove this default value!
+    bool addItem(QGraphicsItem *graphicsItem = new Spline()); //TODO: remove this default value!
     bool remove(QModelIndex index);
 
     bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex());
