@@ -12,11 +12,7 @@ SceneTreeItem::SceneTreeItem(QGraphicsItem *geometry, SceneTreeItem *parent) : m
 }
 
 SceneTreeItem::~SceneTreeItem() {
-    // for(int i = 0; i < m_children.size(); ++i) {
-    //     delete m_children[i];
-    // } // is same as following line:
     std::cout << "SceneTreeItem is deleted" << std::endl;
-    delete m_geometry;
     qDeleteAll(m_children);
 }
 

@@ -53,7 +53,7 @@ void Spline::setMax(QPointF &max, const QPointF point) const {
 
 QRectF Spline::boundingRect() const {
     if(m_points.empty()) {
-        return QRectF(0, 0, 0, 0);
+        return QRectF();
     }
 
     QPointF min, max;
@@ -66,6 +66,18 @@ QRectF Spline::boundingRect() const {
     }
     return QRectF(min, max);
 }
+
+// TODO: repair this!!!
+// QPainterPath Spline::shape() const {
+//     QPainterPath path;
+//     if(!m_points.empty()) {
+//         path.translate(m_points.at(0)->pos());
+//         for(int i = 1; i < m_points.size(); ++i) {
+//                 path.lineTo(m_points.at(i)->pos());
+//         }
+//     }
+//     return path;
+// }
 
 void Spline::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Q_UNUSED(option);

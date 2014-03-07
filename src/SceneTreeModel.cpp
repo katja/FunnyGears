@@ -233,6 +233,7 @@ bool SceneTreeModel::removeRows(int row, int count, const QModelIndex &parent) {
 
     for(int i = row; i < lastItemToRemove; ++i) {
         m_graphicsScene->removeItem(parentItem->child(i)->geometry());
+        delete parentItem->child(i)->geometry();
     }
 
     beginRemoveRows(parent, row, lastItemToRemove);
