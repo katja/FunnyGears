@@ -29,6 +29,11 @@ SceneTreeModel::SceneTreeModel(GraphicsScene *scene, QObject *parent) : QAbstrac
     dataHash->insert(Qt::ToolTipRole, "Holds the rotation of the geometry");
     m_headHash.insert(ROTATION, *dataHash);
 
+    dataHash = new QHash<Qt::ItemDataRole, QString>();
+    dataHash->insert(Qt::DisplayRole, "Geometry");
+    dataHash->insert(Qt::ToolTipRole, "Object, displayed in the Scene");
+    m_headHash.insert(GEOM, *dataHash);
+
     m_rootItem = new SceneTreeItem();
 
     if(!m_graphicsScene->items().empty()) {
@@ -147,6 +152,15 @@ bool SceneTreeModel::setData(const QModelIndex &index, const QVariant &value, in
     }
     emit dataChanged(index, index);
     return true;
+}
+
+QModelIndex SceneTreeModel::itemWithGeometry(const QGraphicsItem *geometry) {
+    SceneTreeItem *itemWithGeometry = m_rootItem->itemWithGeometry(geometry);
+    if(!itemWithGeometry) {
+        return QModelIndex();
+    }
+    int row = itemWithGeometry->childNumber();
+    return createIndex(row, GEOM, itemWithGeometry);
 }
 
 bool SceneTreeModel::toggleValue(const QModelIndex &index) {

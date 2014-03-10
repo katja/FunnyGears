@@ -16,7 +16,7 @@ public:
 
 
     enum Data {
-        NAME, VISIBILITY, TYPE, TRANSLATION, ROTATION
+        NAME, VISIBILITY, TYPE, TRANSLATION, ROTATION, GEOM
     };
 
     /** Sets a new root item. Root Item may be an item of quite another scene tree.
@@ -26,7 +26,7 @@ public:
     SceneTreeItem* setRoot(SceneTreeItem *rootItem);
 
     /** Returns the index of the item in the model
-     * specified by the given row, column and parent index.
+     *  specified by the given row, column and parent index.
      */
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const; //When reimplementing this function in a subclass, call createIndex() to generate model indexes that other components can use to refer to items in your model.
 
@@ -65,6 +65,12 @@ public:
      *  dataChanged() signal is emitted, if data was successfully set
      */
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole); //emit dataChanged() signal
+
+    /** Searches in the model for an item with given geometry (with depth first search).
+     *  Returns model index of the first item with given geometry
+     *  or QModelIndex() if geometry can't be found in an item.
+     */
+    QModelIndex itemWithGeometry(const QGraphicsItem *geometry);
 
     /** Toggles the boolean values (up to now there is only the visibility value).
      *  Returns true, if toggling was possible.

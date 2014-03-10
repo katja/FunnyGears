@@ -2,6 +2,7 @@
 #define GRAPHICS_VIEW
 
 #include "stable.h"
+#include "ConnectionSelectionModel.h"
 
 class GraphicsView : public QGraphicsView {
 

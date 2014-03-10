@@ -89,6 +89,22 @@ QGraphicsItem* SceneTreeItem::geometry() const { //TODO: But implement the QMeta
     return m_geometry;
 }
 
+SceneTreeItem* SceneTreeItem::itemWithGeometry(const QGraphicsItem *geometry) const {
+    if(numberOfChildren() > 0) {
+        foreach(SceneTreeItem *item, m_children) {
+            if(item->geometry() == geometry) {
+                return item;
+            } else {
+                SceneTreeItem *foundItem = item->itemWithGeometry(geometry);
+                if(foundItem) {
+                    return foundItem;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
 void SceneTreeItem::translate(const QVector2D &translation) {
     m_translation += translation;
 }

@@ -129,6 +129,16 @@ void MainWindow::createLayout() {
     QPushButton     *addItemButton      = new QPushButton("+");
     QPushButton     *removeItemButton   = new QPushButton("-");
 
+
+
+
+    ConnectionSelectionModel *selectionModel = new ConnectionSelectionModel(m_sceneModel);
+    m_scene->setSelectionModel(selectionModel);
+    objectSchedule->setSelectionModel(selectionModel);
+
+
+
+
     connect(addItemButton, SIGNAL(clicked()), objectSchedule, SLOT(addItem()));
     connect(removeItemButton, SIGNAL(clicked()), objectSchedule, SLOT(removeItems()));
 

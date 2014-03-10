@@ -4,8 +4,8 @@
 #include "stable.h"
 #include "Geometry.h"
 
-class SceneTreeItem
-{
+class SceneTreeItem {
+
 public:
     SceneTreeItem();
     SceneTreeItem(QGraphicsItem *geometry, SceneTreeItem *parent);
@@ -32,6 +32,7 @@ public:
 
     QString         type() const;
     QGraphicsItem*  geometry() const;
+    SceneTreeItem*  itemWithGeometry(const QGraphicsItem *geometry) const;
 
     void            translate(const QVector2D &translation);
     QVector2D       getTranslation() const;

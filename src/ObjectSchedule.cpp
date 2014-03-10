@@ -16,7 +16,8 @@ ObjectSchedule::ObjectSchedule(SceneTreeModel *sceneModel, QWidget *parent) : QT
 
     hideColumn(SceneTreeModel::TRANSLATION);
     hideColumn(SceneTreeModel::ROTATION);
-    m_numberOfHiddenColumns = 2;
+    hideColumn(SceneTreeModel::GEOM);
+    m_numberOfHiddenColumns = 3;
 }
 
 ObjectSchedule::~ObjectSchedule() {
@@ -76,4 +77,3 @@ void ObjectSchedule::removeItems() {
         }
     }
 }
-

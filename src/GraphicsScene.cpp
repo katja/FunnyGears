@@ -13,10 +13,16 @@ void GraphicsScene::initialize() {
     std::cout << "GraphicsScene is created" << std::endl;
     setForegroundBrush(QColor(50, 50, 50, 50));
     setSceneRect(-1000, -1000, 2000, 2000);
+
+    connect(this, SIGNAL(selectionChanged()), this, SLOT(informModelOfSelectionChange()));
 }
 
 GraphicsScene::~GraphicsScene() {
     std::cout << "GraphicsScene is deleted" << std::endl;
+}
+
+void GraphicsScene::setSelectionModel(ConnectionSelectionModel *selectionModel) {
+    m_selectionModel = selectionModel;
 }
 
 void GraphicsScene::drawBackground(QPainter *painter, const QRectF &rect) {
@@ -60,6 +66,8 @@ void GraphicsScene::drawBackground(QPainter *painter, const QRectF &rect) {
 }
 
 void GraphicsScene::drawForeground(QPainter *painter, const QRectF &rect) {
+    Q_UNUSED(rect);
+
     QPen pen(Qt::gray, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
     painter->setPen(pen);
     painter->drawLine(-50, 0, 150, 0);
@@ -76,6 +84,10 @@ void GraphicsScene::addItem(QGraphicsItem *item) {
     QList<QRectF> updateRegions;
     updateRegions.append(item->sceneBoundingRect());
     updateAllViews(updateRegions);
+}
+
+void GraphicsScene::informModelOfSelectionChange() {
+    m_selectionModel->sceneSelectionChanged(this);
 }
 
 void GraphicsScene::updateAllViews(const QList<QRectF> &updateRegions) const {
