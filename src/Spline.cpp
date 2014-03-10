@@ -1,12 +1,18 @@
 #include "Spline.h"
+#include "Preferences.h"
 
-Spline::Spline() {
+Spline::Spline(QGraphicsItem *parent) : QGraphicsItem(parent) {
     std::cout << "Spline is created" << std::endl;
     m_color = QColor(qrand() % 256, qrand() % 256, qrand() % 256);
 
-    // setCursor(Qt::OpenHandCursor);
-    setAcceptedMouseButtons(Qt::LeftButton);
+    setCursor(Qt::OpenHandCursor);
     setToolTip("Description of what will happen or what to do"); //TODO: Add description
+    setFlags( QGraphicsItem::ItemIsMovable
+            | QGraphicsItem::ItemIsSelectable
+            | QGraphicsItem::ItemSendsGeometryChanges
+            );
+
+    // setAcceptedMouseButtons(Qt::LeftButton);
 
     Point *p = new Point(this);
     p->setPos(qrand() % 80, qrand() % 80);
@@ -20,7 +26,9 @@ Spline::Spline() {
     p->setPos(-(qrand() % 37), -(qrand() % 90));
     m_points.append(p);
 
-    setFlags(QGraphicsItem::ItemSendsGeometryChanges);
+    p = new Point(this);
+    p->setPos(-(qrand() % 37), qrand() % 30 + 50);
+    m_points.append(p);
 }
 
 Spline::~Spline() {
@@ -67,28 +75,80 @@ QRectF Spline::boundingRect() const {
     return QRectF(min, max);
 }
 
-// TODO: repair this!!!
-// QPainterPath Spline::shape() const {
-//     QPainterPath path;
-//     if(!m_points.empty()) {
-//         path.translate(m_points.at(0)->pos());
-//         for(int i = 1; i < m_points.size(); ++i) {
-//                 path.lineTo(m_points.at(i)->pos());
-//         }
-//     }
-//     return path;
-// }
+QPainterPath Spline::shape() const {
+    if(isActive())
+        return path(Preferences::HighlightedLineWidth);
+    else
+        return path(Preferences::SimpleLineWidth);
+}
 
 void Spline::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    Q_UNUSED(option);
     Q_UNUSED(widget);
 
-    painter->setPen(QPen(m_color, 0));
     painter->setBrush(Qt::NoBrush);
 
-    for(int i = 1; i < m_points.size(); ++i) {
-            painter->drawLine(m_points.at(i - 1)->pos(), m_points.at(i)->pos());
+    QPen pen;
+    pen.setCapStyle(Qt::RoundCap);
+    pen.setJoinStyle(Qt::RoundJoin);
+
+    if(option->state & QStyle::State_Selected) {
+        if(option->state & QStyle::State_Sunken) {
+            pen.setColor(Preferences::ActiveColor);
+        } else {
+            pen.setColor(Preferences::SelectionColor);
+        }
+        pen.setWidth(Preferences::HighlightedLineWidth);
+        painter->setPen(pen);
+        painter->drawPath(path());
     }
+
+    pen.setColor(m_color);
+    pen.setWidth(Preferences::SimpleLineWidth);
+    painter->setPen(pen);
+    painter->drawPath(path());
+}
+
+QPainterPath Spline::path(qreal width) const {
+    if(m_points.empty())
+        return QPainterPath();
+
+    if(width == 0) {
+        QPainterPath path(m_points.at(0)->pos()); //startpoint
+        for(int i = 1; i < m_points.size(); ++i) {
+            path.lineTo(m_points.at(i)->pos());
+        }
+        return path;
+
+    } else { // width != 0
+        QPainterPath path;
+        for(int i = 1; i < m_points.size(); ++i) {
+            QVector2D direction(m_points.at(i)->pos() - m_points.at(i - 1)->pos());
+            direction.normalize();
+            QPointF additional = -(direction * 0.6 * width).toPointF();
+            QPainterPath linePath(m_points.at(i - 1)->pos() + additional + QPointF(-additional.y(), additional.x()));
+            linePath.lineTo(m_points.at(i)->pos() - additional + QPointF(-additional.y(), additional.x()));
+            linePath.lineTo(m_points.at(i)->pos() - additional - QPointF(-additional.y(), additional.x()));
+            linePath.lineTo(m_points.at(i - 1)->pos() + additional - QPointF(-additional.y(), additional.x()));
+            linePath.closeSubpath();
+            path.addPath(linePath);
+        }
+        return path;
+    }
+}
+
+void Spline::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
+    update();
+    QGraphicsItem::mouseMoveEvent(event);
+}
+
+void Spline::mousePressEvent(QGraphicsSceneMouseEvent *event) {
+    update();
+    QGraphicsItem::mousePressEvent(event);
+}
+
+void Spline::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
+    update();
+    QGraphicsItem::mouseReleaseEvent(event);
 }
 
 void Spline::pointMoveEvent(Point *point, QGraphicsSceneMouseEvent *event) {

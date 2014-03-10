@@ -26,7 +26,6 @@ public:
 
 private:
     static qreal M_radius;
-    static qreal M_strokeWidth;
     Spline *m_parentSpline;
     QColor m_color;
 

@@ -1,13 +1,12 @@
 #include "Point.h"
 #include "Spline.h"
+#include "Preferences.h"
 
 qreal Point::M_radius = 2;
 
 qreal Point::radius() {
     return Point::M_radius;
 }
-
-qreal Point::M_strokeWidth = 1;
 
 Point::Point(QGraphicsItem *parent) : QGraphicsItem(parent), m_parentSpline(0), m_color(QColor(0, 0, 0)) {
     std::cout << "Point is created     (by QGraphicsItem constructor)" << std::endl;
@@ -35,9 +34,9 @@ Point::~Point() {
 }
 
 QRectF Point::boundingRect() const {
-    qreal radius = M_radius + 0.5 * M_strokeWidth;
+    qreal radius = M_radius + 0.5 * Preferences::SimpleLineWidth;
     if(isSelected()) {
-        radius = M_radius + 1.5 * M_strokeWidth;
+        radius = M_radius + 0.5 * Preferences::HighlightedLineWidth;
     }
     return QRectF(-radius, -radius, 2 * radius, 2 * radius);
 }
@@ -53,16 +52,16 @@ void Point::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
 
     if(option->state & QStyle::State_Selected) {
         if(option->state & QStyle::State_Sunken) {
-            painter->setBrush(QColor(Qt::red));
+            painter->setBrush(Preferences::ActiveColor);
         } else {
-            painter->setBrush(QColor(Qt::yellow));
+            painter->setBrush(Preferences::SelectionColor);
         }
         painter->setPen(Qt::NoPen);
-        qreal bigRadius = M_radius + 1.5 * M_strokeWidth;
+        qreal bigRadius = M_radius + 0.5 * Preferences::HighlightedLineWidth;
         painter->drawEllipse(QPointF(0, 0), bigRadius, bigRadius);
     }
 
-    painter->setPen(QPen(m_color, M_strokeWidth));
+    painter->setPen(QPen(m_color, Preferences::SimpleLineWidth));
     painter->setBrush(Qt::NoBrush);
     painter->drawEllipse(QPointF(0, 0), M_radius, M_radius);
 }
