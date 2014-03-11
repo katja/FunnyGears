@@ -4,6 +4,7 @@
 #include "stable.h"
 
 #include "SceneTreeModel.h"
+#include "ConnectionModel.h"
 
 class ObjectScheduleView : public QTreeView {
 
@@ -12,13 +13,18 @@ Q_OBJECT
 public:
     ObjectScheduleView(SceneTreeModel *sceneModel, QWidget *parent = 0);
     ~ObjectScheduleView();
+
+    ConnectionModel* setConnectionModel(ConnectionModel *model);
+
 public slots:
     void addItem();
+    void addNewSplineItem();
     void removeItems();
 
 private:
     SceneTreeModel *m_sceneModel;
     int m_numberOfHiddenColumns;
+    ConnectionModel* m_connectionModel;
 };
 
 

@@ -1,20 +1,23 @@
-#ifndef CONNECTION_SELECTION_MODEL
-#define CONNECTION_SELECTION_MODEL
+#ifndef CONNECTION_MODEL
+#define CONNECTION_MODEL
 
 #include "stable.h"
 class GraphicsScene;
 class SceneTreeModel;
 
-class ConnectionSelectionModel : public QItemSelectionModel {
+class ConnectionModel : public QItemSelectionModel {
 
 Q_OBJECT
 
 public:
-    ConnectionSelectionModel(SceneTreeModel *model);
-    ~ConnectionSelectionModel();
+    ConnectionModel(SceneTreeModel *model);
+    ~ConnectionModel();
+
+    void turnOnEditingOf(QGraphicsItem *item);
 
 signals:
     void updateRegionInScene(const QList<QGraphicsItem*> &deselect);
+    void startEditingItem(QGraphicsItem *item);
 
 public slots:
     void sceneSelectionChanged(GraphicsScene *scene);
@@ -24,7 +27,7 @@ public slots:
 
 private:
     enum Connection {
-        MODEL, SCENE
+        MODEL, SCENE, ALL
     };
 
     SceneTreeModel *m_sceneTreeModel;
@@ -32,7 +35,7 @@ private:
     QList<QGraphicsItem*> m_selectedItems;
     QList<QGraphicsItem*> m_changedItems;
 
-    void clearPreviousSelectionIn(ConnectionSelectionModel::Connection destination);
+    void clearPreviousSelectionIn(ConnectionModel::Connection destination);
     void addToModelSelection(GraphicsScene *scene);
     void addToSceneSelection(QGraphicsItem *graphicsItem);
     void removeFromSceneSelection(QGraphicsItem *graphicsItem);
@@ -45,4 +48,4 @@ private:
 
 };
 
-#endif // CONNECTION_SELECTION_MODEL
+#endif // CONNECTION_MODEL

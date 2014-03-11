@@ -121,9 +121,9 @@ void MainWindow::createLayout() {
     m_sceneModel            = new SceneTreeModel(m_scene, this);
     m_objectScheduleView    = new ObjectScheduleView(m_sceneModel, this);
 // CONNECTION
-    ConnectionSelectionModel *selectionModel = new ConnectionSelectionModel(m_sceneModel);
-    m_scene->setSelectionModel(selectionModel);
-    m_objectScheduleView->setSelectionModel(selectionModel);
+    ConnectionModel *selectionModel = new ConnectionModel(m_sceneModel);
+    m_scene->setConnectionModel(selectionModel);
+    m_objectScheduleView->setConnectionModel(selectionModel);
 //WIDGETS
     m_objectScheduleWidget  = new ObjectScheduleWidget(m_objectScheduleView, this);
     addDockWidget(Qt::RightDockWidgetArea, m_objectScheduleWidget);

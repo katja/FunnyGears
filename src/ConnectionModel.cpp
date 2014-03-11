@@ -1,24 +1,30 @@
 #include "GraphicsScene.h"
-#include "ConnectionSelectionModel.h"
+#include "ConnectionModel.h"
 #include "SceneTreeModel.h"
 #include "SceneTreeItem.h"
 
-ConnectionSelectionModel::ConnectionSelectionModel(SceneTreeModel *model) : QItemSelectionModel(model), m_sceneTreeModel(model) {
-    std::cout << "ConnectionSelectionModel is created" << std::endl;
+ConnectionModel::ConnectionModel(SceneTreeModel *model) : QItemSelectionModel(model), m_sceneTreeModel(model) {
+    std::cout << "ConnectionModel is created" << std::endl;
 }
 
-ConnectionSelectionModel::~ConnectionSelectionModel() {
-    std::cout << "ConnectionSelectionModel is deleted" << std::endl;
+ConnectionModel::~ConnectionModel() {
+    std::cout << "ConnectionModel is deleted" << std::endl;
 }
 
-void ConnectionSelectionModel::sceneSelectionChanged(GraphicsScene *scene) {
-    clearPreviousSelectionIn(ConnectionSelectionModel::MODEL);
+void ConnectionModel::turnOnEditingOf(QGraphicsItem *item) {
+    clearPreviousSelectionIn(ConnectionModel::ALL);
+    selectItemInModel(item);
+    emit startEditingItem(item);
+}
+
+void ConnectionModel::sceneSelectionChanged(GraphicsScene *scene) {
+    clearPreviousSelectionIn(ConnectionModel::MODEL);
     addToModelSelection(scene);
 }
 
-void ConnectionSelectionModel::modelSelectionChanged(const QModelIndex &index, QItemSelectionModel::SelectionFlags command) {
+void ConnectionModel::modelSelectionChanged(const QModelIndex &index, QItemSelectionModel::SelectionFlags command) {
     if(clearingDemandedIn(command)) {
-        clearPreviousSelectionIn(ConnectionSelectionModel::SCENE);
+        clearPreviousSelectionIn(ConnectionModel::SCENE);
     }
     if(geometryInSelection(index, command)) {
 
@@ -34,22 +40,22 @@ void ConnectionSelectionModel::modelSelectionChanged(const QModelIndex &index, Q
     }
 }
 
-void ConnectionSelectionModel::select(const QModelIndex &index, QItemSelectionModel::SelectionFlags command) {
+void ConnectionModel::select(const QModelIndex &index, QItemSelectionModel::SelectionFlags command) {
     modelSelectionChanged(index, command);
     QItemSelectionModel::select(index, command);
 }
 
-void ConnectionSelectionModel::select(const QItemSelection &selection, QItemSelectionModel::SelectionFlags command) {
+void ConnectionModel::select(const QItemSelection &selection, QItemSelectionModel::SelectionFlags command) {
     foreach(QModelIndex index, selection.indexes()) {
         modelSelectionChanged(index, command);
     }
     QItemSelectionModel::select(selection, command);
 }
 
-void ConnectionSelectionModel::clearPreviousSelectionIn(ConnectionSelectionModel::Connection destination) {
-    if(destination == ConnectionSelectionModel::MODEL)
+void ConnectionModel::clearPreviousSelectionIn(ConnectionModel::Connection destination) {
+    if(destination == ConnectionModel::MODEL || destination == ConnectionModel::ALL)
         clearSelection(); //model: clear selection
-    if(destination == ConnectionSelectionModel::SCENE) { //scene: clear selection
+    if(destination == ConnectionModel::SCENE || destination == ConnectionModel::ALL) { //scene: clear selection
         foreach(QGraphicsItem *item, m_selectedItems) {
             item->setSelected(false);
         }
@@ -58,7 +64,7 @@ void ConnectionSelectionModel::clearPreviousSelectionIn(ConnectionSelectionModel
     m_selectedItems.clear();
 }
 
-void ConnectionSelectionModel::addToModelSelection(GraphicsScene *scene) {
+void ConnectionModel::addToModelSelection(GraphicsScene *scene) {
     m_changedItems.clear();
 
     QList<QGraphicsItem*> changedSceneItems = scene->selectedItems();
@@ -70,7 +76,7 @@ void ConnectionSelectionModel::addToModelSelection(GraphicsScene *scene) {
     updateRegionInScene(m_changedItems);
 }
 
-void ConnectionSelectionModel::addToSceneSelection(QGraphicsItem *graphicsItem) {
+void ConnectionModel::addToSceneSelection(QGraphicsItem *graphicsItem) {
     graphicsItem->setSelected(true);
     m_changedItems.clear();
     m_changedItems << graphicsItem;
@@ -78,7 +84,7 @@ void ConnectionSelectionModel::addToSceneSelection(QGraphicsItem *graphicsItem) 
     emit updateRegionInScene(m_changedItems);
 }
 
-void ConnectionSelectionModel::removeFromSceneSelection(QGraphicsItem *graphicsItem) {
+void ConnectionModel::removeFromSceneSelection(QGraphicsItem *graphicsItem) {
     int index = m_selectedItems.indexOf(graphicsItem);
     if(index >= 0) { //index is in list
         graphicsItem->setSelected(false);
@@ -92,7 +98,7 @@ void ConnectionSelectionModel::removeFromSceneSelection(QGraphicsItem *graphicsI
     }
 }
 
-void ConnectionSelectionModel::selectItemInModel(QGraphicsItem *item) {
+void ConnectionModel::selectItemInModel(QGraphicsItem *item) {
     QModelIndex index = m_sceneTreeModel->itemWithGeometry(item);
 
     if(index.isValid()) {
@@ -100,7 +106,7 @@ void ConnectionSelectionModel::selectItemInModel(QGraphicsItem *item) {
     }
 }
 
-QGraphicsItem* ConnectionSelectionModel::graphicOfRow(const QModelIndex &index) {
+QGraphicsItem* ConnectionModel::graphicOfRow(const QModelIndex &index) {
     QModelIndex geometryIndex = index.sibling(index.row(), SceneTreeModel::GEOM);
     if(!geometryIndex.isValid())
         return 0;
@@ -110,9 +116,9 @@ QGraphicsItem* ConnectionSelectionModel::graphicOfRow(const QModelIndex &index) 
     return graphicsItem;
 }
 
-bool ConnectionSelectionModel::clearingDemandedIn(QItemSelectionModel::SelectionFlags command) {
+bool ConnectionModel::clearingDemandedIn(QItemSelectionModel::SelectionFlags command) {
     return QItemSelectionModel::Clear & command;
 }
-bool ConnectionSelectionModel::geometryInSelection(const QModelIndex &index, QItemSelectionModel::SelectionFlags command) {
+bool ConnectionModel::geometryInSelection(const QModelIndex &index, QItemSelectionModel::SelectionFlags command) {
     return QItemSelectionModel::Rows & command || index.column() == SceneTreeModel::GEOM;
 }

@@ -43,7 +43,7 @@ void GraphicsView::keyPressEvent(QKeyEvent *event) {
     if(event->key() == Qt::Key_Space){
         setDragMode(QGraphicsView::ScrollHandDrag);
     } else {
-        event->ignore();
+        QGraphicsView::keyPressEvent(event);
     }
 }
 
@@ -51,7 +51,7 @@ void GraphicsView::keyReleaseEvent(QKeyEvent *event) {
     if(event->key() == Qt::Key_Space){
         setDragMode(QGraphicsView::RubberBandDrag);
     } else {
-        event->ignore();
+        QGraphicsView::keyReleaseEvent(event);
     }
 }
 

@@ -18,6 +18,8 @@ public:
 
     QColor color() const;
 
+    void addPoint(QPointF point);
+
 private:
     QColor m_color;
     QList<Point*> m_points;
