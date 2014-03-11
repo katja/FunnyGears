@@ -5,6 +5,8 @@
 #include "GraphicsView.h"
 #include "GraphicsScene.h"
 #include "SceneTreeModel.h"
+#include "ObjectScheduleView.h"
+#include "ObjectScheduleWidget.h"
 
 class MainWindow : public QMainWindow {
 
@@ -28,13 +30,15 @@ private slots:
 
 
 private:
-    SceneTreeModel *m_sceneModel;
+    SceneTreeModel      *m_sceneModel;
+    ObjectScheduleView  *m_objectScheduleView;
 
-    GraphicsView  *m_view;
-    GraphicsScene *m_scene;
+    GraphicsView        *m_view;
+    GraphicsScene       *m_scene;
 
-    QDockWidget *m_objectScheduleDockWidget,
-                *m_objectAttributesDockWidget;
+    ObjectScheduleWidget *m_objectScheduleWidget; // is a QDockWidget
+
+    QDockWidget *m_objectAttributesDockWidget;
 
     QMenu       *m_programMenu,
                 *m_fileMenu,

@@ -1,5 +1,4 @@
 #include "MainWindow.h"
-#include "ObjectScheduleView.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), projectChanged(true) {
 
@@ -114,48 +113,23 @@ void MainWindow::createDialogs() {
 }
 
 void MainWindow::createLayout() {
-// GRAPHICS
+// GRAPHICSSCENE THINGS
     m_scene = new GraphicsScene(this);
     m_view = new GraphicsView(m_scene);
     setCentralWidget(m_view);
-
-    m_sceneModel = new SceneTreeModel(m_scene, this);
-
-// DOCK WIDGET OBJECT SCHEDULE
-    m_objectScheduleDockWidget          = new QDockWidget(tr("Object Schedule"), this, Qt::Widget);
-    QWidget *objectScheduleWidget       = new QWidget(m_objectScheduleDockWidget);
-
-    ObjectScheduleView  *objectScheduleView     = new ObjectScheduleView(m_sceneModel, this);
-    QPushButton     *addItemButton      = new QPushButton("+");
-    QPushButton     *removeItemButton   = new QPushButton("-");
-
-
-
-
+// MODEL/VIEW THINGS
+    m_sceneModel            = new SceneTreeModel(m_scene, this);
+    m_objectScheduleView    = new ObjectScheduleView(m_sceneModel, this);
+// CONNECTION
     ConnectionSelectionModel *selectionModel = new ConnectionSelectionModel(m_sceneModel);
     m_scene->setSelectionModel(selectionModel);
-    objectScheduleView->setSelectionModel(selectionModel);
+    m_objectScheduleView->setSelectionModel(selectionModel);
+//WIDGETS
+    m_objectScheduleWidget  = new ObjectScheduleWidget(m_objectScheduleView, this);
+    addDockWidget(Qt::RightDockWidgetArea, m_objectScheduleWidget);
+    m_toggleObjectScheduleAction = m_objectScheduleWidget->toggleViewAction();
 
-
-
-
-    connect(addItemButton, SIGNAL(clicked()), objectScheduleView, SLOT(addItem()));
-    connect(removeItemButton, SIGNAL(clicked()), objectScheduleView, SLOT(removeItems()));
-
-    QGridLayout *gLayout = new QGridLayout(objectScheduleWidget);
-    gLayout->addWidget(objectScheduleView,  0, 0, 1, 2); // addWidget(widget, fromRow, fromColumn, rowSpan, columnSpan, alignment = 0)
-    gLayout->addWidget(addItemButton,   2, 0);
-    gLayout->addWidget(removeItemButton,2, 1);
-
-    objectScheduleWidget->setLayout(gLayout);
-    m_objectScheduleDockWidget->setWidget(objectScheduleWidget);
-
-    addDockWidget(Qt::RightDockWidgetArea, m_objectScheduleDockWidget);
-    m_objectScheduleDockWidget->show();
-
-    m_toggleObjectScheduleAction = m_objectScheduleDockWidget->toggleViewAction();
-
-// DOCK WIDGET OBJECT ATTRIBUTES
+// DOCK WIDGET OBJECT ATTRIBUTES //TODO: place in an extra class
     m_objectAttributesDockWidget        = new QDockWidget(tr("Object Attributes"), this, Qt::Widget);
     QWidget *objectAttributesWidget     = new QWidget(m_objectAttributesDockWidget);
 
