@@ -1,9 +1,9 @@
-#include "ObjectSchedule.h"
+#include "ObjectScheduleView.h"
 #include "YesNoDelegate.h"
 
-ObjectSchedule::ObjectSchedule(SceneTreeModel *sceneModel, QWidget *parent) : QTreeView(parent), m_sceneModel(sceneModel) {
+ObjectScheduleView::ObjectScheduleView(SceneTreeModel *sceneModel, QWidget *parent) : QTreeView(parent), m_sceneModel(sceneModel) {
 
-    std::cout << "ObjectSchedule is created" << std::endl;
+    std::cout << "ObjectScheduleView is created" << std::endl;
 
     setHeaderHidden(false);
     setSelectionMode(QAbstractItemView::ExtendedSelection); //this mode allows a selection of multiple items with mouse, ctrl-key and shift-key
@@ -20,12 +20,12 @@ ObjectSchedule::ObjectSchedule(SceneTreeModel *sceneModel, QWidget *parent) : QT
     m_numberOfHiddenColumns = 3;
 }
 
-ObjectSchedule::~ObjectSchedule() {
-    std::cout << "ObjectSchedule is deleted" << std::endl;
+ObjectScheduleView::~ObjectScheduleView() {
+    std::cout << "ObjectScheduleView is deleted" << std::endl;
     // delete m_sceneModel;
 }
 
-void ObjectSchedule::addItem() {
+void ObjectScheduleView::addItem() {
     m_sceneModel->addItem();
 }
 
@@ -39,7 +39,7 @@ bool isBelow(QModelIndex &a, QModelIndex &b) {
         return true;
 }
 
-void ObjectSchedule::removeItems() {
+void ObjectScheduleView::removeItems() {
     QModelIndexList selectedItems = selectedIndexes();
 
     //Warn the user with a message box:

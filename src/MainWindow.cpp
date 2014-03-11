@@ -1,5 +1,5 @@
 #include "MainWindow.h"
-#include "ObjectSchedule.h"
+#include "ObjectScheduleView.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), projectChanged(true) {
 
@@ -125,7 +125,7 @@ void MainWindow::createLayout() {
     m_objectScheduleDockWidget          = new QDockWidget(tr("Object Schedule"), this, Qt::Widget);
     QWidget *objectScheduleWidget       = new QWidget(m_objectScheduleDockWidget);
 
-    ObjectSchedule  *objectSchedule     = new ObjectSchedule(m_sceneModel, this);
+    ObjectScheduleView  *objectScheduleView     = new ObjectScheduleView(m_sceneModel, this);
     QPushButton     *addItemButton      = new QPushButton("+");
     QPushButton     *removeItemButton   = new QPushButton("-");
 
@@ -134,16 +134,16 @@ void MainWindow::createLayout() {
 
     ConnectionSelectionModel *selectionModel = new ConnectionSelectionModel(m_sceneModel);
     m_scene->setSelectionModel(selectionModel);
-    objectSchedule->setSelectionModel(selectionModel);
+    objectScheduleView->setSelectionModel(selectionModel);
 
 
 
 
-    connect(addItemButton, SIGNAL(clicked()), objectSchedule, SLOT(addItem()));
-    connect(removeItemButton, SIGNAL(clicked()), objectSchedule, SLOT(removeItems()));
+    connect(addItemButton, SIGNAL(clicked()), objectScheduleView, SLOT(addItem()));
+    connect(removeItemButton, SIGNAL(clicked()), objectScheduleView, SLOT(removeItems()));
 
     QGridLayout *gLayout = new QGridLayout(objectScheduleWidget);
-    gLayout->addWidget(objectSchedule,  0, 0, 1, 2); // addWidget(widget, fromRow, fromColumn, rowSpan, columnSpan, alignment = 0)
+    gLayout->addWidget(objectScheduleView,  0, 0, 1, 2); // addWidget(widget, fromRow, fromColumn, rowSpan, columnSpan, alignment = 0)
     gLayout->addWidget(addItemButton,   2, 0);
     gLayout->addWidget(removeItemButton,2, 1);
 
