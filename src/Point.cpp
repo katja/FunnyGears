@@ -73,16 +73,6 @@ void Point::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
     QGraphicsItem::mouseMoveEvent(event);
 }
 
-void Point::mousePressEvent(QGraphicsSceneMouseEvent *event) {
-    update();
-    QGraphicsItem::mousePressEvent(event);
-}
-
-void Point::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
-    update();
-    QGraphicsItem::mouseReleaseEvent(event);
-}
-
 bool Point::hasSplineAsParent() const {
     return parentItem() && m_parentSpline && m_parentSpline == parentItem();
 }

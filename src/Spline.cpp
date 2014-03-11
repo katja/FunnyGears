@@ -1,5 +1,7 @@
 #include "Spline.h"
 #include "Preferences.h"
+#include "GraphicsScene.h"
+#include "Helpers.h"
 
 Spline::Spline(QGraphicsItem *parent) : QGraphicsItem(parent) {
     std::cout << "Spline is created" << std::endl;
@@ -46,32 +48,30 @@ void Spline::setMinAndMax(QPointF &min, QPointF &max, const Point *point) const 
 }
 
 void Spline::setMin(QPointF &min, const QPointF point) const {
-    if(min.x() < point.x())
-        min.setX(point.x());
-    if(min.y() < point.y())
-        min.setY(point.y());
+    if(min.x() > point.x()) min.setX(point.x());
+    if(min.y() > point.y()) min.setY(point.y());
 }
 
 void Spline::setMax(QPointF &max, const QPointF point) const {
-    if(max.x() > point.x())
-        max.setX(point.x());
-    if(max.y() > point.y())
-        max.setY(point.y());
+    if(max.x() < point.x()) max.setX(point.x());
+    if(max.y() < point.y()) max.setY(point.y());
 }
 
 QRectF Spline::boundingRect() const {
     if(m_points.empty()) {
         return QRectF();
     }
-
     QPointF min, max;
-
     min = m_points.at(0)->pos();
     max = min;
-
     for(int i = 1; i < m_points.size(); ++i) {
         setMinAndMax(min, max, m_points.at(i));
     }
+    // when updating the spline from selected to not selected the bounding rect would be smaller
+    // but painting should clean selection. Therefore little space for selection area is added
+    // Normally, half of HighlightedLineWidth should be enough, but a little should not hurt.
+    min -= QPointF(Preferences::HighlightedLineWidth, Preferences::HighlightedLineWidth);
+    max += QPointF(Preferences::HighlightedLineWidth, Preferences::HighlightedLineWidth);
     return QRectF(min, max);
 }
 
@@ -134,21 +134,6 @@ QPainterPath Spline::path(qreal width) const {
         }
         return path;
     }
-}
-
-void Spline::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
-    update();
-    QGraphicsItem::mouseMoveEvent(event);
-}
-
-void Spline::mousePressEvent(QGraphicsSceneMouseEvent *event) {
-    update();
-    QGraphicsItem::mousePressEvent(event);
-}
-
-void Spline::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
-    update();
-    QGraphicsItem::mouseReleaseEvent(event);
 }
 
 void Spline::pointMoveEvent(Point *point, QGraphicsSceneMouseEvent *event) {

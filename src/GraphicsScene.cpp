@@ -1,4 +1,5 @@
 #include "GraphicsScene.h"
+#include "Preferences.h"
 #include <cmath>
 
 GraphicsScene::GraphicsScene(QObject *parent) : QGraphicsScene(parent) {
@@ -23,11 +24,12 @@ GraphicsScene::~GraphicsScene() {
 
 void GraphicsScene::setSelectionModel(ConnectionSelectionModel *selectionModel) {
     m_selectionModel = selectionModel;
+    connect(m_selectionModel, SIGNAL(updateRegionInScene(const QList<QGraphicsItem*>&)), this, SLOT(updateItems(const QList<QGraphicsItem*>&)));
 }
 
 void GraphicsScene::drawBackground(QPainter *painter, const QRectF &rect) {
 
-    QPen pen(Qt::lightGray);
+    QPen pen(Preferences::BackgroundGridColor);
     pen.setWidth(0); // => cosmetic pen (always one pixel wide, independent of transformation)
     painter->setPen(pen);
     painter->setRenderHint(QPainter::Antialiasing);
@@ -68,7 +70,7 @@ void GraphicsScene::drawBackground(QPainter *painter, const QRectF &rect) {
 void GraphicsScene::drawForeground(QPainter *painter, const QRectF &rect) {
     Q_UNUSED(rect);
 
-    QPen pen(Qt::gray, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+    QPen pen(Preferences::CoordinateAxisColor, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
     painter->setPen(pen);
     painter->drawLine(-50, 0, 150, 0);
     painter->drawLine(0, -50, 0, 150);
@@ -86,8 +88,27 @@ void GraphicsScene::addItem(QGraphicsItem *item) {
     updateAllViews(updateRegions);
 }
 
+void GraphicsScene::updateItems(const QList<QGraphicsItem*> &changedItems) {
+    QList<QRectF> updateRegions;
+    foreach(QGraphicsItem* item, changedItems) {
+        update(item->sceneBoundingRect());
+        updateRegions << item->sceneBoundingRect();
+    }
+    updateAllViews(updateRegions);
+}
+
 void GraphicsScene::informModelOfSelectionChange() {
     m_selectionModel->sceneSelectionChanged(this);
+}
+
+void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) {
+    QGraphicsScene::mousePressEvent(mouseEvent);
+    informModelOfSelectionChange();
+}
+
+void GraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) {
+    QGraphicsScene::mouseReleaseEvent(mouseEvent);
+    informModelOfSelectionChange();
 }
 
 void GraphicsScene::updateAllViews(const QList<QRectF> &updateRegions) const {

@@ -18,10 +18,6 @@ public:
 
     QColor color() const;
 
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
-    void mousePressEvent(QGraphicsSceneMouseEvent *event);
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
-
 private:
     QColor m_color;
     QList<Point*> m_points;

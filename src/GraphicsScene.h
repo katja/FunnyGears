@@ -21,7 +21,12 @@ public:
     void addItem(QGraphicsItem *item);
 
 private slots:
+    void updateItems(const QList<QGraphicsItem*> &changedItems);
     void informModelOfSelectionChange();
+
+protected:
+    void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
 
 private:
 
