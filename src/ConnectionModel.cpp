@@ -17,6 +17,25 @@ void ConnectionModel::turnOnEditingOf(QGraphicsItem *item) {
     emit startEditingItem(item);
 }
 
+void ConnectionModel::informModelDataChange(const QModelIndex &topLeft, const QModelIndex &bottomRight) {
+    if(topLeft.parent() != bottomRight.parent()) {
+        std::cout << "ERROR: CHECK ConnectionModel::informModelDataChange METHOD - MAYBE SOLUTION AVAILABLE?" << std::endl;
+        return; //TODO in this case documentation says behaviour is undefined. But nevertheless there may be a better solution than doing nothing?
+    }
+    m_changedItems.clear();
+
+    if(topLeft.row() == bottomRight.row()) {
+        m_changedItems << graphicOfRow(topLeft);
+    } else {
+        QModelIndex parentIndex = topLeft.parent();
+        for(int row = topLeft.row(); row <= bottomRight.row(); ++row) {
+            QModelIndex index = parentIndex.child(row, 0); //column doesn't matter
+            m_changedItems << graphicOfRow(index);
+        }
+    }
+    emit updateRegionInScene(m_changedItems);
+}
+
 void ConnectionModel::sceneSelectionChanged(GraphicsScene *scene) {
     clearPreviousSelectionIn(ConnectionModel::MODEL);
     addToModelSelection(scene);

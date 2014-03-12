@@ -91,3 +91,8 @@ void ObjectScheduleView::removeItems() {
         }
     }
 }
+
+void ObjectScheduleView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles) {
+    QTreeView::dataChanged(topLeft, bottomRight, roles);
+    m_connectionModel->informModelDataChange(topLeft,bottomRight);
+}

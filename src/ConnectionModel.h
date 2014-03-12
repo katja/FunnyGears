@@ -14,6 +14,7 @@ public:
     ~ConnectionModel();
 
     void turnOnEditingOf(QGraphicsItem *item);
+    void informModelDataChange(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
 signals:
     void updateRegionInScene(const QList<QGraphicsItem*> &deselect);

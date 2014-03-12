@@ -71,6 +71,7 @@ QString SceneTreeItem::name() const {
 
 void SceneTreeItem::toggleVisibility() {
     m_isVisible = !m_isVisible;
+    m_geometry->setVisible(m_isVisible);
 }
 
 bool SceneTreeItem::isVisible() const {
