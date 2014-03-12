@@ -153,10 +153,10 @@ void GraphicsScene::updateAllViews(const QList<QRectF> &updateRegions) const {
 }
 
 void GraphicsScene::startEditingItem(QGraphicsItem *item) {
-    Spline spline;
+    GraphicsSpline spline;
     if(typeid(*item) != typeid(spline))
         return;
-    m_currentSpline = static_cast<Spline*>(item);
+    m_currentSpline = static_cast<GraphicsSpline*>(item);
     m_currentState = GraphicsScene::EDITING;
     setAllItemsEnabled(false);
     m_currentSpline->setEnabled(true);

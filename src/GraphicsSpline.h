@@ -1,14 +1,14 @@
-#ifndef SPLINE
-#define SPLINE
+#ifndef GRAPHICS_SPLINE
+#define GRAPHICS_SPLINE
 
 #include "stable.h"
 #include "Point.h"
 
-class Spline : public QGraphicsItem {
+class GraphicsSpline : public QGraphicsItem {
 
 public:
-    Spline(QGraphicsItem *parent = 0);
-    ~Spline();
+    GraphicsSpline(QGraphicsItem *parent = 0);
+    ~GraphicsSpline();
 
     QRectF boundingRect() const;
     QPainterPath shape() const;
@@ -33,4 +33,4 @@ private:
 
 };
 
-#endif // SPLINE
+#endif // GRAPHICS_SPLINE

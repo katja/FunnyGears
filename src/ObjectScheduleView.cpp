@@ -1,6 +1,6 @@
 #include "ObjectScheduleView.h"
 #include "YesNoDelegate.h"
-#include "Spline.h"
+#include "GraphicsSpline.h"
 
 ObjectScheduleView::ObjectScheduleView(SceneTreeModel *sceneModel, QWidget *parent) : QTreeView(parent), m_sceneModel(sceneModel) {
 
@@ -38,7 +38,7 @@ void ObjectScheduleView::addItem() {
 }
 
 void ObjectScheduleView::addNewSplineItem() {
-    Spline *spline = new Spline();
+    GraphicsSpline *spline = new GraphicsSpline();
     m_sceneModel->addItem(spline);
     m_connectionModel->turnOnEditingOf(spline);
 }

@@ -3,7 +3,7 @@
 
 #include "stable.h"
 
-class Spline;
+class GraphicsSpline;
 
 class Point : public QGraphicsItem {
 
@@ -11,7 +11,7 @@ public:
     static qreal radius();
 
     Point(QGraphicsItem *parent = 0);
-    Point(Spline *parent);
+    Point(GraphicsSpline *parent);
     ~Point();
 
     QRectF boundingRect() const;
@@ -23,7 +23,7 @@ public:
 
 private:
     static qreal M_radius;
-    Spline *m_parentSpline;
+    GraphicsSpline *m_parentSpline;
     QColor m_color;
 
     void initialize();

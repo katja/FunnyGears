@@ -1,5 +1,5 @@
 #include "Point.h"
-#include "Spline.h"
+#include "GraphicsSpline.h"
 #include "Preferences.h"
 
 qreal Point::M_radius = 2;
@@ -13,8 +13,8 @@ Point::Point(QGraphicsItem *parent) : QGraphicsItem(parent), m_parentSpline(0), 
     initialize();
 }
 
-Point::Point(Spline *parent) : QGraphicsItem(parent) {
-    std::cout << "Point is created     (by Spline constructor)" << std::endl;
+Point::Point(GraphicsSpline *parent) : QGraphicsItem(parent) {
+    std::cout << "Point is created     (by GraphicsSpline constructor)" << std::endl;
     m_parentSpline = parent;
     m_color = parent->color();
     initialize();

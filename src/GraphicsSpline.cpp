@@ -1,10 +1,10 @@
-#include "Spline.h"
+#include "GraphicsSpline.h"
 #include "Preferences.h"
 #include "GraphicsScene.h"
 // #include "Helpers.h"
 
-Spline::Spline(QGraphicsItem *parent) : QGraphicsItem(parent) {
-    std::cout << "Spline is created" << std::endl;
+GraphicsSpline::GraphicsSpline(QGraphicsItem *parent) : QGraphicsItem(parent) {
+    std::cout << "GraphicsSpline is created" << std::endl;
     int partColor = qrand() % 512 + 100;
     m_color = QColor(partColor / 5, partColor * 2 / 5, partColor % 256);
 
@@ -18,11 +18,11 @@ Spline::Spline(QGraphicsItem *parent) : QGraphicsItem(parent) {
     // setAcceptedMouseButtons(Qt::LeftButton);
 }
 
-Spline::~Spline() {
-    std::cout << "Spline is deleted" << std::endl;
+GraphicsSpline::~GraphicsSpline() {
+    std::cout << "GraphicsSpline is deleted" << std::endl;
 }
 
-QRectF Spline::boundingRect() const {
+QRectF GraphicsSpline::boundingRect() const {
     if(m_points.empty()) {
         return QRectF();
     }
@@ -40,14 +40,14 @@ QRectF Spline::boundingRect() const {
     return QRectF(min, max);
 }
 
-QPainterPath Spline::shape() const {
+QPainterPath GraphicsSpline::shape() const {
     if(isActive())
         return path(Preferences::HighlightedLineWidth);
     else
         return path(Preferences::SimpleLineWidth);
 }
 
-void Spline::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+void GraphicsSpline::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Q_UNUSED(widget);
 
     painter->setBrush(Qt::NoBrush);
@@ -73,22 +73,22 @@ void Spline::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
     painter->drawPath(path());
 }
 
-void Spline::pointMoveEvent(Point *point, QGraphicsSceneMouseEvent *event) {
+void GraphicsSpline::pointMoveEvent(Point *point, QGraphicsSceneMouseEvent *event) {
     prepareGeometryChange();
     point->setPos(event->pos() + point->pos());
 }
 
-QColor Spline::color() const {
+QColor GraphicsSpline::color() const {
     return m_color;
 }
 
-void Spline::addPoint(QPointF scenePos) {
+void GraphicsSpline::addPoint(QPointF scenePos) {
     Point *p = new Point(this);
     p->setPos(mapFromScene(scenePos));
     m_points.append(p);
 }
 
-QPainterPath Spline::path(qreal width) const {
+QPainterPath GraphicsSpline::path(qreal width) const {
     if(m_points.empty())
         return QPainterPath();
 
@@ -116,7 +116,7 @@ QPainterPath Spline::path(qreal width) const {
     }
 }
 
-void Spline::setMinAndMax(QPointF &min, QPointF &max, const Point *point) const {
+void GraphicsSpline::setMinAndMax(QPointF &min, QPointF &max, const Point *point) const {
     QRectF pointRect = point->boundingRect();
     pointRect.translate(point->pos());
 
@@ -126,12 +126,12 @@ void Spline::setMinAndMax(QPointF &min, QPointF &max, const Point *point) const 
     setMax(max, pointRect.topRight());
 }
 
-void Spline::setMin(QPointF &min, const QPointF point) const {
+void GraphicsSpline::setMin(QPointF &min, const QPointF point) const {
     if(min.x() > point.x()) min.setX(point.x());
     if(min.y() > point.y()) min.setY(point.y());
 }
 
-void Spline::setMax(QPointF &max, const QPointF point) const {
+void GraphicsSpline::setMax(QPointF &max, const QPointF point) const {
     if(max.x() < point.x()) max.setX(point.x());
     if(max.y() < point.y()) max.setY(point.y());
 }

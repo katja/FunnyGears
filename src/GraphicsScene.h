@@ -3,7 +3,7 @@
 
 #include "stable.h"
 #include "ConnectionModel.h"
-#include "Spline.h"
+#include "GraphicsSpline.h"
 
 class GraphicsScene : public QGraphicsScene {
 
@@ -39,7 +39,7 @@ private:
         VIEW, EDITING
     };
     State m_currentState;
-    Spline *m_currentSpline;
+    GraphicsSpline *m_currentSpline;
     QPointF m_clickedPoint;
 
     ConnectionModel *m_selectionModel;
