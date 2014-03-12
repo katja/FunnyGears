@@ -6,8 +6,8 @@ ObjectScheduleWidget::ObjectScheduleWidget(ObjectScheduleView *objectSchedule, Q
 
     QWidget *mainWidget  = new QWidget(this);
 
-    m_addItemButton      = new QPushButton("+");
-    m_removeItemButton   = new QPushButton("-");
+    m_addItemButton      = new QPushButton(QIcon("images/Add.png"), "", this);
+    m_removeItemButton   = new QPushButton(QIcon("images/Remove.png"), "", this);
 
     QGridLayout *gLayout = new QGridLayout(mainWidget);
     gLayout->addWidget(m_objectSchedule,  0, 0, 1, 2); // addWidget(widget, fromRow, fromColumn, rowSpan, columnSpan, alignment = 0)
