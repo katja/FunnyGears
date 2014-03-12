@@ -5,7 +5,8 @@
 
 Spline::Spline(QGraphicsItem *parent) : QGraphicsItem(parent) {
     std::cout << "Spline is created" << std::endl;
-    m_color = QColor(qrand() % 256, qrand() % 256, qrand() % 256);
+    int partColor = qrand() % 512 + 100;
+    m_color = QColor(partColor / 5, partColor * 2 / 5, partColor % 256);
 
     setCursor(Qt::OpenHandCursor);
     setToolTip("Description of what will happen or what to do"); //TODO: Add description
