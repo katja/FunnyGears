@@ -73,7 +73,7 @@ void ConnectionModel::addToModelSelection(GraphicsScene *scene) {
         m_selectedItems << graphicsItem;
         selectItemInModel(graphicsItem);
     }
-    updateRegionInScene(m_changedItems);
+    emit updateRegionInScene(m_changedItems);
 }
 
 void ConnectionModel::addToSceneSelection(QGraphicsItem *graphicsItem) {
@@ -91,7 +91,7 @@ void ConnectionModel::removeFromSceneSelection(QGraphicsItem *graphicsItem) {
         m_changedItems.clear();
         m_changedItems << graphicsItem;
         m_selectedItems.removeAt(index);
-        updateRegionInScene(m_changedItems);
+        emit updateRegionInScene(m_changedItems);
     }
     if(graphicsItem->isSelected()) {
         std::cout << "ERROR: AN ITEM IS SELECTED AND MUST NOT BE!" << std::endl;
