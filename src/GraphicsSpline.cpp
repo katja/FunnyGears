@@ -5,6 +5,7 @@
 
 GraphicsSpline::GraphicsSpline(QGraphicsItem *parent) : QGraphicsItem(parent) {
     std::cout << "GraphicsSpline is created" << std::endl;
+    m_spline = new Spline();
     int partColor = qrand() % 512 + 100;
     m_color = QColor(partColor / 5, partColor * 2 / 5, partColor % 256);
 
@@ -20,6 +21,7 @@ GraphicsSpline::GraphicsSpline(QGraphicsItem *parent) : QGraphicsItem(parent) {
 
 GraphicsSpline::~GraphicsSpline() {
     std::cout << "GraphicsSpline is deleted" << std::endl;
+    delete m_spline;
 }
 
 QRectF GraphicsSpline::boundingRect() const {
@@ -41,10 +43,11 @@ QRectF GraphicsSpline::boundingRect() const {
 }
 
 QPainterPath GraphicsSpline::shape() const {
+    //only the control polygon path is used here, as with the spline path this would be too slow
     if(isActive())
-        return path(Preferences::HighlightedLineWidth);
+        return controlPointPolygonPath(Preferences::HighlightedLineWidth);
     else
-        return path(Preferences::SimpleLineWidth);
+        return controlPointPolygonPath(Preferences::SimpleLineWidth);
 }
 
 void GraphicsSpline::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
@@ -64,43 +67,50 @@ void GraphicsSpline::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
         }
         pen.setWidth(Preferences::HighlightedLineWidth);
         painter->setPen(pen);
-        painter->drawPath(path());
+        painter->drawPath(controlPointPolygonPath());
+        painter->drawPath(splineCurvePath());
     }
 
     pen.setColor(m_color);
     pen.setWidth(Preferences::SimpleLineWidth);
+    pen.setStyle(Qt::DotLine);
     painter->setPen(pen);
-    painter->drawPath(path());
-}
-
-void GraphicsSpline::pointMoveEvent(Point *point, QGraphicsSceneMouseEvent *event) {
-    prepareGeometryChange();
-    point->setPos(event->pos() + point->pos());
+    painter->drawPath(controlPointPolygonPath());
+    pen.setStyle(Qt::SolidLine);
+    painter->setPen(pen);
+    painter->drawPath(splineCurvePath());
 }
 
 QColor GraphicsSpline::color() const {
     return m_color;
 }
 
+void GraphicsSpline::pointMoveEvent(Point *point, QGraphicsSceneMouseEvent *event) {
+    prepareGeometryChange();
+    point->setPos(event->pos() + point->pos());
+    m_spline->moveControlPoint(m_points.indexOf(point), point->pos());
+}
+
 void GraphicsSpline::addPoint(QPointF scenePos) {
     Point *p = new Point(this);
     p->setPos(mapFromScene(scenePos));
     m_points.append(p);
+    m_spline->addControlPoint(p->pos());
 }
 
-QPainterPath GraphicsSpline::path(qreal width) const {
+QPainterPath GraphicsSpline::controlPointPolygonPath(qreal width) const {
     if(m_points.empty())
         return QPainterPath();
 
     if(width == 0) {
-        QPainterPath path(m_points.at(0)->pos()); //startpoint
+        QPainterPath controlPointPolygon(m_points.at(0)->pos()); //startpoint
         for(int i = 1; i < m_points.size(); ++i) {
-            path.lineTo(m_points.at(i)->pos());
+            controlPointPolygon.lineTo(m_points.at(i)->pos());
         }
-        return path;
+        return controlPointPolygon;
 
     } else { // width != 0
-        QPainterPath path;
+        QPainterPath controlPointPolygon;
         for(int i = 1; i < m_points.size(); ++i) {
             QVector2D direction(m_points.at(i)->pos() - m_points.at(i - 1)->pos());
             direction.normalize();
@@ -110,10 +120,21 @@ QPainterPath GraphicsSpline::path(qreal width) const {
             linePath.lineTo(m_points.at(i)->pos() - additional - QPointF(-additional.y(), additional.x()));
             linePath.lineTo(m_points.at(i - 1)->pos() + additional - QPointF(-additional.y(), additional.x()));
             linePath.closeSubpath();
-            path.addPath(linePath);
+            controlPointPolygon.addPath(linePath);
         }
-        return path;
+        return controlPointPolygon;
     }
+}
+
+QPainterPath GraphicsSpline::splineCurvePath() const {
+    if(!m_spline->enoughControlPoints()) {
+        return QPainterPath();
+    }
+    QVector<QPointF> curve(10 * m_points.size());
+    m_spline->curve(curve);
+    QPainterPath path;
+    path.addPolygon(QPolygonF(curve));
+    return path;
 }
 
 void GraphicsSpline::setMinAndMax(QPointF &min, QPointF &max, const Point *point) const {
