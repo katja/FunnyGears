@@ -4,11 +4,12 @@
 #include "stable.h"
 #include "List.h"
 #include "Spline.h"
+#include "SceneTreeModel.h"
 
 class SplineModel : public QAbstractTableModel {
 
 public:
-    SplineModel(QObject *parent = 0);
+    SplineModel(SceneTreeModel *model, QObject *parent = 0);
     ~SplineModel();
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -20,10 +21,14 @@ public:
     bool addSpline(Spline *spline);
     bool removeSpline(Spline *spline);
 
+public slots:
+    void geometryAdded(QGraphicsItem *graphicsItem);
+
 private:
     enum Properties {
         DEGREE, TORN_TO_EDGES
     };
+    SceneTreeModel *m_sceneModel;
     int m_numberOfProperties;
     List<Spline*> m_splines;
 };

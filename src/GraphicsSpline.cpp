@@ -24,6 +24,10 @@ GraphicsSpline::~GraphicsSpline() {
     delete m_spline;
 }
 
+Spline* GraphicsSpline::spline() const {
+    return m_spline;
+}
+
 QRectF GraphicsSpline::boundingRect() const {
     if(m_points.empty()) {
         return QRectF();

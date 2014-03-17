@@ -86,7 +86,7 @@ public:
      */
     Qt::ItemFlags flags(const QModelIndex &index) const; //The base class implementation returns a combination of flags that enables the item (ItemIsEnabled) and allows it to be selected (ItemIsSelectable). ItemIsEditable must be returned!
 
-    bool addItem(QGraphicsItem *graphicsItem = new GraphicsSpline()); //TODO: remove this default value!
+    bool addItem(QGraphicsItem *graphicsItem);
     bool remove(QModelIndex index);
 
     bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex());
@@ -95,6 +95,7 @@ public:
 signals:
     void layoutChanged(const QList<QPersistentModelIndex> &parents = QList<QPersistentModelIndex>(), QAbstractItemModel::LayoutChangeHint hint = QAbstractItemModel::NoLayoutChangeHint);
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>());
+    void geometryAdded(QGraphicsItem *graphicsItem);
 
 private:
     SceneTreeItem *m_rootItem;

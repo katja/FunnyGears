@@ -1,7 +1,8 @@
 #include "SplineModel.h"
 
-SplineModel::SplineModel(QObject *parent) : QAbstractTableModel(parent) {
+SplineModel::SplineModel(SceneTreeModel *sceneModel, QObject *parent) : QAbstractTableModel(parent), m_sceneModel(sceneModel) {
     std::cout << "SplineModel is created" << std::endl;
+    connect(m_sceneModel, SIGNAL(geometryAdded(QGraphicsItem*)), this, SLOT(geometryAdded(QGraphicsItem*)));
 }
 
 SplineModel::~SplineModel() {
@@ -78,4 +79,11 @@ bool SplineModel::removeSpline(Spline *spline) {
     m_splines.removeAt(index); //TODO: delete spline???
     endRemoveRows();
     return true;
+}
+
+void SplineModel::geometryAdded(QGraphicsItem *graphicsItem) {
+    GraphicsSpline spline;
+    if(typeid(*graphicsItem) != typeid(spline))
+        return;
+    addSpline((static_cast<GraphicsSpline*>(graphicsItem))->spline());
 }

@@ -205,6 +205,7 @@ bool SceneTreeModel::addItem(QGraphicsItem *graphicsItem) {
         m_graphicsScene->addItem(graphicsItem);
         m_rootItem->addChild(graphicsItem);
     endInsertRows();
+    emit geometryAdded(graphicsItem);
     return true;
 }
 

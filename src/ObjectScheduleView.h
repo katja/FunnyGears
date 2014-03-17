@@ -17,7 +17,6 @@ public:
     ConnectionModel* setConnectionModel(ConnectionModel *model);
 
 public slots:
-    void addItem();
     void addNewSplineItem();
     void removeItems();
 

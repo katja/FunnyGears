@@ -33,10 +33,6 @@ ConnectionModel* ObjectScheduleView::setConnectionModel(ConnectionModel *model) 
     return oldModel;
 }
 
-void ObjectScheduleView::addItem() {
-    m_sceneModel->addItem();
-}
-
 void ObjectScheduleView::addNewSplineItem() {
     GraphicsSpline *spline = new GraphicsSpline();
     m_sceneModel->addItem(spline);

@@ -11,6 +11,8 @@ public:
     GraphicsSpline(QGraphicsItem *parent = 0);
     ~GraphicsSpline();
 
+    Spline* spline() const;
+
     QRectF boundingRect() const;
     QPainterPath shape() const;
 
