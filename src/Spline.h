@@ -9,14 +9,15 @@ public:
     Spline();
     ~Spline();
 
-    vec2 evaluate(qreal value) const;
-    void curve(QVector<QPointF> &curve) const;
-    int degree() const;
+    vec2  evaluate(qreal value) const;
+    void  curve(QVector<QPointF> &curve) const;
+    int   degree() const;
+    void  setDegree(int degree);
 
     /** Checks if there exists a spline in the current state.
      *  This depends on the degree and the number of control points.
      */
-    bool enoughControlPoints() const;
+    bool  enoughControlPoints() const;
 
     /** Returns the lowest value, which can be evaluated.
      *  If not enough control points are available at the moment,
@@ -32,19 +33,21 @@ public:
      */
     qreal upperDomainBorder() const;
 
-    void addControlPoint(vec2 point);
-    void addControlPoint(QPointF point);
+    void  addControlPoint(vec2 point);
+    void  addControlPoint(QPointF point);
 
-    void moveControlPoint(int index, QPointF newPosition);
+    void  moveControlPoint(int index, QPointF newPosition);
 
-    void toggleTearToEdges();
+    void  setTornToEdges(bool tearToEdges);
+
+    bool isTornToEdges();
 
     /** Returns the index of the knot in the knot array,
      *  whose value is smaller or equal to the given value.
      *  (If a value is given, which is lower than all current knots
      *  index 0 is returned.)
      */
-    int lowerNextKnot(int value) const;
+    int   lowerNextKnot(int value) const;
 
 private:
     QVector<real> m_knots;
@@ -54,6 +57,10 @@ private:
 
     void deBoor(QVector<vec2> &controlPoints, qreal value, qreal n) const;
     void deBoor(QVector<vec2> &controlPoints, qreal value, qreal n, int degree, int stop = 0) const;
+    void equalizeFirstKnots();
+    void equalizeLastKnots();
+    void makeDifferentFirstKnots();
+    void makeDifferentLastKnots();
 
 };
 

@@ -41,6 +41,23 @@ int Spline::degree() const {
     return m_degree;
 }
 
+void Spline::setDegree(int degree) {
+    if(degree < 0 || m_degree == degree)
+        return;
+    if(m_degree < degree) {
+        for(int i = m_degree; i < degree; ++i) {
+            m_knots << (m_knots.at(m_knots.size() - 1) + 1);
+            m_knots.prepend(m_knots.at(0) - 1);
+            m_degree += 1;
+        }
+    } else { // m_degree > degree
+        for(int i = m_degree; i > degree; --i) {
+            m_knots.removeFirst();
+            m_knots.removeLast();
+            m_degree -= 1;
+        }
+    }
+}
 
 bool Spline::enoughControlPoints() const {
     return m_controlPoints.size() >= 1 + m_degree; //first visible for degree + 1 control points
@@ -88,21 +105,20 @@ void Spline::moveControlPoint(int index, QPointF newPosition) {
     m_controlPoints[index] = vec2(newPosition.x(), newPosition.y());
 }
 
-void Spline::toggleTearToEdges() {
-    if(!enoughControlPoints())
-        return; //No curve available at the moment!
+void Spline::setTornToEdges(bool tearToEdges) {
+    if(m_tornToEdges != tearToEdges)
+    m_tornToEdges = tearToEdges;
     if(m_tornToEdges) {
-        for(int i = 0; i < m_degree; ++i) {
-            m_knots[i] = m_knots[m_degree] - (m_degree - i);
-            m_knots[m_knots.size() - 1 - i] = m_knots[m_controlPoints.size()] + (m_degree - i);
-        }
+        equalizeLastKnots();
+        equalizeFirstKnots();
     } else {
-        for(int i = 0; i < m_degree; ++i) {
-            m_knots[i] = m_knots[m_degree];
-            m_knots[m_knots.size() - 1 - i] = m_knots[m_controlPoints.size()];
-        }
+        makeDifferentLastKnots();
+        makeDifferentFirstKnots();
     }
-    m_tornToEdges = !m_tornToEdges;
+}
+
+bool Spline::isTornToEdges() {
+    return m_tornToEdges;
 }
 
 int Spline::lowerNextKnot(int value) const {
@@ -129,5 +145,31 @@ void Spline::deBoor(QVector<vec2> &controlPoints, qreal value, qreal n, int degr
     }
     if(stop != degree)
         deBoor(controlPoints, value, n, --degree, stop);
+}
+
+void Spline::equalizeFirstKnots() {
+    for(int i = 0; i < m_degree; ++i) {
+        m_knots[i] = m_knots.at(m_degree);
+    }
+}
+
+void Spline::equalizeLastKnots() {
+    int lastIndex = m_knots.size() - 1;
+    for(int i = 0; i < m_degree; ++i) {
+        m_knots[lastIndex - i] = m_knots[lastIndex - m_degree];
+    }
+}
+
+void Spline::makeDifferentFirstKnots() {
+    for(int i = m_degree - 1; i >= 0; --i) {
+        m_knots[i] = m_knots.at(i + 1) - 1;
+    }
+}
+
+void Spline::makeDifferentLastKnots() {
+    int refIndex = m_knots.size() - m_degree;
+    for (int i = refIndex; i < refIndex + m_degree; ++i) {
+        m_knots[i] = m_knots.at(i - 1) + 1;
+    }
 }
 
