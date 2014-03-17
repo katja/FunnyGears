@@ -7,6 +7,7 @@
 #include "SceneTreeModel.h"
 #include "ObjectScheduleView.h"
 #include "ObjectScheduleWidget.h"
+#include "ObjectAttributesWidget.h"
 
 class MainWindow : public QMainWindow {
 
@@ -37,8 +38,7 @@ private:
     GraphicsScene       *m_scene;
 
     ObjectScheduleWidget *m_objectScheduleWidget; // is a QDockWidget
-
-    QDockWidget *m_objectAttributesDockWidget;
+    ObjectAttributesWidget *m_objectAttributesWidget; // is a QDockWidget
 
     QMenu       *m_programMenu,
                 *m_fileMenu,

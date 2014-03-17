@@ -16,7 +16,9 @@
 #include <QAction>
 #include <QApplication>
 #include <QBitmap>
+#include <QCheckBox>
 #include <QColorDialog>
+#include <QDataWidgetMapper>
 #include <QDialog>
 #include <QDockWidget>
 #include <QDrag>
@@ -39,6 +41,7 @@
 #include <QPaintEngine>
 #include <QPalette>
 #include <QPushButton>
+#include <QSpinBox>
 #include <QStatusBar>
 #include <QStyledItemDelegate>
 #include <QToolBar>

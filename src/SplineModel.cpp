@@ -1,8 +1,7 @@
 #include "SplineModel.h"
 
-SplineModel::SplineModel(SceneTreeModel *sceneModel, QObject *parent) : QAbstractTableModel(parent), m_sceneModel(sceneModel) {
+SplineModel::SplineModel(SceneTreeModel *sceneModel, QObject *parent) : GeometryModel(sceneModel, parent) {
     std::cout << "SplineModel is created" << std::endl;
-    connect(m_sceneModel, SIGNAL(geometryAdded(QGraphicsItem*)), this, SLOT(geometryAdded(QGraphicsItem*)));
 }
 
 SplineModel::~SplineModel() {
@@ -18,7 +17,7 @@ int SplineModel::rowCount(const QModelIndex &parent) const {
 
 int SplineModel::columnCount(const QModelIndex &parent) const {
     Q_UNUSED(parent);
-    return m_numberOfProperties;
+    return 2; // TODO: better idea?
 }
 
 QVariant SplineModel::data(const QModelIndex &index, int role) const {
@@ -81,9 +80,26 @@ bool SplineModel::removeSpline(Spline *spline) {
     return true;
 }
 
+bool SplineModel::operatesOn(QGraphicsItem *graphicsItem) {
+    return isSpline(graphicsItem);
+}
+
+int SplineModel::indexOf(QGraphicsItem *graphicsItem) {
+    if(!isSpline(graphicsItem))
+        return -1;
+    return m_splines.indexOf((static_cast<GraphicsSpline*>(graphicsItem))->spline());
+}
+
 void SplineModel::geometryAdded(QGraphicsItem *graphicsItem) {
-    GraphicsSpline spline;
-    if(typeid(*graphicsItem) != typeid(spline))
+    if(!isSpline(graphicsItem))
         return;
     addSpline((static_cast<GraphicsSpline*>(graphicsItem))->spline());
+}
+
+bool SplineModel::isSpline(QGraphicsItem *graphicsItem) {
+    GraphicsSpline spline;
+    if(typeid(*graphicsItem) == typeid(spline))
+        return true;
+    else
+        return false;
 }

@@ -17,8 +17,10 @@ public:
     void informModelDataChange(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
 signals:
-    void updateRegionInScene(const QList<QGraphicsItem*> &deselect);
+    void updateRegionInScene(const QList<QGraphicsItem*> &changedItems);
     void startEditingItem(QGraphicsItem *item);
+    void oneGraphicsItemSelected(QGraphicsItem *item);
+    void manyOrNoneGraphicsItemSelected();
 
 public slots:
     void sceneSelectionChanged(GraphicsScene *scene);

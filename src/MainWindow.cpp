@@ -120,31 +120,19 @@ void MainWindow::createLayout() {
 // MODEL/VIEW THINGS
     m_sceneModel            = new SceneTreeModel(m_scene, this);
     m_objectScheduleView    = new ObjectScheduleView(m_sceneModel, this);
+
 // CONNECTION
-    ConnectionModel *selectionModel = new ConnectionModel(m_sceneModel);
-    m_scene->setConnectionModel(selectionModel);
-    m_objectScheduleView->setConnectionModel(selectionModel);
+    ConnectionModel *connectionModel = new ConnectionModel(m_sceneModel);
+    m_scene->setConnectionModel(connectionModel);
+    m_objectScheduleView->setConnectionModel(connectionModel);
 //WIDGETS
     m_objectScheduleWidget  = new ObjectScheduleWidget(m_objectScheduleView, this);
     addDockWidget(Qt::RightDockWidgetArea, m_objectScheduleWidget);
     m_toggleObjectScheduleAction = m_objectScheduleWidget->toggleViewAction();
 
-// DOCK WIDGET OBJECT ATTRIBUTES //TODO: place in an extra class
-    m_objectAttributesDockWidget        = new QDockWidget(tr("Object Attributes"), this, Qt::Widget);
-    QWidget *objectAttributesWidget     = new QWidget(m_objectAttributesDockWidget);
-
-    QLabel *label = new QLabel(tr("Object Attributes should go here!"), objectAttributesWidget);
-    QVBoxLayout *vLayout = new QVBoxLayout(objectAttributesWidget);
-    vLayout->addWidget(label);
-
-    objectAttributesWidget->setLayout(vLayout);
-    m_objectAttributesDockWidget->setWidget(objectAttributesWidget);
-
-    addDockWidget(Qt::RightDockWidgetArea, m_objectAttributesDockWidget);
-    m_objectAttributesDockWidget->show();
-
-    m_toggleObjectAttributesAction = m_objectAttributesDockWidget->toggleViewAction();
-
+    m_objectAttributesWidget = new ObjectAttributesWidget(m_sceneModel, connectionModel, this);
+    addDockWidget(Qt::RightDockWidgetArea, m_objectAttributesWidget);
+    m_toggleObjectAttributesAction = m_objectAttributesWidget->toggleViewAction();
 };
 
 void MainWindow::quitProgram() {

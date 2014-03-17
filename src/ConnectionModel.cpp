@@ -79,6 +79,7 @@ void ConnectionModel::clearPreviousSelectionIn(ConnectionModel::Connection desti
             item->setSelected(false);
         }
     }
+    emit manyOrNoneGraphicsItemSelected();
     emit updateRegionInScene(m_selectedItems); //scene: update rendering (remove highlight of previous selection)
     m_selectedItems.clear();
 }
@@ -92,6 +93,8 @@ void ConnectionModel::addToModelSelection(GraphicsScene *scene) {
         m_selectedItems << graphicsItem;
         selectItemInModel(graphicsItem);
     }
+    if(m_changedItems.size() == 1)
+        emit oneGraphicsItemSelected(m_changedItems.at(0));
     emit updateRegionInScene(m_changedItems);
 }
 
@@ -100,6 +103,7 @@ void ConnectionModel::addToSceneSelection(QGraphicsItem *graphicsItem) {
     m_changedItems.clear();
     m_changedItems << graphicsItem;
     m_selectedItems << graphicsItem;
+    emit oneGraphicsItemSelected(graphicsItem);
     emit updateRegionInScene(m_changedItems);
 }
 
@@ -110,6 +114,7 @@ void ConnectionModel::removeFromSceneSelection(QGraphicsItem *graphicsItem) {
         m_changedItems.clear();
         m_changedItems << graphicsItem;
         m_selectedItems.removeAt(index);
+        emit manyOrNoneGraphicsItemSelected();
         emit updateRegionInScene(m_changedItems);
     }
     if(graphicsItem->isSelected()) {
