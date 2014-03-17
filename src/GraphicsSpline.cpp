@@ -1,7 +1,7 @@
 #include "GraphicsSpline.h"
-#include "Preferences.h"
 #include "GraphicsScene.h"
-// #include "Helpers.h"
+#include "preferences.h"
+
 
 GraphicsSpline::GraphicsSpline(QGraphicsItem *parent) : QGraphicsItem(parent) {
     std::cout << "GraphicsSpline is created" << std::endl;

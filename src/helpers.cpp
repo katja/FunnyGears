@@ -1,4 +1,4 @@
-#include "Helpers.h"
+#include "helpers.h"
 #include "definitions.h"
 #include "Point.h"
 

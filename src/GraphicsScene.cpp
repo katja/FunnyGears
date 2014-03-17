@@ -1,6 +1,6 @@
 #include "GraphicsScene.h"
 #include "ConnectionModel.h"
-#include "Preferences.h"
+#include "preferences.h"
 #include <cmath>
 
 GraphicsScene::GraphicsScene(QObject *parent) : QGraphicsScene(parent) {

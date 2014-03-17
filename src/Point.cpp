@@ -1,6 +1,6 @@
 #include "Point.h"
 #include "GraphicsSpline.h"
-#include "Preferences.h"
+#include "preferences.h"
 
 qreal Point::M_radius = 2;
 

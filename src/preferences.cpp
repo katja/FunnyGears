@@ -1,4 +1,4 @@
-#include "Preferences.h"
+#include "preferences.h"
 
 QColor Preferences::SelectionColor(Qt::yellow);
 
