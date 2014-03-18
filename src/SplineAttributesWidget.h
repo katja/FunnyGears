@@ -5,9 +5,17 @@
 
 class SplineAttributesWidget : public QWidget {
 
+Q_OBJECT
+
 public:
     SplineAttributesWidget(QDataWidgetMapper *mapper, QWidget *parent = 0);
     ~SplineAttributesWidget();
+
+private slots:
+    void changed(int);
+
+signals:
+    void somethingChanged();
 
 private:
     QDataWidgetMapper *m_mapper;
@@ -15,7 +23,6 @@ private:
     QLabel      *m_degreeLabel;
     QCheckBox   *m_tornToEdgesCheckBox;
     QLabel      *m_tornToEdgesLabel;
-
 
 };
 

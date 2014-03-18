@@ -44,6 +44,7 @@ bool SplineModel::setData(const QModelIndex &index, const QVariant &value, int r
     switch(index.column()) {
         case DEGREE:
             spline->setDegree(value.toInt());
+            // m_sceneTreeModel->
             return true;
         case TORN_TO_EDGES:
             spline->setTornToEdges(value.toBool());

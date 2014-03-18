@@ -18,11 +18,15 @@ public:
 private slots:
     void selectItem(QGraphicsItem *graphicsItem);
     void deselect();
+    void updateCurrentSceneItem();
 private:
     QList<GeometryModel*> m_modelList;
     QHash<GeometryModel*, QWidget*> m_modelWidgetsHash;
     QHash<GeometryModel*, QDataWidgetMapper*> m_modelMapperHash;
     QWidget *m_noContentWidget;
+    ConnectionModel *m_connectionModel;
+
+    QGraphicsItem *m_currentItem;
 
 };
 
