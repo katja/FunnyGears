@@ -131,7 +131,7 @@ QPainterPath GraphicsSpline::controlPointPolygonPath(qreal width) const {
 }
 
 QPainterPath GraphicsSpline::splineCurvePath() const {
-    if(!m_spline->enoughControlPoints()) {
+    if(!m_spline->isValid()) {
         return QPainterPath();
     }
     QVector<QPointF> curve(10 * m_points.size());

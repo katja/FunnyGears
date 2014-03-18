@@ -27,3 +27,28 @@ std::ostream& operator <<(std::ostream &os, const QVector<vec2> vector) {
     os << vector.at(i) << "]";
     return os;
 }
+
+std::ostream& operator <<(std::ostream &os, const Spline &spline) {
+    os << "Control Points: ";
+    const QVector<vec2> controlPoints = spline.controlPoints();
+    foreach(vec2 point, controlPoints) {
+        os << point;
+    }
+    os << "\n";
+    os << "Knots: ";
+    const QVector<real> knots = spline.knots();
+    for(int i = 0; i < knots.size(); ++i) {
+        os << knots.at(i);
+        if(i != knots.size() - 1)
+            os << ", ";
+    }
+    os << "\n";
+    os << "TornToEdges? ";
+    if(spline.isTornToEdges())
+        os << "yes";
+    else
+        os << "no";
+    os << "\n";
+    os << "Degree: " << spline.degree();
+    return os;
+}

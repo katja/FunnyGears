@@ -1,14 +1,15 @@
 #include "Spline.h"
+#include "helpers.h"
 
 Spline::Spline() : m_degree(2), m_tornToEdges(false) {
-    m_knots << 0 << 1 << 2 << 3;
+    m_knots << 0 << 1 << 2;
 }
 
 Spline::~Spline() {
 }
 
 vec2 Spline::evaluate(qreal value) const {
-    if(!enoughControlPoints() || value < lowerDomainBorder() || value > upperDomainBorder())
+    if(!isValid() || value < lowerDomainBorder() || value > upperDomainBorder())
         return vec2(0, 0); //TODO: is this REALLY necessary or only time consuming?????
     int n = lowerNextKnot(value); // value is element of knot[n] and knot[n+1]
     QVector<vec2> controlPointsCopy(m_degree + 1);
@@ -20,12 +21,19 @@ vec2 Spline::evaluate(qreal value) const {
 }
 
 void Spline::curve(QVector<QPointF> &curve) const {
+    std::cout << "\n\nSPLINE:\n" << (*this) << std::endl;
     qreal u = lowerDomainBorder();
     qreal uStop = upperDomainBorder();
     int iStop = curve.size();
 
+    std::cout << "lowerBorder: " << u << ", upperBorder: " << uStop << std::endl;
     qreal step = (uStop - u) / iStop;
     for(int i = 0; i < iStop; ++i) {
+        if(i == iStop - 1) {
+            std::cout << "u in loop would end with: " << u;
+            u = uStop - 0.001f;
+            std::cout << " and now is set to " << u << std::endl;
+        }
         vec2 point = evaluate(u);
         curve[i] = QPointF(point.x(), point.y());
         u += step;
@@ -45,53 +53,61 @@ void Spline::setDegree(int degree) {
     if(degree < 0 || m_degree == degree)
         return;
     if(m_degree < degree) {
+        if(m_tornToEdges && isValid())
+            makeDifferentLastKnots();
         for(int i = m_degree; i < degree; ++i) {
             m_knots << (m_knots.at(m_knots.size() - 1) + 1);
-            m_knots.prepend(m_knots.at(0) - 1);
             m_degree += 1;
         }
     } else { // m_degree > degree
         for(int i = m_degree; i > degree; --i) {
-            m_knots.removeFirst();
             m_knots.removeLast();
             m_degree -= 1;
         }
     }
+    if(m_tornToEdges) {
+        if(isValid())
+            equalizeLastKnots();
+        else
+            adjustKnots();
+    }
 }
 
-bool Spline::enoughControlPoints() const {
-    return m_controlPoints.size() >= 1 + m_degree; //first visible for degree + 1 control points
+const QVector<vec2>& Spline::controlPoints() const {
+    return m_controlPoints;
+}
+
+const QVector<real>& Spline::knots() const {
+    return m_knots;
+}
+
+bool Spline::isValid() const {
+    return m_controlPoints.size() > m_degree; //first visible for degree + 1 control points
 }
 
 qreal Spline::lowerDomainBorder() const {
-    if(!enoughControlPoints())
+    if(!isValid())
         return -1.0; //No curve available at the moment!
     return m_knots[m_degree];
 }
 qreal Spline::upperDomainBorder() const {
-    if(!enoughControlPoints())
+    if(!isValid())
         return -1.0; //No curve available at the moment!
-    return m_knots[m_controlPoints.size()];
+    return m_knots[m_controlPoints.size()]; //is equal to: m_knots[m_knots.size() - 1 - m_degree]
 }
 
 void Spline::addControlPoint(vec2 point) {
-    m_controlPoints << point;
-    if(!m_tornToEdges) {
-        m_knots << (m_knots[m_knots.size() - 1] + 1); // append a knot with a value "1" higher than previous end knot
+    if(m_tornToEdges && isValid()) {
+        makeDifferentLastKnots();
+        m_knots << (m_knots.at(m_knots.size() - 1) + 1);
+        m_controlPoints << point;
+        equalizeLastKnots();
     } else {
-        if(m_knots.size() <= m_degree) { //new knot needs same value as all knots up to now!
-            m_knots << m_knots[m_knots.size() - 1];
-        } else if(m_knots.size() == m_degree + 1) { //new knot is first with other value
-            m_knots << (m_knots[m_knots.size() - 1] + 1);
-        } else if(m_knots.size() < 2 * (m_degree + 1)) { //new knot belongs to the last knots, and yet there are not enough knots available. => we can add it simply at the end
-            m_knots << m_knots[m_knots.size() - 1];
-        } else { //new knot belongs to the last knots and as not more than m_degree same knots are possible, we have to increase last knots.
-            qreal newKnotValue = m_knots[m_knots.size() - 1];
-            for(int i = 0; i < m_degree; ++i) {
-                m_knots[m_knots.size() - 1 - i] = newKnotValue;
-            }
-            m_knots << newKnotValue;
-        }
+        m_controlPoints << point;
+        m_knots << (m_knots.at(m_knots.size() - 1) + 1);
+
+        if(m_tornToEdges)
+            adjustKnots();
     }
 }
 
@@ -106,18 +122,27 @@ void Spline::moveControlPoint(int index, QPointF newPosition) {
 }
 
 void Spline::setTornToEdges(bool tearToEdges) {
-    if(m_tornToEdges != tearToEdges)
-    m_tornToEdges = tearToEdges;
-    if(m_tornToEdges) {
-        equalizeLastKnots();
-        equalizeFirstKnots();
-    } else {
-        makeDifferentLastKnots();
-        makeDifferentFirstKnots();
+    if(m_tornToEdges != tearToEdges) {
+        m_tornToEdges = tearToEdges;
+        if(m_tornToEdges) {
+            if(isValid()) {
+                equalizeFirstKnots();
+                equalizeLastKnots();
+            } else {
+                adjustKnots();
+            }
+        } else { // not torn to edges
+            if(isValid()) {
+                makeDifferentFirstKnots();
+                makeDifferentLastKnots();
+            } else {
+                adjustKnots();
+            }
+        }
     }
 }
 
-bool Spline::isTornToEdges() {
+bool Spline::isTornToEdges() const {
     return m_tornToEdges;
 }
 
@@ -147,29 +172,95 @@ void Spline::deBoor(QVector<vec2> &controlPoints, qreal value, qreal n, int degr
         deBoor(controlPoints, value, n, --degree, stop);
 }
 
+void Spline::adjustKnots() {
+    int lastKnotValue = m_knots[0];
+    int occurences = 1;
+    for(int i = 1; i < m_knots.size(); ++i) {
+
+        //when torn to edges the first n = m_degree + 1 knots have to have the same value
+        if(m_tornToEdges && i <= m_degree) {
+            m_knots[i] = lastKnotValue;
+            ++occurences;
+        } else
+        //when torn to edges the last knots have to have the same value
+        //starting with knot[m_controlPoints.size()]. If this knot has same value
+        //as the one before, give it a new bigger value.
+        if(m_tornToEdges && i == m_controlPoints.size()) {
+            if(m_knots.at(i) == lastKnotValue)
+                m_knots[i] = lastKnotValue + 1;
+            occurences = 1;
+        } else
+
+        //when torn to edges the last n = m_degree + 1 (= m_knots.size() - m_controlPoints.size())
+        //knots need the same value
+        if(m_tornToEdges && i > m_controlPoints.size()) {
+            assert(occurences <= m_degree); //otherwise, number of control points to knots and to degree is not correct!
+            m_knots[i] = lastKnotValue;
+            ++occurences;
+        } else
+
+        //assure that there are not more than n = m_degree + 1 same knot values
+        if(m_knots.at(i) == lastKnotValue) {
+            ++occurences;
+            if(occurences > m_degree + 1) {
+                m_knots[i] = lastKnotValue + 1;
+                occurences = 1;
+            }
+
+        //m_knots.at(i) != lastKnotValue
+        } else {
+            //assure that knots have an increasing order
+            if(m_knots.at(i) < lastKnotValue)
+                m_knots[i] = lastKnotValue + 1;
+            occurences = 1;
+        }
+        lastKnotValue = m_knots.at(i);
+    }
+}
+
+// void Spline::updateKnots() {
+//     if(m_tornToEdges) {
+//         equalizeLastKnots();
+//         equalizeFirstKnots();
+//     } else {
+//         makeDifferentLastKnots();
+//         makeDifferentFirstKnots();
+//     }
+// }
+
 void Spline::equalizeFirstKnots() {
-    for(int i = 0; i < m_degree; ++i) {
-        m_knots[i] = m_knots.at(m_degree);
+    real firstOtherKnot = m_knots.at(m_degree + 1);
+    real firstKnotsValue = m_knots.at(m_degree);
+    if(firstKnotsValue == firstOtherKnot)
+        firstKnotsValue -= 1;
+    for(int i = 0; i <= m_degree; ++i) {
+        m_knots[i] = firstKnotsValue;
     }
 }
 
 void Spline::equalizeLastKnots() {
-    int lastIndex = m_knots.size() - 1;
-    for(int i = 0; i < m_degree; ++i) {
-        m_knots[lastIndex - i] = m_knots[lastIndex - m_degree];
+    real lastOtherKnot = m_knots.at(m_controlPoints.size() - 1);
+    real lastKnotsValue = m_knots.at(m_controlPoints.size());
+    if(lastOtherKnot == lastKnotsValue)
+        lastKnotsValue += 1;
+    for(int i = 0; i <= m_degree; ++i) {
+        m_knots[m_controlPoints.size() + i] =lastKnotsValue;
     }
 }
 
 void Spline::makeDifferentFirstKnots() {
-    for(int i = m_degree - 1; i >= 0; --i) {
-        m_knots[i] = m_knots.at(i + 1) - 1;
+    real nextValue = m_knots.at(m_degree + 1);
+    for(int i = m_degree; i >= 0; --i) {
+        nextValue -= 1.0f;
+        m_knots[i] = nextValue;
     }
 }
 
 void Spline::makeDifferentLastKnots() {
-    int refIndex = m_knots.size() - m_degree;
-    for (int i = refIndex; i < refIndex + m_degree; ++i) {
-        m_knots[i] = m_knots.at(i - 1) + 1;
+    real lastValue = m_knots.at(m_controlPoints.size() - 1);
+    for (int i = 0; i <= m_degree; ++i) {
+        lastValue += 1.0f;
+        m_knots[m_controlPoints.size() + i] = lastValue;
     }
 }
 

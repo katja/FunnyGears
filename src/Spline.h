@@ -14,10 +14,13 @@ public:
     int   degree() const;
     void  setDegree(int degree);
 
+    const QVector<vec2>& controlPoints() const;
+    const QVector<real>& knots() const;
+
     /** Checks if there exists a spline in the current state.
      *  This depends on the degree and the number of control points.
      */
-    bool  enoughControlPoints() const;
+    bool  isValid() const;
 
     /** Returns the lowest value, which can be evaluated.
      *  If not enough control points are available at the moment,
@@ -40,7 +43,7 @@ public:
 
     void  setTornToEdges(bool tearToEdges);
 
-    bool isTornToEdges();
+    bool isTornToEdges() const;
 
     /** Returns the index of the knot in the knot array,
      *  whose value is smaller or equal to the given value.
@@ -57,6 +60,7 @@ private:
 
     void deBoor(QVector<vec2> &controlPoints, qreal value, qreal n) const;
     void deBoor(QVector<vec2> &controlPoints, qreal value, qreal n, int degree, int stop = 0) const;
+    void adjustKnots();
     void equalizeFirstKnots();
     void equalizeLastKnots();
     void makeDifferentFirstKnots();
