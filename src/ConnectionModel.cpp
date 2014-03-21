@@ -129,7 +129,7 @@ void ConnectionModel::removeFromSceneSelection(QGraphicsItem *graphicsItem) {
 }
 
 void ConnectionModel::selectItemInModel(QGraphicsItem *item) {
-    QModelIndex index = m_sceneTreeModel->itemWithGeometry(item);
+    QModelIndex index = m_sceneTreeModel->itemWithGraphicsItem(item);
 
     if(index.isValid()) {
         QItemSelectionModel::select(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
@@ -137,12 +137,12 @@ void ConnectionModel::selectItemInModel(QGraphicsItem *item) {
 }
 
 QGraphicsItem* ConnectionModel::graphicOfRow(const QModelIndex &index) {
-    QModelIndex geometryIndex = index.sibling(index.row(), SceneTreeModel::GEOM);
-    if(!geometryIndex.isValid())
+    QModelIndex graphicsItemIndex = index.sibling(index.row(), SceneTreeModel::GEOM);
+    if(!graphicsItemIndex.isValid())
         return 0;
-    void *data = geometryIndex.internalPointer(); //TODO: refactor SceneTreeModel and -Item not to use in every column same QModelIndex, but f.ex. in the geom column the m_geometry of the SceneTreeItem
+    void *data = graphicsItemIndex.internalPointer(); //TODO: refactor SceneTreeModel and -Item not to use in every column same QModelIndex, but f.ex. in the geom column the m_graphicsItem of the SceneTreeItem
     SceneTreeItem *item = static_cast<SceneTreeItem*>(data);
-    QGraphicsItem *graphicsItem = item->geometry();
+    QGraphicsItem *graphicsItem = item->graphicsItem();
     return graphicsItem;
 }
 

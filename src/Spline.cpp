@@ -2,6 +2,7 @@
 #include "helpers.h"
 
 Spline::Spline(int degree) : m_degree(degree), m_isClosed(false), m_tornToEdges(false) {
+    std::cout << "Spline is created" << std::endl;
     if(m_degree <= 0)
         throw;
     for(int i = 0; i <= m_degree; ++i)
@@ -13,6 +14,7 @@ Spline::Spline(QVector<vec2> interpolationPoints) {
 }
 
 Spline::~Spline() {
+    std::cout << "Spline is deleted" << std::endl;
 }
 
 vec2 Spline::evaluate(real value) const {
@@ -41,20 +43,20 @@ vec2 Spline::derivative(real value) const {
 }
 
 void Spline::curve(QVector<QPointF> &curve) const {
-    std::cout << "\n\nSPLINE:\n" << (*this) << std::endl;
+    // std::cout << "\n\nSPLINE:\n" << (*this) << std::endl;
     if(!isValid())
         return;
     real u = lowerDomainLimit();
     real uStop = upperDomainLimit();
     int iStop = curve.size();
 
-    std::cout << "lowerBorder: " << u << ", upperBorder: " << uStop << std::endl;
+    // std::cout << "lowerBorder: " << u << ", upperBorder: " << uStop << std::endl;
     real step = (uStop - u) / iStop;
     for(int i = 0; i < iStop; ++i) {
         if(i == iStop - 1) {
-            std::cout << "u in loop would end with: " << u;
+            // std::cout << "u in loop would end with: " << u;
             u = uStop - 0.001f;
-            std::cout << " and now is set to " << u << std::endl;
+            // std::cout << " and now is set to " << u << std::endl;
         }
         vec2 point = evaluate(u);
         curve[i] = QPointF(point.x(), point.y());

@@ -66,11 +66,11 @@ public:
      */
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole); //emit dataChanged() signal
 
-    /** Searches in the model for an item with given geometry (with depth first search).
-     *  Returns model index of the first item with given geometry
-     *  or QModelIndex() if geometry can't be found in an item.
+    /** Searches in the model for an item with given graphicsItem (with depth first search).
+     *  Returns model index of the first item with given graphicsItem
+     *  or QModelIndex() if graphicsItem can't be found in an item.
      */
-    QModelIndex itemWithGeometry(const QGraphicsItem *geometry);
+    QModelIndex itemWithGraphicsItem(const QGraphicsItem *graphicsItem);
 
     /** Toggles the boolean values (up to now there is only the visibility value).
      *  Returns true, if toggling was possible.
@@ -96,6 +96,7 @@ signals:
     void layoutChanged(const QList<QPersistentModelIndex> &parents = QList<QPersistentModelIndex>(), QAbstractItemModel::LayoutChangeHint hint = QAbstractItemModel::NoLayoutChangeHint);
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>());
     void graphicsItemAdded(QGraphicsItem *graphicsItem);
+    void graphicsItemRemoved(QGraphicsItem *graphicsItem);
 
 private:
     SceneTreeItem *m_rootItem;

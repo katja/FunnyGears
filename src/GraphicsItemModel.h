@@ -17,6 +17,7 @@ public:
 
 public slots:
     virtual void graphicsItemAdded(QGraphicsItem *graphicsItem) = 0;
+    virtual void graphicsItemRemoved(QGraphicsItem *graphicsItem) = 0;
 
 protected:
     SceneTreeModel *m_sceneTreeModel;

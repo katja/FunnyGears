@@ -97,6 +97,12 @@ void SplineModel::graphicsItemAdded(QGraphicsItem *graphicsItem) {
     addSpline(static_cast<GraphicsSpline*>(graphicsItem));
 }
 
+void SplineModel::graphicsItemRemoved(QGraphicsItem *graphicsItem) {
+    if(!isSpline(graphicsItem))
+        return;
+    removeSpline(static_cast<GraphicsSpline*>(graphicsItem));
+}
+
 bool SplineModel::isSpline(QGraphicsItem *graphicsItem) {
     GraphicsSpline spline;
     if(typeid(*graphicsItem) == typeid(spline))

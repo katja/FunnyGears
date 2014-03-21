@@ -8,12 +8,12 @@ class SceneTreeItem {
 
 public:
     SceneTreeItem();
-    SceneTreeItem(QGraphicsItem *geometry, SceneTreeItem *parent);
+    SceneTreeItem(QGraphicsItem *graphicsItem, SceneTreeItem *parent);
     ~SceneTreeItem();
 
     bool            isRoot() const;
 
-    SceneTreeItem*  addChild(QGraphicsItem *geometry = new QGraphicsRectItem(0, 0, 10, 10));
+    SceneTreeItem*  addChild(QGraphicsItem *graphicsItem = new QGraphicsRectItem(0, 0, 10, 10));
     bool            removeChild(SceneTreeItem *child);
     bool            removeChild(int childIndex);
 
@@ -31,8 +31,8 @@ public:
 
 
     QString         type() const;
-    QGraphicsItem*  geometry() const;
-    SceneTreeItem*  itemWithGeometry(const QGraphicsItem *geometry) const;
+    QGraphicsItem*  graphicsItem() const;
+    SceneTreeItem*  itemWithGraphicsItem(const QGraphicsItem *graphicsItem) const;
 
     void            translate(const QVector2D &translation);
     QVector2D       getTranslation() const;
@@ -41,7 +41,7 @@ public:
 
 
 private:
-    QGraphicsItem *m_geometry;
+    QGraphicsItem *m_graphicsItem;
 
     bool m_isRoot;
     SceneTreeItem *m_parent;

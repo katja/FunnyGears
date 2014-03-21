@@ -5,7 +5,7 @@ SceneTreeItem::SceneTreeItem() {
     m_isRoot = true;
 }
 
-SceneTreeItem::SceneTreeItem(QGraphicsItem *geometry, SceneTreeItem *parent) : m_geometry(geometry), m_isRoot(false), m_parent(parent) {
+SceneTreeItem::SceneTreeItem(QGraphicsItem *graphicsItem, SceneTreeItem *parent) : m_graphicsItem(graphicsItem), m_isRoot(false), m_parent(parent) {
     std::cout << "SceneTreeItem is created" << std::endl;
     m_name = "Unnamed Item";
     m_isVisible = true;
@@ -20,8 +20,8 @@ bool SceneTreeItem::isRoot() const {
     return m_isRoot;
 }
 
-SceneTreeItem* SceneTreeItem::addChild(QGraphicsItem *geometry) {
-    SceneTreeItem *child = new SceneTreeItem(geometry, this);
+SceneTreeItem* SceneTreeItem::addChild(QGraphicsItem *graphicsItem) {
+    SceneTreeItem *child = new SceneTreeItem(graphicsItem, this);
     m_children.append(child);
     return child;
 }
@@ -71,7 +71,7 @@ QString SceneTreeItem::name() const {
 
 void SceneTreeItem::toggleVisibility() {
     m_isVisible = !m_isVisible;
-    m_geometry->setVisible(m_isVisible);
+    m_graphicsItem->setVisible(m_isVisible);
 }
 
 bool SceneTreeItem::isVisible() const {
@@ -83,20 +83,20 @@ bool SceneTreeItem::isRemovable() const {
 }
 
 QString SceneTreeItem::type() const {
-    return "m_geometry"; //TODO: return suitable stuff instead of this stub!
+    return "m_graphicsItem"; //TODO: return suitable stuff instead of this stub!
 }
 
-QGraphicsItem* SceneTreeItem::geometry() const { //TODO: But implement the QMetaTypeClass before!!!
-    return m_geometry;
+QGraphicsItem* SceneTreeItem::graphicsItem() const { //TODO: But implement the QMetaTypeClass before!!!
+    return m_graphicsItem;
 }
 
-SceneTreeItem* SceneTreeItem::itemWithGeometry(const QGraphicsItem *geometry) const {
+SceneTreeItem* SceneTreeItem::itemWithGraphicsItem(const QGraphicsItem *graphicsItem) const {
     if(numberOfChildren() > 0) {
         foreach(SceneTreeItem *item, m_children) {
-            if(item->geometry() == geometry) {
+            if(item->graphicsItem() == graphicsItem) {
                 return item;
             } else {
-                SceneTreeItem *foundItem = item->itemWithGeometry(geometry);
+                SceneTreeItem *foundItem = item->itemWithGraphicsItem(graphicsItem);
                 if(foundItem) {
                     return foundItem;
                 }

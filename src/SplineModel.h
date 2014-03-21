@@ -33,6 +33,7 @@ public:
 
 public slots:
     void graphicsItemAdded(QGraphicsItem *graphicsItem);
+    void graphicsItemRemoved(QGraphicsItem *graphicsItem);
 
 private:
     List<GraphicsSpline*> m_splines;

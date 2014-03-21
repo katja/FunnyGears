@@ -16,17 +16,17 @@ SceneTreeModel::SceneTreeModel(GraphicsScene *scene, QObject *parent) : QAbstrac
 
     dataHash = new QHash<Qt::ItemDataRole, QString>();
     dataHash->insert(Qt::DisplayRole, "Type");
-    dataHash->insert(Qt::ToolTipRole, "Holds information about the whole geometry.");
+    dataHash->insert(Qt::ToolTipRole, "Holds information about the whole graphicsItem.");
     m_headHash.insert(TYPE, *dataHash);
 
     dataHash = new QHash<Qt::ItemDataRole, QString>();
     dataHash->insert(Qt::DisplayRole, "Translation");
-    dataHash->insert(Qt::ToolTipRole, "Holds the position of the geometry.");
+    dataHash->insert(Qt::ToolTipRole, "Holds the position of the graphicsItem.");
     m_headHash.insert(TRANSLATION, *dataHash);
 
     dataHash = new QHash<Qt::ItemDataRole, QString>();
     dataHash->insert(Qt::DisplayRole, "Rotation");
-    dataHash->insert(Qt::ToolTipRole, "Holds the rotation of the geometry");
+    dataHash->insert(Qt::ToolTipRole, "Holds the rotation of the graphicsItem");
     m_headHash.insert(ROTATION, *dataHash);
 
     dataHash = new QHash<Qt::ItemDataRole, QString>();
@@ -154,8 +154,8 @@ bool SceneTreeModel::setData(const QModelIndex &index, const QVariant &value, in
     return true;
 }
 
-QModelIndex SceneTreeModel::itemWithGeometry(const QGraphicsItem *geometry) {
-    SceneTreeItem *itemWithGeometry = m_rootItem->itemWithGeometry(geometry);
+QModelIndex SceneTreeModel::itemWithGraphicsItem(const QGraphicsItem *graphicsItem) {
+    SceneTreeItem *itemWithGeometry = m_rootItem->itemWithGraphicsItem(graphicsItem);
     if(!itemWithGeometry) {
         return QModelIndex();
     }
@@ -247,8 +247,9 @@ bool SceneTreeModel::removeRows(int row, int count, const QModelIndex &parent) {
 
 
     for(int i = row; i < lastItemToRemove; ++i) {
-        m_graphicsScene->removeItem(parentItem->child(i)->geometry());
-        delete parentItem->child(i)->geometry();
+        emit graphicsItemRemoved(parentItem->child(i)->graphicsItem());
+        m_graphicsScene->removeItem(parentItem->child(i)->graphicsItem());
+        delete parentItem->child(i)->graphicsItem();
     }
 
     beginRemoveRows(parent, row, lastItemToRemove);
@@ -256,7 +257,6 @@ bool SceneTreeModel::removeRows(int row, int count, const QModelIndex &parent) {
         parentItem->removeChild(i);
     }
     endRemoveRows();
-
     return true;
 }
 
