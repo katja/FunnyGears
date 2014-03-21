@@ -23,3 +23,5 @@ HEADERS = \
 
 SOURCES = \
     src/*.cpp \
+
+INCLUDEPATH += /usr/include

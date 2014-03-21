@@ -2,9 +2,12 @@
 #define DEFINITIONS
 
 #include "stable.h"
+#include <Eigen/Core>
 
-typedef qreal       real;
-typedef QVector2D   vec2;
-typedef QVector3D   vec3;
+typedef double          real;
+typedef unsigned int    uint;
+typedef Eigen::Vector2d vec2;
+typedef Eigen::Vector3d vec3;
+typedef Eigen::Matrix2d m2x2;
 
 #endif // DEFINITIONS
