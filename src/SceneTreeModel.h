@@ -95,7 +95,7 @@ public:
 signals:
     void layoutChanged(const QList<QPersistentModelIndex> &parents = QList<QPersistentModelIndex>(), QAbstractItemModel::LayoutChangeHint hint = QAbstractItemModel::NoLayoutChangeHint);
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>());
-    void geometryAdded(QGraphicsItem *graphicsItem);
+    void graphicsItemAdded(QGraphicsItem *graphicsItem);
 
 private:
     SceneTreeItem *m_rootItem;

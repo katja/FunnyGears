@@ -4,7 +4,7 @@
 #include "stable.h"
 #include "SceneTreeModel.h"
 #include "ConnectionModel.h"
-#include "GeometryModel.h"
+#include "GraphicsItemModel.h"
 #include "SplineModel.h"
 
 class ObjectAttributesWidget : public QDockWidget {
@@ -20,9 +20,9 @@ private slots:
     void deselect();
     void updateCurrentSceneItem();
 private:
-    QList<GeometryModel*> m_modelList;
-    QHash<GeometryModel*, QWidget*> m_modelWidgetsHash;
-    QHash<GeometryModel*, QDataWidgetMapper*> m_modelMapperHash;
+    QList<GraphicsItemModel*> m_modelList;
+    QHash<GraphicsItemModel*, QWidget*> m_modelWidgetsHash;
+    QHash<GraphicsItemModel*, QDataWidgetMapper*> m_modelMapperHash;
     QWidget *m_noContentWidget;
     ConnectionModel *m_connectionModel;
 

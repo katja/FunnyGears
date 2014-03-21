@@ -5,9 +5,9 @@
 #include "List.h"
 #include "Spline.h"
 #include "SceneTreeModel.h"
-#include "GeometryModel.h"
+#include "GraphicsItemModel.h"
 
-class SplineModel : public GeometryModel {
+class SplineModel : public GraphicsItemModel {
 
 Q_OBJECT
 
@@ -16,7 +16,7 @@ public:
     ~SplineModel();
 
     enum Properties {
-        DEGREE, TORN_TO_EDGES
+        DEGREE, TORN_TO_EDGES, PROPERTIES //PROPERTIES has to stay last "property", as this gives the number of available properties!
     };
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -25,17 +25,17 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
     Qt::ItemFlags flags(const QModelIndex &index) const;
 
-    bool addSpline(Spline *spline);
-    bool removeSpline(Spline *spline);
+    bool addSpline(GraphicsSpline *graphicsSpline);
+    bool removeSpline(GraphicsSpline *graphicsSpline);
 
     bool operatesOn(QGraphicsItem *graphicsItem);
     int  indexOf(QGraphicsItem *graphicsItem);
 
 public slots:
-    void geometryAdded(QGraphicsItem *graphicsItem);
+    void graphicsItemAdded(QGraphicsItem *graphicsItem);
 
 private:
-    List<Spline*> m_splines;
+    List<GraphicsSpline*> m_splines;
 
     bool isSpline(QGraphicsItem *graphicsItem);
 };

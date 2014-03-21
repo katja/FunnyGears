@@ -28,7 +28,7 @@ ObjectAttributesWidget::~ObjectAttributesWidget() {
 }
 
 void ObjectAttributesWidget::selectItem(QGraphicsItem *item) {
-    foreach(GeometryModel *model, m_modelList) {
+    foreach(GraphicsItemModel *model, m_modelList) {
         if(model->operatesOn(item)) {
             m_currentItem = item;
             setWidget(m_modelWidgetsHash[model]);
@@ -45,5 +45,5 @@ void ObjectAttributesWidget::deselect() {
 void ObjectAttributesWidget::updateCurrentSceneItem() {
     if(!m_currentItem)
         return;
-    m_connectionModel->geometryChanged(m_currentItem);
+    m_connectionModel->graphicsItemChanged(m_currentItem);
 }

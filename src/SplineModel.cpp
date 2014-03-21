@@ -1,6 +1,6 @@
 #include "SplineModel.h"
 
-SplineModel::SplineModel(SceneTreeModel *sceneModel, QObject *parent) : GeometryModel(sceneModel, parent) {
+SplineModel::SplineModel(SceneTreeModel *sceneModel, QObject *parent) : GraphicsItemModel(sceneModel, parent) {
     std::cout << "SplineModel is created" << std::endl;
 }
 
@@ -17,7 +17,7 @@ int SplineModel::rowCount(const QModelIndex &parent) const {
 
 int SplineModel::columnCount(const QModelIndex &parent) const {
     Q_UNUSED(parent);
-    return 2; // TODO: better idea?
+    return PROPERTIES; // TODO: better idea?
 }
 
 QVariant SplineModel::data(const QModelIndex &index, int role) const {
@@ -25,12 +25,12 @@ QVariant SplineModel::data(const QModelIndex &index, int role) const {
     if(!index.isValid() || !m_splines.containsIndex(index.row()))
         return QVariant();
 
-    Spline *spline = m_splines.at(index.row());
+    GraphicsSpline *graphicsSpline = m_splines.at(index.row());
     switch(index.column()) {
         case DEGREE:
-            return spline->degree();
+            return graphicsSpline->spline()->degree();
         case TORN_TO_EDGES:
-            return spline->isTornToEdges();
+            return graphicsSpline->spline()->isTornToEdges();
         default:
             return QVariant();
     }
@@ -40,14 +40,14 @@ bool SplineModel::setData(const QModelIndex &index, const QVariant &value, int r
     Q_UNUSED(role); //TODO: vielleicht doch noch ändern?
     if(!index.isValid() || !m_splines.containsIndex(index.row()))
         return false;
-    Spline *spline = m_splines.at(index.row());
+    GraphicsSpline *graphicsSpline = m_splines.at(index.row());
     switch(index.column()) {
         case DEGREE:
-            spline->setDegree(value.toInt());
+            graphicsSpline->spline()->setDegree(value.toInt());
             // m_sceneTreeModel->
             return true;
         case TORN_TO_EDGES:
-            spline->setTornToEdges(value.toBool());
+            graphicsSpline->spline()->setTornToEdges(value.toBool());
             return true;
         default:
             return false;
@@ -64,15 +64,15 @@ Qt::ItemFlags SplineModel::flags(const QModelIndex &index) const {
     return Qt::NoItemFlags;
 }
 
-bool SplineModel::addSpline(Spline *spline) {
+bool SplineModel::addSpline(GraphicsSpline *graphicsSpline) {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    m_splines << spline;
+    m_splines << graphicsSpline;
     endInsertRows();
     return true;
 }
 
-bool SplineModel::removeSpline(Spline *spline) {
-    int index = m_splines.indexOf(spline);
+bool SplineModel::removeSpline(GraphicsSpline *graphicsSpline) {
+    int index = m_splines.indexOf(graphicsSpline);
     if(index < 0)
         return false;
     beginRemoveRows(QModelIndex(), index, index);
@@ -88,13 +88,13 @@ bool SplineModel::operatesOn(QGraphicsItem *graphicsItem) {
 int SplineModel::indexOf(QGraphicsItem *graphicsItem) {
     if(!isSpline(graphicsItem))
         return -1;
-    return m_splines.indexOf((static_cast<GraphicsSpline*>(graphicsItem))->spline());
+    return m_splines.indexOf(static_cast<GraphicsSpline*>(graphicsItem));
 }
 
-void SplineModel::geometryAdded(QGraphicsItem *graphicsItem) {
+void SplineModel::graphicsItemAdded(QGraphicsItem *graphicsItem) {
     if(!isSpline(graphicsItem))
         return;
-    addSpline((static_cast<GraphicsSpline*>(graphicsItem))->spline());
+    addSpline(static_cast<GraphicsSpline*>(graphicsItem));
 }
 
 bool SplineModel::isSpline(QGraphicsItem *graphicsItem) {
