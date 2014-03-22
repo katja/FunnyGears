@@ -76,6 +76,8 @@ int Spline::degree() const {
 void Spline::setDegree(int degree) {
     if(m_degree == degree || degree <= 0)
         return;
+
+    bool wasValid = isValid();
     if(m_degree < degree) {
         if(m_tornToEdges && isValid())
             makeDifferentLastKnots();
@@ -89,12 +91,20 @@ void Spline::setDegree(int degree) {
             m_degree -= 1;
         }
     }
-    if(m_tornToEdges) {
-        if(isValid())
-            equalizeLastKnots();
-        else
-            adjustKnots();
+
+    //State changed in a valid state. As the knot vector may be completely bumfuzzled,
+    //an adjustment (check an adaption) of all knots has to be done.
+    if(!wasValid && isValid()) {
+        adjustKnots();
     }
+    //Adapt knots only if spline is in a valid state. If it is not, there need to be
+    //a change, which sets the spline in a valid state. This change then has to check the
+    //correctness of the knots!
+    else if(m_tornToEdges && isValid()) {
+        equalizeFirstKnots();
+        equalizeLastKnots();
+    }
+    std::cout << "\n\nSPLINE:\n" << (*this) << std::endl;
 }
 
 int Spline::numberOfControlPoints() const {
@@ -115,7 +125,8 @@ void Spline::addControlPoint(vec2 point) {
         m_controlPoints << point;
         m_knots << (m_knots.at(m_knots.size() - 1) + 1);
 
-        if(m_tornToEdges)
+        // If it is valid now, adjust (check and adapt) all knots, as the may be bumfuzzled.
+        if(isValid())
             adjustKnots();
     }
 }
@@ -129,12 +140,10 @@ void Spline::removeControlPoint(int index) {
         return;
     m_controlPoints.remove(index);
     m_knots.removeLast();
-    if(m_tornToEdges) {
-        if(isValid())
-            equalizeLastKnots();
-        else
-            adjustKnots();
-    }
+
+    if(m_tornToEdges && isValid())
+        equalizeLastKnots();
+
     updateClosedCurve();
 }
 
@@ -249,21 +258,16 @@ void Spline::updateClosedCurve() {
 void Spline::setTornToEdges(bool tearToEdges) {
     if(m_tornToEdges != tearToEdges) {
         m_tornToEdges = tearToEdges;
-        if(m_tornToEdges) {
-            if(isValid()) {
+        if(isValid()) {
+            if(m_tornToEdges) {
                 equalizeFirstKnots();
                 equalizeLastKnots();
-            } else {
-                adjustKnots();
-            }
-        } else { // not torn to edges
-            if(isValid()) {
+            } else { // not torn to edges
                 makeDifferentFirstKnots();
                 makeDifferentLastKnots();
-            } else {
-                adjustKnots();
             }
         }
+        std::cout << "\n\nSPLINE:\n" << (*this) << std::endl;
     }
 }
 
@@ -421,8 +425,11 @@ void Spline::deBoor(QVector<vec2> &controlPoints, real value, real n, int degree
 }
 
 void Spline::adjustKnots() {
+    if(!isValid())
+        return;
     int lastKnotValue = m_knots[0];
     int occurences = 1;
+
     for(int i = 1; i < m_knots.size(); ++i) {
 
         //when torn to edges the first n = m_degree + 1 knots have to have the same value
