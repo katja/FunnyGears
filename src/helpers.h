@@ -18,4 +18,6 @@ std::ostream& operator <<(std::ostream &os, const QVector<vec2> vector);
 
 std::ostream& operator <<(std::ostream &os, const Spline &spline);
 
+QColor darkenColor(const QColor &color, int degree = 60);
+
 #endif // HELPERS

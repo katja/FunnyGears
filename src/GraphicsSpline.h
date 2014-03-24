@@ -19,8 +19,8 @@ public:
 
     void setTangentDrawn(bool draw);
     bool isTangentDrawn() const;
-    void setTangentValue(int);
-    int tangentValue() const;
+    void setTangentValue(real);
+    real tangentValue();
 
     QRectF boundingRect() const;
     QPainterPath shape() const;
@@ -38,10 +38,13 @@ private:
     QList<Point*> m_points;
 
     bool m_isTangentDrawn;
-    int m_tangentValue;
+    real m_tangentValue;
 
     QPainterPath controlPointPolygonPath(qreal width = 0) const;
     QPainterPath splineCurvePath() const;
+    QPainterPath tangentPath() const;
+
+    void adjustInSplineRange(real &value) const;
 
     void setMinAndMax(QPointF &min, QPointF &max, const Point *point) const;
     void setMax(QPointF &max, const QPointF point) const;

@@ -1,26 +1,27 @@
 #include "SplineAttributesWidget.h"
 #include "SplineModel.h"
 
-SplineAttributesWidget::SplineAttributesWidget(QDataWidgetMapper *mapper, QWidget *parent) : QWidget(parent), m_mapper(mapper) {
+SplineAttributesWidget::SplineAttributesWidget(QWidget *parent) : GraphicsItemAttributesWidget(parent) {
 
     m_degreeLabel   = new QLabel(tr("Degree"));
     m_degreeSpinBox = new QSpinBox(this);
     m_degreeSpinBox->setMinimum(1);
     m_degreeLabel->setBuddy(m_degreeSpinBox);
-    connect(m_degreeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changed(int)));
+    m_degree = m_degreeSpinBox->value();
+    connect(m_degreeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeDegree(int)));
 
     m_tornToEdgesLabel = new QLabel(tr("Is torn to edges"));
     m_tornToEdgesCheckBox = new QCheckBox(tr("Is torn to edges"), this);
     m_tornToEdgesLabel->setBuddy(m_tornToEdgesCheckBox);
-    connect(m_tornToEdgesCheckBox, SIGNAL(stateChanged(int)), this, SLOT(changed(int)));
+    connect(m_tornToEdgesCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleTornToEdges(bool)));
 
     m_drawTangentCheckBox = new QCheckBox(tr("Draw tangent?"), this);
-    connect(m_drawTangentCheckBox, SIGNAL(stateChanged(int)), this, SLOT(changed(int)));
-    // m_tangentValueSlider = new RealValuedSlider("Tangent at value...", this);
-    // connect(m_tangentValueSlider, SIGNAL(valueChanged(real)), this, SLOT(changed(real)));
+    connect(m_drawTangentCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleTangentDrawn(bool)));
+    m_tangentValueSlider = new RealValuedSlider("Tangent at value...", this);
+    connect(m_tangentValueSlider, SIGNAL(valueChanged(real)), this, SLOT(changedTangentValue(real)));
 
-    m_tangentValueSlider = new QSlider(Qt::Horizontal, this);
-    connect(m_tangentValueSlider, SIGNAL(valueChanged(int)), this, SLOT(changed(int)));
+    // m_tangentValueSlider = new QSlider(Qt::Horizontal, this);
+    // connect(m_tangentValueSlider, SIGNAL(valueChanged(int)), this, SLOT(changedTangentValue(int)));
 
     QGridLayout *layout = new QGridLayout(this);
     layout->addWidget(m_degreeLabel,        0, 0, 1, 1);
@@ -31,24 +32,52 @@ SplineAttributesWidget::SplineAttributesWidget(QDataWidgetMapper *mapper, QWidge
     layout->addWidget(m_tangentValueSlider, 2, 1, 3, 1);
     setLayout(layout);
 
-    m_mapper->addMapping(m_degreeSpinBox, SplineModel::DEGREE);
-    m_mapper->addMapping(m_tornToEdgesCheckBox, SplineModel::TORN_TO_EDGES);
-    m_mapper->addMapping(m_drawTangentCheckBox, SplineModel::TANGENT_DRAWN);
-    m_mapper->addMapping(m_tangentValueSlider, SplineModel::TANGENT_VALUE, "value");
-    m_mapper->addMapping(m_tangentValueSlider, SplineModel::MIN_VALUE, "minimum");
-    m_mapper->addMapping(m_tangentValueSlider, SplineModel::MAX_VALUE, "maximum");
-    m_mapper->setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
-
 }
 
 SplineAttributesWidget::~SplineAttributesWidget() {
 }
 
-void SplineAttributesWidget::changed(int) {
-    std::cout << "SplineAttributesWidget::changed(int) was called and mapper will now submit" << std::endl;
-    m_mapper->submit();
+void SplineAttributesWidget::setItem(QGraphicsItem *graphicsItem) {
+    m_currentSpline = static_cast<GraphicsSpline*>(graphicsItem);
+    updateAttributes();
 }
 
-// void SplineAttributesWidget::changed(real) {
-//     m_mapper->submit();
-// }
+void SplineAttributesWidget::updateAttributes() {
+    const Spline *spline = m_currentSpline->spline();
+    m_degreeSpinBox->setValue(spline->degree());
+    m_tornToEdgesCheckBox->setChecked(spline->isTornToEdges());
+    if(spline->isValid()) {
+        m_drawTangentCheckBox->setEnabled(true);
+        m_drawTangentCheckBox->setChecked(m_currentSpline->isTangentDrawn());
+        m_tangentValueSlider->setEnabled(m_currentSpline->isTangentDrawn());
+        m_tangentValueSlider->setRange(spline->lowerDomainLimit(), spline->upperDomainLimit() - 0.01f);
+        m_tangentValueSlider->setValue(m_currentSpline->tangentValue());
+    } else {
+        m_drawTangentCheckBox->setEnabled(false);
+        m_tangentValueSlider->setEnabled(false);
+    }
+}
+
+void SplineAttributesWidget::changeDegree(int value) {
+    //Prevent an update of the other items, when degree is still the same!
+    if(m_degree != value) {
+        m_degree = value;
+        m_currentSpline->changeDegree(m_degree);
+        updateAttributes();
+    }
+}
+
+void SplineAttributesWidget::toggleTornToEdges(bool state) {
+    m_currentSpline->changeTornToEdges(state);
+    updateAttributes();
+}
+
+void SplineAttributesWidget::toggleTangentDrawn(bool state) {
+    m_currentSpline->setTangentDrawn(state);
+    m_tangentValueSlider->setEnabled(state);
+}
+
+void SplineAttributesWidget::changedTangentValue(real value) {
+    m_currentSpline->setTangentValue(value);
+}
+

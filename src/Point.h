@@ -22,7 +22,6 @@ public:
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
 
 private:
-    static qreal M_radius;
     GraphicsSpline *m_parentSpline;
     QColor m_color;
 

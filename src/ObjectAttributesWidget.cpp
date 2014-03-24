@@ -6,14 +6,11 @@ ObjectAttributesWidget::ObjectAttributesWidget(SceneTreeModel *sceneTreeModel, C
     std::cout << "ObjectAttributesWidget is created" << std::endl;
 
     SplineModel *splineModel = new SplineModel(sceneTreeModel, this);
-    QDataWidgetMapper *splineMapper = new QDataWidgetMapper(this);
-    splineMapper->setModel(splineModel);
-    SplineAttributesWidget *splineWidget = new SplineAttributesWidget(splineMapper, this);
+    SplineAttributesWidget *splineWidget = new SplineAttributesWidget(this);
     splineWidget->hide();
 
     m_modelList << (splineModel);
     m_modelWidgetsHash.insert(splineModel, splineWidget);
-    m_modelMapperHash.insert(splineModel, splineMapper);
 
     m_noContentWidget = new QWidget(this);
     setWidget(m_noContentWidget);
@@ -30,8 +27,9 @@ void ObjectAttributesWidget::selectItem(QGraphicsItem *item) {
     foreach(GraphicsItemModel *model, m_modelList) {
         if(model->operatesOn(item)) {
             m_currentItem = item;
-            setWidget(m_modelWidgetsHash[model]);
-            (m_modelMapperHash[model])->setCurrentIndex(model->indexOf(item));
+            GraphicsItemAttributesWidget *currentWidget = m_modelWidgetsHash[model];
+            currentWidget->setItem(item);
+            setWidget(currentWidget);
         }
     }
 }

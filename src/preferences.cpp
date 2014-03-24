@@ -11,3 +11,7 @@ QColor Preferences::CoordinateAxisColor(QColor(10, 10, 10, 50));
 qreal Preferences::SimpleLineWidth(1);
 
 qreal Preferences::HighlightedLineWidth(3);
+
+qreal Preferences::PointRadius(2.0f);
+
+qreal Preferences::TangentLength(40.0f);

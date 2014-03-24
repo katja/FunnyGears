@@ -18,7 +18,6 @@
 #include <QBitmap>
 #include <QCheckBox>
 #include <QColorDialog>
-#include <QDataWidgetMapper>
 #include <QDialog>
 #include <QDockWidget>
 #include <QDrag>
@@ -30,6 +29,7 @@
 #include <QGraphicsView>
 #include <QGraphicsWidget>
 #include <QGridLayout>
+#include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMainWindow>

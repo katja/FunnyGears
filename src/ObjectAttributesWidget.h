@@ -5,6 +5,7 @@
 #include "SceneTreeModel.h"
 #include "ConnectionModel.h"
 #include "GraphicsItemModel.h"
+#include "GraphicsItemAttributesWidget.h"
 #include "SplineModel.h"
 
 class ObjectAttributesWidget : public QDockWidget {
@@ -21,8 +22,7 @@ private slots:
 
 private:
     QList<GraphicsItemModel*> m_modelList;
-    QHash<GraphicsItemModel*, QWidget*> m_modelWidgetsHash;
-    QHash<GraphicsItemModel*, QDataWidgetMapper*> m_modelMapperHash;
+    QHash<GraphicsItemModel*, GraphicsItemAttributesWidget*> m_modelWidgetsHash;
     QWidget *m_noContentWidget;
     ConnectionModel *m_connectionModel;
 

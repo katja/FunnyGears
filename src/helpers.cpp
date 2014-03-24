@@ -52,3 +52,11 @@ std::ostream& operator <<(std::ostream &os, const Spline &spline) {
     os << "Degree: " << spline.degree();
     return os;
 }
+
+QColor darkenColor(const QColor &color, int degree) {
+    QColor darkenedColor;
+    darkenedColor.setRed(color.red() < degree ? 0 : color.red() - degree);
+    darkenedColor.setGreen(color.green() < degree ? 0 : color.green() - degree);
+    darkenedColor.setBlue(color.blue() < degree ? 0 : color.blue() - degree);
+    return darkenedColor;
+}

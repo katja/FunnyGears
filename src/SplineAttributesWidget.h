@@ -3,31 +3,41 @@
 
 #include "stable.h"
 #include "definitions.h"
-// #include "RealValuedSlider.h"
+#include "GraphicsItemAttributesWidget.h"
+#include "GraphicsSpline.h"
+#include "RealValuedSlider.h"
 
-class SplineAttributesWidget : public QWidget {
+class SplineAttributesWidget : public GraphicsItemAttributesWidget {
 
 Q_OBJECT
 
 public:
-    SplineAttributesWidget(QDataWidgetMapper *mapper, QWidget *parent = 0);
+    SplineAttributesWidget(QWidget *parent = 0);
     ~SplineAttributesWidget();
 
-private slots:
-    void changed(int);
-    // void changed(real);
+    void setItem(QGraphicsItem *graphicsItem);
 
-signals:
-    void somethingChanged();
+private slots:
+    void changeDegree(int value);
+    void toggleTornToEdges(bool state);
+    void toggleTangentDrawn(bool state);
+    void changedTangentValue(real value);
 
 private:
-    QDataWidgetMapper *m_mapper;
+    GraphicsSpline *m_currentSpline;
+
     QSpinBox    *m_degreeSpinBox;
     QLabel      *m_degreeLabel;
+    int          m_degree;
+
     QCheckBox   *m_tornToEdgesCheckBox;
     QLabel      *m_tornToEdgesLabel;
+
     QCheckBox   *m_drawTangentCheckBox;
-    QSlider     *m_tangentValueSlider;
+
+    RealValuedSlider *m_tangentValueSlider;
+
+    void updateAttributes();
 
 };
 

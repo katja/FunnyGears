@@ -11,6 +11,10 @@ namespace Preferences {
 
     extern qreal SimpleLineWidth;
     extern qreal HighlightedLineWidth;
+
+    extern qreal PointRadius;
+
+    extern qreal TangentLength;
 }
 
 #endif // PREFERENCES

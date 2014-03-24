@@ -1,9 +1,10 @@
 #include "GraphicsSpline.h"
 #include "GraphicsScene.h"
 #include "preferences.h"
+#include "helpers.h"
 
 
-GraphicsSpline::GraphicsSpline(QGraphicsItem *parent) : QGraphicsItem(parent), m_isTangentDrawn(false), m_tangentValue(3) {
+GraphicsSpline::GraphicsSpline(QGraphicsItem *parent) : QGraphicsItem(parent), m_isTangentDrawn(false), m_tangentValue(-1.0f) {
     std::cout << "GraphicsSpline is created" << std::endl;
     m_spline = new Spline();
     int partColor = qrand() % 512 + 100;
@@ -56,15 +57,17 @@ bool GraphicsSpline::isTangentDrawn() const {
     return m_isTangentDrawn;
 }
 
-void GraphicsSpline::setTangentValue(int value) {
+void GraphicsSpline::setTangentValue(real value) {
+    adjustInSplineRange(value);
+    prepareGeometryChange();
     m_tangentValue = value;
 }
 
 
-int GraphicsSpline::tangentValue() const {
+real GraphicsSpline::tangentValue() {
+    adjustInSplineRange(m_tangentValue);
     return m_tangentValue;
 }
-
 
 QRectF GraphicsSpline::boundingRect() const {
     if(m_points.empty()) {
@@ -81,7 +84,12 @@ QRectF GraphicsSpline::boundingRect() const {
     // Normally, half of HighlightedLineWidth should be enough, but a little should not hurt.
     min -= QPointF(Preferences::HighlightedLineWidth, Preferences::HighlightedLineWidth);
     max += QPointF(Preferences::HighlightedLineWidth, Preferences::HighlightedLineWidth);
-    return QRectF(min, max);
+
+    QRectF boundingRect = QRectF(min, max);
+    if(m_isTangentDrawn) {
+        boundingRect |= tangentPath().boundingRect();
+    }
+    return boundingRect;
 }
 
 QPainterPath GraphicsSpline::shape() const {
@@ -121,6 +129,12 @@ void GraphicsSpline::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     pen.setStyle(Qt::SolidLine);
     painter->setPen(pen);
     painter->drawPath(splineCurvePath());
+
+    if(m_isTangentDrawn) {
+        pen.setColor(darkenColor(m_color));
+        painter->setPen(pen);
+        painter->drawPath(tangentPath());
+    }
 }
 
 QColor GraphicsSpline::color() const {
@@ -169,14 +183,46 @@ QPainterPath GraphicsSpline::controlPointPolygonPath(qreal width) const {
 }
 
 QPainterPath GraphicsSpline::splineCurvePath() const {
-    if(!m_spline->isValid()) {
+    if(!m_spline->isValid())
         return QPainterPath();
-    }
+
     QVector<QPointF> curve(10 * m_points.size());
     m_spline->curve(curve);
     QPainterPath path;
     path.addPolygon(QPolygonF(curve));
     return path;
+}
+
+QPainterPath GraphicsSpline::tangentPath() const {
+    if(!m_spline->isValid())
+        return QPainterPath();
+    qreal tangentValue = m_tangentValue;
+    adjustInSplineRange(tangentValue);
+    if(m_tangentValue != tangentValue)
+        return QPainterPath();
+
+    QPainterPath path;
+    vec2 tangentVecPoint = m_spline->evaluate(m_tangentValue);
+    vec2 derivative = m_spline->derivative(m_tangentValue);
+    vec2 start = tangentVecPoint - 0.5f * Preferences::TangentLength * derivative;
+    vec2 stop = tangentVecPoint + 0.5f * Preferences::TangentLength * derivative;
+    QVector<QPointF> tangentLine(2);
+    tangentLine[0] = QPointF(start(0), start(1));
+    tangentLine[1] = QPointF(stop(0), stop(1));
+    QPointF tangentPoint = QPointF(tangentVecPoint(0), tangentVecPoint(1));
+    path.addEllipse(tangentPoint, Preferences::PointRadius, Preferences::PointRadius);
+    path.addPolygon(QPolygonF(tangentLine));
+    return path;
+
+
+}
+
+void GraphicsSpline::adjustInSplineRange(real &value) const {
+    if(value < m_spline->lowerDomainLimit()) {
+        value = m_spline->lowerDomainLimit();
+    } else if (value >= m_spline->upperDomainLimit()) {
+        value = m_spline->upperDomainLimit() - 0.01f;
+    }
 }
 
 void GraphicsSpline::setMinAndMax(QPointF &min, QPointF &max, const Point *point) const {
