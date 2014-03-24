@@ -420,8 +420,9 @@ void Spline::deBoor(QVector<vec2> &controlPoints, real value, real n, int degree
             (1.0f - alpha) * controlPoints.at(index - 1)
                 + alpha * controlPoints.at(index);
     }
+    degree -= 1;
     if(stop != degree)
-        deBoor(controlPoints, value, n, --degree, stop);
+        deBoor(controlPoints, value, n, degree, stop);
 }
 
 void Spline::adjustKnots() {
