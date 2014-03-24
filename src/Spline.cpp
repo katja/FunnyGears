@@ -104,7 +104,7 @@ void Spline::setDegree(int degree) {
         equalizeFirstKnots();
         equalizeLastKnots();
     }
-    std::cout << "\n\nSPLINE:\n" << (*this) << std::endl;
+    // std::cout << "\n\nSPLINE:\n" << (*this) << std::endl;
 }
 
 int Spline::numberOfControlPoints() const {
@@ -267,7 +267,7 @@ void Spline::setTornToEdges(bool tearToEdges) {
                 makeDifferentLastKnots();
             }
         }
-        std::cout << "\n\nSPLINE:\n" << (*this) << std::endl;
+        // std::cout << "\n\nSPLINE:\n" << (*this) << std::endl;
     }
 }
 

@@ -15,7 +15,6 @@ public:
 
     void turnOnEditingOf(QGraphicsItem *item);
     void informModelDataChange(const QModelIndex &topLeft, const QModelIndex &bottomRight);
-    void graphicsItemChanged(QGraphicsItem *item);
 
 signals:
     void updateRegionInScene(const QList<QGraphicsItem*> &changedItems);

@@ -2,6 +2,8 @@
 #define SPLINE_ATTRIBUTES_WIDGET
 
 #include "stable.h"
+#include "definitions.h"
+// #include "RealValuedSlider.h"
 
 class SplineAttributesWidget : public QWidget {
 
@@ -13,6 +15,7 @@ public:
 
 private slots:
     void changed(int);
+    // void changed(real);
 
 signals:
     void somethingChanged();
@@ -23,6 +26,8 @@ private:
     QLabel      *m_degreeLabel;
     QCheckBox   *m_tornToEdgesCheckBox;
     QLabel      *m_tornToEdgesLabel;
+    QCheckBox   *m_drawTangentCheckBox;
+    QSlider     *m_tangentValueSlider;
 
 };
 

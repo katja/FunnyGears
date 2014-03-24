@@ -36,12 +36,6 @@ void ConnectionModel::informModelDataChange(const QModelIndex &topLeft, const QM
     emit updateRegionInScene(m_changedItems);
 }
 
-void ConnectionModel::graphicsItemChanged(QGraphicsItem *item) {
-    m_changedItems.clear();
-    m_changedItems << item;
-    emit updateRegionInScene(m_changedItems);
-}
-
 void ConnectionModel::sceneSelectionChanged(GraphicsScene *scene) {
     clearPreviousSelectionIn(ConnectionModel::MODEL);
     addToModelSelection(scene);

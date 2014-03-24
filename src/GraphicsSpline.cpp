@@ -3,7 +3,7 @@
 #include "preferences.h"
 
 
-GraphicsSpline::GraphicsSpline(QGraphicsItem *parent) : QGraphicsItem(parent) {
+GraphicsSpline::GraphicsSpline(QGraphicsItem *parent) : QGraphicsItem(parent), m_isTangentDrawn(false), m_tangentValue(3) {
     std::cout << "GraphicsSpline is created" << std::endl;
     m_spline = new Spline();
     int partColor = qrand() % 512 + 100;
@@ -24,9 +24,47 @@ GraphicsSpline::~GraphicsSpline() {
     delete m_spline;
 }
 
-Spline* GraphicsSpline::spline() const {
+const Spline* GraphicsSpline::spline() const {
+    std::cout << "GraphicsSpline::spline() (spline is torn to edges? =>" << m_spline->isTornToEdges() << ")" << std::endl;
     return m_spline;
 }
+
+void GraphicsSpline::changeDegree(int degree) {
+    prepareGeometryChange();
+    m_spline->setDegree(degree);
+}
+
+void GraphicsSpline::changeTornToEdges(bool tearToEdges) {
+    std::cout << "GraphicsSpline::changeTornToEdges with" << tearToEdges << std::endl;
+    prepareGeometryChange();
+    m_spline->setTornToEdges(tearToEdges);
+}
+
+void GraphicsSpline::setTangentDrawn(bool draw) {
+    if(draw && m_spline->isValid()) {
+        if(m_tangentValue < m_spline->lowerDomainLimit())
+            m_tangentValue = m_spline->lowerDomainLimit();
+        if(m_tangentValue >= m_spline->upperDomainLimit())
+            m_tangentValue = m_spline->upperDomainLimit();
+
+    }
+    prepareGeometryChange();
+    m_isTangentDrawn = draw;
+}
+
+bool GraphicsSpline::isTangentDrawn() const {
+    return m_isTangentDrawn;
+}
+
+void GraphicsSpline::setTangentValue(int value) {
+    m_tangentValue = value;
+}
+
+
+int GraphicsSpline::tangentValue() const {
+    return m_tangentValue;
+}
+
 
 QRectF GraphicsSpline::boundingRect() const {
     if(m_points.empty()) {

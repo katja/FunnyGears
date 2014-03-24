@@ -10,7 +10,6 @@ ObjectAttributesWidget::ObjectAttributesWidget(SceneTreeModel *sceneTreeModel, C
     splineMapper->setModel(splineModel);
     SplineAttributesWidget *splineWidget = new SplineAttributesWidget(splineMapper, this);
     splineWidget->hide();
-    connect(splineWidget, SIGNAL(somethingChanged()), this, SLOT(updateCurrentSceneItem()));
 
     m_modelList << (splineModel);
     m_modelWidgetsHash.insert(splineModel, splineWidget);
@@ -40,10 +39,4 @@ void ObjectAttributesWidget::selectItem(QGraphicsItem *item) {
 void ObjectAttributesWidget::deselect() {
     setWidget(m_noContentWidget);
     m_currentItem = 0;
-}
-
-void ObjectAttributesWidget::updateCurrentSceneItem() {
-    if(!m_currentItem)
-        return;
-    m_connectionModel->graphicsItemChanged(m_currentItem);
 }

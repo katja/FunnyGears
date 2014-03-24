@@ -18,7 +18,7 @@ public:
 private slots:
     void selectItem(QGraphicsItem *graphicsItem);
     void deselect();
-    void updateCurrentSceneItem();
+
 private:
     QList<GraphicsItemModel*> m_modelList;
     QHash<GraphicsItemModel*, QWidget*> m_modelWidgetsHash;

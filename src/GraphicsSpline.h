@@ -2,6 +2,7 @@
 #define GRAPHICS_SPLINE
 
 #include "stable.h"
+#include "definitions.h"
 #include "Point.h"
 #include "Spline.h"
 
@@ -11,7 +12,15 @@ public:
     GraphicsSpline(QGraphicsItem *parent = 0);
     ~GraphicsSpline();
 
-    Spline* spline() const;
+    const Spline* spline() const;
+
+    void changeDegree(int degree);
+    void changeTornToEdges(bool tearToEdges);
+
+    void setTangentDrawn(bool draw);
+    bool isTangentDrawn() const;
+    void setTangentValue(int);
+    int tangentValue() const;
 
     QRectF boundingRect() const;
     QPainterPath shape() const;
@@ -27,6 +36,9 @@ private:
     Spline *m_spline;
     QColor m_color;
     QList<Point*> m_points;
+
+    bool m_isTangentDrawn;
+    int m_tangentValue;
 
     QPainterPath controlPointPolygonPath(qreal width = 0) const;
     QPainterPath splineCurvePath() const;

@@ -16,7 +16,13 @@ public:
     ~SplineModel();
 
     enum Properties {
-        DEGREE, TORN_TO_EDGES, PROPERTIES //PROPERTIES has to stay last "property", as this gives the number of available properties!
+        DEGREE,
+        TORN_TO_EDGES,
+        TANGENT_DRAWN,
+        TANGENT_VALUE,
+        MIN_VALUE,
+        MAX_VALUE,
+        PROPERTIES //PROPERTIES has to stay last "property", as this gives the number of available properties!
     };
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
