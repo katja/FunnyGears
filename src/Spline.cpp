@@ -9,12 +9,39 @@ Spline::Spline(int degree) : m_degree(degree), m_isClosed(false), m_tornToEdges(
         m_knots << i;
 }
 
+Spline::Spline(const Spline &other) {
+    m_knots = QVector<real>(other.m_knots);
+    m_controlPoints = QVector<vec2>(other.m_controlPoints);
+    m_degree = other.m_degree;
+    m_isClosed = other.m_isClosed;
+    m_tornToEdges = other.m_tornToEdges;
+}
+
 Spline::Spline(QVector<vec2> interpolationPoints) {
     //TODO!!!
 }
 
 Spline::~Spline() {
     std::cout << "Spline is deleted" << std::endl;
+}
+
+Spline& Spline::operator=(const Spline &other) {
+    if(this == &other)
+        return *this;
+    m_knots.clear();
+    m_knots.resize(other.m_knots.size());
+    for(int i = 0; i < m_knots.size(); ++i) {
+        m_knots[i] = other.m_knots.at(i);
+    }
+    m_controlPoints.clear();
+    m_controlPoints.resize(other.m_controlPoints.size());
+    for(int i = 0; i < m_controlPoints.size(); ++i) {
+        m_controlPoints[i] = other.m_controlPoints.at(i);
+    }
+    m_degree = other.m_degree;
+    m_isClosed = other.m_isClosed;
+    m_tornToEdges = other.m_tornToEdges;
+    return *this;
 }
 
 vec2 Spline::evaluate(real value) const {
@@ -43,21 +70,16 @@ vec2 Spline::derivative(real value) const {
 }
 
 void Spline::curve(QVector<QPointF> &curve) const {
-    // std::cout << "\n\nSPLINE:\n" << (*this) << std::endl;
     if(!isValid())
         return;
     real u = lowerDomainLimit();
     real uStop = upperDomainLimit();
     int iStop = curve.size();
 
-    // std::cout << "lowerBorder: " << u << ", upperBorder: " << uStop << std::endl;
     real step = (uStop - u) / iStop;
     for(int i = 0; i < iStop; ++i) {
-        if(i == iStop - 1) {
-            // std::cout << "u in loop would end with: " << u;
+        if(i == iStop - 1)
             u = uStop - 0.001f;
-            // std::cout << " and now is set to " << u << std::endl;
-        }
         vec2 point = evaluate(u);
         curve[i] = QPointF(point.x(), point.y());
         u += step;
@@ -104,7 +126,6 @@ void Spline::setDegree(int degree) {
         equalizeFirstKnots();
         equalizeLastKnots();
     }
-    // std::cout << "\n\nSPLINE:\n" << (*this) << std::endl;
 }
 
 int Spline::numberOfControlPoints() const {
@@ -184,7 +205,7 @@ void Spline::knotRefinement(real minDist) {
         return;
     //test each segment from lowest possible u value unto u = m_controlPoints.size() (must not be reached)
     int i = m_degree;
-    while(i < m_controlPoints.size() - 1) {
+    while(i < m_controlPoints.size()) {
         real dist = m_knots.at(i + 1) - m_knots.at(i);
         if(dist > minDist) {
             real newValue = m_knots.at(i) + 0.5 * dist;
@@ -212,7 +233,7 @@ void Spline::refineAt(real knotValue, int multiplicity) {
 
     //When the new knotVaue is inserted r-times (multiplicity = r) the new points are equal
     //to the points of the de boor scheme in the r-th column and the outer way to this column
-    for(int i = 1; i < multiplicity; ++i) {
+    for(int i = 1; i <= multiplicity; ++i) {
 
         //do only one step of the de boor algorithm each iteration
         //and only multiplicity times
@@ -236,9 +257,11 @@ void Spline::refineAt(real knotValue, int multiplicity) {
     for(; i >= n; --i) {
         m_controlPoints[i + multiplicity] = m_controlPoints.at(i);
     }
-    int j = newPoints.size();
-    for(; i > n - m_degree; --i) {
-        m_controlPoints[i + multiplicity] = newPoints[--j];
+    for(int j = newPoints.size() - 1; j >= 0; --j, --i) {
+        m_controlPoints[i + multiplicity] = newPoints[j];
+    }
+    for(int k = 1; k <= multiplicity; ++k) {
+        m_knots.insert(n + k, knotValue);
     }
 }
 
@@ -267,7 +290,6 @@ void Spline::setTornToEdges(bool tearToEdges) {
                 makeDifferentLastKnots();
             }
         }
-        // std::cout << "\n\nSPLINE:\n" << (*this) << std::endl;
     }
 }
 

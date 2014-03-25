@@ -10,7 +10,10 @@ class GraphicsSpline : public QGraphicsItem {
 
 public:
     GraphicsSpline(QGraphicsItem *parent = 0);
+    // GraphicsSpline(const GraphicsSpline &other);
     ~GraphicsSpline();
+
+    GraphicsSpline* copy() const;
 
     const Spline* spline() const;
 
@@ -21,6 +24,8 @@ public:
     bool isTangentDrawn() const;
     void setTangentValue(real);
     real tangentValue();
+
+    void refineSpline();
 
     QRectF boundingRect() const;
     QPainterPath shape() const;

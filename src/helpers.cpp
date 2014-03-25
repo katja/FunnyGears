@@ -28,11 +28,20 @@ std::ostream& operator <<(std::ostream &os, const QVector<vec2> vector) {
     return os;
 }
 
+std::ostream& operator <<(std::ostream &os, const QVector<real> vector) {
+    for(int i = 0; i < vector.size(); ++i) {
+        os << vector.at(i);
+        if(i != vector.size() - 1)
+            os << ", ";
+    }
+    return os;
+}
+
 std::ostream& operator <<(std::ostream &os, const Spline &spline) {
     os << "Control Points: ";
     const QVector<vec2> controlPoints = spline.controlPoints();
     foreach(vec2 point, controlPoints) {
-        os << point;
+        os << point << "    ";
     }
     os << "\n";
     os << "Knots: ";

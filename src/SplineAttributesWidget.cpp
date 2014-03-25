@@ -20,8 +20,8 @@ SplineAttributesWidget::SplineAttributesWidget(QWidget *parent) : GraphicsItemAt
     m_tangentValueSlider = new RealValuedSlider("Tangent at value...", this);
     connect(m_tangentValueSlider, SIGNAL(valueChanged(real)), this, SLOT(changedTangentValue(real)));
 
-    // m_tangentValueSlider = new QSlider(Qt::Horizontal, this);
-    // connect(m_tangentValueSlider, SIGNAL(valueChanged(int)), this, SLOT(changedTangentValue(int)));
+    m_refineButton = new QPushButton(tr("Add more control points"), this);
+    connect(m_refineButton, SIGNAL(clicked()), this, SLOT(refineSpline()));
 
     QGridLayout *layout = new QGridLayout(this);
     layout->addWidget(m_degreeLabel,        0, 0, 1, 1);
@@ -30,6 +30,7 @@ SplineAttributesWidget::SplineAttributesWidget(QWidget *parent) : GraphicsItemAt
     layout->addWidget(m_tornToEdgesCheckBox,1, 1, 1, 1);
     layout->addWidget(m_drawTangentCheckBox,2, 0, 3, 1);
     layout->addWidget(m_tangentValueSlider, 2, 1, 3, 1);
+    layout->addWidget(m_refineButton,       5, 0, 1, 2);
     setLayout(layout);
 
 }
@@ -52,9 +53,11 @@ void SplineAttributesWidget::updateAttributes() {
         m_tangentValueSlider->setEnabled(m_currentSpline->isTangentDrawn());
         m_tangentValueSlider->setRange(spline->lowerDomainLimit(), spline->upperDomainLimit() - 0.01f);
         m_tangentValueSlider->setValue(m_currentSpline->tangentValue());
+        m_refineButton->setEnabled(true);
     } else {
         m_drawTangentCheckBox->setEnabled(false);
         m_tangentValueSlider->setEnabled(false);
+        m_refineButton->setEnabled(false);
     }
 }
 
@@ -81,3 +84,7 @@ void SplineAttributesWidget::changedTangentValue(real value) {
     m_currentSpline->setTangentValue(value);
 }
 
+void SplineAttributesWidget::refineSpline() {
+    m_currentSpline->refineSpline();
+    updateAttributes();
+}

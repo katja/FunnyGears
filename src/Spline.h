@@ -9,8 +9,11 @@ class Spline {
 
 public:
     Spline(int degree = 2);
+    Spline(const Spline &other);
     Spline(QVector<vec2> interpolationPoints); //TODO!
     ~Spline();
+
+    Spline& operator=(const Spline &other);
 
     /** Evalutes the spline at the given value
      *  Attention: make sure that the spline is valid and that value is one of the interval

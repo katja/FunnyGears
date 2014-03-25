@@ -22,6 +22,7 @@ private slots:
     void toggleTornToEdges(bool state);
     void toggleTangentDrawn(bool state);
     void changedTangentValue(real value);
+    void refineSpline();
 
 private:
     GraphicsSpline *m_currentSpline;
@@ -36,6 +37,8 @@ private:
     QCheckBox   *m_drawTangentCheckBox;
 
     RealValuedSlider *m_tangentValueSlider;
+
+    QPushButton *m_refineButton;
 
     void updateAttributes();
 

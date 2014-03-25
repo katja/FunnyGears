@@ -25,8 +25,20 @@ GraphicsSpline::~GraphicsSpline() {
     delete m_spline;
 }
 
+GraphicsSpline* GraphicsSpline::copy() const {
+    GraphicsSpline *copy = new GraphicsSpline(parentItem());
+    *(copy->m_spline) = *m_spline;
+    copy->m_color = m_color;
+    copy->m_isTangentDrawn = m_isTangentDrawn;
+    copy->m_tangentValue = m_tangentValue;
+    copy->m_points.clear();
+    for(int i = 0; i < m_points.size(); ++i) {
+        copy->m_points << m_points.at(i);
+    }
+    return copy;
+}
+
 const Spline* GraphicsSpline::spline() const {
-    std::cout << "GraphicsSpline::spline() (spline is torn to edges? =>" << m_spline->isTornToEdges() << ")" << std::endl;
     return m_spline;
 }
 
@@ -36,7 +48,6 @@ void GraphicsSpline::changeDegree(int degree) {
 }
 
 void GraphicsSpline::changeTornToEdges(bool tearToEdges) {
-    std::cout << "GraphicsSpline::changeTornToEdges with" << tearToEdges << std::endl;
     prepareGeometryChange();
     m_spline->setTornToEdges(tearToEdges);
 }
@@ -67,6 +78,24 @@ void GraphicsSpline::setTangentValue(real value) {
 real GraphicsSpline::tangentValue() {
     adjustInSplineRange(m_tangentValue);
     return m_tangentValue;
+}
+
+void GraphicsSpline::refineSpline() {
+    if(!m_spline->isValid())
+        return;
+    prepareGeometryChange();
+    real minDist = (m_spline->upperDomainLimit() - m_spline->lowerDomainLimit()) / m_spline->numberOfControlPoints();
+    m_spline->knotRefinement(minDist);
+    while(!m_points.empty()) {
+        Point *point = m_points.takeLast();
+        delete point;
+    }
+    const QVector<vec2> controlPoints = m_spline->controlPoints();
+    for(int i = 0; i < controlPoints.size(); ++i) {
+        Point *p = new Point(this);
+        p->setPos(QPointF(controlPoints.at(i)(0), controlPoints.at(i)(1)));
+        m_points << p;
+    }
 }
 
 QRectF GraphicsSpline::boundingRect() const {

@@ -16,6 +16,8 @@ std::ostream& operator <<(std::ostream &os, const vec2 vec);
 
 std::ostream& operator <<(std::ostream &os, const QVector<vec2> vector);
 
+std::ostream& operator <<(std::ostream &os, const QVector<real> vector);
+
 std::ostream& operator <<(std::ostream &os, const Spline &spline);
 
 QColor darkenColor(const QColor &color, int degree = 60);
