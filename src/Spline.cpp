@@ -216,13 +216,12 @@ void Spline::knotRefinement(real minDist) {
     }
 }
 
-//TODO: in description: check must done before and by yourself!!!
 void Spline::refineAt(real knotValue, int multiplicity) {
     //A multiplicity of 0 would mean no knot insertion and
-    //an insertion with multiplicity > m_degree would lead to a whole in the spline curve!
+    //an insertion with multiplicity > m_degree would lead to a hole in the spline curve!
     if(multiplicity <= 0 || multiplicity > m_degree)
         return;
-    //Use de Boor scheme to geht the new point(s)
+    //Use de Boor scheme to get the new point(s)
     int n = lowerNextKnot(knotValue); // knotValue is element of [knot[n], knot[n+1])
     QVector<vec2> controlPointsCopy(m_degree + 1);
     for(int i = 0; i <= m_degree; ++i) {
