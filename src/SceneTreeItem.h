@@ -2,7 +2,6 @@
 #define SCENE_TREE_ITEM
 
 #include "stable.h"
-#include "Geometry.h"
 
 class SceneTreeItem {
 
