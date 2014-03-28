@@ -10,11 +10,23 @@ Spline::Spline(int degree) : m_degree(degree), m_isClosed(false), m_tornToEdges(
 }
 
 Spline::Spline(const Spline &other) {
+    std::cout << "Spline is created with copy constructor" << std::endl;
     m_knots = QVector<real>(other.m_knots);
     m_controlPoints = QVector<vec2>(other.m_controlPoints);
     m_degree = other.m_degree;
     m_isClosed = other.m_isClosed;
     m_tornToEdges = other.m_tornToEdges;
+}
+
+Spline::Spline(QVector<vec2> controlPoints, QVector<real> knots) {
+    std::cout << "Spline is created with given points and knots" << std::endl;
+    if(knots.size() < controlPoints.size() + 2)
+        throw;
+    m_knots = knots;
+    m_controlPoints = controlPoints;
+    m_degree = m_knots.size() - m_controlPoints.size() - 1;
+    updateTornToEdges();
+    updateClosedCurve();
 }
 
 Spline::Spline(QVector<vec2> interpolationPoints) {
@@ -368,63 +380,46 @@ int Spline::lowerNextKnot(real value) const {
     return m_knots.size() - 1;
 }
 
-
-//TODO: methode anschaun und untersuchen:
 void Spline::getIntersectionPointsWithRay(const Ray &ray, QVector<vec2> &intersectionPoints) const {
-    // intersectionPoints.resize(0); //ensure that no wrong values are returned
+    //first test the control point polygon.
+    //If the ray has no intersection with it, there can't be an intersection with the spline curve, too.
+    for(int i = 0; i < m_controlPoints.size() - 1; ++i) {
+        vec2 startLine, endLine, intersectionPoint;
+        startLine = m_controlPoints[i];
+        endLine = m_controlPoints[i + 1];
 
-    // //first test the control point polygon.
-    // //If the ray has no intersection with it, there can't be an intersection with the spline curve, too.
-    // for(int i = 0; i < m_controlPoints.size() - 1; ++i) {
-    //     vec2 startLine, endLine, intersectionPoint;
-    //     startLine = m_controlPoints[i];
-    //     endLine = m_controlPoints[i + 1];
+        if(ray.intersect(startLine, endLine, intersectionPoint)) {
 
-    //     if(ray.intersect(startLine, endLine, intersectionPoint)) {
+            //An intersection occured with a line of the control point polygon
+            //When degree = 1, the spline curve is equal to the control point polygon
+            //So return the found point.
+            if(m_degree == 1) {
+                intersectionPoints << intersectionPoint;
+            }
+            //For higher degrees create a new spline with the points and knots which influence
+            //the line, where the intersection occured. Refine knots of new spline and
+            //examine resulting spline recursively.
+            else {
+                if(upperDomainLimit() - lowerDomainLimit() > 0.1f) {
+                    int startPointIndex = i - (m_degree - 1);
+                    int stopPointIndex = i + m_degree;
+                    if(startPointIndex < 0)
+                        startPointIndex = 0;
+                    if(stopPointIndex >= m_controlPoints.size())
+                        stopPointIndex = m_controlPoints.size() - 1;
+                    QVector<vec2> controlPoints = m_controlPoints.mid(startPointIndex, stopPointIndex - startPointIndex + 1);
+                    QVector<real> knots = m_knots.mid(startPointIndex, controlPoints.size() + m_degree);
 
-    //         //An intersection occured with a line of the control point polygon
-    //         //When degree = 1, the spline curve is equal to the control point polygon
-    //         //So return the found point.
-    //         if(m_degree == 1) {
-    //             intersectionPoints.push_back(intersectionPoint);
-    //         }
-    //         //For higher degrees ???
-    //         else {
-    //             QVector<real> knots(m_knots);
-    //             std::vector<vec2> points(m_controlPoints);
-
-    //             int startKnotIndex = i - (m_degree - 1);
-    //             if(startKnotIndex < m_degree)
-    //                 startKnotIndex = m_degree;
-    //             int stopKnotIndex = i + m_degree + 1 + m_degree + 1;
-    //             if(stopKnotIndex > points.size())
-    //                 stopKnotIndex = points.size();
-    //             bool newPointsInserted = false;
-    //             do {
-    //                 std::vector<real> newKnots;
-    //                 for(int j = startKnotIndex; j < stopKnotIndex; ++j) {
-    //                     if(knots[j + 1] - knots[j] > 0.05f) {
-    //                         real newKnot = knots[j] + (knots[j + 1] - knots[j]) / 2.0f;
-    //                         newKnots.push_back(newKnot);
-    //                     }
-    //                 }
-    //                 stopKnotIndex += newKnots.size();
-    //                 newPointsInserted = !newKnots.empty();
-    //                 if(newPointsInserted)
-    //                     refine(knots, points, newKnots);
-    //             } while(newPointsInserted);
-
-    //             for(int j = startKnotIndex; j < stopKnotIndex - m_degree - 1; ++j) {
-    //                 vec2 startLine, endLine, intersectionPoint;
-    //                 startLine = vec2(points[j]);
-    //                 endLine = vec2(points[j + 1]);
-    //                 if(ray.intersect(startLine, endLine, intersectionPoint)) {
-    //                     intersectionPoints.push_back(intersectionPoint);
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
+                    Spline splinePart(controlPoints, knots);
+                    real maxKnotPitch = m_knots.at(startPointIndex + m_degree + 1) - m_knots.at(startPointIndex + m_degree);
+                    splinePart.knotRefinement(maxKnotPitch);
+                    splinePart.getIntersectionPointsWithRay(ray, intersectionPoints);
+                } else {
+                    intersectionPoints << intersectionPoint;
+                }
+            }
+        }
+    }
 }
 
 void Spline::deBoor(QVector<vec2> &controlPoints, real value, real n) const {

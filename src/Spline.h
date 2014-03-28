@@ -10,6 +10,7 @@ class Spline {
 public:
     Spline(int degree = 2);
     Spline(const Spline &other);
+    Spline(QVector<vec2> controlPoints, QVector<real> knots);
     Spline(QVector<vec2> interpolationPoints); //TODO!
     ~Spline();
 
@@ -213,6 +214,12 @@ public:
      */
     int   lowerNextKnot(real value) const;
 
+    /** Cuts given ray with the spline curve and expands the QVector intersectionPoints with
+     *  found (approximated) intersection points. Already present values in the
+     *  intersectionPoints QVector will not be deleted!
+     *  @param ray Ray which is searched for intersections with the spline curve
+     *  @param intersectionPoints found intersection points are inserted in this QVector.
+     */
     void  getIntersectionPointsWithRay(const Ray &ray, QVector<vec2> &intersectionPoints) const;
 
 private:
