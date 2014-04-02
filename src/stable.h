@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <cassert>
-#include <tr1/cstdint>
+#include <cstdint>
 
 /* QtWidget includes many Qt GUI classes.
  * Either QtWidgets has to be used or the list of really used QWidgets below.

@@ -8,6 +8,11 @@ QT  +=  core gui \
 #                           warn_on, warn_off (=> print all/fewest possible compiler warnings)
 CONFIG  += debug                # Only during development necessary: Print debugging symbols and information
 
+# Add C++11 support
+CONFIG  += c++11
+QMAKE_CXXFLAGS += -stdlib=libc++
+QMAKE_CXXFLAGS += -mmacosx-version-min=10.7
+
 DESTDIR = "app/"                # Project will be build in this directory
 OBJECTS_DIR = "compile/"        # Directory for intermediate objects when compiling
 MOC_DIR = $$OBJECTS_DIR/.moc
