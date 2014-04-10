@@ -55,13 +55,17 @@ void GraphicsView::keyReleaseEvent(QKeyEvent *event) {
     }
 }
 
-// void GraphicsView::enableMoving() {
-//     setDragMode(QGraphicsView::ScrollHandDrag);
-//     movingEnabled = true;
-// }
+void GraphicsView::changeView(EditingState editingState) {
+    if(editingState == EditingState::ZoomIn || editingState == EditingState::ZoomOut)
+        m_state = editingState;
+    else
+        m_state = EditingState::NoEditing;
+}
 
-// void GraphicsView::disableMoving() {
-//     // setCursor(Qt::ArrowCursor);
-//     setDragMode(QGraphicsView::RubberBandDrag);
-//     movingEnabled = false;
-// }
+void GraphicsView::changeViewToDefault() {
+
+}
+
+void GraphicsView::stopChangeView() {
+
+}

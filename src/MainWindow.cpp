@@ -44,6 +44,9 @@ void MainWindow::createActions() {
         SIGNAL(triggered()), this, SLOT(openProject()));
     connect(createAction(m_toggleColorDialogAction, tr("Color Dialog"), tr("Show or open color dialog")),
         SIGNAL(triggered()), this, SLOT(openColorDialog()));
+    connect(createAction(m_toolbarZoomDefault, tr("ZoomDefault"), tr("zoom to default")),
+        SIGNAL(triggered()), this, SLOT(setToolbarZoomDefault()));
+
     m_toggleColorDialogAction->setCheckable(true);
     m_toggleColorDialogAction->setChecked(false);
 };
@@ -99,9 +102,33 @@ void MainWindow::createToolbars() {
     m_fileToolBar->addAction(m_saveAction);
     m_fileToolBar->addAction(m_saveAsAction);
 
+    createAction(m_toolbarPenAction, tr("Pen"), tr("add points to spline curve"));
+    m_toolbarPenAction->setCheckable(true);
+    connect(m_toolbarPenAction, SIGNAL(toggled(bool)), this, SLOT(useToolbarPen(bool)));
+
+    createAction(m_toolbarEraserAction, tr("Eraser"), tr("remove objects"));
+    m_toolbarEraserAction->setCheckable(true);
+    connect(m_toolbarEraserAction, SIGNAL(toggled(bool)), this, SLOT(useToolbarEraser(bool)));
+
+    createAction(m_toolbarZoomInAction, tr("ZoomIn"), tr("zoom in"));
+    m_toolbarZoomInAction->setCheckable(true);
+    connect(m_toolbarZoomInAction, SIGNAL(toggled(bool)), this, SLOT(useToolbarZoomIn(bool)));
+
+    createAction(m_toolbarZoomOutAction, tr("ZoomOut"), tr("zoom out"));
+    m_toolbarZoomOutAction->setCheckable(true);
+    connect(m_toolbarZoomOutAction, SIGNAL(toggled(bool)), this, SLOT(useToolbarZoomOut(bool)));
+
+    m_editActionGroup = new QActionGroup(this);
+    m_editActionGroup->setExclusive(true);
+    m_editActionGroup->addAction(m_toolbarPenAction);
+    m_editActionGroup->addAction(m_toolbarEraserAction);
+    m_editActionGroup->addAction(m_toolbarZoomInAction);
+    m_editActionGroup->addAction(m_toolbarZoomOutAction);
+
     m_editToolBar = this->addToolBar(tr("Edit"));
-    m_editToolBar->addAction(m_callAction);
-    m_editToolBar->addAction(m_aboutAction);
+    m_editToolBar->setIconSize(QSize(16,16));
+    m_editToolBar->addActions(m_editActionGroup->actions());
+    m_editToolBar->addAction(m_toolbarZoomDefault);
 
     m_toggleFileToolBarAction = m_fileToolBar->toggleViewAction();
     m_toggleEditToolBarAction = m_editToolBar->toggleViewAction();
@@ -192,3 +219,43 @@ bool MainWindow::savedProjectOrOk() {
 void MainWindow::sayHello() {
     std::cout << "MainWindow::sayHello" << std::endl;
 };
+
+void MainWindow::useToolbarPen(bool useIt) {
+    std::cout << "MainWindow::useToolbarPen()" << std::endl;
+    m_scene->stopEditing();
+    m_view->stopChangeView();
+    if(useIt)
+        m_scene->startEditing(EditingState::Add);
+
+}
+
+void MainWindow::useToolbarEraser(bool useIt) {
+    std::cout << "MainWindow::useToolbarEraser()" << std::endl;
+    m_scene->stopEditing();
+    m_view->stopChangeView();
+    if(useIt)
+        m_scene->startEditing(EditingState::Erase);
+}
+
+void MainWindow::useToolbarZoomIn(bool useIt) {
+    std::cout << "MainWindow::useToolbarZoomIn()" << std::endl;
+    m_scene->stopEditing();
+    m_view->stopChangeView();
+    if(useIt)
+        m_view->changeView(EditingState::ZoomIn);
+}
+
+void MainWindow::useToolbarZoomOut(bool useIt) {
+    std::cout << "MainWindow::useToolbarZoomOut()" << std::endl;
+    m_scene->stopEditing();
+    m_view->stopChangeView();
+    if(useIt)
+        m_view->changeView(EditingState::ZoomOut);
+}
+
+void MainWindow::setToolbarZoomDefault() {
+    std::cout << "MainWindow::setToolbarZoomDefault()" << std::endl;
+    m_scene->stopEditing();
+    m_view->stopChangeView();
+    m_view->changeViewToDefault();
+}

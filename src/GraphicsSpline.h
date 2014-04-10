@@ -3,13 +3,16 @@
 
 #include "stable.h"
 #include "definitions.h"
+#include "GraphicsItem.h"
 #include "Point.h"
 #include "Spline.h"
 
-class GraphicsSpline : public QGraphicsItem {
+class GraphicsSpline : public GraphicsItem {
 
 public:
-    GraphicsSpline(QGraphicsItem *parent = 0);
+    static const int Type;
+
+    GraphicsSpline(GraphicsItem *parent = 0);
     // GraphicsSpline(const GraphicsSpline &other);
     ~GraphicsSpline();
 
@@ -33,17 +36,24 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     QColor color() const;
 
+    void addPoint(QPointF scenePos);
+    void removePoint(int index);
+    void removePointNear(QPointF scenePos);
     void pointMoveEvent(Point *point, QGraphicsSceneMouseEvent *event);
 
-    void addPoint(QPointF scenePos);
+    int type() const;
+    void clickReceived(QPointF point);
+    void setToState(EditingState state);
 
 private:
     Spline *m_spline;
-    QColor m_color;
     QList<Point*> m_points;
 
     bool m_isTangentDrawn;
     real m_tangentValue;
+
+    QColor m_color;
+    EditingState m_editingState;
 
     QPainterPath controlPointPolygonPath(qreal width = 0) const;
     QPainterPath splineCurvePath() const;

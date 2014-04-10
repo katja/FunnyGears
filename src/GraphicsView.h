@@ -2,6 +2,7 @@
 #define GRAPHICS_VIEW
 
 #include "stable.h"
+#include "definitions.h"
 
 class GraphicsView : public QGraphicsView {
 
@@ -16,12 +17,11 @@ public:
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
 
+    void changeView(EditingState editingState);
+    void changeViewToDefault();
+    void stopChangeView();
+
 private:
-    // void enableMoving();
-    // void disableMoving();
-
-    // bool movingEnabled;
-
     void initialize();
 };
 

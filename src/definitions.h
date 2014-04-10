@@ -10,4 +10,17 @@ typedef Eigen::Vector2d vec2;
 typedef Eigen::Vector3d vec3;
 typedef Eigen::Matrix2d m2x2;
 
+enum class EditingState {
+    NoEditing = 0,
+    Add = 1,
+    Erase = 2
+};
+
+enum Type {
+    QGraphicsItemType,
+    GraphicsItemType,
+    GraphicsSplineType,
+    NumberOfTypes
+};
+
 #endif // DEFINITIONS

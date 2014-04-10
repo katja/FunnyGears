@@ -4,6 +4,7 @@
 #include "stable.h"
 #include "ConnectionModel.h"
 #include "GraphicsSpline.h"
+#include "GraphicsItem.h"
 
 class GraphicsScene : public QGraphicsScene {
 
@@ -22,12 +23,18 @@ public:
     void addItem(QGraphicsItem *item);
     void removeItem(QGraphicsItem *item);
 
+    QList<GraphicsItem*> selectedGraphicsItems() const;
+
+    void startEditing(EditingState editingStyle);
+
+public slots:
+    void stopEditing();
+
 private slots:
     void updateItem(QGraphicsItem *item);
     void updateItems(const QList<QGraphicsItem*> &changedItems);
     void informModelOfSelectionChange();
-    void startEditingItem(QGraphicsItem *item);
-    void stopEditing();
+    void startEditingItem(QGraphicsItem *item, EditingState editingStyle = EditingState::Add);
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
@@ -39,6 +46,7 @@ private:
         VIEW, EDITING
     };
     State m_currentState;
+    GraphicsItem *m_currentItem;
     GraphicsSpline *m_currentSpline;
     QPointF m_clickedPoint;
 
@@ -47,6 +55,7 @@ private:
     void initialize();
     void updateAllViews(const QList<QRectF> &updateRegions) const;
     void setAllItemsEnabled(bool enabled = true);
+    void reduceSelection(int leaveBehind);
 
 };
 

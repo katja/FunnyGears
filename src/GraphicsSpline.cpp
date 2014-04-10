@@ -3,8 +3,9 @@
 #include "preferences.h"
 #include "helpers.h"
 
+const int GraphicsSpline::Type = GraphicsSpline::UserType + Type::GraphicsSplineType;
 
-GraphicsSpline::GraphicsSpline(QGraphicsItem *parent) : QGraphicsItem(parent), m_isTangentDrawn(false), m_tangentValue(-1.0f) {
+GraphicsSpline::GraphicsSpline(GraphicsItem *parent) : GraphicsItem(parent), m_isTangentDrawn(false), m_tangentValue(-1.0f) {
     std::cout << "GraphicsSpline is created" << std::endl;
     m_spline = new Spline();
     int partColor = qrand() % 512 + 100;
@@ -26,6 +27,7 @@ GraphicsSpline::~GraphicsSpline() {
 }
 
 GraphicsSpline* GraphicsSpline::copy() const {
+    std::cout << "COPY: ";
     GraphicsSpline *copy = new GraphicsSpline(parentItem());
     *(copy->m_spline) = *m_spline;
     copy->m_color = m_color;
@@ -170,17 +172,46 @@ QColor GraphicsSpline::color() const {
     return m_color;
 }
 
+void GraphicsSpline::addPoint(QPointF scenePos) {
+    Point *p = new Point(this);
+    p->setPos(mapFromScene(scenePos));
+    m_points.append(p);
+    m_spline->addControlPoint(p->pos());
+}
+
+void GraphicsSpline::removePoint(int index) {
+    prepareGeometryChange();
+    scene()->removeItem(m_points.at(index));
+    m_spline->removeControlPoint(index);
+}
+
+void GraphicsSpline::removePointNear(QPointF scenePos) {
+    for(int i = 0; i < m_points.size(); ++i) {
+        if(m_points.at(i)->boundingRect().contains(scenePos)) {
+            removePoint(i);
+        }
+    }
+}
+
 void GraphicsSpline::pointMoveEvent(Point *point, QGraphicsSceneMouseEvent *event) {
     prepareGeometryChange();
     point->setPos(event->pos() + point->pos());
     m_spline->moveControlPoint(m_points.indexOf(point), point->pos());
 }
 
-void GraphicsSpline::addPoint(QPointF scenePos) {
-    Point *p = new Point(this);
-    p->setPos(mapFromScene(scenePos));
-    m_points.append(p);
-    m_spline->addControlPoint(p->pos());
+int GraphicsSpline::type() const {
+    return Type;
+}
+
+void GraphicsSpline::clickReceived(QPointF point) {
+    if(m_editingState == EditingState::Add)
+        addPoint(point);
+    else if(m_editingState == EditingState::Erase)
+        removePointNear(point);
+}
+
+void GraphicsSpline::setToState(EditingState state) {
+    m_editingState = state;
 }
 
 QPainterPath GraphicsSpline::controlPointPolygonPath(qreal width) const {

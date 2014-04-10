@@ -139,9 +139,5 @@ void SplineModel::graphicsItemRemoved(QGraphicsItem *graphicsItem) {
 }
 
 bool SplineModel::isSpline(QGraphicsItem *graphicsItem) {
-    GraphicsSpline spline;
-    if(typeid(*graphicsItem) == typeid(spline))
-        return true;
-    else
-        return false;
+    return graphicsItem->type() == GraphicsSpline::Type;
 }

@@ -28,7 +28,11 @@ private slots:
     void openProject();
     void openColorDialog();
     void sayHello();
-
+    void useToolbarPen(bool useIt);
+    void useToolbarEraser(bool useIt);
+    void useToolbarZoomIn(bool useIt);
+    void useToolbarZoomOut(bool useIt);
+    void setToolbarZoomDefault();
 
 private:
     SceneTreeModel      *m_sceneModel;
@@ -59,7 +63,13 @@ private:
                 *m_toggleEditToolBarAction,
                 *m_toggleColorDialogAction,
                 *m_toggleObjectAttributesAction,
-                *m_toggleObjectScheduleAction;
+                *m_toggleObjectScheduleAction,
+                *m_toolbarPenAction,
+                *m_toolbarEraserAction,
+                *m_toolbarZoomInAction,
+                *m_toolbarZoomOutAction,
+                *m_toolbarZoomDefault;
+    QActionGroup *m_editActionGroup;
 
     bool projectChanged;
 
