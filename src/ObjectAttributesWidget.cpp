@@ -1,16 +1,13 @@
 #include "ObjectAttributesWidget.h"
-#include "SplineAttributesWidget.h"
+#include "GraphicsSplineAttributesWidget.h"
 
-ObjectAttributesWidget::ObjectAttributesWidget(SceneTreeModel *sceneTreeModel, ConnectionModel *connectionModel, QWidget *parent)
-: QDockWidget("Object Attributes", parent, Qt::Widget), m_connectionModel(connectionModel), m_currentItem(0) {
+ObjectAttributesWidget::ObjectAttributesWidget(ConnectionModel *connectionModel, QWidget *parent)
+: QDockWidget("Object Attributes", parent, Qt::Widget), m_connectionModel(connectionModel) {
     std::cout << "ObjectAttributesWidget is created" << std::endl;
 
-    SplineModel *splineModel = new SplineModel(sceneTreeModel, this);
-    SplineAttributesWidget *splineWidget = new SplineAttributesWidget(this);
+    GraphicsSplineAttributesWidget *splineWidget = new GraphicsSplineAttributesWidget(this);
     splineWidget->hide();
-
-    m_modelList << (splineModel);
-    m_modelWidgetsHash.insert(splineModel, splineWidget);
+    m_graphicsItemWidgets << splineWidget;
 
     m_noContentWidget = new QWidget(this);
     setWidget(m_noContentWidget);
@@ -24,17 +21,20 @@ ObjectAttributesWidget::~ObjectAttributesWidget() {
 }
 
 void ObjectAttributesWidget::selectItem(QGraphicsItem *item) {
-    foreach(GraphicsItemModel *model, m_modelList) {
-        if(model->operatesOn(item)) {
-            m_currentItem = item;
-            GraphicsItemAttributesWidget *currentWidget = m_modelWidgetsHash[model];
+    GraphicsItemAttributesWidget *currentWidget = 0;
+    int i = 0;
+    while(currentWidget == 0 && i < m_graphicsItemWidgets.size()) {
+        if(m_graphicsItemWidgets.at(i)->worksOnItem(item)) {
+            currentWidget = m_graphicsItemWidgets.at(i);
             currentWidget->setItem(item);
             setWidget(currentWidget);
         }
+        ++i;
     }
+    if(currentWidget == 0)
+        deselect();
 }
 
 void ObjectAttributesWidget::deselect() {
     setWidget(m_noContentWidget);
-    m_currentItem = 0;
 }

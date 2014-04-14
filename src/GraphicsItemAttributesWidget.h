@@ -10,6 +10,7 @@ public:
     virtual ~GraphicsItemAttributesWidget();
 
     virtual void setItem(QGraphicsItem *graphicsItem) = 0;
+    virtual bool worksOnItem(QGraphicsItem *graphicsItem) = 0;
 };
 
 #endif // GRAPHICS_ITEM_ATTRIBUTES_WIDGET

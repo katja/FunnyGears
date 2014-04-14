@@ -3,8 +3,10 @@
 
 #include "stable.h"
 #include "definitions.h"
+#include "ToolBarListener.h"
+#include "EditingToolBar.h"
 
-class GraphicsView : public QGraphicsView {
+class GraphicsView : public QGraphicsView, public ToolBarListener {
 
 Q_OBJECT
 
@@ -17,12 +19,15 @@ public:
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
 
-    void changeView(EditingState editingState);
-    void changeViewToDefault();
-    void stopChangeView();
+    void stopEditing();
+    void startEditing(Editing::State editingState);
+    void executeEditingAction(Editing::Action editingAction);
 
 private:
     void initialize();
+    void zoomToDefault();
+
+    Editing::State m_editingState;
 };
 
 #endif //GRAPHICS_VIEW

@@ -19,21 +19,6 @@ public:
 
     QIcon icon() const;
 
-private slots:
-    void quitProgram();
-    void about();
-    void newProject();
-    bool saveProject();
-    bool saveAsProject();
-    void openProject();
-    void openColorDialog();
-    void sayHello();
-    void useToolbarPen(bool useIt);
-    void useToolbarEraser(bool useIt);
-    void useToolbarZoomIn(bool useIt);
-    void useToolbarZoomOut(bool useIt);
-    void setToolbarZoomDefault();
-
 private:
     SceneTreeModel      *m_sceneModel;
     ObjectScheduleView  *m_objectScheduleView;
@@ -46,40 +31,45 @@ private:
 
     QMenu       *m_programMenu,
                 *m_fileMenu,
-                *m_editMenu,
-                *m_viewMenu,
-                *m_helpMenu;
-    QToolBar    *m_fileToolBar,
-                *m_editToolBar;
+                *m_viewMenu;
+    QToolBar    *m_fileToolBar;
+    EditingToolBar *m_editToolBar;
     QColorDialog *m_colorDialog;
     QAction     *m_exitAction,
+                *m_aboutAction,
                 *m_newAction,
+                *m_openAction,
                 *m_saveAction,
                 *m_saveAsAction,
-                *m_openAction,
-                *m_aboutAction,
-                *m_callAction,
                 *m_toggleFileToolBarAction,
                 *m_toggleEditToolBarAction,
                 *m_toggleColorDialogAction,
                 *m_toggleObjectAttributesAction,
-                *m_toggleObjectScheduleAction,
-                *m_toolbarPenAction,
-                *m_toolbarEraserAction,
-                *m_toolbarZoomInAction,
-                *m_toolbarZoomOutAction,
-                *m_toolbarZoomDefault;
-    QActionGroup *m_editActionGroup;
+                *m_toggleObjectScheduleAction;
 
     bool projectChanged;
 
+    void createMainProgramPart();
+    void createMenusAndToolbars();
+
+    void createProgramMenu();
+    void createFileMenuAndToolbar();
+    void createEditToolbar();
+    void createViewMenu();
+
     void createActions();
-    QAction* createAction(QAction *&action, QString name, QString statusTip, QKeySequence shortcut = NULL);
-    void createMenus();
-    void createToolbars();
-    void createDialogs();
-    void createLayout();
+    QAction* createAction(QAction *&action, QString name, QString toolTip, QKeySequence shortcut = 0);
+
     bool savedProjectOrOk();
+
+private slots:
+    void quitProgram();
+    void about();
+    void newProject();
+    bool saveProject();
+    bool saveAsProject();
+    void openProject();
+    void openColorDialog();
 };
 
 

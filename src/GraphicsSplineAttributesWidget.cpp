@@ -1,7 +1,6 @@
-#include "SplineAttributesWidget.h"
-#include "SplineModel.h"
+#include "GraphicsSplineAttributesWidget.h"
 
-SplineAttributesWidget::SplineAttributesWidget(QWidget *parent) : GraphicsItemAttributesWidget(parent) {
+GraphicsSplineAttributesWidget::GraphicsSplineAttributesWidget(QWidget *parent) : GraphicsItemAttributesWidget(parent) {
 
     m_degreeLabel   = new QLabel(tr("Degree"));
     m_degreeSpinBox = new QSpinBox(this);
@@ -35,15 +34,21 @@ SplineAttributesWidget::SplineAttributesWidget(QWidget *parent) : GraphicsItemAt
 
 }
 
-SplineAttributesWidget::~SplineAttributesWidget() {
+GraphicsSplineAttributesWidget::~GraphicsSplineAttributesWidget() {
 }
 
-void SplineAttributesWidget::setItem(QGraphicsItem *graphicsItem) {
+void GraphicsSplineAttributesWidget::setItem(QGraphicsItem *graphicsItem) {
     m_currentSpline = static_cast<GraphicsSpline*>(graphicsItem);
     updateAttributes();
 }
 
-void SplineAttributesWidget::updateAttributes() {
+bool GraphicsSplineAttributesWidget::worksOnItem(QGraphicsItem *graphicsItem) {
+    if(GraphicsSpline::isGraphicsSplineItem(graphicsItem))
+        return true;
+    return false;
+}
+
+void GraphicsSplineAttributesWidget::updateAttributes() {
     const Spline *spline = m_currentSpline->spline();
     m_degreeSpinBox->setValue(spline->degree());
     m_tornToEdgesCheckBox->setChecked(spline->isTornToEdges());
@@ -61,7 +66,7 @@ void SplineAttributesWidget::updateAttributes() {
     }
 }
 
-void SplineAttributesWidget::changeDegree(int value) {
+void GraphicsSplineAttributesWidget::changeDegree(int value) {
     //Prevent an update of the other items, when degree is still the same!
     if(m_degree != value) {
         m_degree = value;
@@ -70,21 +75,21 @@ void SplineAttributesWidget::changeDegree(int value) {
     }
 }
 
-void SplineAttributesWidget::toggleTornToEdges(bool state) {
+void GraphicsSplineAttributesWidget::toggleTornToEdges(bool state) {
     m_currentSpline->changeTornToEdges(state);
     updateAttributes();
 }
 
-void SplineAttributesWidget::toggleTangentDrawn(bool state) {
+void GraphicsSplineAttributesWidget::toggleTangentDrawn(bool state) {
     m_currentSpline->setTangentDrawn(state);
     m_tangentValueSlider->setEnabled(state);
 }
 
-void SplineAttributesWidget::changedTangentValue(real value) {
+void GraphicsSplineAttributesWidget::changedTangentValue(real value) {
     m_currentSpline->setTangentValue(value);
 }
 
-void SplineAttributesWidget::refineSpline() {
+void GraphicsSplineAttributesWidget::refineSpline() {
     m_currentSpline->refineSpline();
     updateAttributes();
 }

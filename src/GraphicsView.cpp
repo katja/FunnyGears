@@ -18,6 +18,7 @@ void GraphicsView::initialize() {
     setDragMode(QGraphicsView::RubberBandDrag);
     setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    stopEditing();
 }
 
 GraphicsView::~GraphicsView() {
@@ -55,17 +56,22 @@ void GraphicsView::keyReleaseEvent(QKeyEvent *event) {
     }
 }
 
-void GraphicsView::changeView(EditingState editingState) {
-    if(editingState == EditingState::ZoomIn || editingState == EditingState::ZoomOut)
-        m_state = editingState;
+void GraphicsView::stopEditing() {
+    m_editingState = Editing::NoEditing;
+}
+
+void GraphicsView::startEditing(Editing::State editingState) {
+    if(editingState == Editing::ZoomIn || editingState == Editing::ZoomOut)
+        m_editingState = editingState;
     else
-        m_state = EditingState::NoEditing;
+        stopEditing();
 }
 
-void GraphicsView::changeViewToDefault() {
-
+void GraphicsView::executeEditingAction(Editing::Action editingAction) {
+    if(editingAction == Editing::ZoomDefault)
+        zoomToDefault();
 }
 
-void GraphicsView::stopChangeView() {
-
+void GraphicsView::zoomToDefault() {
+    std::cout << "TODO: zoomToDefault in GraphicsView" << std::endl;
 }

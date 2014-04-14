@@ -1,5 +1,5 @@
-#ifndef SPLINE_ATTRIBUTES_WIDGET
-#define SPLINE_ATTRIBUTES_WIDGET
+#ifndef GRAPHICS_SPLINE_ATTRIBUTES_WIDGET
+#define GRAPHCIS_SPLINE_ATTRIBUTES_WIDGET
 
 #include "stable.h"
 #include "definitions.h"
@@ -7,15 +7,16 @@
 #include "GraphicsSpline.h"
 #include "RealValuedSlider.h"
 
-class SplineAttributesWidget : public GraphicsItemAttributesWidget {
+class GraphicsSplineAttributesWidget : public GraphicsItemAttributesWidget {
 
 Q_OBJECT
 
 public:
-    SplineAttributesWidget(QWidget *parent = 0);
-    ~SplineAttributesWidget();
+    GraphicsSplineAttributesWidget(QWidget *parent = 0);
+    ~GraphicsSplineAttributesWidget();
 
     void setItem(QGraphicsItem *graphicsItem);
+    bool worksOnItem(QGraphicsItem *graphicsItem);
 
 private slots:
     void changeDegree(int value);
@@ -44,4 +45,4 @@ private:
 
 };
 
-#endif // SPLINE_ATTRIBUTES_WIDGET
+#endif // GRAPHICS_SPLINE_ATTRIBUTES_WIDGET

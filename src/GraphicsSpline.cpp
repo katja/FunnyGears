@@ -5,6 +5,19 @@
 
 const int GraphicsSpline::Type = GraphicsSpline::UserType + Type::GraphicsSplineType;
 
+bool GraphicsSpline::isGraphicsSplineItem(QGraphicsItem *item) {
+    if(item->type() == Type)
+        return true;
+    return false;
+}
+
+
+// bool GraphicsItem::isGraphicsItem(QGraphicsItem *item) {
+//     if(item->type() >= Type && item->type() < GraphicsItem::UserType + Type::NumberOfTypes)
+//         return true;
+//     return false;
+// }
+
 GraphicsSpline::GraphicsSpline(GraphicsItem *parent) : GraphicsItem(parent), m_isTangentDrawn(false), m_tangentValue(-1.0f) {
     std::cout << "GraphicsSpline is created" << std::endl;
     m_spline = new Spline();
@@ -180,14 +193,17 @@ void GraphicsSpline::addPoint(QPointF scenePos) {
 }
 
 void GraphicsSpline::removePoint(int index) {
+    Point *point = m_points.at(index);
     prepareGeometryChange();
     scene()->removeItem(m_points.at(index));
+    m_points.removeAt(index);
+    delete point;
     m_spline->removeControlPoint(index);
 }
 
 void GraphicsSpline::removePointNear(QPointF scenePos) {
     for(int i = 0; i < m_points.size(); ++i) {
-        if(m_points.at(i)->boundingRect().contains(scenePos)) {
+        if((m_points.at(i)->pos() - scenePos).manhattanLength() <= 5) {
             removePoint(i);
         }
     }
@@ -204,13 +220,13 @@ int GraphicsSpline::type() const {
 }
 
 void GraphicsSpline::clickReceived(QPointF point) {
-    if(m_editingState == EditingState::Add)
+    if(m_editingState == Editing::Pen)
         addPoint(point);
-    else if(m_editingState == EditingState::Erase)
+    else if(m_editingState == Editing::Eraser)
         removePointNear(point);
 }
 
-void GraphicsSpline::setToState(EditingState state) {
+void GraphicsSpline::setToState(Editing::State state) {
     m_editingState = state;
 }
 

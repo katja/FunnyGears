@@ -10,9 +10,7 @@ ObjectScheduleView::ObjectScheduleView(SceneTreeModel *sceneModel, QWidget *pare
     setSelectionMode(QAbstractItemView::ExtendedSelection); //this mode allows a selection of multiple items with mouse, ctrl-key and shift-key
     setSelectionBehavior(QAbstractItemView::SelectRows);
     setEditTriggers(QAbstractItemView::DoubleClicked);
-
     setItemDelegate(new YesNoDelegate(this));
-
     setModel(m_sceneModel);
 
     hideColumn(SceneTreeModel::TRANSLATION);
@@ -23,7 +21,6 @@ ObjectScheduleView::ObjectScheduleView(SceneTreeModel *sceneModel, QWidget *pare
 
 ObjectScheduleView::~ObjectScheduleView() {
     std::cout << "ObjectScheduleView is deleted" << std::endl;
-    // delete m_sceneModel;
 }
 
 ConnectionModel* ObjectScheduleView::setConnectionModel(ConnectionModel *model) {
@@ -38,7 +35,6 @@ void ObjectScheduleView::addNewSplineItem() {
     m_sceneModel->addItem(spline);
     m_connectionModel->turnOnEditingOf(spline);
 }
-
 
 //Helpermethod for removeItems()
 //TODO: put this method somewhere suitable!

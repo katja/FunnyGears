@@ -2,11 +2,12 @@
 #define GRAPHICS_SCENE
 
 #include "stable.h"
+#include "ToolBarListener.h"
 #include "ConnectionModel.h"
 #include "GraphicsSpline.h"
 #include "GraphicsItem.h"
 
-class GraphicsScene : public QGraphicsScene {
+class GraphicsScene : public QGraphicsScene, public ToolBarListener {
 
 Q_OBJECT
 
@@ -25,16 +26,15 @@ public:
 
     QList<GraphicsItem*> selectedGraphicsItems() const;
 
-    void startEditing(EditingState editingStyle);
-
-public slots:
     void stopEditing();
+    void startEditing(Editing::State editingState);
+    void executeEditingAction(Editing::Action editingAction);
 
 private slots:
     void updateItem(QGraphicsItem *item);
     void updateItems(const QList<QGraphicsItem*> &changedItems);
     void informModelOfSelectionChange();
-    void startEditingItem(QGraphicsItem *item, EditingState editingStyle = EditingState::Add);
+    void startEditingItem(QGraphicsItem *item, Editing::State editingStyle = Editing::Pen);
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
@@ -56,6 +56,7 @@ private:
     void updateAllViews(const QList<QRectF> &updateRegions) const;
     void setAllItemsEnabled(bool enabled = true);
     void reduceSelection(int leaveBehind);
+    bool isGraphicsItemEditing(Editing::State editingStyle) const;
 
 };
 

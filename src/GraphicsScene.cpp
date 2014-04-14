@@ -14,6 +14,7 @@ GraphicsScene::GraphicsScene(qreal x, qreal y, qreal width, qreal height, QObjec
 void GraphicsScene::initialize() {
     std::cout << "GraphicsScene is created" << std::endl;
     m_currentState = GraphicsScene::VIEW;
+    m_currentItem = 0;
     setForegroundBrush(QColor(50, 50, 50, 50));
     setSceneRect(-1000, -1000, 2000, 2000);
 
@@ -92,6 +93,7 @@ void GraphicsScene::addItem(QGraphicsItem *item) {
 void GraphicsScene::removeItem(QGraphicsItem *item) {
     if(m_currentState == GraphicsScene::EDITING && item == m_currentItem) {
         stopEditing();
+        m_currentItem = 0;
     }
     QGraphicsScene::removeItem(item);
 }
@@ -100,9 +102,7 @@ QList<GraphicsItem*> GraphicsScene::selectedGraphicsItems() const {
     QList<GraphicsItem*> list;
     foreach(QGraphicsItem *qitem, selectedItems()) {
 
-        std::cout << "type = " << qitem->type() << std::endl;
         if(GraphicsItem::isGraphicsItem(qitem)) {
-            std::cout << "found a graphics item!!!" << std::endl;
             list << static_cast<GraphicsItem*>(qitem);
         }
     }
@@ -166,20 +166,31 @@ void GraphicsScene::updateAllViews(const QList<QRectF> &updateRegions) const {
     }
 }
 
-void GraphicsScene::startEditing(EditingState editingStyle) {
-    std::cout << "GraphicsScene::startEditing ";
+void GraphicsScene::stopEditing() {
+    setAllItemsEnabled(true);
+    m_currentState = GraphicsScene::VIEW;
+    if(m_currentItem)
+        m_currentItem->setToState(Editing::NoEditing);
+    clearFocus();
+}
+
+void GraphicsScene::startEditing(Editing::State editingStyle) {
+    if(!isGraphicsItemEditing(editingStyle))
+        return;
     if(!selectedGraphicsItems().empty()) {
         if(selectedGraphicsItems().size() > 1)
             reduceSelection(1);
-        std::cout << "selectedItems size: " << selectedGraphicsItems().size() << std::endl;
         m_currentItem = selectedGraphicsItems().first();
         startEditingItem(m_currentItem, editingStyle);
-        std::cout << " will really start";
     }
-    std::cout << std::endl;
 }
 
-void GraphicsScene::startEditingItem(QGraphicsItem *item, EditingState editingStyle) {
+void GraphicsScene::executeEditingAction(Editing::Action editingAction) {
+    Q_UNUSED(editingAction);
+    stopEditing();
+}
+
+void GraphicsScene::startEditingItem(QGraphicsItem *item, Editing::State editingStyle) {
     if(!GraphicsItem::isGraphicsItem(item))
         return;
     m_currentItem = static_cast<GraphicsItem*>(item);
@@ -188,13 +199,6 @@ void GraphicsScene::startEditingItem(QGraphicsItem *item, EditingState editingSt
     m_currentItem->setEnabled(true);
     m_currentItem->setToState(editingStyle);
     setFocus(Qt::OtherFocusReason);
-}
-
-void GraphicsScene::stopEditing() {
-    setAllItemsEnabled(true);
-    m_currentState = GraphicsScene::VIEW;
-    m_currentItem->setToState(EditingState::NoEditing);
-    clearFocus();
 }
 
 void GraphicsScene::setAllItemsEnabled(bool enabled) {
@@ -209,4 +213,12 @@ void GraphicsScene::reduceSelection(int leaveBehind) {
     for(int i = leaveBehind; i <= selectedItems.size(); ++i) {
         selectedItems.last()->setSelected(false);
     }
+}
+
+bool GraphicsScene::isGraphicsItemEditing(Editing::State editingStyle) const {
+    if(editingStyle == Editing::NoEditing ||
+        editingStyle == Editing::Pen ||
+        editingStyle == Editing::Eraser)
+        return true;
+    return false;
 }

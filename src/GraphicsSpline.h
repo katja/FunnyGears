@@ -10,7 +10,8 @@
 class GraphicsSpline : public GraphicsItem {
 
 public:
-    static const int Type;
+    static const int Type;// = GraphicsSpline::UserType + Type::GraphicsSplineType;
+    static bool isGraphicsSplineItem(QGraphicsItem *item);
 
     GraphicsSpline(GraphicsItem *parent = 0);
     // GraphicsSpline(const GraphicsSpline &other);
@@ -43,7 +44,7 @@ public:
 
     int type() const;
     void clickReceived(QPointF point);
-    void setToState(EditingState state);
+    void setToState(Editing::State state);
 
 private:
     Spline *m_spline;
@@ -53,7 +54,7 @@ private:
     real m_tangentValue;
 
     QColor m_color;
-    EditingState m_editingState;
+    Editing::State m_editingState;
 
     QPainterPath controlPointPolygonPath(qreal width = 0) const;
     QPainterPath splineCurvePath() const;
