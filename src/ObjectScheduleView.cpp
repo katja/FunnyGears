@@ -37,7 +37,6 @@ void ObjectScheduleView::addNewSplineItem() {
 }
 
 //Helpermethod for removeItems()
-//TODO: put this method somewhere suitable!
 bool isBelow(QModelIndex &a, QModelIndex &b) {
     if(a.row() < b.row())
         return false;

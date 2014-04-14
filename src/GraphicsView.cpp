@@ -10,7 +10,6 @@ GraphicsView::GraphicsView(QGraphicsScene *scene, QWidget *parent) : QGraphicsVi
 
 void GraphicsView::initialize() {
     std::cout << "GraphicsView is created" << std::endl;
-    // movingEnabled = false;
     setRenderHint(QPainter::Antialiasing);
     setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
     setMouseTracking(false);

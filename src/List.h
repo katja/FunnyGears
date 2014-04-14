@@ -1,7 +1,6 @@
 #ifndef LIST
 #define LIST
 
-// #include <initializer_list>
 #include "stable.h"
 
 template <typename T>

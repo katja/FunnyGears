@@ -11,13 +11,6 @@ bool GraphicsSpline::isGraphicsSplineItem(QGraphicsItem *item) {
     return false;
 }
 
-
-// bool GraphicsItem::isGraphicsItem(QGraphicsItem *item) {
-//     if(item->type() >= Type && item->type() < GraphicsItem::UserType + Type::NumberOfTypes)
-//         return true;
-//     return false;
-// }
-
 GraphicsSpline::GraphicsSpline(GraphicsItem *parent) : GraphicsItem(parent), m_isTangentDrawn(false), m_tangentValue(-1.0f) {
     std::cout << "GraphicsSpline is created" << std::endl;
     m_spline = new Spline();
@@ -30,8 +23,6 @@ GraphicsSpline::GraphicsSpline(GraphicsItem *parent) : GraphicsItem(parent), m_i
             | QGraphicsItem::ItemIsSelectable
             | QGraphicsItem::ItemSendsGeometryChanges
             );
-
-    // setAcceptedMouseButtons(Qt::LeftButton);
 }
 
 GraphicsSpline::~GraphicsSpline() {

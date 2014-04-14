@@ -14,7 +14,6 @@ public:
     static bool isGraphicsSplineItem(QGraphicsItem *item);
 
     GraphicsSpline(GraphicsItem *parent = 0);
-    // GraphicsSpline(const GraphicsSpline &other);
     ~GraphicsSpline();
 
     GraphicsSpline* copy() const;
