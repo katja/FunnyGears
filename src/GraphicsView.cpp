@@ -46,11 +46,11 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent *event) {
     else if (m_editingState == Editing::ZoomOut)
         zoomOut();
     else
-        QGraphicsView::mousePressEvent(event);
+        QGraphicsView::mouseReleaseEvent(event);
 }
 
 void GraphicsView::keyPressEvent(QKeyEvent *event) {
-    if(event->key() == Qt::Key_Space){
+    if(event->key() == Qt::Key_Space) {
         setDragMode(QGraphicsView::ScrollHandDrag);
     } else {
         QGraphicsView::keyPressEvent(event);
@@ -58,7 +58,7 @@ void GraphicsView::keyPressEvent(QKeyEvent *event) {
 }
 
 void GraphicsView::keyReleaseEvent(QKeyEvent *event) {
-    if(event->key() == Qt::Key_Space){
+    if(event->key() == Qt::Key_Space) {
         setDragMode(QGraphicsView::RubberBandDrag);
     } else {
         QGraphicsView::keyReleaseEvent(event);
