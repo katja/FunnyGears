@@ -15,6 +15,9 @@ namespace Preferences {
     extern qreal PointRadius;
 
     extern qreal TangentLength;
+
+    extern qreal ZoomDefaultX;
+    extern qreal ZoomDefaultY;
 }
 
 #endif // PREFERENCES

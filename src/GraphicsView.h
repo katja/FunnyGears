@@ -16,6 +16,7 @@ public:
     ~GraphicsView();
 
     void wheelEvent(QWheelEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
 
@@ -23,9 +24,12 @@ public:
     void startEditing(Editing::State editingState);
     void executeEditingAction(Editing::Action editingAction);
 
+    void zoomToDefault();
+    void zoomIn();
+    void zoomOut();
+
 private:
     void initialize();
-    void zoomToDefault();
 
     Editing::State m_editingState;
 };

@@ -1,4 +1,5 @@
 #include "GraphicsView.h"
+#include "preferences.h"
 
 GraphicsView::GraphicsView(QWidget *parent) : QGraphicsView(parent) {
     initialize();
@@ -39,6 +40,15 @@ void GraphicsView::wheelEvent(QWheelEvent *event) {
     }
 }
 
+void GraphicsView::mouseReleaseEvent(QMouseEvent *event) {
+    if(m_editingState == Editing::ZoomIn)
+        zoomIn();
+    else if (m_editingState == Editing::ZoomOut)
+        zoomOut();
+    else
+        QGraphicsView::mousePressEvent(event);
+}
+
 void GraphicsView::keyPressEvent(QKeyEvent *event) {
     if(event->key() == Qt::Key_Space){
         setDragMode(QGraphicsView::ScrollHandDrag);
@@ -71,6 +81,21 @@ void GraphicsView::executeEditingAction(Editing::Action editingAction) {
         zoomToDefault();
 }
 
+void GraphicsView::zoomIn() {
+    qreal scaleFactor = 1.1f;
+    scale(scaleFactor, scaleFactor);
+}
+
+void GraphicsView::zoomOut() {
+    qreal scaleFactor = 0.9f;
+    scale(scaleFactor, scaleFactor);
+}
+
 void GraphicsView::zoomToDefault() {
-    std::cout << "TODO: zoomToDefault in GraphicsView" << std::endl;
+    fitInView(-0.5f * Preferences::ZoomDefaultX,
+            -0.5f * Preferences::ZoomDefaultY,
+            Preferences::ZoomDefaultX,
+            Preferences::ZoomDefaultY,
+            Qt::KeepAspectRatio);
+    centerOn(0, 0);
 }

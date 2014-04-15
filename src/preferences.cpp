@@ -15,3 +15,7 @@ qreal Preferences::HighlightedLineWidth(3);
 qreal Preferences::PointRadius(2.0f);
 
 qreal Preferences::TangentLength(40.0f);
+
+qreal Preferences::ZoomDefaultX(750.0f);
+
+qreal Preferences::ZoomDefaultY(750.0f);
