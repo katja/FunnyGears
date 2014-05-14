@@ -22,6 +22,18 @@ QIcon MainWindow::icon() const {
     return windowIcon();
 }
 
+void MainWindow::keyPressEvent(QKeyEvent *event) {
+    if(event->key() == Qt::Key_Escape ||
+        event->key() == Qt::Key_V ||
+        event->key() == Qt::Key_P ||
+        event->key() == Qt::Key_E) {
+        m_editToolBar->keyPressEvent(event);
+        if(event->isAccepted())
+            return;
+    }
+    QMainWindow::keyPressEvent(event);
+}
+
 void MainWindow::createMainProgramPart() {
 // GRAPHICSSCENE THINGS
     m_scene = new GraphicsScene(this);

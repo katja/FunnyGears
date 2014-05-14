@@ -33,7 +33,6 @@ ConnectionModel* ObjectScheduleView::setConnectionModel(ConnectionModel *model) 
 void ObjectScheduleView::addNewSplineItem() {
     GraphicsSpline *spline = new GraphicsSpline();
     m_sceneModel->addItem(spline);
-    m_connectionModel->turnOnEditingOf(spline);
 }
 
 //Helpermethod for removeItems()
@@ -81,9 +80,4 @@ void ObjectScheduleView::removeItems() {
             }
         }
     }
-}
-
-void ObjectScheduleView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles) {
-    QTreeView::dataChanged(topLeft, bottomRight, roles);
-    m_connectionModel->informModelDataChange(topLeft,bottomRight);
 }

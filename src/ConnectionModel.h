@@ -13,20 +13,21 @@ public:
     ConnectionModel(SceneTreeModel *model);
     ~ConnectionModel();
 
-    void turnOnEditingOf(QGraphicsItem *item);
-    void informModelDataChange(const QModelIndex &topLeft, const QModelIndex &bottomRight);
-
 signals:
-    void updateRegionInScene(const QList<QGraphicsItem*> &changedItems);
-    void startEditingItem(QGraphicsItem *item);
+    //signals a connected GraphicsScene needs to handle:
+    void selectOnly(QGraphicsItem*);
+    void selectAlso(QGraphicsItem*);
+    void selectNothing();
+    void selectNoMore(QGraphicsItem*);
+
     void oneGraphicsItemSelected(QGraphicsItem *item);
-    void manyOrNoneGraphicsItemSelected();
+    void noneOrManyGraphicsItemsSelected();
 
 public slots:
     void sceneSelectionChanged(GraphicsScene *scene);
-    void modelSelectionChanged(const QModelIndex &index, QItemSelectionModel::SelectionFlags command);
-    void select(const QModelIndex &index, QItemSelectionModel::SelectionFlags command);
-    void select(const QItemSelection &selection, QItemSelectionModel::SelectionFlags command);
+
+private slots:
+    void updateSelection(const QItemSelection &selected, const QItemSelection &deselected);
 
 private:
     enum Connection {
@@ -36,17 +37,13 @@ private:
     SceneTreeModel *m_sceneTreeModel;
 
     QList<QGraphicsItem*> m_selectedItems;
+    QList<QGraphicsItem*> m_selectedRubberBandItems;
     QList<QGraphicsItem*> m_changedItems;
 
-    void clearPreviousSelectionIn(ConnectionModel::Connection destination);
-    void addToModelSelection(GraphicsScene *scene);
-    void addToSceneSelection(QGraphicsItem *graphicsItem);
-    void removeFromSceneSelection(QGraphicsItem *graphicsItem);
-    void selectItemInModel(QGraphicsItem *item);
-
+    void changeSelectionInModel(QGraphicsItem *item, QItemSelectionModel::SelectionFlags command = QItemSelectionModel::Select);
+    void reportSelectionCount();
     QGraphicsItem* graphicOfRow(const QModelIndex &index);
-    bool clearingDemandedIn(QItemSelectionModel::SelectionFlags command);
-    bool geometryInSelection(const QModelIndex &index, QItemSelectionModel::SelectionFlags command);
+    bool selectionIncludesGraphicsItem(const QModelIndex &index, QItemSelectionModel::SelectionFlags command);
 
 
 };

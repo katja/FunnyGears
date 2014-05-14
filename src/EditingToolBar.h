@@ -16,6 +16,8 @@ public:
     bool addListener(ToolBarListener *listener);
     bool removeListener(ToolBarListener *listener);
 
+    void keyPressEvent(QKeyEvent *event);
+
 private slots:
     void toolChanged(bool);
     void executeZoomDefault();
@@ -29,6 +31,7 @@ private:
     void createEditingStateActions();
     void createEditingActionActions();
     void equipAction(QAction *action, QString name, QString toolTip, QKeySequence shortcut = 0);
+    QAction* editingStateActionWithKeyEvent(QKeyEvent *event) const;
 
     void stopEditing();
     void startEditing(Editing::State);

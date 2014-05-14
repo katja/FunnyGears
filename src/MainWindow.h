@@ -19,6 +19,9 @@ public:
 
     QIcon icon() const;
 
+protected:
+    void keyPressEvent(QKeyEvent *event);
+
 private:
     SceneTreeModel      *m_sceneModel;
     ObjectScheduleView  *m_objectScheduleView;

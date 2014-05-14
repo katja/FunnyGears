@@ -2,6 +2,7 @@
 #include "GraphicsScene.h"
 #include "preferences.h"
 #include "helpers.h"
+#include "Cursor.h"
 
 const int GraphicsSpline::Type = GraphicsSpline::UserType + Type::GraphicsSplineType;
 
@@ -17,7 +18,8 @@ GraphicsSpline::GraphicsSpline(GraphicsItem *parent) : GraphicsItem(parent), m_i
     int partColor = qrand() % 512 + 100;
     m_color = QColor(partColor / 5, partColor * 2 / 5, partColor % 256);
 
-    setCursor(Qt::OpenHandCursor);
+    // setCursor(Qt::OpenHandCursor);
+    // setCursor(CursorRental::pen());
     setToolTip("Description of what will happen or what to do"); //TODO: Add description
     setFlags( QGraphicsItem::ItemIsMovable
             | QGraphicsItem::ItemIsSelectable
@@ -179,6 +181,7 @@ QColor GraphicsSpline::color() const {
 void GraphicsSpline::addPoint(QPointF scenePos) {
     Point *p = new Point(this);
     p->setPos(mapFromScene(scenePos));
+    prepareGeometryChange();
     m_points.append(p);
     m_spline->addControlPoint(p->pos());
 }
@@ -210,14 +213,17 @@ int GraphicsSpline::type() const {
     return Type;
 }
 
-void GraphicsSpline::clickReceived(QPointF point) {
-    if(m_editingState == Editing::Pen)
+void GraphicsSpline::clickReceived(QPointF point, Editing::State state) {
+    std::cout << "GraphicsSpline::clickReceived and state: " << state << std::endl;
+    if(state == Editing::Pen)
         addPoint(point);
-    else if(m_editingState == Editing::Eraser)
+    else if(state == Editing::Eraser)
         removePointNear(point);
 }
 
 void GraphicsSpline::setToState(Editing::State state) {
+    std::cout << "GraphicsSpline::setToState " << state << std::endl;
+    //TODO: remove all EditingState things of all GraphicsItems!!!
     m_editingState = state;
 }
 
@@ -280,8 +286,6 @@ QPainterPath GraphicsSpline::tangentPath() const {
     path.addEllipse(tangentPoint, Preferences::PointRadius, Preferences::PointRadius);
     path.addPolygon(QPolygonF(tangentLine));
     return path;
-
-
 }
 
 void GraphicsSpline::adjustInSplineRange(real &value) const {

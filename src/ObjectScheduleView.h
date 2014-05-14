@@ -20,9 +20,6 @@ public slots:
     void addNewSplineItem();
     void removeItems();
 
-protected slots:
-    void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>());
-
 private:
     SceneTreeModel *m_sceneModel;
     int m_numberOfHiddenColumns;

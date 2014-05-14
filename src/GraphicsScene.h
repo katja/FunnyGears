@@ -16,45 +16,63 @@ public:
     GraphicsScene(qreal x, qreal y, qreal width, qreal height, QObject *parent = 0);
     ~GraphicsScene();
 
-    void setConnectionModel(ConnectionModel *selectionModel);
+    void setConnectionModel(ConnectionModel *connectionModel);
 
     void drawForeground(QPainter *painter, const QRectF &rect);
     void drawBackground(QPainter *painter, const QRectF &rect);
 
-    void addItem(QGraphicsItem *item);
     void removeItem(QGraphicsItem *item);
 
     QList<GraphicsItem*> selectedGraphicsItems() const;
 
-    void stopEditing();
     void startEditing(Editing::State editingState);
+    void stopEditing();
     void executeEditingAction(Editing::Action editingAction);
 
 private slots:
-    void updateItem(QGraphicsItem *item);
-    void updateItems(const QList<QGraphicsItem*> &changedItems);
-    void informModelOfSelectionChange();
-    void startEditingItem(QGraphicsItem *item, Editing::State editingStyle = Editing::Pen);
+    void reactOnSelectionChange();
+    void selectOnly(QGraphicsItem*);
+    void selectAlso(QGraphicsItem*);
+    void selectNothing();
+    void selectNoMore(QGraphicsItem*);
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
-    void keyReleaseEvent(QKeyEvent *keyEvent);
 
 private:
-    enum State {
-        VIEW, EDITING
+    enum class SelectionState {
+        OneItemRequested,
+        OneItem,
+        AllItems
     };
-    State m_currentState;
-    GraphicsItem *m_currentItem;
-    GraphicsSpline *m_currentSpline;
+    SelectionState m_selectionState;
+    Editing::State m_editingState;
+
+    bool m_selectionChangeInProgress;
+
     QPointF m_clickedPoint;
 
-    ConnectionModel *m_selectionModel;
+    ConnectionModel *m_connectionModel;
 
     void initialize();
     void updateAllViews(const QList<QRectF> &updateRegions) const;
-    void setAllItemsEnabled(bool enabled = true);
+
+    void switchToDefaultState();
+    void switchToPointerState();
+    void switchToPenState();
+    void switchToEraserState();
+
+    void activateAllItemSelection();
+    void activateOneItemSelection();
+    void activateItem(GraphicsItem *item);
+
+    void swapActiveItemTo(GraphicsItem *newActiveItem);
+
+    void setAllItemsEnabled(bool enabled = true, bool selectedOnesExcluded = false);
+    void setAllItemsFlags(QGraphicsItem::GraphicsItemFlags);
+    void expandAllItemsFlags(QGraphicsItem::GraphicsItemFlags);
+    void sendClickToSelectedItems();
     void reduceSelection(int leaveBehind);
     bool isGraphicsItemEditing(Editing::State editingStyle) const;
 

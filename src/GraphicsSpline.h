@@ -42,7 +42,7 @@ public:
     void pointMoveEvent(Point *point, QGraphicsSceneMouseEvent *event);
 
     int type() const;
-    void clickReceived(QPointF point);
+    void clickReceived(QPointF point, Editing::State state);
     void setToState(Editing::State state);
 
 private:

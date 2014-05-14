@@ -13,7 +13,7 @@ ObjectAttributesWidget::ObjectAttributesWidget(ConnectionModel *connectionModel,
     setWidget(m_noContentWidget);
 
     connect(m_connectionModel, SIGNAL(oneGraphicsItemSelected(QGraphicsItem*)), this, SLOT(selectItem(QGraphicsItem*)));
-    connect(m_connectionModel, SIGNAL(manyOrNoneGraphicsItemSelected()), this, SLOT(deselect()));
+    connect(m_connectionModel, SIGNAL(noneOrManyGraphicsItemsSelected()), this, SLOT(deselect()));
 }
 
 ObjectAttributesWidget::~ObjectAttributesWidget() {

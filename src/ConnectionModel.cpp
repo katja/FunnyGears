@@ -5,128 +5,78 @@
 
 ConnectionModel::ConnectionModel(SceneTreeModel *model) : QItemSelectionModel(model), m_sceneTreeModel(model) {
     std::cout << "ConnectionModel is created" << std::endl;
+    connect(this, SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+        this, SLOT(updateSelection(const QItemSelection&, const QItemSelection&)));
 }
 
 ConnectionModel::~ConnectionModel() {
     std::cout << "ConnectionModel is deleted" << std::endl;
 }
 
-void ConnectionModel::turnOnEditingOf(QGraphicsItem *item) {
-    clearPreviousSelectionIn(ConnectionModel::ALL);
-    selectItemInModel(item);
-    emit startEditingItem(item);
-}
-
-void ConnectionModel::informModelDataChange(const QModelIndex &topLeft, const QModelIndex &bottomRight) {
-    if(topLeft.parent() != bottomRight.parent()) {
-        std::cout << "ERROR: CHECK ConnectionModel::informModelDataChange METHOD - MAYBE SOLUTION AVAILABLE?" << std::endl;
-        return; //TODO in this case documentation says behaviour is undefined. But nevertheless there may be a better solution than doing nothing?
-    }
-    m_changedItems.clear();
-
-    if(topLeft.row() == bottomRight.row()) {
-        m_changedItems << graphicOfRow(topLeft);
-    } else {
-        QModelIndex parentIndex = topLeft.parent();
-        for(int row = topLeft.row(); row <= bottomRight.row(); ++row) {
-            QModelIndex index = parentIndex.child(row, 0); //column doesn't matter
-            m_changedItems << graphicOfRow(index);
-        }
-    }
-    emit updateRegionInScene(m_changedItems);
-}
-
 void ConnectionModel::sceneSelectionChanged(GraphicsScene *scene) {
-    clearPreviousSelectionIn(ConnectionModel::MODEL);
-    addToModelSelection(scene);
-}
+    QList<QGraphicsItem*> sceneSelectionItems = scene->selectedItems();
 
-void ConnectionModel::modelSelectionChanged(const QModelIndex &index, QItemSelectionModel::SelectionFlags command) {
-    if(clearingDemandedIn(command)) {
-        clearPreviousSelectionIn(ConnectionModel::SCENE);
-    }
-    if(geometryInSelection(index, command)) {
-
-        QGraphicsItem *graphicsItem = graphicOfRow(index);
-        if(!graphicsItem)
-            return;
-        if(QItemSelectionModel::Select & command) {
-            addToSceneSelection(graphicsItem);
-        }
-        if(QItemSelectionModel::Deselect & command) {
-            removeFromSceneSelection(graphicsItem);
+    foreach(QGraphicsItem *currentlySelected, m_selectedItems) {
+        if(!sceneSelectionItems.contains(currentlySelected)) {
+            changeSelectionInModel(currentlySelected, QItemSelectionModel::Deselect);
         }
     }
-}
 
-void ConnectionModel::select(const QModelIndex &index, QItemSelectionModel::SelectionFlags command) {
-    modelSelectionChanged(index, command);
-    QItemSelectionModel::select(index, command);
-}
-
-void ConnectionModel::select(const QItemSelection &selection, QItemSelectionModel::SelectionFlags command) {
-    foreach(QModelIndex index, selection.indexes()) {
-        modelSelectionChanged(index, command);
-    }
-    QItemSelectionModel::select(selection, command);
-}
-
-void ConnectionModel::clearPreviousSelectionIn(ConnectionModel::Connection destination) {
-    if(destination == ConnectionModel::MODEL || destination == ConnectionModel::ALL)
-        clearSelection(); //model: clear selection
-    if(destination == ConnectionModel::SCENE || destination == ConnectionModel::ALL) { //scene: clear selection
-        foreach(QGraphicsItem *item, m_selectedItems) {
-            item->setSelected(false);
+    foreach(QGraphicsItem* sceneItem, sceneSelectionItems) {
+        if(!m_selectedItems.contains(sceneItem)) {
+            changeSelectionInModel(sceneItem, QItemSelectionModel::Select);
         }
     }
-    emit manyOrNoneGraphicsItemSelected();
-    emit updateRegionInScene(m_selectedItems); //scene: update rendering (remove highlight of previous selection)
-    m_selectedItems.clear();
+    reportSelectionCount();
 }
 
-void ConnectionModel::addToModelSelection(GraphicsScene *scene) {
-    m_changedItems.clear();
-
-    QList<QGraphicsItem*> changedSceneItems = scene->selectedItems();
-    foreach(QGraphicsItem *graphicsItem, changedSceneItems) {
-        m_changedItems << graphicsItem;
-        m_selectedItems << graphicsItem;
-        selectItemInModel(graphicsItem);
+void ConnectionModel::updateSelection(const QItemSelection &selected, const QItemSelection &deselected) {
+    if(selectedRows(SceneTreeModel::NAME).size() == 0) {
+        m_selectedItems.clear();
+        emit selectNothing();
+    } else if(selectedRows(SceneTreeModel::NAME).size() == 1) {
+        QGraphicsItem *graphicsItem = graphicOfRow(selectedRows(SceneTreeModel::NAME).first());
+        if(graphicsItem) {
+            m_selectedItems.clear();
+            m_selectedItems << graphicsItem;
+            emit selectOnly(graphicsItem);
+        }
+    } else {
+        foreach(QModelIndex index, selected.indexes()) {
+            if(index.column() == SceneTreeModel::NAME) {
+                QGraphicsItem *graphicsItem = graphicOfRow(index);
+                if(graphicsItem) {
+                    m_selectedItems << graphicsItem;
+                    emit selectAlso(graphicsItem);
+                }
+            }
+        }
+        foreach(QModelIndex index, deselected.indexes()) {
+            if(index.column() == SceneTreeModel::NAME) {
+                QGraphicsItem *graphicsItem = graphicOfRow(index);
+                if(graphicsItem) {
+                    m_selectedItems.removeAll(graphicsItem);
+                    emit selectNoMore(graphicsItem);
+                }
+            }
+        }
     }
-    if(m_changedItems.size() == 1)
-        emit oneGraphicsItemSelected(m_changedItems.at(0));
-    emit updateRegionInScene(m_changedItems);
+    reportSelectionCount();
 }
 
-void ConnectionModel::addToSceneSelection(QGraphicsItem *graphicsItem) {
-    graphicsItem->setSelected(true);
-    m_changedItems.clear();
-    m_changedItems << graphicsItem;
-    m_selectedItems << graphicsItem;
-    emit oneGraphicsItemSelected(graphicsItem);
-    emit updateRegionInScene(m_changedItems);
-}
-
-void ConnectionModel::removeFromSceneSelection(QGraphicsItem *graphicsItem) {
-    int index = m_selectedItems.indexOf(graphicsItem);
-    if(index >= 0) { //index is in list
-        graphicsItem->setSelected(false);
-        m_changedItems.clear();
-        m_changedItems << graphicsItem;
-        m_selectedItems.removeAt(index);
-        emit manyOrNoneGraphicsItemSelected();
-        emit updateRegionInScene(m_changedItems);
-    }
-    if(graphicsItem->isSelected()) {
-        std::cout << "ERROR: AN ITEM IS SELECTED AND MUST NOT BE!" << std::endl;
-    }
-}
-
-void ConnectionModel::selectItemInModel(QGraphicsItem *item) {
+void ConnectionModel::changeSelectionInModel(QGraphicsItem *item, QItemSelectionModel::SelectionFlags command) {
     QModelIndex index = m_sceneTreeModel->itemWithGraphicsItem(item);
 
     if(index.isValid()) {
-        QItemSelectionModel::select(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+            QItemSelectionModel::select(index, command | QItemSelectionModel::Rows);
+    }
+}
+
+void ConnectionModel::reportSelectionCount() {
+    if(m_selectedItems.size() == 1) {
+        emit oneGraphicsItemSelected(m_selectedItems.first());
+    } else {
+        emit noneOrManyGraphicsItemsSelected();
     }
 }
 
@@ -140,9 +90,7 @@ QGraphicsItem* ConnectionModel::graphicOfRow(const QModelIndex &index) {
     return graphicsItem;
 }
 
-bool ConnectionModel::clearingDemandedIn(QItemSelectionModel::SelectionFlags command) {
-    return QItemSelectionModel::Clear & command;
-}
-bool ConnectionModel::geometryInSelection(const QModelIndex &index, QItemSelectionModel::SelectionFlags command) {
-    return QItemSelectionModel::Rows & command || index.column() == SceneTreeModel::GEOM;
+bool ConnectionModel::selectionIncludesGraphicsItem(const QModelIndex &index, QItemSelectionModel::SelectionFlags command) {
+    return index.row() >= 0 //if nothing is selected the model uses a index of -1
+        && (QItemSelectionModel::Rows & command || index.column() == SceneTreeModel::GEOM);
 }

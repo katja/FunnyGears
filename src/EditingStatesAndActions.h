@@ -4,8 +4,9 @@
 namespace Editing {
     enum State : int {
         NoEditing = 0,
-        Pen = 1,
-        Eraser = 2,
+        Pointer = 1,
+        Pen,
+        Eraser,
         ZoomIn,
         ZoomOut,
         STATE_SIZE
