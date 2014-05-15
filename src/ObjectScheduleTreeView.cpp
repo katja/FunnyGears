@@ -15,7 +15,7 @@ ObjectScheduleTreeView::ObjectScheduleTreeView(SceneTreeModel *sceneModel, QWidg
 
     hideColumn(SceneTreeModel::TRANSLATION);
     hideColumn(SceneTreeModel::ROTATION);
-    hideColumn(SceneTreeModel::GEOM);
+    hideColumn(SceneTreeModel::GRAPHIC);
     m_numberOfHiddenColumns = 3;
 }
 

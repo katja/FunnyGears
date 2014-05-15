@@ -2,6 +2,7 @@
 #define CONNECTION_MODEL
 
 #include "stable.h"
+#include "GraphicsItem.h"
 class GraphicsScene;
 class SceneTreeModel;
 
@@ -15,12 +16,12 @@ public:
 
 signals:
     //signals a connected GraphicsScene needs to handle:
-    void selectOnly(QGraphicsItem*);
-    void selectAlso(QGraphicsItem*);
+    void selectOnly(GraphicsItem*);
+    void selectAlso(GraphicsItem*);
     void selectNothing();
-    void selectNoMore(QGraphicsItem*);
+    void selectNoMore(GraphicsItem*);
 
-    void oneGraphicsItemSelected(QGraphicsItem *item);
+    void oneGraphicsItemSelected(GraphicsItem *item);
     void noneOrManyGraphicsItemsSelected();
 
 public slots:
@@ -36,13 +37,11 @@ private:
 
     SceneTreeModel *m_sceneTreeModel;
 
-    QList<QGraphicsItem*> m_selectedItems;
-    QList<QGraphicsItem*> m_selectedRubberBandItems;
-    QList<QGraphicsItem*> m_changedItems;
+    QList<GraphicsItem*> m_selectedItems;
 
-    void changeSelectionInModel(QGraphicsItem *item, QItemSelectionModel::SelectionFlags command = QItemSelectionModel::Select);
+    void changeSelectionInModel(GraphicsItem *item, QItemSelectionModel::SelectionFlags command = QItemSelectionModel::Select);
     void reportSelectionCount();
-    QGraphicsItem* graphicOfRow(const QModelIndex &index);
+    GraphicsItem* graphicOfRow(const QModelIndex &index);
     bool selectionIncludesGraphicsItem(const QModelIndex &index, QItemSelectionModel::SelectionFlags command);
 
 

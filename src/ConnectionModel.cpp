@@ -14,15 +14,15 @@ ConnectionModel::~ConnectionModel() {
 }
 
 void ConnectionModel::sceneSelectionChanged(GraphicsScene *scene) {
-    QList<QGraphicsItem*> sceneSelectionItems = scene->selectedItems();
+    QList<GraphicsItem*> sceneSelectionItems = scene->selectedGraphicsItems();
 
-    foreach(QGraphicsItem *currentlySelected, m_selectedItems) {
+    foreach(GraphicsItem *currentlySelected, m_selectedItems) {
         if(!sceneSelectionItems.contains(currentlySelected)) {
             changeSelectionInModel(currentlySelected, QItemSelectionModel::Deselect);
         }
     }
 
-    foreach(QGraphicsItem* sceneItem, sceneSelectionItems) {
+    foreach(GraphicsItem* sceneItem, sceneSelectionItems) {
         if(!m_selectedItems.contains(sceneItem)) {
             changeSelectionInModel(sceneItem, QItemSelectionModel::Select);
         }
@@ -35,7 +35,7 @@ void ConnectionModel::updateSelection(const QItemSelection &selected, const QIte
         m_selectedItems.clear();
         emit selectNothing();
     } else if(selectedRows(SceneTreeModel::NAME).size() == 1) {
-        QGraphicsItem *graphicsItem = graphicOfRow(selectedRows(SceneTreeModel::NAME).first());
+        GraphicsItem *graphicsItem = graphicOfRow(selectedRows(SceneTreeModel::NAME).first());
         if(graphicsItem) {
             m_selectedItems.clear();
             m_selectedItems << graphicsItem;
@@ -44,7 +44,7 @@ void ConnectionModel::updateSelection(const QItemSelection &selected, const QIte
     } else {
         foreach(QModelIndex index, selected.indexes()) {
             if(index.column() == SceneTreeModel::NAME) {
-                QGraphicsItem *graphicsItem = graphicOfRow(index);
+                GraphicsItem *graphicsItem = graphicOfRow(index);
                 if(graphicsItem) {
                     m_selectedItems << graphicsItem;
                     emit selectAlso(graphicsItem);
@@ -53,7 +53,7 @@ void ConnectionModel::updateSelection(const QItemSelection &selected, const QIte
         }
         foreach(QModelIndex index, deselected.indexes()) {
             if(index.column() == SceneTreeModel::NAME) {
-                QGraphicsItem *graphicsItem = graphicOfRow(index);
+                GraphicsItem *graphicsItem = graphicOfRow(index);
                 if(graphicsItem) {
                     m_selectedItems.removeAll(graphicsItem);
                     emit selectNoMore(graphicsItem);
@@ -64,7 +64,7 @@ void ConnectionModel::updateSelection(const QItemSelection &selected, const QIte
     reportSelectionCount();
 }
 
-void ConnectionModel::changeSelectionInModel(QGraphicsItem *item, QItemSelectionModel::SelectionFlags command) {
+void ConnectionModel::changeSelectionInModel(GraphicsItem *item, QItemSelectionModel::SelectionFlags command) {
     QModelIndex index = m_sceneTreeModel->itemWithGraphicsItem(item);
 
     if(index.isValid()) {
@@ -80,17 +80,17 @@ void ConnectionModel::reportSelectionCount() {
     }
 }
 
-QGraphicsItem* ConnectionModel::graphicOfRow(const QModelIndex &index) {
-    QModelIndex graphicsItemIndex = index.sibling(index.row(), SceneTreeModel::GEOM);
+GraphicsItem* ConnectionModel::graphicOfRow(const QModelIndex &index) {
+    QModelIndex graphicsItemIndex = index.sibling(index.row(), SceneTreeModel::GRAPHIC);
     if(!graphicsItemIndex.isValid())
         return 0;
     void *data = graphicsItemIndex.internalPointer(); //TODO: refactor SceneTreeModel and -Item not to use in every column same QModelIndex, but f.ex. in the geom column the m_graphicsItem of the SceneTreeItem
     SceneTreeItem *item = static_cast<SceneTreeItem*>(data);
-    QGraphicsItem *graphicsItem = item->graphicsItem();
+    GraphicsItem *graphicsItem = item->graphicsItem();
     return graphicsItem;
 }
 
 bool ConnectionModel::selectionIncludesGraphicsItem(const QModelIndex &index, QItemSelectionModel::SelectionFlags command) {
     return index.row() >= 0 //if nothing is selected the model uses a index of -1
-        && (QItemSelectionModel::Rows & command || index.column() == SceneTreeModel::GEOM);
+        && (QItemSelectionModel::Rows & command || index.column() == SceneTreeModel::GRAPHIC);
 }

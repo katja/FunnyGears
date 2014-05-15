@@ -2,17 +2,18 @@
 #define SCENE_TREE_ITEM
 
 #include "stable.h"
+#include "GraphicsScene.h"
 
 class SceneTreeItem {
 
 public:
-    SceneTreeItem();
-    SceneTreeItem(QGraphicsItem *graphicsItem, SceneTreeItem *parent);
+    SceneTreeItem(GraphicsScene *graphicsScene);
+    SceneTreeItem(GraphicsItem *graphicsItem, SceneTreeItem *parent);
     ~SceneTreeItem();
 
     bool            isRoot() const;
 
-    SceneTreeItem*  addChild(QGraphicsItem *graphicsItem = new QGraphicsRectItem(0, 0, 10, 10));
+    SceneTreeItem*  addChild(GraphicsItem *graphicsItem);
     bool            removeChild(SceneTreeItem *child);
     bool            removeChild(int childIndex);
 
@@ -30,8 +31,8 @@ public:
 
 
     QString         type() const;
-    QGraphicsItem*  graphicsItem() const;
-    SceneTreeItem*  itemWithGraphicsItem(const QGraphicsItem *graphicsItem) const;
+    GraphicsItem*   graphicsItem() const;
+    SceneTreeItem*  itemWithGraphicsItem(const GraphicsItem *graphicsItem) const;
 
     void            translate(const QVector2D &translation);
     QVector2D       getTranslation() const;
@@ -40,13 +41,14 @@ public:
 
 
 private:
-    QGraphicsItem *m_graphicsItem;
-
     bool m_isRoot;
+    GraphicsScene *m_graphicsScene;
+
     SceneTreeItem *m_parent;
     QList<SceneTreeItem*> m_children;
 
     QString m_name;
+    GraphicsItem *m_graphicsItem;
     bool m_isVisible;
 
     QVector2D m_translation; //translation

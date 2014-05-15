@@ -32,9 +32,9 @@ GraphicsScene::~GraphicsScene() {
 void GraphicsScene::setConnectionModel(ConnectionModel *connectionModel) {
     m_connectionModel = connectionModel;
     connect(this, SIGNAL(selectionChanged()), this, SLOT(reactOnSelectionChange()));
-    connect(m_connectionModel, SIGNAL(selectOnly(QGraphicsItem*)), this, SLOT(selectOnly(QGraphicsItem*)));
-    connect(m_connectionModel, SIGNAL(selectAlso(QGraphicsItem*)), this, SLOT(selectAlso(QGraphicsItem*)));
-    connect(m_connectionModel, SIGNAL(selectNoMore(QGraphicsItem*)), this, SLOT(selectNoMore(QGraphicsItem*)));
+    connect(m_connectionModel, SIGNAL(selectOnly(GraphicsItem*)), this, SLOT(selectOnly(GraphicsItem*)));
+    connect(m_connectionModel, SIGNAL(selectAlso(GraphicsItem*)), this, SLOT(selectAlso(GraphicsItem*)));
+    connect(m_connectionModel, SIGNAL(selectNoMore(GraphicsItem*)), this, SLOT(selectNoMore(GraphicsItem*)));
     connect(m_connectionModel, SIGNAL(selectNothing()), this, SLOT(selectNothing()));
 }
 
@@ -100,6 +100,16 @@ void GraphicsScene::removeItem(QGraphicsItem *item) {
     QGraphicsScene::removeItem(item);
 }
 
+QList<GraphicsItem*> GraphicsScene::graphicsItems() const {
+    QList<GraphicsItem*> list;
+    foreach(QGraphicsItem *qItem, items()) {
+        if(GraphicsItem::isGraphicsItem(qItem)) {
+            list << static_cast<GraphicsItem*>(qItem);
+        }
+    }
+    return list;
+}
+
 QList<GraphicsItem*> GraphicsScene::selectedGraphicsItems() const {
     QList<GraphicsItem*> list;
     foreach(QGraphicsItem *qItem, selectedItems()) {
@@ -145,9 +155,9 @@ void GraphicsScene::reactOnSelectionChange() {
         activateOneItemSelection();
 }
 
-void GraphicsScene::selectOnly(QGraphicsItem *qItem) {
+void GraphicsScene::selectOnly(GraphicsItem *qItem) {
     m_selectionChangeInProgress = true;
-    if(m_selectionState == SelectionState::OneItem && GraphicsItem::isGraphicsItem(qItem))
+    if(m_selectionState == SelectionState::OneItem)
         swapActiveItemTo(static_cast<GraphicsItem*>(qItem));
     else {
         clearSelection();
@@ -160,7 +170,7 @@ void GraphicsScene::selectOnly(QGraphicsItem *qItem) {
     reactOnSelectionChange();
 }
 
-void GraphicsScene::selectAlso(QGraphicsItem *qItem) {
+void GraphicsScene::selectAlso(GraphicsItem *qItem) {
     if(m_selectionState == SelectionState::OneItem)
         //no more item can be selected => inform connection model
         reactOnSelectionChange();
@@ -168,6 +178,14 @@ void GraphicsScene::selectAlso(QGraphicsItem *qItem) {
         qItem->setSelected(true);
     else
         std::cout << "selection was not possible :-(" << std::endl;
+}
+
+void GraphicsScene::selectNoMore(GraphicsItem *qItem) {
+    if(m_selectionState == SelectionState::OneItem && qItem->isSelected()) {
+        selectNothing();
+    } else {
+        qItem->setSelected(false);
+    }
 }
 
 void GraphicsScene::selectNothing() {
@@ -178,14 +196,6 @@ void GraphicsScene::selectNothing() {
         activateOneItemSelection();
     } else {
         clearSelection();
-    }
-}
-
-void GraphicsScene::selectNoMore(QGraphicsItem *qItem) {
-    if(m_selectionState == SelectionState::OneItem && qItem->isSelected()) {
-        selectNothing();
-    } else {
-        qItem->setSelected(false);
     }
 }
 
@@ -292,6 +302,8 @@ void GraphicsScene::swapActiveItemTo(GraphicsItem *newActiveItem) {
 }
 
 void GraphicsScene::setAllItemsEnabled(bool enabled, bool selectedOnesExcluded) {
+    //TODO: actually here an GraphicsItem should be used instead of QGraphicsItem!!!
+    //But as items() is probably much faster than graphicsItems(), I use this variant up to now.
     foreach(QGraphicsItem* item, items()) {
         if(!(selectedOnesExcluded && item->isSelected()))
             item->setEnabled(enabled);
@@ -299,6 +311,8 @@ void GraphicsScene::setAllItemsEnabled(bool enabled, bool selectedOnesExcluded) 
 }
 
 void GraphicsScene::setAllItemsFlags(QGraphicsItem::GraphicsItemFlags flags) {
+    //TODO: actually here an GraphicsItem should be used instead of QGraphicsItem!!!
+    //But as items() is probably much faster than graphicsItems(), I use this variant up to now.
     foreach(QGraphicsItem* item, items()) {
         if(item->isSelected())
             item->setFlags(flags | QGraphicsItem::ItemIsSelectable);
@@ -308,6 +322,8 @@ void GraphicsScene::setAllItemsFlags(QGraphicsItem::GraphicsItemFlags flags) {
 }
 
 void GraphicsScene::expandAllItemsFlags(QGraphicsItem::GraphicsItemFlags flags) {
+    //TODO: actually here an GraphicsItem should be used instead of QGraphicsItem!!!
+    //But as items() is probably much faster than graphicsItems(), I use this variant up to now.
     foreach(QGraphicsItem* item, items()) {
         item->setFlags(flags | item->flags());
     }

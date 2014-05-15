@@ -23,6 +23,7 @@ public:
 
     void removeItem(QGraphicsItem *item);
 
+    QList<GraphicsItem*> graphicsItems() const;
     QList<GraphicsItem*> selectedGraphicsItems() const;
 
     void startEditing(Editing::State editingState);
@@ -31,10 +32,10 @@ public:
 
 private slots:
     void reactOnSelectionChange();
-    void selectOnly(QGraphicsItem*);
-    void selectAlso(QGraphicsItem*);
+    void selectOnly(GraphicsItem*);
+    void selectAlso(GraphicsItem*);
+    void selectNoMore(GraphicsItem*);
     void selectNothing();
-    void selectNoMore(QGraphicsItem*);
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);

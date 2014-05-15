@@ -4,6 +4,7 @@
 #include "stable.h"
 #include "SceneTreeModel.h"
 #include "ConnectionModel.h"
+#include "GraphicsItem.h"
 #include "GraphicsItemAttributesWidget.h"
 
 class ObjectAttributesWidget : public QDockWidget {
@@ -15,7 +16,7 @@ public:
     ~ObjectAttributesWidget();
 
 private slots:
-    void selectItem(QGraphicsItem *graphicsItem);
+    void selectItem(GraphicsItem *graphicsItem);
     void deselect();
 
 private:

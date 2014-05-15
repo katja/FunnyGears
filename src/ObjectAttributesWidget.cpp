@@ -12,7 +12,7 @@ ObjectAttributesWidget::ObjectAttributesWidget(ConnectionModel *connectionModel,
     m_noContentWidget = new QWidget(this);
     setWidget(m_noContentWidget);
 
-    connect(m_connectionModel, SIGNAL(oneGraphicsItemSelected(QGraphicsItem*)), this, SLOT(selectItem(QGraphicsItem*)));
+    connect(m_connectionModel, SIGNAL(oneGraphicsItemSelected(GraphicsItem*)), this, SLOT(selectItem(GraphicsItem*)));
     connect(m_connectionModel, SIGNAL(noneOrManyGraphicsItemsSelected()), this, SLOT(deselect()));
 }
 
@@ -20,7 +20,7 @@ ObjectAttributesWidget::~ObjectAttributesWidget() {
     std::cout << "ObjectAttributesWidget is deleted" << std::endl;
 }
 
-void ObjectAttributesWidget::selectItem(QGraphicsItem *item) {
+void ObjectAttributesWidget::selectItem(GraphicsItem *item) {
     GraphicsItemAttributesWidget *currentWidget = 0;
     int i = 0;
     while(currentWidget == 0 && i < m_graphicsItemWidgets.size()) {

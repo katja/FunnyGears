@@ -32,19 +32,10 @@ SceneTreeModel::SceneTreeModel(GraphicsScene *scene, QObject *parent) : QAbstrac
     dataHash = new QHash<Qt::ItemDataRole, QString>();
     dataHash->insert(Qt::DisplayRole, "Geometry");
     dataHash->insert(Qt::ToolTipRole, "Object, displayed in the Scene");
-    m_headHash.insert(GEOM, *dataHash);
+    m_headHash.insert(GRAPHIC, *dataHash);
 
-    m_rootItem = new SceneTreeItem();
-
-    if(!m_graphicsScene->items().empty()) {
-        QList<QGraphicsItem*> sceneItems = m_graphicsScene->items();
-        foreach(QGraphicsItem *graphicsItem, sceneItems) {
-            m_rootItem->addChild(graphicsItem);
-        }
-        emit dataChanged(QModelIndex(), index(sceneItems.size() - 1, m_headHash.size() - 1, QModelIndex()));
-    } else {
-        emit dataChanged(QModelIndex(), QModelIndex());
-    }
+    m_rootItem = new SceneTreeItem(m_graphicsScene);
+    emit dataChanged(QModelIndex(), QModelIndex());
 }
 
 SceneTreeModel::~SceneTreeModel() {
@@ -154,13 +145,13 @@ bool SceneTreeModel::setData(const QModelIndex &index, const QVariant &value, in
     return true;
 }
 
-QModelIndex SceneTreeModel::itemWithGraphicsItem(const QGraphicsItem *graphicsItem) {
-    SceneTreeItem *itemWithGeometry = m_rootItem->itemWithGraphicsItem(graphicsItem);
-    if(!itemWithGeometry) {
+QModelIndex SceneTreeModel::itemWithGraphicsItem(const GraphicsItem *graphicsItem) {
+    SceneTreeItem *graphicsTreeItem = m_rootItem->itemWithGraphicsItem(graphicsItem);
+    if(!graphicsTreeItem) {
         return QModelIndex();
     }
-    int row = itemWithGeometry->childNumber();
-    return createIndex(row, GEOM, itemWithGeometry);
+    int row = graphicsTreeItem->childNumber();
+    return createIndex(row, GRAPHIC, graphicsTreeItem);
 }
 
 bool SceneTreeModel::toggleValue(const QModelIndex &index) {
@@ -198,64 +189,28 @@ Qt::ItemFlags SceneTreeModel::flags(const QModelIndex &index) const {
     }
 }
 
-bool SceneTreeModel::addItem(QGraphicsItem *graphicsItem) {
+bool SceneTreeModel::addItem(GraphicsItem *graphicsItem) {
     int lastRow = rowCount(QModelIndex());
 
     beginInsertRows(QModelIndex(), lastRow, 1);
-        m_graphicsScene->addItem(graphicsItem);
+    //TODO: is the "1" in row above correct?
+        // m_graphicsScene->addItem(graphicsItem);
         m_rootItem->addChild(graphicsItem);
     endInsertRows();
-    emit graphicsItemAdded(graphicsItem);
     return true;
 }
 
 bool SceneTreeModel::remove(QModelIndex index) {
     if(!index.isValid())
         return false;
-    return removeRows(index.row(), 1, index.parent());
-}
-
-bool SceneTreeModel::insertRows(int row, int count, const QModelIndex &parent) {
-    if(parent.isValid() || row < 0 || row > m_rootItem->numberOfChildren())
+    SceneTreeItem *item = findItemBy(index);
+    if(!item->isRemovable())
         return false;
 
-    SceneTreeItem *parentItem = findItemBy(parent);
-    if(!parentItem)
-        return false;
+    m_graphicsScene->removeItem(item->graphicsItem());
 
-    beginInsertRows(parent, row, count);
-    for(int i = 0; i < count; ++i) {
-        parentItem->addChild();
-    }
-    endInsertRows();
-    return true;
-}
-
-bool SceneTreeModel::removeRows(int row, int count, const QModelIndex &parent) {
-    if(parent.isValid() || row < 0 || count < 0)
-        return false;
-
-    SceneTreeItem *parentItem = findItemBy(parent);
-
-    //if row to start would be behind available rows (=number of children) nothing can be done
-    if(parentItem->numberOfChildren() <= row)
-        return false;
-
-    //if count would be longer than children list, shorten it to the suitable size
-    int lastItemToRemove = (row + count > parentItem->numberOfChildren()) ?
-                                parentItem->numberOfChildren() : row + count;
-
-
-    for(int i = row; i < lastItemToRemove; ++i) {
-        emit graphicsItemRemoved(parentItem->child(i)->graphicsItem());
-        m_graphicsScene->removeItem(parentItem->child(i)->graphicsItem());
-        delete parentItem->child(i)->graphicsItem();
-    }
-
-    beginRemoveRows(parent, row, lastItemToRemove);
-    for(int i = row; i < lastItemToRemove; ++i) {
-        parentItem->removeChild(i);
-    }
+    beginRemoveRows(index.parent(), index.row(), index.row() + 1);
+    item->parent()->removeChild(index.row());
     endRemoveRows();
     return true;
 }

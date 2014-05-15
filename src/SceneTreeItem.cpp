@@ -1,27 +1,33 @@
 #include "SceneTreeItem.h"
 
-SceneTreeItem::SceneTreeItem() {
+SceneTreeItem::SceneTreeItem(GraphicsScene *graphicsScene) : m_graphicsScene(graphicsScene) {
     std::cout << "SceneTreeItem-Root is created" << std::endl;
     m_isRoot = true;
 }
 
-SceneTreeItem::SceneTreeItem(QGraphicsItem *graphicsItem, SceneTreeItem *parent) : m_graphicsItem(graphicsItem), m_isRoot(false), m_parent(parent) {
+SceneTreeItem::SceneTreeItem(GraphicsItem *graphicsItem, SceneTreeItem *parent) : m_isRoot(false), m_parent(parent), m_graphicsItem(graphicsItem) {
     std::cout << "SceneTreeItem is created" << std::endl;
     m_name = "Unnamed Item";
     m_isVisible = true;
+    m_graphicsScene = m_parent->m_graphicsScene;
+    m_graphicsScene->addItem(graphicsItem);
 }
 
 SceneTreeItem::~SceneTreeItem() {
     std::cout << "SceneTreeItem is deleted" << std::endl;
     qDeleteAll(m_children);
+    delete m_graphicsItem;
 }
 
 bool SceneTreeItem::isRoot() const {
     return m_isRoot;
 }
 
-SceneTreeItem* SceneTreeItem::addChild(QGraphicsItem *graphicsItem) {
+SceneTreeItem* SceneTreeItem::addChild(GraphicsItem *graphicsItem) {
     SceneTreeItem *child = new SceneTreeItem(graphicsItem, this);
+    foreach(GraphicsItem *graphicsChild, graphicsItem->childItems()) {
+        child->addChild(graphicsChild);
+    }
     m_children.append(child);
     return child;
 }
@@ -79,18 +85,18 @@ bool SceneTreeItem::isVisible() const {
 }
 
 bool SceneTreeItem::isRemovable() const {
-    return true; //TODO: make suitable
+    return m_parent->isRoot();
 }
 
 QString SceneTreeItem::type() const {
     return "m_graphicsItem"; //TODO: return suitable stuff instead of this stub!
 }
 
-QGraphicsItem* SceneTreeItem::graphicsItem() const { //TODO: But implement the QMetaTypeClass before!!!
+GraphicsItem* SceneTreeItem::graphicsItem() const { //TODO: But implement the QMetaTypeClass before!!!
     return m_graphicsItem;
 }
 
-SceneTreeItem* SceneTreeItem::itemWithGraphicsItem(const QGraphicsItem *graphicsItem) const {
+SceneTreeItem* SceneTreeItem::itemWithGraphicsItem(const GraphicsItem *graphicsItem) const {
     if(numberOfChildren() > 0) {
         foreach(SceneTreeItem *item, m_children) {
             if(item->graphicsItem() == graphicsItem) {

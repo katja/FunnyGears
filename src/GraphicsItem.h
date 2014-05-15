@@ -18,8 +18,6 @@ public:
     virtual void clickReceived(QPointF point, Editing::State state) = 0;
     virtual void setToState(Editing::State state) = 0;
 
-    QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value);
-
     QList<GraphicsItem*> childItems() const;
     QList<GraphicsItem*> collidingItems(Qt::ItemSelectionMode mode = Qt::IntersectsItemShape) const;
     GraphicsItem* commonAncestorItem(const GraphicsItem *other) const;

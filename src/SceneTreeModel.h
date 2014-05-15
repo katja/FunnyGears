@@ -11,12 +11,13 @@ class SceneTreeModel : public QAbstractItemModel {
 Q_OBJECT
 
 public:
+    //Any already inserted QGraphicsItems or GraphicsItems of the GraphicsScene used here are not observed in the SceneTreeModel!!!
     SceneTreeModel(GraphicsScene *scene, QObject *parent = 0);
     ~SceneTreeModel();
 
 
     enum Data {
-        NAME, VISIBILITY, TYPE, TRANSLATION, ROTATION, GEOM
+        NAME, VISIBILITY, TYPE, TRANSLATION, ROTATION, GRAPHIC
     };
 
     /** Sets a new root item. Root Item may be an item of quite another scene tree.
@@ -70,7 +71,7 @@ public:
      *  Returns model index of the first item with given graphicsItem
      *  or QModelIndex() if graphicsItem can't be found in an item.
      */
-    QModelIndex itemWithGraphicsItem(const QGraphicsItem *graphicsItem);
+    QModelIndex itemWithGraphicsItem(const GraphicsItem *graphicsItem);
 
     /** Toggles the boolean values (up to now there is only the visibility value).
      *  Returns true, if toggling was possible.
@@ -86,17 +87,14 @@ public:
      */
     Qt::ItemFlags flags(const QModelIndex &index) const; //The base class implementation returns a combination of flags that enables the item (ItemIsEnabled) and allows it to be selected (ItemIsSelectable). ItemIsEditable must be returned!
 
-    bool addItem(QGraphicsItem *graphicsItem);
+    bool addItem(GraphicsItem *graphicsItem);
     bool remove(QModelIndex index);
-
-    bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex());
-    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
 
 signals:
     void layoutChanged(const QList<QPersistentModelIndex> &parents = QList<QPersistentModelIndex>(), QAbstractItemModel::LayoutChangeHint hint = QAbstractItemModel::NoLayoutChangeHint);
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>());
-    void graphicsItemAdded(QGraphicsItem *graphicsItem);
-    void graphicsItemRemoved(QGraphicsItem *graphicsItem);
+    // void graphicsItemAdded(QGraphicsItem *graphicsItem);
+    // void graphicsItemRemoved(QGraphicsItem *graphicsItem);
 
 private:
     SceneTreeItem *m_rootItem;

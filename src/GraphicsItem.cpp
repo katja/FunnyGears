@@ -15,12 +15,6 @@ int GraphicsItem::type() const {
     return Type;
 }
 
-//TODO: delete this method!!! This is only for testing and understanding of information of qt
-QVariant GraphicsItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value) {
-    // std::cout << "GraphicsItem::itemChange(" << change << ", " << value.toString().toStdString() << ") called" << std::endl;
-    return QGraphicsItem::itemChange(change, value);
-}
-
 QList<GraphicsItem*> GraphicsItem::childItems() const {
     return toGraphicsList(QGraphicsItem::childItems());
 }
