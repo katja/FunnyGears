@@ -42,7 +42,7 @@ void MainWindow::createMainProgramPart() {
 
 // MODEL/VIEW THINGS
     m_sceneModel = new SceneTreeModel(m_scene, this);
-    m_objectScheduleView = new ObjectScheduleView(m_sceneModel, this);
+    m_objectScheduleView = new ObjectScheduleTreeView(m_sceneModel, this);
 
 // CONNECTION
     ConnectionModel *connectionModel = new ConnectionModel(m_sceneModel);

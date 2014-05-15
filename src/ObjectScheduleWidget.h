@@ -2,14 +2,14 @@
 #define OBJECT_SCHEDULE_WIDGET
 
 #include "stable.h"
-#include "ObjectScheduleView.h"
+#include "ObjectScheduleTreeView.h"
 
 class ObjectScheduleWidget : public QDockWidget {
 
 Q_OBJECT
 
 public:
-    ObjectScheduleWidget(ObjectScheduleView *objectSchedule, QWidget *parent = 0);
+    ObjectScheduleWidget(ObjectScheduleTreeView *objectSchedule, QWidget *parent = 0);
     ~ObjectScheduleWidget();
 
 private slots:
@@ -17,7 +17,7 @@ private slots:
     void addGear();
 
 private:
-    ObjectScheduleView *m_objectSchedule;
+    ObjectScheduleTreeView *m_objectSchedule;
 
     QPushButton *m_addItemButton,
                 *m_removeItemButton;

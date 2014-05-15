@@ -1,6 +1,6 @@
 #include "ObjectScheduleWidget.h"
 
-ObjectScheduleWidget::ObjectScheduleWidget(ObjectScheduleView *objectSchedule, QWidget *parent)
+ObjectScheduleWidget::ObjectScheduleWidget(ObjectScheduleTreeView *objectSchedule, QWidget *parent)
 : QDockWidget("Object Schedule", parent, Qt::Widget), m_objectSchedule(objectSchedule) {
     std::cout << "ObjectScheduleWidget is created" << std::endl;
 

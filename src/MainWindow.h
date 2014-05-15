@@ -5,7 +5,7 @@
 #include "GraphicsView.h"
 #include "GraphicsScene.h"
 #include "SceneTreeModel.h"
-#include "ObjectScheduleView.h"
+#include "ObjectScheduleTreeView.h"
 #include "ObjectScheduleWidget.h"
 #include "ObjectAttributesWidget.h"
 
@@ -24,7 +24,7 @@ protected:
 
 private:
     SceneTreeModel      *m_sceneModel;
-    ObjectScheduleView  *m_objectScheduleView;
+    ObjectScheduleTreeView  *m_objectScheduleView;
 
     GraphicsView        *m_view;
     GraphicsScene       *m_scene;

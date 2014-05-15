@@ -1,10 +1,10 @@
-#include "ObjectScheduleView.h"
+#include "ObjectScheduleTreeView.h"
 #include "YesNoDelegate.h"
 #include "GraphicsSpline.h"
 
-ObjectScheduleView::ObjectScheduleView(SceneTreeModel *sceneModel, QWidget *parent) : QTreeView(parent), m_sceneModel(sceneModel) {
+ObjectScheduleTreeView::ObjectScheduleTreeView(SceneTreeModel *sceneModel, QWidget *parent) : QTreeView(parent), m_sceneModel(sceneModel) {
 
-    std::cout << "ObjectScheduleView is created" << std::endl;
+    std::cout << "ObjectScheduleTreeView is created" << std::endl;
 
     setHeaderHidden(false);
     setSelectionMode(QAbstractItemView::ExtendedSelection); //this mode allows a selection of multiple items with mouse, ctrl-key and shift-key
@@ -19,18 +19,18 @@ ObjectScheduleView::ObjectScheduleView(SceneTreeModel *sceneModel, QWidget *pare
     m_numberOfHiddenColumns = 3;
 }
 
-ObjectScheduleView::~ObjectScheduleView() {
-    std::cout << "ObjectScheduleView is deleted" << std::endl;
+ObjectScheduleTreeView::~ObjectScheduleTreeView() {
+    std::cout << "ObjectScheduleTreeView is deleted" << std::endl;
 }
 
-ConnectionModel* ObjectScheduleView::setConnectionModel(ConnectionModel *model) {
+ConnectionModel* ObjectScheduleTreeView::setConnectionModel(ConnectionModel *model) {
     setSelectionModel(model);
     ConnectionModel *oldModel = m_connectionModel;
     m_connectionModel = model;
     return oldModel;
 }
 
-void ObjectScheduleView::addNewSplineItem() {
+void ObjectScheduleTreeView::addNewSplineItem() {
     GraphicsSpline *spline = new GraphicsSpline();
     m_sceneModel->addItem(spline);
 }
@@ -43,7 +43,7 @@ bool isBelow(QModelIndex &a, QModelIndex &b) {
         return true;
 }
 
-void ObjectScheduleView::removeItems() {
+void ObjectScheduleTreeView::removeItems() {
     QModelIndexList selectedItems = selectedIndexes();
 
     //Warn the user with a message box:

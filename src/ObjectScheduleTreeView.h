@@ -1,18 +1,18 @@
-#ifndef OBJECT_SCHEDULE_VIEW
-#define OBJECT_SCHEDULE_VIEW
+#ifndef OBJECT_SCHEDULE_TREE_VIEW
+#define OBJECT_SCHEDULE_TREE_VIEW
 
 #include "stable.h"
 
 #include "SceneTreeModel.h"
 #include "ConnectionModel.h"
 
-class ObjectScheduleView : public QTreeView {
+class ObjectScheduleTreeView : public QTreeView {
 
 Q_OBJECT
 
 public:
-    ObjectScheduleView(SceneTreeModel *sceneModel, QWidget *parent = 0);
-    ~ObjectScheduleView();
+    ObjectScheduleTreeView(SceneTreeModel *sceneModel, QWidget *parent = 0);
+    ~ObjectScheduleTreeView();
 
     ConnectionModel* setConnectionModel(ConnectionModel *model);
 
@@ -27,4 +27,4 @@ private:
 };
 
 
-#endif // OBJECT_SCHEDULE_VIEW
+#endif // OBJECT_SCHEDULE_TREE_VIEW
