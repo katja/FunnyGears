@@ -205,21 +205,18 @@ void GraphicsScene::selectNothing() {
 
 void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) {
     m_clickedPoint = mouseEvent->scenePos();
-    if(m_editingState == Editing::Pen && !selectedItems().empty())
+    if(m_selectionState == SelectionState::OneItem)
         mouseEvent->accept();
     else
         QGraphicsScene::mousePressEvent(mouseEvent);
 }
 
 void GraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) {
-    //TODO: release immer tracken? hier müsst doch auch ne abfrage rein, welcher status...???
-    if(!selectedItems().empty()) {
-        if(m_clickedPoint == mouseEvent->scenePos()) {
-            sendClickToSelectedItems();
-            mouseEvent->accept();
-            return;
-        }
-        //TODO: is this if necessary???
+    if(m_selectionState == SelectionState::OneItem
+        && m_clickedPoint == mouseEvent->scenePos()) {
+        sendClickToSelectedItems();
+        mouseEvent->accept();
+        return;
     }
     QGraphicsScene::mouseReleaseEvent(mouseEvent);
 }
