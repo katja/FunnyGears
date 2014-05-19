@@ -16,7 +16,6 @@ public:
 
     virtual int type() const;
     virtual void clickReceived(QPointF point, Editing::State state) = 0;
-    virtual void setToState(Editing::State state) = 0;
 
     QList<GraphicsItem*> childItems() const;
     QList<GraphicsItem*> collidingItems(Qt::ItemSelectionMode mode = Qt::IntersectsItemShape) const;

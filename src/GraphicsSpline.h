@@ -43,7 +43,6 @@ public:
 
     int type() const;
     void clickReceived(QPointF point, Editing::State state);
-    void setToState(Editing::State state);
 
 private:
     Spline *m_spline;
@@ -53,7 +52,6 @@ private:
     real m_tangentValue;
 
     QColor m_color;
-    Editing::State m_editingState;
 
     QPainterPath controlPointPolygonPath(qreal width = 0) const;
     QPainterPath splineCurvePath() const;

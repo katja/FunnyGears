@@ -221,12 +221,6 @@ void GraphicsSpline::clickReceived(QPointF point, Editing::State state) {
         removePointNear(point);
 }
 
-void GraphicsSpline::setToState(Editing::State state) {
-    std::cout << "GraphicsSpline::setToState " << state << std::endl;
-    //TODO: remove all EditingState things of all GraphicsItems!!!
-    m_editingState = state;
-}
-
 QPainterPath GraphicsSpline::controlPointPolygonPath(qreal width) const {
     if(m_points.empty())
         return QPainterPath();
