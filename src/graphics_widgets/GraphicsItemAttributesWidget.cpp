@@ -1,4 +1,4 @@
-#include "GraphicsItemAttributesWidget.h"
+#include "graphics_widgets/GraphicsItemAttributesWidget.h"
 
 GraphicsItemAttributesWidget::GraphicsItemAttributesWidget(QWidget *parent) : QWidget(parent) {}
 

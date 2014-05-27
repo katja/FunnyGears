@@ -1,8 +1,6 @@
-#include "GraphicsSpline.h"
-#include "GraphicsScene.h"
+#include "graphics_objects/GraphicsSpline.h"
 #include "preferences.h"
 #include "helpers.h"
-#include "Cursor.h"
 
 const int GraphicsSpline::Type = GraphicsSpline::UserType + Type::GraphicsSplineType;
 
@@ -18,8 +16,6 @@ GraphicsSpline::GraphicsSpline(GraphicsItem *parent) : GraphicsItem(parent), m_i
     int partColor = qrand() % 512 + 100;
     m_color = QColor(partColor / 5, partColor * 2 / 5, partColor % 256);
 
-    // setCursor(Qt::OpenHandCursor);
-    // setCursor(CursorRental::pen());
     setToolTip("Description of what will happen or what to do"); //TODO: Add description
     setFlags( QGraphicsItem::ItemIsMovable
             | QGraphicsItem::ItemIsSelectable

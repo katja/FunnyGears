@@ -3,8 +3,8 @@
 
 #include "stable.h"
 #include "definitions.h"
-#include "ToolBarListener.h"
-#include "EditingToolBar.h"
+#include "tool_bars/ToolBarListener.h"
+#include "tool_bars/EditingToolBar.h"
 
 class GraphicsView : public QGraphicsView, public ToolBarListener {
 

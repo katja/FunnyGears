@@ -1,5 +1,5 @@
 #include "ObjectAttributesWidget.h"
-#include "GraphicsSplineAttributesWidget.h"
+#include "graphics_widgets/GraphicsSplineAttributesWidget.h"
 
 ObjectAttributesWidget::ObjectAttributesWidget(ConnectionModel *connectionModel, QWidget *parent)
 : QDockWidget("Object Attributes", parent, Qt::Widget), m_connectionModel(connectionModel) {

@@ -4,8 +4,8 @@
 #include "stable.h"
 #include "SceneTreeModel.h"
 #include "ConnectionModel.h"
-#include "GraphicsItem.h"
-#include "GraphicsItemAttributesWidget.h"
+#include "graphics_objects/GraphicsItem.h"
+#include "graphics_widgets/GraphicsItemAttributesWidget.h"
 
 class ObjectAttributesWidget : public QDockWidget {
 

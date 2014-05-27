@@ -2,8 +2,8 @@
 #define EDITING_TOOL_BAR
 
 #include "stable.h"
-#include "ToolBarListener.h"
-#include "EditingStatesAndActions.h"
+#include "tool_bars/ToolBarListener.h"
+#include "tool_bars/EditingStatesAndActions.h"
 
 class EditingToolBar : public QToolBar {
 

@@ -3,8 +3,8 @@
 
 #include "stable.h"
 #include "definitions.h"
-#include "GraphicsItemAttributesWidget.h"
-#include "GraphicsSpline.h"
+#include "graphics_widgets/GraphicsItemAttributesWidget.h"
+#include "graphics_objects/GraphicsSpline.h"
 #include "RealValuedSlider.h"
 
 class GraphicsSplineAttributesWidget : public GraphicsItemAttributesWidget {

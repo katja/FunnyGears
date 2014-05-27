@@ -2,10 +2,10 @@
 #define GRAPHICS_SCENE
 
 #include "stable.h"
-#include "ToolBarListener.h"
+#include "tool_bars/ToolBarListener.h"
 #include "ConnectionModel.h"
-#include "GraphicsSpline.h"
-#include "GraphicsItem.h"
+#include "graphics_objects/GraphicsSpline.h"
+#include "graphics_objects/GraphicsItem.h"
 
 class GraphicsScene : public QGraphicsScene, public ToolBarListener {
 

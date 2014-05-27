@@ -1,6 +1,6 @@
 #include "ObjectScheduleTreeView.h"
 #include "YesNoDelegate.h"
-#include "GraphicsSpline.h"
+#include "graphics_objects/GraphicsSpline.h"
 
 ObjectScheduleTreeView::ObjectScheduleTreeView(SceneTreeModel *sceneModel, QWidget *parent) : QTreeView(parent), m_sceneModel(sceneModel) {
 

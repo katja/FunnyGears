@@ -2,7 +2,7 @@
 #define CONNECTION_MODEL
 
 #include "stable.h"
-#include "GraphicsItem.h"
+#include "graphics_objects/GraphicsItem.h"
 class GraphicsScene;
 class SceneTreeModel;
 

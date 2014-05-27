@@ -1,4 +1,4 @@
-#include "GraphicsSplineAttributesWidget.h"
+#include "graphics_widgets/GraphicsSplineAttributesWidget.h"
 
 GraphicsSplineAttributesWidget::GraphicsSplineAttributesWidget(QWidget *parent) : GraphicsItemAttributesWidget(parent) {
 

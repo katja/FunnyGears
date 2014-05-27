@@ -3,7 +3,7 @@
 
 #include "stable.h"
 #include "definitions.h"
-#include "EditingStatesAndActions.h"
+#include "tool_bars/EditingStatesAndActions.h"
 
 class GraphicsItem : public QGraphicsItem {
 

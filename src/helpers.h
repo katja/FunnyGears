@@ -3,8 +3,8 @@
 
 #include "stable.h"
 #include "definitions.h"
-#include "Point.h"
-#include "Spline.h"
+#include "graphics_objects/Point.h"
+#include "basic_objects/Spline.h"
 
 std::ostream& operator<<(std::ostream &os, const Point &point);
 

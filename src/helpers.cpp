@@ -1,6 +1,6 @@
 #include "helpers.h"
 #include "definitions.h"
-#include "Point.h"
+#include "graphics_objects/Point.h"
 
 std::ostream& operator<<(std::ostream &os, const Point &point) {
     return os << "(" << point.pos().x() << ", " << point.pos().y() << ")";

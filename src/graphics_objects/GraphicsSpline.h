@@ -3,9 +3,9 @@
 
 #include "stable.h"
 #include "definitions.h"
-#include "GraphicsItem.h"
-#include "Point.h"
-#include "Spline.h"
+#include "graphics_objects/GraphicsItem.h"
+#include "graphics_objects/Point.h"
+#include "basic_objects/Spline.h"
 
 class GraphicsSpline : public GraphicsItem {
 

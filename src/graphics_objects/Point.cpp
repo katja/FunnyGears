@@ -1,5 +1,5 @@
-#include "Point.h"
-#include "GraphicsSpline.h"
+#include "graphics_objects/Point.h"
+#include "graphics_objects/GraphicsSpline.h"
 #include "preferences.h"
 
 Point::Point(QGraphicsItem *parent) : QGraphicsItem(parent), m_parentSpline(0), m_color(QColor(0, 0, 0)) {

@@ -1,4 +1,4 @@
-#include "GraphicsItem.h"
+#include "graphics_objects/GraphicsItem.h"
 
 const int GraphicsItem::Type = GraphicsItem::UserType + Type::GraphicsItemType;
 

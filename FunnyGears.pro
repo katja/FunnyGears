@@ -19,14 +19,24 @@ MOC_DIR = $$OBJECTS_DIR/.moc
 RCC_DIR = $$OBJECTS_DIR/.rrc
 UI_DIR  = $$OBJECTS_DIR/.ui
 
+INCLUDEPATH += ./src/
+
 ICON    = images/Gear.icns      # Mac solution for the icon of the app
 
 PRECOMPILED_HEADER = src/stable.h
 
 HEADERS = \
     src/*.h \
+    src/basic_objects/*.h \
+    src/graphics_objects/*.h \
+    src/graphics_widgets/*.h \
+    src/tool_bars/*.h
 
 SOURCES = \
     src/*.cpp \
+    src/basic_objects/*.cpp \
+    src/graphics_objects/*.cpp \
+    src/graphics_widgets/*.cpp \
+    src/tool_bars/*.cpp
 
 INCLUDEPATH += /usr/include

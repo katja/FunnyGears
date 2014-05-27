@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include "definitions.h"
-#include "Ray.h"
+#include "basic_objects/Ray.h"
 
 class Spline {
 

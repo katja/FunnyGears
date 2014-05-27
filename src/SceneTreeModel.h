@@ -4,7 +4,7 @@
 #include "stable.h"
 #include "SceneTreeItem.h"
 #include "GraphicsScene.h"
-#include "GraphicsSpline.h"
+#include "graphics_objects/GraphicsSpline.h"
 
 class SceneTreeModel : public QAbstractItemModel {
 

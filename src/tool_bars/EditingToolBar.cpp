@@ -1,4 +1,4 @@
-#include "EditingToolBar.h"
+#include "tool_bars/EditingToolBar.h"
 
 EditingToolBar::EditingToolBar(QWidget *parent) : QToolBar(tr("Edit"), parent) {
     setIconSize(QSize(16,16));

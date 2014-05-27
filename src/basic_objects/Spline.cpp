@@ -1,4 +1,4 @@
-#include "Spline.h"
+#include "basic_objects/Spline.h"
 #include "helpers.h"
 
 Spline::Spline(int degree) : m_degree(degree), m_isClosed(false), m_tornToEdges(false) {
