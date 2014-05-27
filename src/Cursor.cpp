@@ -6,6 +6,8 @@ CursorRental::CursorRental() {
     m_pointerCursor = 0;
     m_penCursor = 0;
     m_eraserCursor = 0;
+    m_zoomInCursor = 0;
+    m_zoomOutCursor = 0;
 }
 
 CursorRental::~CursorRental() {

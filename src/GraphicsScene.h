@@ -65,6 +65,7 @@ private:
     void switchToEraserState();
 
     void activateAllItemSelection();
+    void activateOneItemRequestedSelection();
     void activateOneItemSelection();
     void activateItem(GraphicsItem *item);
 
@@ -73,6 +74,10 @@ private:
     void setAllItemsEnabled(bool enabled = true, bool selectedOnesExcluded = false);
     void setAllItemsFlags(QGraphicsItem::GraphicsItemFlags);
     void expandAllItemsFlags(QGraphicsItem::GraphicsItemFlags);
+    void setAllItemsCursor(const QCursor &cursor);
+    void unsetAllItemsCursor();
+    void setCursorInViews(const QCursor &cursor);
+    void unsetCursorInViews();
     void sendClickToSelectedItems();
     void reduceSelection(int leaveBehind);
     bool isGraphicsItemEditing(Editing::State editingStyle) const;

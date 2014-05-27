@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "Cursor.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), projectChanged(true) {
     std::cout << "MainWindow is created" << std::endl;

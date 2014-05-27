@@ -15,7 +15,7 @@ Point::Point(GraphicsSpline *parent) : QGraphicsItem(parent) {
 }
 
 void Point::initialize() {
-    setCursor(Qt::OpenHandCursor);
+    // setCursor(Qt::OpenHandCursor); ATTENTION: do NOT uncomment this!!! Otherwise the cursor will not work! (Please, tell me why *aaaaah*)
     setToolTip("This is a Point-Tooltip!"); //TODO: Add description
     setFlags( QGraphicsItem::ItemIsMovable
             | QGraphicsItem::ItemIsSelectable

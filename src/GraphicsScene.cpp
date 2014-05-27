@@ -1,5 +1,6 @@
 #include "GraphicsScene.h"
 #include "ConnectionModel.h"
+#include "Cursor.h"
 #include "preferences.h"
 #include <cmath>
 
@@ -27,6 +28,10 @@ void GraphicsScene::initialize() {
 
 GraphicsScene::~GraphicsScene() {
     std::cout << "GraphicsScene is deleted" << std::endl;
+    //do not delete the GraphicsItems, as they are deleted of the SceneTreeItems!
+    foreach(GraphicsItem *graphicsItem, graphicsItems()) {
+        removeItem(graphicsItem);
+    }
 }
 
 void GraphicsScene::setConnectionModel(ConnectionModel *connectionModel) {
@@ -151,8 +156,9 @@ void GraphicsScene::executeEditingAction(Editing::Action editingAction) {
 void GraphicsScene::reactOnSelectionChange() {
     if(m_connectionModel && !m_selectionChangeInProgress)
         m_connectionModel->sceneSelectionChanged(this);
-    if(m_selectionState == SelectionState::OneItemRequested)
-        activateOneItemSelection();
+    if(m_selectionState == SelectionState::OneItemRequested) {
+        startEditing(m_editingState);
+    }
 }
 
 void GraphicsScene::selectOnly(GraphicsItem *qItem) {
@@ -235,6 +241,8 @@ void GraphicsScene::updateAllViews(const QList<QRectF> &updateRegions) const {
 void GraphicsScene::switchToDefaultState() {
     m_editingState = Editing::NoEditing;
     activateAllItemSelection();
+    unsetAllItemsCursor();
+    unsetCursorInViews();
 }
 
 void GraphicsScene::switchToPointerState() {
@@ -243,16 +251,27 @@ void GraphicsScene::switchToPointerState() {
     expandAllItemsFlags(
         QGraphicsItem::ItemIsMovable |
         QGraphicsItem::ItemSendsGeometryChanges);
+    setAllItemsCursor(CursorRental::pointer());
 }
 
 void GraphicsScene::switchToPenState() {
     m_editingState = Editing::Pen;
-    activateOneItemSelection();
+    if(selectedGraphicsItems().empty()) {
+        activateOneItemRequestedSelection();
+    } else {
+        activateOneItemSelection();
+        setCursorInViews(CursorRental::pen());
+    }
 }
 
 void GraphicsScene::switchToEraserState() {
     m_editingState = Editing::Eraser;
-    activateOneItemSelection();
+    if(selectedGraphicsItems().empty()) {
+        activateOneItemRequestedSelection();
+    } else {
+        activateOneItemSelection();
+        setCursorInViews(CursorRental::eraser());
+    }
 }
 
 void GraphicsScene::activateAllItemSelection() {
@@ -263,10 +282,13 @@ void GraphicsScene::activateAllItemSelection() {
     setAllItemsEnabled(true);
 }
 
+void GraphicsScene::activateOneItemRequestedSelection() {
+    m_selectionState = SelectionState::OneItemRequested;
+}
+
 void GraphicsScene::activateOneItemSelection() {
     m_selectionState = SelectionState::OneItemRequested;
     if(selectedGraphicsItems().empty()) {
-        return;
     } else {
         if(selectedGraphicsItems().size() > 1)
             reduceSelection(1);
@@ -274,7 +296,6 @@ void GraphicsScene::activateOneItemSelection() {
         setAllItemsFlags(0);
         setAllItemsEnabled(false, true);
         activateItem(selectedGraphicsItems().first());
-        return;
     }
 }
 
@@ -323,6 +344,34 @@ void GraphicsScene::expandAllItemsFlags(QGraphicsItem::GraphicsItemFlags flags) 
     //But as items() is probably much faster than graphicsItems(), I use this variant up to now.
     foreach(QGraphicsItem* item, items()) {
         item->setFlags(flags | item->flags());
+    }
+}
+
+void GraphicsScene::setAllItemsCursor(const QCursor &cursor) {
+    //TODO: actually here an GraphicsItem should be used instead of QGraphicsItem!!!
+    //But as items() is probably much faster than graphicsItems(), I use this variant up to now.
+    foreach(QGraphicsItem* item, items()) {
+        item->setCursor(cursor);
+    }
+}
+
+void GraphicsScene::unsetAllItemsCursor() {
+    //TODO: actually here an GraphicsItem should be used instead of QGraphicsItem!!!
+    //But as items() is probably much faster than graphicsItems(), I use this variant up to now.
+    foreach(QGraphicsItem* item, items()) {
+        item->unsetCursor();
+    }
+}
+
+void GraphicsScene::setCursorInViews(const QCursor &cursor) {
+    foreach(QGraphicsView *view, views()) {
+        view->setCursor(cursor);
+    }
+}
+
+void GraphicsScene::unsetCursorInViews() {
+    foreach(QGraphicsView *view, views()) {
+        view->unsetCursor();
     }
 }
 

@@ -10,8 +10,8 @@ private:
     CursorRental();
 
     QCursor *m_pointerCursor,
-            *m_eraserCursor,
             *m_penCursor,
+            *m_eraserCursor,
             *m_zoomInCursor,
             *m_zoomOutCursor;
 
