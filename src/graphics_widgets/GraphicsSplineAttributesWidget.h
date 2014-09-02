@@ -1,5 +1,5 @@
 #ifndef GRAPHICS_SPLINE_ATTRIBUTES_WIDGET
-#define GRAPHCIS_SPLINE_ATTRIBUTES_WIDGET
+#define GRAPHICS_SPLINE_ATTRIBUTES_WIDGET
 
 #include "stable.h"
 #include "definitions.h"
