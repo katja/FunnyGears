@@ -1,8 +1,8 @@
 #include "preferences.h"
 
-QColor Preferences::SelectionColor(Qt::yellow);
+QColor Preferences::SelectionColor(QColor(230, 230, 230));
 
-QColor Preferences::ActiveColor(Qt::red);
+QColor Preferences::ActiveColor(QColor(220, 220, 255));
 
 QColor Preferences::BackgroundGridColor(Qt::lightGray);
 
@@ -14,7 +14,7 @@ qreal Preferences::HighlightedLineWidth(3);
 
 qreal Preferences::PointRadius(2.0f);
 
-qreal Preferences::TangentLength(40.0f);
+qreal Preferences::TangentLength(80.0f);
 
 qreal Preferences::ZoomDefaultX(750.0f);
 
