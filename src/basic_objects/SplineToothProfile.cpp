@@ -65,11 +65,11 @@ int SplineToothProfile::pointsWithNormalsThroughOrigin(vector<vec2> &samples, re
     uint evaluableKnots = m_controlPoints.size() + 1 - m_degree;
     vector<real> sampleValues(evaluableKnots * 2 - 1);
     //insert all evaluable knots at every second position of sampleValues
-    for(int i = 0; i < evaluableKnots; ++i) {
+    for(uint i = 0; i < evaluableKnots; ++i) {
         sampleValues[2 * i] = m_knots[i + m_degree];
     }
     //insert an additional value between knot values
-    for(int i = 1; i < sampleValues.size(); i += 2) {
+    for(uint i = 1; i < sampleValues.size(); i += 2) {
         sampleValues[i] = (sampleValues[i - 1] + sampleValues[i + 1]) / 2.0f;
     }
     sampleValues[sampleValues.size() - 1] = sampleValues.back() - epsilon;
@@ -84,7 +84,7 @@ int SplineToothProfile::pointsWithNormalsThroughOrigin(vector<vec2> &samples, re
     int foundPoints = 0;
     int sign = 0; //Algebraic sign which signals direction of vector to point against normal in point
 
-    for(int i = 0; i < sampleValues.size(); ++i) {
+    for(uint i = 0; i < sampleValues.size(); ++i) {
         int throughOrigin = testThroughOrigin(sampleValues[i], sign, foundPoints, samples, epsilon);
         if(throughOrigin < 0) {
             real a = sampleValues[i - 1]; //this point must exist, as sampleValues[0] can not reach this if condition

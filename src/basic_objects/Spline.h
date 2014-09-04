@@ -8,10 +8,10 @@
 class Spline {
 
 public:
-    Spline(int degree = 2);
+    Spline(uint degree = 2);
     Spline(const Spline &other);
-    Spline(QVector<vec2> controlPoints, QVector<real> knots);
-    Spline(QVector<vec2> interpolationPoints); //TODO!
+    Spline(vector<vec2> controlPoints, vector<real> knots);
+    Spline(vector<vec2> interpolationPoints); //TODO!
     ~Spline();
 
     Spline& operator=(const Spline &other);
@@ -45,23 +45,23 @@ public:
      *  If spline is not valid, nothing is done!
      *  @param curve used for the result, size specifies number of samples, is totally filled
      */
-    void  curve(QVector<QPointF> &curve) const;
+    void  curve(vector<QPointF> &curve) const;
 
     /** @return degree of spline curve */
-    int   degree() const;
+    uint   degree() const;
 
     /** Sets the degree of the spline to degree
      *  Updates knot vector respectively.
      *  @param degree new degree for spline, must be greater than 0
      */
-    void  setDegree(int degree);
+    void  setDegree(uint degree);
 
     /** @return number of control points of the spline
      */
-    int   numberOfControlPoints() const;
+    uint  numberOfControlPoints() const;
 
     /** @return control points of the spline */
-    const QVector<vec2>& controlPoints() const;
+    const vector<vec2>& controlPoints() const;
 
     /** Appends a control point at point.
      *  The knot vector is continued with a suitable value
@@ -82,23 +82,23 @@ public:
      *  is restored (so remains active).
      *  @param index index of the control point to be removed (index >= 0)
      */
-    void  removeControlPoint(int index);
+    void  removeControlPoint(uint index);
 
     /** Sets the position of the control points at index index to new Position.
      *  If given index is out of range, it does nothing.
      *  @param index index of the control point which is set to newPosition (index >= 0)
      *  @param newPosition new position for control point with given index
      */
-    void  moveControlPoint(int index, QPointF newPosition);
+    void  moveControlPoint(uint index, QPointF newPosition);
 
     /** @return number of knots of the spline
      *  Remeber that first and last knot are not needed for the rendering of the spline curve.
      *  They are only included on definition purpose.
      */
-    int   numberOfKnots() const;
+    uint  numberOfKnots() const;
 
     /** @return knots of the spline */
-    const QVector<real>& knots() const;
+    const vector<real>& knots() const;
 
     /** Searches the knot vector for given knotValue and return the occurences.
      *  Note that at the moment this is a comparisons of real values and therefore
@@ -106,7 +106,7 @@ public:
      *  @param knotValue value to be searched for occurences in the knot vector
      *  @return occurences of knotValue in the knot vector
      */
-    int   multiplicityOfKnotValue(real knotValue) const;
+    uint  multiplicityOfKnotValue(real knotValue) const;
 
     /** Multiplicity of knot at index knotValue
      *  Searches the knot vector for knots with same value as the one at given knotIndex.
@@ -114,7 +114,7 @@ public:
      *  @param knotIndex index of knot whichs multiplicity is asked (knotIndex >= 0)
      *  @return multiplicity of knot at knotIndex
      */
-    int   multiplicity(int knotIndex) const;
+    uint  multiplicity(uint knotIndex) const;
 
     /** Inserts knots and control points without changing the curve
      *  until between every two knots is a maximum of minDist gap.
@@ -128,13 +128,13 @@ public:
 
     /** Inserts a knot at the given knotValue and a suitable point without changing the curve.
      *  If the knot should have a multiplicity bigger than 1, give a suitable value
-     *  (smalles multiplicity value is 1, largest is m_degree)
+     *  (smallest multiplicity value is 1, largest is m_degree)
      *  Attention: This method does NOT check the validity of the curve, nor does it check
      *  if the given knotValue is a possible value. So make sure you check this first!
      *  @param knotValue a suitable new knotValue to insert
      *  @param multiplicity how often this new knotValue should be inserted (0 < multiplicity <= m_degree)
      */
-    void refineAt(real knotValue, int multiplicity = 1);
+    void refineAt(real knotValue, uint multiplicity = 1);
 
     /** The spline curve can be expanded to form a closed curve.
      *   @param isClosed if true, curve will be expanded to a closed curve,
@@ -219,25 +219,25 @@ public:
      *  (If a value is given, which is lower than all current knots
      *  index 0 is returned.)
      */
-    int   lowerNextKnot(real value) const;
+    uint  lowerNextKnot(real value) const;
 
-    /** Cuts given ray with the spline curve and expands the QVector intersectionPoints with
+    /** Cuts given ray with the spline curve and expands the vector intersectionPoints with
      *  found (approximated) intersection points. Already present values in the
-     *  intersectionPoints QVector will not be deleted!
+     *  intersectionPoints vector will not be deleted!
      *  @param ray Ray which is searched for intersections with the spline curve
-     *  @param intersectionPoints found intersection points are inserted in this QVector.
+     *  @param intersectionPoints found intersection points are inserted in this vector.
      */
-    void  getIntersectionPointsWithRay(const Ray &ray, QVector<vec2> &intersectionPoints) const;
+    void  getIntersectionPointsWithRay(const Ray &ray, vector<vec2> &intersectionPoints) const;
 
 protected:
-    QVector<real>   m_knots;
-    QVector<vec2>   m_controlPoints;
-    int             m_degree;
+    vector<real>    m_knots;
+    vector<vec2>    m_controlPoints;
+    uint            m_degree;
     bool            m_isClosed;
     bool            m_tornToEdges;
 
-    void deBoor(QVector<vec2> &controlPoints, real value, real n) const;
-    void deBoor(QVector<vec2> &controlPoints, real value, real n, int degree, int stop = 0) const;
+    void deBoor(vector<vec2> &controlPoints, real value, real n) const;
+    void deBoor(vector<vec2> &controlPoints, real value, real n, uint degree, uint stop = 0) const;
     void adjustKnots();
 
     /** Sets the first m_degree + 1 knots to the same value.

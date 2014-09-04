@@ -94,7 +94,7 @@ void GraphicsSpline::refineSpline() {
         Point *point = m_points.takeLast();
         delete point;
     }
-    const QVector<vec2> controlPoints = m_spline->controlPoints();
+    const QVector<vec2> controlPoints = convertToQVector(m_spline->controlPoints());
     for(int i = 0; i < controlPoints.size(); ++i) {
         Point *p = new Point(this);
         p->setPos(QPointF(controlPoints.at(i)(0), controlPoints.at(i)(1)));
@@ -249,10 +249,10 @@ QPainterPath GraphicsSpline::splineCurvePath() const {
     if(!m_spline->isValid())
         return QPainterPath();
 
-    QVector<QPointF> curve(10 * m_points.size());
+    vector<QPointF> curve(10 * m_points.size());
     m_spline->curve(curve);
     QPainterPath path;
-    path.addPolygon(QPolygonF(curve));
+    path.addPolygon(QPolygonF(convertToQVector(curve)));
     return path;
 }
 

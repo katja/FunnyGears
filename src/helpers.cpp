@@ -61,14 +61,14 @@ std::ostream& operator <<(std::ostream &os, const vector<real> v) {
 
 std::ostream& operator <<(std::ostream &os, const Spline &spline) {
     os << "Control Points: ";
-    const QVector<vec2> controlPoints = spline.controlPoints();
+    const vector<vec2> controlPoints = spline.controlPoints();
     foreach(vec2 point, controlPoints) {
         os << point << "    ";
     }
     os << "\n";
     os << "Knots: ";
-    const QVector<real> knots = spline.knots();
-    for(int i = 0; i < knots.size(); ++i) {
+    const vector<real> knots = spline.knots();
+    for(uint i = 0; i < knots.size(); ++i) {
         os << knots.at(i);
         if(i != knots.size() - 1)
             os << ", ";
@@ -85,7 +85,7 @@ std::ostream& operator <<(std::ostream &os, const Spline &spline) {
 }
 
 ////////////////////////////////////
-////////// OTHER ///////////////
+////////// OTHER ///////////////////
 
 QColor darkenColor(const QColor &color, int degree) {
     QColor darkenedColor;
