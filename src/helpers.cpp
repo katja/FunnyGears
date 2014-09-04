@@ -2,6 +2,9 @@
 #include "definitions.h"
 #include "graphics_objects/Point.h"
 
+////////////////////////////////////
+////////// STREAMING ///////////////
+
 std::ostream& operator<<(std::ostream &os, const Point &point) {
     return os << "(" << point.pos().x() << ", " << point.pos().y() << ")";
 }
@@ -28,10 +31,29 @@ std::ostream& operator <<(std::ostream &os, const QVector<vec2> vector) {
     return os;
 }
 
+std::ostream& operator <<(std::ostream &os, const vector<vec2> v) {
+    os << "[";
+    uint i;
+    for(i = 0; i < v.size() - 1; ++i) {
+        os << v[i] << "|\t";
+    }
+    os << v[i] << "]";
+    return os;
+}
+
 std::ostream& operator <<(std::ostream &os, const QVector<real> vector) {
     for(int i = 0; i < vector.size(); ++i) {
         os << vector.at(i);
         if(i != vector.size() - 1)
+            os << ", ";
+    }
+    return os;
+}
+
+std::ostream& operator <<(std::ostream &os, const vector<real> v) {
+    for(uint i = 0; i < v.size(); ++i) {
+        os << v[i];
+        if(i != v.size() - 1)
             os << ", ";
     }
     return os;
@@ -62,10 +84,19 @@ std::ostream& operator <<(std::ostream &os, const Spline &spline) {
     return os;
 }
 
+////////////////////////////////////
+////////// OTHER ///////////////
+
 QColor darkenColor(const QColor &color, int degree) {
     QColor darkenedColor;
     darkenedColor.setRed(color.red() < degree ? 0 : color.red() - degree);
     darkenedColor.setGreen(color.green() < degree ? 0 : color.green() - degree);
     darkenedColor.setBlue(color.blue() < degree ? 0 : color.blue() - degree);
     return darkenedColor;
+}
+
+real angleBetween(const vec2 &a, const vec2 &b) {
+    //normally one should use abs(a.dot(b)), but this uses the std C abs(), which is only defined on integers and therefore causes wrong results.
+    real angle = acos((a.dot(b)) / (a.norm() * b.norm()));
+    return angle;
 }

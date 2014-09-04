@@ -81,6 +81,13 @@ vec2 Spline::derivative(real value) const {
     return (vec2(controlPointsCopy.at(m_degree) - controlPointsCopy.at(m_degree - 1))).normalized();
 }
 
+vec2 Spline::normal(real value) const {
+    vec2 dv = derivative(value);
+    if(dv == vec2(0,0))
+        return dv;
+    return vec2(-dv.y(), dv.x());
+}
+
 void Spline::curve(QVector<QPointF> &curve) const {
     if(!isValid())
         return;

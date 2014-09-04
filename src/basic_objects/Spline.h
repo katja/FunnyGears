@@ -32,6 +32,13 @@ public:
      */
     vec2  derivative(real value) const;
 
+    /** Uses derivative to form the normal
+     *  If Spline is not valid or value is not valid, it returns a 0-vector.
+     *  @param value specifies the position of the spline for the normal
+     *  @return normal vector of the spline evaluated at value
+     */
+    vec2  normal(real value) const;
+
     /** Evaluates spline curve.size() times in equal intervals and writes
      *  the result in the curve vector. Evaluation starts with lowest possible
      *  value and continues to upper limit.
@@ -151,7 +158,7 @@ public:
      *  knot values each to the same value.
      *  If tearToEdges is false, it replaces the first and last knots with evenly
      *  distributed values.
-     *  Note that this method changes the knot values and therefore user
+     *  Note that this method changes the knot values and therefore earlier
      *  chosen values will be lost!
      */
     void  setTornToEdges(bool tearToEdges);
@@ -222,7 +229,7 @@ public:
      */
     void  getIntersectionPointsWithRay(const Ray &ray, QVector<vec2> &intersectionPoints) const;
 
-private:
+protected:
     QVector<real>   m_knots;
     QVector<vec2>   m_controlPoints;
     int             m_degree;
