@@ -10,7 +10,7 @@ SceneTreeItem::SceneTreeItem(GraphicsItem *graphicsItem, SceneTreeItem *parent) 
     m_isVisible = true;
     m_graphicsScene = m_parent->m_graphicsScene;
     m_graphicsScene->addItem(graphicsItem);
-    m_graphicsItem->rename("Unnamed " + m_graphicsItem->name());
+    m_name = QString("Unnamed " + m_graphicsItem->defaultName());
 }
 
 SceneTreeItem::~SceneTreeItem() {
@@ -68,11 +68,11 @@ int SceneTreeItem::childNumber() const {
 }
 
 void SceneTreeItem::setName(QString name) {
-    m_graphicsItem->rename(name);
+    m_name = name;
 }
 
 QString SceneTreeItem::name() const {
-    return m_graphicsItem->name();
+    return m_name;
 }
 
 void SceneTreeItem::toggleVisibility() {

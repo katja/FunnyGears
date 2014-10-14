@@ -39,7 +39,6 @@ GraphicsSpline* GraphicsSpline::copy() const {
     for(int i = 0; i < m_points.size(); ++i) {
         copy->m_points << m_points.at(i);
     }
-    copy->rename(name());
     return copy;
 }
 
