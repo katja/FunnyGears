@@ -1,12 +1,15 @@
 #include "ObjectScheduleTreeView.h"
 #include "YesNoDelegate.h"
 #include "graphics_objects/GraphicsSpline.h"
+#include "graphics_objects/GraphicsSimpleGear.h"
+#include "graphics_objects/GraphicsInvoluteGear.h"
 
 ObjectScheduleTreeView::ObjectScheduleTreeView(SceneTreeModel *sceneModel, QWidget *parent) : QTreeView(parent), m_sceneModel(sceneModel) {
 
     std::cout << "ObjectScheduleTreeView is created" << std::endl;
 
     setHeaderHidden(false);
+    setIndentation(0);
     setSelectionMode(QAbstractItemView::ExtendedSelection); //this mode allows a selection of multiple items with mouse, ctrl-key and shift-key
     setSelectionBehavior(QAbstractItemView::SelectRows);
     setEditTriggers(QAbstractItemView::DoubleClicked);
@@ -17,6 +20,9 @@ ObjectScheduleTreeView::ObjectScheduleTreeView(SceneTreeModel *sceneModel, QWidg
     hideColumn(SceneTreeModel::ROTATION);
     hideColumn(SceneTreeModel::GRAPHIC);
     m_numberOfHiddenColumns = 3;
+
+    setColumnWidth(SceneTreeModel::NAME, 150);
+    setColumnWidth(SceneTreeModel::VISIBILITY, 30);
 }
 
 ObjectScheduleTreeView::~ObjectScheduleTreeView() {
@@ -30,9 +36,19 @@ ConnectionModel* ObjectScheduleTreeView::setConnectionModel(ConnectionModel *mod
     return oldModel;
 }
 
-void ObjectScheduleTreeView::addNewSplineItem() {
+void ObjectScheduleTreeView::addSplineItem() {
     GraphicsSpline *spline = new GraphicsSpline();
     m_sceneModel->addItem(spline);
+}
+
+void ObjectScheduleTreeView::addGearToothItem() {
+    GraphicsSimpleGear *gear = new GraphicsSimpleGear();
+    m_sceneModel->addItem(gear);
+}
+
+void ObjectScheduleTreeView::addInvoluteGearItem() {
+    GraphicsInvoluteGear *gear = new GraphicsInvoluteGear();
+    m_sceneModel->addItem(gear);
 }
 
 //Helpermethod for removeItems()

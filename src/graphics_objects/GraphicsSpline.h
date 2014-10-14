@@ -14,7 +14,7 @@ public:
     static bool isGraphicsSplineItem(QGraphicsItem *item);
 
     GraphicsSpline(GraphicsItem *parent = 0);
-    ~GraphicsSpline();
+    virtual ~GraphicsSpline();
 
     GraphicsSpline* copy() const;
 
@@ -43,6 +43,7 @@ public:
 
     int type() const;
     void clickReceived(QPointF point, Editing::State state);
+    QString defaultName() const;
 
 private:
     Spline *m_spline;

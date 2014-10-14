@@ -10,7 +10,7 @@ SceneTreeModel::SceneTreeModel(GraphicsScene *scene, QObject *parent) : QAbstrac
     m_headHash.insert(NAME, *dataHash);
 
     dataHash = new QHash<Qt::ItemDataRole, QString>();
-    dataHash->insert(Qt::DisplayRole, "Visibility");
+    dataHash->insert(Qt::DisplayRole, "Vis.");
     dataHash->insert(Qt::ToolTipRole, "The item can be visible or not, which is shown here.");
     m_headHash.insert(VISIBILITY, *dataHash);
 

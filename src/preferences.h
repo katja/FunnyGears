@@ -16,6 +16,8 @@ namespace Preferences {
 
     extern qreal TangentLength;
 
+    extern qreal AngularPitchStrokesLength;
+
     extern qreal ZoomDefaultX;
     extern qreal ZoomDefaultY;
 }

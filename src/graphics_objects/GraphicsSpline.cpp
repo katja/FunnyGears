@@ -39,6 +39,7 @@ GraphicsSpline* GraphicsSpline::copy() const {
     for(int i = 0; i < m_points.size(); ++i) {
         copy->m_points << m_points.at(i);
     }
+    copy->rename(name());
     return copy;
 }
 
@@ -215,6 +216,10 @@ void GraphicsSpline::clickReceived(QPointF point, Editing::State state) {
         addPoint(point);
     else if(state == Editing::Eraser)
         removePointNear(point);
+}
+
+QString GraphicsSpline::defaultName() const {
+    return "Spline";
 }
 
 QPainterPath GraphicsSpline::controlPointPolygonPath(qreal width) const {

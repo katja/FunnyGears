@@ -17,6 +17,10 @@ public:
     virtual int type() const;
     virtual void clickReceived(QPointF point, Editing::State state) = 0;
 
+    virtual QString defaultName() const;
+    QString name() const;
+    void rename(const QString &name);
+
     QList<GraphicsItem*> childItems() const;
     QList<GraphicsItem*> collidingItems(Qt::ItemSelectionMode mode = Qt::IntersectsItemShape) const;
     GraphicsItem* commonAncestorItem(const GraphicsItem *other) const;
@@ -25,6 +29,9 @@ public:
     GraphicsItem* panel() const;
     GraphicsItem* parentItem() const;
     GraphicsItem* topLevelItem() const;
+
+protected:
+    QString m_name;
 
 private:
     QList<GraphicsItem*> toGraphicsList(QList<QGraphicsItem*> qlist) const;

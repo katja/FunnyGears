@@ -16,6 +16,8 @@ qreal Preferences::PointRadius(2.0f);
 
 qreal Preferences::TangentLength(80.0f);
 
+qreal Preferences::AngularPitchStrokesLength(300.0f);
+
 qreal Preferences::ZoomDefaultX(750.0f);
 
 qreal Preferences::ZoomDefaultY(750.0f);

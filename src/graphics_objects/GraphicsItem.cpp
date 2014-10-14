@@ -8,11 +8,24 @@ bool GraphicsItem::isGraphicsItem(QGraphicsItem *item) {
     return false;
 }
 
-GraphicsItem::GraphicsItem(GraphicsItem *parent) : QGraphicsItem(parent) {
+GraphicsItem::GraphicsItem(GraphicsItem *parent) : QGraphicsItem(parent), m_name("") {
 }
 
 int GraphicsItem::type() const {
     return Type;
+}
+
+QString GraphicsItem::defaultName() const {
+    return "Item";
+}
+
+QString GraphicsItem::name() const {
+    if(m_name == "")
+        return defaultName();
+    return m_name;
+}
+void GraphicsItem::rename(const QString &name) {
+    m_name = name;
 }
 
 QList<GraphicsItem*> GraphicsItem::childItems() const {

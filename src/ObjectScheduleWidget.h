@@ -14,7 +14,8 @@ public:
 
 private slots:
     void addSpline();
-    void addGear();
+    void addGearTooth();
+    void addInvoluteGear();
 
 private:
     ObjectScheduleTreeView *m_objectSchedule;

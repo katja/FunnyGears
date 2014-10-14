@@ -20,6 +20,8 @@ enum Type {
     QGraphicsItemType,
     GraphicsItemType,
     GraphicsSplineType,
+    GraphicsSimpleGearType,
+    GraphicsInvoluteGearType,
     NumberOfTypes
 };
 

@@ -48,7 +48,7 @@ public:
     void  curve(vector<QPointF> &curve) const;
 
     /** @return degree of spline curve */
-    uint   degree() const;
+    uint  degree() const;
 
     /** Sets the degree of the spline to degree
      *  Updates knot vector respectively.

@@ -17,7 +17,9 @@ public:
     ConnectionModel* setConnectionModel(ConnectionModel *model);
 
 public slots:
-    void addNewSplineItem();
+    void addSplineItem();
+    void addGearToothItem();
+    void addInvoluteGearItem();
     void removeItems();
 
 private:

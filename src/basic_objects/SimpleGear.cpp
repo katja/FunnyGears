@@ -24,11 +24,11 @@ void SimpleGear::setRadius(real radius) {
     m_radius = radius;
 }
 
-bool SimpleGear::minRadius() const {
+real SimpleGear::minRadius() const {
     return m_toothProfile->getMinimumDistanceToOrigin();
 }
 
-bool SimpleGear::maxRadius() const {
+real SimpleGear::maxRadius() const {
     return m_toothProfile->getMaximumDistanceToOrigin();
 }
 

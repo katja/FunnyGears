@@ -28,10 +28,10 @@ public:
     void setRadius(real radius);
 
     /** Gives a bottom limit for a radius value */
-    bool minRadius() const;
+    real minRadius() const;
 
     /** Gives an upper limit for a radius value */
-    bool maxRadius() const;
+    real maxRadius() const;
 
     real getRootRadius() const;
 

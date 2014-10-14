@@ -25,24 +25,23 @@ public:
     virtual uint getNumberOfTeeth() const = 0;
 
     /**
-     * Writes the points of a whole tooth profile of the gear
-     * to the given toothProfile vector. Even the last point,
-     * which must be the same one as the first one of the next tooth,
-     * is included.
+     * Writes the points of one tooth profile of the gear
+     * to the given toothProfile vector.
      */
-    virtual void getSampledProfileOfATooth(vector<vec2> &toothProfile) const = 0;
+    virtual void toothProfile(vector<vec2> &toothProfile) const = 0;
 
     /**
      * Writes the points of the whole gear in the given gearProfile vector.
-     * One has to bear in mind, that no two points may on each other - so
-     * if one uses the getToothProfile() here, special care is needed for
-     * the first and last points of the tooth profile.
-     * If the gearProfile is not a multiple of the number of teeth of the
-     * gear, this method won't change anything!
-     * @param gearProfile given vec2 QVector whose length is a multiple
+     * If no special method is used in subclasses, this works on the toothProfile()
+     * method to construct a whole gear profile.
+     * Often it would be better to write an own implementation.
+     *
+     * If the gearProfile's size is not a multiple of the number of teeth of the
+     * gear, this method won't do anything!
+     * @param gearProfile given vec2 vector whose length is a multiple
      *        of the number of teeth
      */
-    virtual void getGearProfile(vector<vec2> &gearProfile) const;
+    virtual void gearProfile(vector<vec2> &gearProfile) const;
 
 };
 

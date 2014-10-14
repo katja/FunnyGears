@@ -17,17 +17,20 @@ ObjectScheduleWidget::ObjectScheduleWidget(ObjectScheduleTreeView *objectSchedul
     mainWidget->setLayout(gLayout);
     setWidget(mainWidget);
 
-    QAction *addSplineAction = new QAction("Create own gear tooth", this);
-    QAction *addGearAction = new QAction("Add involute gear", this);
+    QAction *addSplineAction = new QAction("Create own spline curve", this);
+    QAction *addGearToothAction = new QAction("Create own gear", this);
+    QAction *addInvoluteGearAction = new QAction("Add involute gear", this);
 
     m_addMenu = new QMenu(this);
     m_addMenu->addAction(addSplineAction);
-    m_addMenu->addAction(addGearAction);
+    m_addMenu->addAction(addGearToothAction);
+    m_addMenu->addAction(addInvoluteGearAction);
 
     m_addItemButton->setMenu(m_addMenu);
 
-    connect(addSplineAction, SIGNAL(triggered()),   this, SLOT(addSpline()));
-    connect(addGearAction,   SIGNAL(triggered()),   this, SLOT(addGear()));
+    connect(addSplineAction,       SIGNAL(triggered()), this, SLOT(addSpline()));
+    connect(addGearToothAction,    SIGNAL(triggered()), this, SLOT(addGearTooth()));
+    connect(addInvoluteGearAction, SIGNAL(triggered()), this, SLOT(addInvoluteGear()));
     connect(m_removeItemButton, SIGNAL(clicked()),  m_objectSchedule, SLOT(removeItems()));
 }
 
@@ -36,9 +39,13 @@ ObjectScheduleWidget::~ObjectScheduleWidget() {
 }
 
 void ObjectScheduleWidget::addSpline() {
-    m_objectSchedule->addNewSplineItem();
+    m_objectSchedule->addSplineItem();
 }
 
-void ObjectScheduleWidget::addGear() {
+void ObjectScheduleWidget::addGearTooth() {
+    m_objectSchedule->addGearToothItem();
+}
 
+void ObjectScheduleWidget::addInvoluteGear() {
+    m_objectSchedule->addInvoluteGearItem();
 }

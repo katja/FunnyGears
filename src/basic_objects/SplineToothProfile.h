@@ -19,9 +19,11 @@ public:
     void sampledCurve(vector<vec2> &samples) const;
 
 private:
-    /** Searches for points in the spline curve whose normales pass the origin
-     *  As resizing of the samples vector should be prohibited, the samples vector must
-     *  at least have the size of:
+    /** Searches for points in the spline curve whose normales pass the origin.
+     *  Found points are necessary f.ex. for the calculation of the minimum and maximum
+     *  distances of the curve to the origin.
+     *  As resizing of the given @param samples vector should be prohibited, the samples
+     *  vector must at least have the size of:
      *  2 x number of control points
      *  When a smaller samples vector is given, "-1" is returned.
      *  @param samples in this given vector are the points inserted whose normals pass the origin
