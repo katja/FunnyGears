@@ -12,6 +12,7 @@ SplineToothProfile::SplineToothProfile(const Spline &other) : Spline(other) {
 }
 
 SplineToothProfile::~SplineToothProfile() {
+    std::cout << "SplineToothProfile destructor" << std::endl;
 }
 
 SplineToothProfile* SplineToothProfile::create() const {
@@ -31,9 +32,7 @@ real SplineToothProfile::getMinimumDistanceToOrigin() const {
     vector<vec2> possiblePoints(2 * m_controlPoints.size());
     int numOfPossiblePoints = pointsWithNormalsThroughOrigin(possiblePoints);
     real minDistance = possiblePoints[0].norm();
-    std::cout << "getMinimumDistanceToOrigin found " << numOfPossiblePoints << " points" << std::endl;
     for(int i = 1; i < numOfPossiblePoints; ++i) {
-        std::cout << "dist: " << possiblePoints[i].norm() << std::endl;
         if(possiblePoints[i].norm() < minDistance)
             minDistance = possiblePoints[i].norm();
     }
@@ -44,9 +43,7 @@ real SplineToothProfile::getMaximumDistanceToOrigin() const {
     vector<vec2> possiblePoints(2 * m_controlPoints.size());
     int numOfPossiblePoints = pointsWithNormalsThroughOrigin(possiblePoints);
     real maxDistance = possiblePoints[0].norm();
-    std::cout << "getMinimumDistanceToOrigin found " << numOfPossiblePoints << " points" << std::endl;
     for(int i = 1; i < numOfPossiblePoints; ++i) {
-        std::cout << "dist: " << possiblePoints[i].norm() << std::endl;
         if(possiblePoints[i].norm() > maxDistance)
             maxDistance = possiblePoints[i].norm();
     }

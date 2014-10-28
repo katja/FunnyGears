@@ -253,7 +253,7 @@ QPainterPath GraphicsSpline::splineCurvePath() const {
     if(!m_spline->isValid())
         return QPainterPath();
 
-    vector<QPointF> curve(10 * m_points.size());
+    vector<QPointF> curve(20 * m_points.size());
     m_spline->curve(curve);
     QPainterPath path;
     path.addPolygon(QPolygonF(convertToQVector(curve)));
