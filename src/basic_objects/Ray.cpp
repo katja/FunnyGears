@@ -6,7 +6,7 @@ Ray::Ray() {
 }
 
 Ray::Ray(vec2 origin, vec2 direction) : m_origin(origin), m_direction(direction) {
-    if(m_direction == vec2(0,0));
+    if(m_direction == vec2(0,0))
         throw;
     m_direction.normalize();
 }
