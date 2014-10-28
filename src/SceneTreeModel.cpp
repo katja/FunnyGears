@@ -19,21 +19,6 @@ SceneTreeModel::SceneTreeModel(GraphicsScene *scene, QObject *parent) : QAbstrac
     dataHash->insert(Qt::ToolTipRole, "Holds information about the whole graphicsItem.");
     m_headHash.insert(TYPE, *dataHash);
 
-    dataHash = new QHash<Qt::ItemDataRole, QString>();
-    dataHash->insert(Qt::DisplayRole, "Translation");
-    dataHash->insert(Qt::ToolTipRole, "Holds the position of the graphicsItem.");
-    m_headHash.insert(TRANSLATION, *dataHash);
-
-    dataHash = new QHash<Qt::ItemDataRole, QString>();
-    dataHash->insert(Qt::DisplayRole, "Rotation");
-    dataHash->insert(Qt::ToolTipRole, "Holds the rotation of the graphicsItem");
-    m_headHash.insert(ROTATION, *dataHash);
-
-    dataHash = new QHash<Qt::ItemDataRole, QString>();
-    dataHash->insert(Qt::DisplayRole, "Geometry");
-    dataHash->insert(Qt::ToolTipRole, "Object, displayed in the Scene");
-    m_headHash.insert(GRAPHIC, *dataHash);
-
     m_rootItem = new SceneTreeItem(m_graphicsScene);
     emit dataChanged(QModelIndex(), QModelIndex());
 }
@@ -107,14 +92,8 @@ QVariant SceneTreeModel::data(const QModelIndex &index, int role) const {
             switch(index.column()) {
                 case NAME:
                     return item->name();
-                // case VISIBILITY: //TODO: maybe it would be good to give this boolean value here, too, but disabling it in the used QAbstractItemView or better the QAbstractItemDelegate (YesNoDelegate)
-                //     return item->isVisible();
                 case TYPE:
                     return item->type();
-                // case TRANSLATION:
-                //     return ...
-                // case ROTATION
-                //     return ...
                 default:
                     return QVariant();
             }
@@ -151,7 +130,7 @@ QModelIndex SceneTreeModel::itemWithGraphicsItem(const GraphicsItem *graphicsIte
         return QModelIndex();
     }
     int row = graphicsTreeItem->childNumber();
-    return createIndex(row, GRAPHIC, graphicsTreeItem);
+    return createIndex(row, TYPE, graphicsTreeItem);
 }
 
 bool SceneTreeModel::toggleValue(const QModelIndex &index) {

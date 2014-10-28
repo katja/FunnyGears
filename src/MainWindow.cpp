@@ -1,6 +1,11 @@
 #include "MainWindow.h"
 #include "Cursor.h"
 
+
+#include "src/basic_objects/SplineToothProfile.h"
+#include "src/helpers.h"
+#include <cmath>
+
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), projectChanged(true) {
     std::cout << "MainWindow is created" << std::endl;
 
@@ -43,17 +48,17 @@ void MainWindow::createMainProgramPart() {
 
 // MODEL/VIEW THINGS
     m_sceneModel = new SceneTreeModel(m_scene, this);
-    m_objectScheduleView = new ObjectScheduleTreeView(m_sceneModel, this);
-
-// CONNECTION
     ConnectionModel *connectionModel = new ConnectionModel(m_sceneModel);
-    m_scene->setConnectionModel(connectionModel);
-    m_objectScheduleView->setConnectionModel(connectionModel);
-//WIDGETS
-    m_objectScheduleWidget  = new ObjectScheduleWidget(m_objectScheduleView, this);
-    addDockWidget(Qt::RightDockWidgetArea, m_objectScheduleWidget);
 
+    m_objectSchedule  = new ObjectScheduleViewWidget(m_sceneModel, this);
+
+// SELECTION THINGS
     m_objectAttributesWidget = new ObjectAttributesWidget(connectionModel, this);
+    m_scene->setConnectionModel(connectionModel);
+    m_objectSchedule->setConnectionModel(connectionModel);
+
+// DOCK WIDGETS
+    addDockWidget(Qt::RightDockWidgetArea, m_objectSchedule);
     addDockWidget(Qt::RightDockWidgetArea, m_objectAttributesWidget);
 }
 
@@ -120,7 +125,7 @@ void MainWindow::createViewMenu() {
     m_toggleColorDialogAction->setCheckable(true);
     m_toggleColorDialogAction->setChecked(false);
 
-    m_toggleObjectScheduleAction = m_objectScheduleWidget->toggleViewAction();
+    m_toggleObjectScheduleAction = m_objectSchedule->toggleViewAction();
     m_toggleObjectAttributesAction = m_objectAttributesWidget->toggleViewAction();
 
     m_viewMenu = menuBar()->addMenu(tr("&View"));

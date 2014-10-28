@@ -111,19 +111,3 @@ SceneTreeItem* SceneTreeItem::itemWithGraphicsItem(const GraphicsItem *graphicsI
     }
     return 0;
 }
-
-void SceneTreeItem::translate(const QVector2D &translation) {
-    m_translation += translation;
-}
-
-QVector2D SceneTreeItem::getTranslation() const {
-    return m_translation;
-}
-
-void SceneTreeItem::rotate(float angle) {
-    m_rotation += angle;
-}
-
-float SceneTreeItem::getRotation() const {
-    return m_rotation;
-}

@@ -81,10 +81,9 @@ void ConnectionModel::reportSelectionCount() {
 }
 
 GraphicsItem* ConnectionModel::graphicOfRow(const QModelIndex &index) {
-    QModelIndex graphicsItemIndex = index.sibling(index.row(), SceneTreeModel::GRAPHIC);
-    if(!graphicsItemIndex.isValid())
+    if(!index.isValid())
         return 0;
-    void *data = graphicsItemIndex.internalPointer(); //TODO: refactor SceneTreeModel and -Item not to use in every column same QModelIndex, but f.ex. in the geom column the m_graphicsItem of the SceneTreeItem
+    void *data = index.internalPointer(); //TODO: refactor SceneTreeModel and -Item not to use in every column same QModelIndex, but f.ex. in the geom column the m_graphicsItem of the SceneTreeItem
     SceneTreeItem *item = static_cast<SceneTreeItem*>(data);
     GraphicsItem *graphicsItem = item->graphicsItem();
     return graphicsItem;
@@ -92,5 +91,5 @@ GraphicsItem* ConnectionModel::graphicOfRow(const QModelIndex &index) {
 
 bool ConnectionModel::selectionIncludesGraphicsItem(const QModelIndex &index, QItemSelectionModel::SelectionFlags command) {
     return index.row() >= 0 //if nothing is selected the model uses a index of -1
-        && (QItemSelectionModel::Rows & command || index.column() == SceneTreeModel::GRAPHIC);
+        && (QItemSelectionModel::Rows & command);
 }

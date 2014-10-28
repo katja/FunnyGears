@@ -34,12 +34,6 @@ public:
     GraphicsItem*   graphicsItem() const;
     SceneTreeItem*  itemWithGraphicsItem(const GraphicsItem *graphicsItem) const;
 
-    void            translate(const QVector2D &translation);
-    QVector2D       getTranslation() const;
-    void            rotate(float angle);
-    float           getRotation() const;
-
-
 private:
     bool m_isRoot;
     GraphicsScene *m_graphicsScene;
@@ -50,9 +44,6 @@ private:
     QString m_name;
     GraphicsItem *m_graphicsItem;
     bool m_isVisible;
-
-    QVector2D m_translation; //translation
-    float m_rotation; //rotation counterclockwise
 
 };
 

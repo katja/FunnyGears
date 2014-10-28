@@ -17,7 +17,7 @@ public:
 
 
     enum Data {
-        NAME, VISIBILITY, TYPE, TRANSLATION, ROTATION, GRAPHIC
+        NAME, VISIBILITY, TYPE
     };
 
     /** Sets a new root item. Root Item may be an item of quite another scene tree.

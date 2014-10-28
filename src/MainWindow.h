@@ -5,8 +5,7 @@
 #include "GraphicsView.h"
 #include "GraphicsScene.h"
 #include "SceneTreeModel.h"
-#include "ObjectScheduleTreeView.h"
-#include "ObjectScheduleWidget.h"
+#include "ObjectScheduleViewWidget.h"
 #include "ObjectAttributesWidget.h"
 
 class MainWindow : public QMainWindow {
@@ -23,14 +22,12 @@ protected:
     void keyPressEvent(QKeyEvent *event);
 
 private:
-    SceneTreeModel      *m_sceneModel;
-    ObjectScheduleTreeView  *m_objectScheduleView;
+    GraphicsView                *m_view;
+    GraphicsScene               *m_scene;
 
-    GraphicsView        *m_view;
-    GraphicsScene       *m_scene;
-
-    ObjectScheduleWidget *m_objectScheduleWidget; // is a QDockWidget
-    ObjectAttributesWidget *m_objectAttributesWidget; // is a QDockWidget
+    SceneTreeModel              *m_sceneModel;
+    ObjectScheduleViewWidget    *m_objectSchedule; // is a QDockWidget, has a TreeView
+    ObjectAttributesWidget      *m_objectAttributesWidget; // is a QDockWidget
 
     QMenu       *m_programMenu,
                 *m_fileMenu,
