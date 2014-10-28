@@ -3,7 +3,7 @@
 
 #include "stable.h"
 #include "SceneTreeModel.h"
-#include "ConnectionModel.h"
+#include "SelectionModel.h"
 
 class TreeView;
 class ObjectScheduleViewWidget : public QDockWidget {
@@ -14,7 +14,7 @@ public:
     ObjectScheduleViewWidget(SceneTreeModel *model, QWidget *parent = 0);
     virtual ~ObjectScheduleViewWidget();
 
-    ConnectionModel* setConnectionModel(ConnectionModel *model);
+    SelectionModel* setSelectionModel(SelectionModel *model);
 
 private slots:
     void addSpline();
@@ -31,7 +31,7 @@ private:
                 *m_removeItemButton;
 
     SceneTreeModel *m_sceneTreeModel;
-    ConnectionModel* m_connectionModel;
+    SelectionModel* m_selectionModel;
 
     void setTreeViewLayout();
     void setWidgetLayout();

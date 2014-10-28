@@ -1,19 +1,19 @@
 #include "GraphicsScene.h"
-#include "ConnectionModel.h"
+#include "SelectionModel.h"
 #include "SceneTreeModel.h"
 #include "SceneTreeItem.h"
 
-ConnectionModel::ConnectionModel(SceneTreeModel *model) : QItemSelectionModel(model), m_sceneTreeModel(model) {
-    std::cout << "ConnectionModel is created" << std::endl;
+SelectionModel::SelectionModel(SceneTreeModel *model) : QItemSelectionModel(model), m_sceneTreeModel(model) {
+    std::cout << "SelectionModel is created" << std::endl;
     connect(this, SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
         this, SLOT(updateSelection(const QItemSelection&, const QItemSelection&)));
 }
 
-ConnectionModel::~ConnectionModel() {
-    std::cout << "ConnectionModel is deleted" << std::endl;
+SelectionModel::~SelectionModel() {
+    std::cout << "SelectionModel is deleted" << std::endl;
 }
 
-void ConnectionModel::sceneSelectionChanged(GraphicsScene *scene) {
+void SelectionModel::sceneSelectionChanged(GraphicsScene *scene) {
     QList<GraphicsItem*> sceneSelectionItems = scene->selectedGraphicsItems();
 
     foreach(GraphicsItem *currentlySelected, m_selectedItems) {
@@ -30,7 +30,7 @@ void ConnectionModel::sceneSelectionChanged(GraphicsScene *scene) {
     reportSelectionCount();
 }
 
-void ConnectionModel::updateSelection(const QItemSelection &selected, const QItemSelection &deselected) {
+void SelectionModel::updateSelection(const QItemSelection &selected, const QItemSelection &deselected) {
     if(selectedRows(SceneTreeModel::NAME).size() == 0) {
         m_selectedItems.clear();
         emit selectNothing();
@@ -64,7 +64,7 @@ void ConnectionModel::updateSelection(const QItemSelection &selected, const QIte
     reportSelectionCount();
 }
 
-void ConnectionModel::changeSelectionInModel(GraphicsItem *item, QItemSelectionModel::SelectionFlags command) {
+void SelectionModel::changeSelectionInModel(GraphicsItem *item, QItemSelectionModel::SelectionFlags command) {
     QModelIndex index = m_sceneTreeModel->itemWithGraphicsItem(item);
 
     if(index.isValid()) {
@@ -72,7 +72,7 @@ void ConnectionModel::changeSelectionInModel(GraphicsItem *item, QItemSelectionM
     }
 }
 
-void ConnectionModel::reportSelectionCount() {
+void SelectionModel::reportSelectionCount() {
     if(m_selectedItems.size() == 1) {
         emit oneGraphicsItemSelected(m_selectedItems.first());
     } else {
@@ -80,7 +80,7 @@ void ConnectionModel::reportSelectionCount() {
     }
 }
 
-GraphicsItem* ConnectionModel::graphicOfRow(const QModelIndex &index) {
+GraphicsItem* SelectionModel::graphicOfRow(const QModelIndex &index) {
     if(!index.isValid())
         return 0;
     void *data = index.internalPointer(); //TODO: refactor SceneTreeModel and -Item not to use in every column same QModelIndex, but f.ex. in the geom column the m_graphicsItem of the SceneTreeItem
@@ -89,7 +89,7 @@ GraphicsItem* ConnectionModel::graphicOfRow(const QModelIndex &index) {
     return graphicsItem;
 }
 
-bool ConnectionModel::selectionIncludesGraphicsItem(const QModelIndex &index, QItemSelectionModel::SelectionFlags command) {
+bool SelectionModel::selectionIncludesGraphicsItem(const QModelIndex &index, QItemSelectionModel::SelectionFlags command) {
     return index.row() >= 0 //if nothing is selected the model uses a index of -1
         && (QItemSelectionModel::Rows & command);
 }

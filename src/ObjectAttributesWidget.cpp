@@ -1,8 +1,8 @@
 #include "ObjectAttributesWidget.h"
 #include "graphics_widgets/GraphicsSplineAttributesWidget.h"
 
-ObjectAttributesWidget::ObjectAttributesWidget(ConnectionModel *connectionModel, QWidget *parent)
-: QDockWidget("Object Attributes", parent, Qt::Widget), m_connectionModel(connectionModel) {
+ObjectAttributesWidget::ObjectAttributesWidget(SelectionModel *selectionModel, QWidget *parent)
+: QDockWidget("Object Attributes", parent, Qt::Widget), m_selectionModel(selectionModel) {
     std::cout << "ObjectAttributesWidget is created" << std::endl;
 
     GraphicsSplineAttributesWidget *splineWidget = new GraphicsSplineAttributesWidget(this);
@@ -12,8 +12,8 @@ ObjectAttributesWidget::ObjectAttributesWidget(ConnectionModel *connectionModel,
     m_noContentWidget = new QWidget(this);
     setWidget(m_noContentWidget);
 
-    connect(m_connectionModel, SIGNAL(oneGraphicsItemSelected(GraphicsItem*)), this, SLOT(selectItem(GraphicsItem*)));
-    connect(m_connectionModel, SIGNAL(noneOrManyGraphicsItemsSelected()), this, SLOT(deselect()));
+    connect(m_selectionModel, SIGNAL(oneGraphicsItemSelected(GraphicsItem*)), this, SLOT(selectItem(GraphicsItem*)));
+    connect(m_selectionModel, SIGNAL(noneOrManyGraphicsItemsSelected()), this, SLOT(deselect()));
 }
 
 ObjectAttributesWidget::~ObjectAttributesWidget() {

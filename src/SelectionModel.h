@@ -1,18 +1,18 @@
-#ifndef CONNECTION_MODEL
-#define CONNECTION_MODEL
+#ifndef SELECTION_MODEL
+#define SELECTION_MODEL
 
 #include "stable.h"
 #include "graphics_objects/GraphicsItem.h"
 class GraphicsScene;
 class SceneTreeModel;
 
-class ConnectionModel : public QItemSelectionModel {
+class SelectionModel : public QItemSelectionModel {
 
 Q_OBJECT
 
 public:
-    ConnectionModel(SceneTreeModel *model);
-    ~ConnectionModel();
+    SelectionModel(SceneTreeModel *model);
+    ~SelectionModel();
 
 signals:
     //signals a connected GraphicsScene needs to handle:
@@ -47,4 +47,4 @@ private:
 
 };
 
-#endif // CONNECTION_MODEL
+#endif // SELECTION_MODEL

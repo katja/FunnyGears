@@ -3,7 +3,7 @@
 
 #include "stable.h"
 #include "tool_bars/ToolBarListener.h"
-#include "ConnectionModel.h"
+#include "SelectionModel.h"
 #include "graphics_objects/GraphicsSpline.h"
 #include "graphics_objects/GraphicsItem.h"
 
@@ -16,7 +16,7 @@ public:
     GraphicsScene(qreal x, qreal y, qreal width, qreal height, QObject *parent = 0);
     ~GraphicsScene();
 
-    void setConnectionModel(ConnectionModel *connectionModel);
+    void setSelectionModel(SelectionModel *selectionModel);
 
     void drawForeground(QPainter *painter, const QRectF &rect);
     void drawBackground(QPainter *painter, const QRectF &rect);
@@ -54,7 +54,7 @@ private:
 
     QPointF m_clickedPoint;
 
-    ConnectionModel *m_connectionModel;
+    SelectionModel *m_selectionModel;
 
     void initialize();
     void updateAllViews(const QList<QRectF> &updateRegions) const;

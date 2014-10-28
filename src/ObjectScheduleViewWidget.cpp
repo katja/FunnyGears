@@ -39,10 +39,10 @@ ObjectScheduleViewWidget::~ObjectScheduleViewWidget() {
     std::cout << "ObjectScheduleViewWidget is deleted" << std::endl;
 }
 
-ConnectionModel* ObjectScheduleViewWidget::setConnectionModel(ConnectionModel *model) {
+SelectionModel* ObjectScheduleViewWidget::setSelectionModel(SelectionModel *model) {
     m_treeView->setSelectionModel(model);
-    ConnectionModel *oldModel = m_connectionModel;
-    m_connectionModel = model;
+    SelectionModel *oldModel = m_selectionModel;
+    m_selectionModel = model;
     return oldModel;
 }
 

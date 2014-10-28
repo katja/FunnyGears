@@ -48,14 +48,14 @@ void MainWindow::createMainProgramPart() {
 
 // MODEL/VIEW THINGS
     m_sceneModel = new SceneTreeModel(m_scene, this);
-    ConnectionModel *connectionModel = new ConnectionModel(m_sceneModel);
+    SelectionModel *selectionModel = new SelectionModel(m_sceneModel);
 
     m_objectSchedule  = new ObjectScheduleViewWidget(m_sceneModel, this);
 
 // SELECTION THINGS
-    m_objectAttributesWidget = new ObjectAttributesWidget(connectionModel, this);
-    m_scene->setConnectionModel(connectionModel);
-    m_objectSchedule->setConnectionModel(connectionModel);
+    m_objectAttributesWidget = new ObjectAttributesWidget(selectionModel, this);
+    m_scene->setSelectionModel(selectionModel);
+    m_objectSchedule->setSelectionModel(selectionModel);
 
 // DOCK WIDGETS
     addDockWidget(Qt::RightDockWidgetArea, m_objectSchedule);

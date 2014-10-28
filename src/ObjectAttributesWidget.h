@@ -3,7 +3,7 @@
 
 #include "stable.h"
 #include "SceneTreeModel.h"
-#include "ConnectionModel.h"
+#include "SelectionModel.h"
 #include "graphics_objects/GraphicsItem.h"
 #include "graphics_widgets/GraphicsItemAttributesWidget.h"
 
@@ -12,7 +12,7 @@ class ObjectAttributesWidget : public QDockWidget {
 Q_OBJECT
 
 public:
-    ObjectAttributesWidget(ConnectionModel *connectionModel, QWidget *parent = 0);
+    ObjectAttributesWidget(SelectionModel *selectionModel, QWidget *parent = 0);
     ~ObjectAttributesWidget();
 
 private slots:
@@ -22,7 +22,7 @@ private slots:
 private:
     QList<GraphicsItemAttributesWidget*> m_graphicsItemWidgets;
     QWidget *m_noContentWidget;
-    ConnectionModel *m_connectionModel;
+    SelectionModel *m_selectionModel;
 
 };
 

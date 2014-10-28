@@ -1,5 +1,5 @@
 #include "GraphicsScene.h"
-#include "ConnectionModel.h"
+#include "SelectionModel.h"
 #include "Cursor.h"
 #include "preferences.h"
 #include <cmath>
@@ -18,7 +18,7 @@ GraphicsScene::GraphicsScene(qreal x, qreal y, qreal width, qreal height, QObjec
 
 void GraphicsScene::initialize() {
     std::cout << "GraphicsScene is created" << std::endl;
-    m_connectionModel = 0;
+    m_selectionModel = 0;
     m_selectionChangeInProgress = false;
     switchToDefaultState();
 
@@ -34,13 +34,13 @@ GraphicsScene::~GraphicsScene() {
     }
 }
 
-void GraphicsScene::setConnectionModel(ConnectionModel *connectionModel) {
-    m_connectionModel = connectionModel;
+void GraphicsScene::setSelectionModel(SelectionModel *selectionModel) {
+    m_selectionModel = selectionModel;
     connect(this, SIGNAL(selectionChanged()), this, SLOT(reactOnSelectionChange()));
-    connect(m_connectionModel, SIGNAL(selectOnly(GraphicsItem*)), this, SLOT(selectOnly(GraphicsItem*)));
-    connect(m_connectionModel, SIGNAL(selectAlso(GraphicsItem*)), this, SLOT(selectAlso(GraphicsItem*)));
-    connect(m_connectionModel, SIGNAL(selectNoMore(GraphicsItem*)), this, SLOT(selectNoMore(GraphicsItem*)));
-    connect(m_connectionModel, SIGNAL(selectNothing()), this, SLOT(selectNothing()));
+    connect(m_selectionModel, SIGNAL(selectOnly(GraphicsItem*)), this, SLOT(selectOnly(GraphicsItem*)));
+    connect(m_selectionModel, SIGNAL(selectAlso(GraphicsItem*)), this, SLOT(selectAlso(GraphicsItem*)));
+    connect(m_selectionModel, SIGNAL(selectNoMore(GraphicsItem*)), this, SLOT(selectNoMore(GraphicsItem*)));
+    connect(m_selectionModel, SIGNAL(selectNothing()), this, SLOT(selectNothing()));
 }
 
 void GraphicsScene::drawForeground(QPainter *painter, const QRectF &rect) {
@@ -154,8 +154,8 @@ void GraphicsScene::executeEditingAction(Editing::Action editingAction) {
 //****************************************************************************
 
 void GraphicsScene::reactOnSelectionChange() {
-    if(m_connectionModel && !m_selectionChangeInProgress)
-        m_connectionModel->sceneSelectionChanged(this);
+    if(m_selectionModel && !m_selectionChangeInProgress)
+        m_selectionModel->sceneSelectionChanged(this);
     if(m_selectionState == SelectionState::OneItemRequested) {
         startEditing(m_editingState);
     }
