@@ -97,7 +97,7 @@ QVariant SceneTreeModel::data(const QModelIndex &index, int role) const {
                 default:
                     return QVariant();
             }
-        } else if (role == Qt::DecorationRole && index.column() == VISIBILITY) {
+        } else if(role == Qt::DecorationRole && index.column() == VISIBILITY) {
             if(item->isVisible())
                 return QIcon("images/EyeOpen.png");
             else
@@ -112,7 +112,7 @@ bool SceneTreeModel::setData(const QModelIndex &index, const QVariant &value, in
         return false;
     SceneTreeItem *item = findItemBy(index);
     if(item) {
-        if (index.column() == NAME) {
+        if(index.column() == NAME) {
             item->setName(value.toString());
         } else {
             return false;

@@ -99,8 +99,6 @@ signals:
 private:
     SceneTreeItem *m_rootItem;
     QHash< Data, QHash<Qt::ItemDataRole, QString> > m_headHash;
-    int m_nameColumn;
-    int m_visibilityColumn;
 
     GraphicsScene *m_graphicsScene;
 
