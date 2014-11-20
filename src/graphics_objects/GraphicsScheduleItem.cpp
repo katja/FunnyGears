@@ -1,4 +1,4 @@
-#include "GraphicsScheduleItem.h"
+#include "graphics_objects/GraphicsScheduleItem.h"
 
 const int GraphicsScheduleItem::Type = GraphicsScheduleItem::UserType + Type::GraphicsScheduleItemType;
 

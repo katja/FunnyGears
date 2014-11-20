@@ -1,4 +1,4 @@
-#include "CylindricalGear.h"
+#include "basic_objects/CylindricalGear.h"
 #include <Eigen/Geometry>
 
 void CylindricalGear::gearProfile(vector<vec2> &gearProfile) const {

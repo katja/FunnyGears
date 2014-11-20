@@ -1,8 +1,8 @@
 #ifndef SPLINE_TOOTH_PROFILE
 #define SPLINE_TOOTH_PROFILE
 
-#include "Spline.h"
-#include "ToothProfile.h"
+#include "basic_objects/Spline.h"
+#include "basic_objects/ToothProfile.h"
 
 class SplineToothProfile : public Spline, public ToothProfile {
 

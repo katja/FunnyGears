@@ -1,4 +1,4 @@
-#include "ToolBarManager.h"
+#include "tool_bars/ToolBarManager.h"
 
 ToolBarManager* ToolBarManager::getToolBarManager() {
     if(m_uniqueManager == 0)

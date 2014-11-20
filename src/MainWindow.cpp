@@ -1,8 +1,8 @@
 #include "MainWindow.h"
 #include <cmath>
-#include "src/helpers.h"
-#include "Cursor.h"
+#include "helpers.h"
 #include "tool_bars/ToolBarManager.h"
+#include "Cursor.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), projectChanged(true) {
     std::cout << "MainWindow is created" << std::endl;

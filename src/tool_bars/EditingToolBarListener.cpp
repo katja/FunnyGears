@@ -1,5 +1,5 @@
-#include "EditingToolBarListener.h"
-#include "ToolBarManager.h"
+#include "tool_bars/EditingToolBarListener.h"
+#include "tool_bars/ToolBarManager.h"
 
 //Helper class (null object) to decide if a ToolBarListener object is an EditingToolBarListener
 class EditingToolBarNullListener : public EditingToolBarListener {

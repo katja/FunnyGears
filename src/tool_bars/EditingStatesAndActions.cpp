@@ -1,4 +1,4 @@
-#include "EditingStatesAndActions.h"
+#include "tool_bars/EditingStatesAndActions.h"
 
 bool Editing::demandsWholeCanvas(State s) {
     if(s == Pen ||

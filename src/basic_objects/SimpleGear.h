@@ -1,8 +1,8 @@
 #ifndef SIMPLE_GEAR
 #define SIMPLE_GEAR
 
-#include "CylindricalGear.h"
-#include "ToothProfile.h"
+#include "basic_objects/CylindricalGear.h"
+#include "basic_objects/ToothProfile.h"
 
 class SimpleGear : public CylindricalGear {
 

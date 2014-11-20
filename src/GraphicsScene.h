@@ -4,8 +4,8 @@
 #include "stable.h"
 #include "tool_bars/EditingToolBarListener.h"
 #include "tool_bars/EditingStatesAndActions.h"
-#include "SelectionModel.h"
 #include "graphics_objects/GraphicsItem.h"
+#include "SelectionModel.h"
 
 class GraphicsScene : public QGraphicsScene, public EditingToolBarListener {
 

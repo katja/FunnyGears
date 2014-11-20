@@ -1,4 +1,4 @@
-#include "SplineToothProfile.h"
+#include "basic_objects/SplineToothProfile.h"
 #include "helpers.h"
 #include <cmath>
 #include <Eigen/LU>

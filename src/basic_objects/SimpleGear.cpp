@@ -1,4 +1,4 @@
-#include "SimpleGear.h"
+#include "basic_objects/SimpleGear.h"
 
 SimpleGear::SimpleGear(const ToothProfile &toothProfile) : m_toothProfile(toothProfile.clone()) {
     // Assume for simplicity a radius which lies in the middle of max and min points around the center
