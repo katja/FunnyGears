@@ -1,5 +1,5 @@
 #include "YesNoDelegate.h"
-#include "SceneTreeModel.h"
+#include "Model.h"
 
 YesNoDelegate::YesNoDelegate(QObject *parent) : QStyledItemDelegate(parent) {
     std::cout << "YesNoDelegate is created" << std::endl;
@@ -11,9 +11,9 @@ YesNoDelegate::~YesNoDelegate() {
 
 bool YesNoDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index) {
     if(event->type() == QEvent::MouseButtonDblClick && index.data(Qt::DecorationRole).canConvert<QIcon>()) {
-        if(model->inherits("SceneTreeModel")) {
-            SceneTreeModel *sceneModel = static_cast<SceneTreeModel*>(model);
-            sceneModel->toggleValue(index);
+        if(model->inherits("Model")) {
+            Model *m = static_cast<Model*>(model);
+            m->toggleValue(index);
         }
     }
     return QStyledItemDelegate::editorEvent(event, model, option, index);

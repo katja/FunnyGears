@@ -2,7 +2,6 @@
 #define OBJECT_ATTRIBUTES_WIDGET
 
 #include "stable.h"
-#include "SceneTreeModel.h"
 #include "SelectionModel.h"
 #include "graphics_objects/GraphicsItem.h"
 #include "graphics_widgets/GraphicsItemAttributesWidget.h"

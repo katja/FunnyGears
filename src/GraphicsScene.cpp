@@ -1,5 +1,4 @@
 #include "GraphicsScene.h"
-#include "SelectionModel.h"
 #include "Cursor.h"
 #include "preferences.h"
 #include <cmath>
@@ -20,7 +19,7 @@ void GraphicsScene::initialize() {
     std::cout << "GraphicsScene is created" << std::endl;
     m_selectionModel = 0;
     m_selectionChangeInProgress = false;
-    switchToDefaultState();
+    m_editingState = Editing::NoEditing;
 
     setForegroundBrush(QColor(50, 50, 50, 50));
     setSceneRect(-1000, -1000, 2000, 2000);
@@ -28,10 +27,11 @@ void GraphicsScene::initialize() {
 
 GraphicsScene::~GraphicsScene() {
     std::cout << "GraphicsScene is deleted" << std::endl;
-    //do not delete the GraphicsItems, as they are deleted of the SceneTreeItems!
-    foreach(GraphicsItem *graphicsItem, graphicsItems()) {
-        removeItem(graphicsItem);
-    }
+    //TODO: I think the Graphicsitems should be deleted by the scene itself, so no removing before has to take place
+    //      Like that they are automatically deleted from QGraphicsScene.
+    // foreach(GraphicsItem *graphicsItem, graphicsItems()) {
+    //     removeItem(graphicsItem);
+    // }
 }
 
 void GraphicsScene::setSelectionModel(SelectionModel *selectionModel) {
@@ -97,30 +97,13 @@ void GraphicsScene::drawBackground(QPainter *painter, const QRectF &rect) {
     }
 }
 
-void GraphicsScene::removeItem(QGraphicsItem *item) {
-    if(mouseGrabberItem() == item && m_selectionState == SelectionState::OneItem) {
-        activateAllItemSelection();
-        m_selectionState = SelectionState::OneItemRequested;
-    }
-    QGraphicsScene::removeItem(item);
-}
-
-QList<GraphicsItem*> GraphicsScene::graphicsItems() const {
-    QList<GraphicsItem*> list;
-    foreach(QGraphicsItem *qItem, items()) {
-        if(GraphicsItem::isGraphicsItem(qItem)) {
-            list << static_cast<GraphicsItem*>(qItem);
-        }
-    }
-    return list;
-}
-
 QList<GraphicsItem*> GraphicsScene::selectedGraphicsItems() const {
     QList<GraphicsItem*> list;
     foreach(QGraphicsItem *qItem, selectedItems()) {
         if(GraphicsItem::isGraphicsItem(qItem)) {
             list << static_cast<GraphicsItem*>(qItem);
         }
+        std::cout << std::endl;
     }
     return list;
 }
@@ -128,20 +111,11 @@ QList<GraphicsItem*> GraphicsScene::selectedGraphicsItems() const {
 //Before every startEditing a stopEditing is called.
 //So don't stop things again!
 void GraphicsScene::startEditing(Editing::State editingState) {
-    if(isGraphicsItemEditing(editingState))
-        m_editingState = editingState;
-    if(editingState == Editing::Pointer)
-        switchToPointerState();
-    else if (editingState == Editing::Pen)
-        switchToPenState();
-    else if (editingState == Editing::Eraser)
-        switchToEraserState();
-    else if (editingState == Editing::NoEditing)
-        std::cout << "START EDITING WITH NO_EDITING CALLED! WHY????????" << std::endl;
+    m_editingState = editingState;
 }
 
 void GraphicsScene::stopEditing() {
-    switchToDefaultState();
+    m_editingState = Editing::NoEditing;
 }
 
 void GraphicsScene::executeEditingAction(Editing::Action editingAction) {
@@ -154,55 +128,8 @@ void GraphicsScene::executeEditingAction(Editing::Action editingAction) {
 //****************************************************************************
 
 void GraphicsScene::reactOnSelectionChange() {
-    if(m_selectionModel && !m_selectionChangeInProgress)
+    if(m_selectionModel && !m_selectionChangeInProgress) //TODO: delete m_selectionChangeInProgress, if it is not longer needed!!!
         m_selectionModel->sceneSelectionChanged(this);
-    if(m_selectionState == SelectionState::OneItemRequested) {
-        startEditing(m_editingState);
-    }
-}
-
-void GraphicsScene::selectOnly(GraphicsItem *qItem) {
-    m_selectionChangeInProgress = true;
-    if(m_selectionState == SelectionState::OneItem)
-        swapActiveItemTo(static_cast<GraphicsItem*>(qItem));
-    else {
-        clearSelection();
-        if(qItem->flags() & QGraphicsItem::ItemIsSelectable)
-            qItem->setSelected(true);
-        else
-            std::cout << "selection was not possible :-(" << std::endl;
-    }
-    m_selectionChangeInProgress = false;
-    reactOnSelectionChange();
-}
-
-void GraphicsScene::selectAlso(GraphicsItem *qItem) {
-    if(m_selectionState == SelectionState::OneItem)
-        //no more item can be selected => inform connection model
-        reactOnSelectionChange();
-    else if(qItem->flags() & QGraphicsItem::ItemIsSelectable)
-        qItem->setSelected(true);
-    else
-        std::cout << "selection was not possible :-(" << std::endl;
-}
-
-void GraphicsScene::selectNoMore(GraphicsItem *qItem) {
-    if(m_selectionState == SelectionState::OneItem && qItem->isSelected()) {
-        selectNothing();
-    } else {
-        qItem->setSelected(false);
-    }
-}
-
-void GraphicsScene::selectNothing() {
-    if(m_selectionState == SelectionState::OneItem) {
-        //As all items have to be selectable again, editing has to stop first and then be started again!
-        activateAllItemSelection();
-        clearSelection();
-        activateOneItemSelection();
-    } else {
-        clearSelection();
-    }
 }
 
 //****************************************************************************
@@ -210,19 +137,33 @@ void GraphicsScene::selectNothing() {
 //****************************************************************************
 
 void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) {
+    std::cout << "GraphicsScene::mousePressEvent tracked" << std::endl;
     m_clickedPoint = mouseEvent->scenePos();
-    if(m_selectionState == SelectionState::OneItem)
+    if(Editing::demandsWholeCanvas(m_editingState)) {
         mouseEvent->accept();
-    else
-        QGraphicsScene::mousePressEvent(mouseEvent);
+        std::cout << "          and accepted" << std::endl;
+        return;
+    }
+    QGraphicsScene::mousePressEvent(mouseEvent);
 }
 
 void GraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) {
-    if(m_selectionState == SelectionState::OneItem
-        && m_clickedPoint == mouseEvent->scenePos()) {
-        sendClickToSelectedItems();
-        mouseEvent->accept();
-        return;
+    std::cout << "GraphicsScene::mouseReleaseEvent tracked" << std::endl;
+    if(Editing::demandsWholeCanvas(m_editingState) && m_clickedPoint == mouseEvent->scenePos()) {
+        //Following: Hack to select the select the suitable QGraphicsItem, if clicked on one
+        //This is necessary, as the selection happens on the mousePressEvent,
+        //but if it is selected, then the mouse is released, an editing click is send
+        //to the graphics item, which was meant to be a selection click
+        if(selectedGraphicsItems().isEmpty()) {
+            std::cout << "          and is now send away with mousePressEvent" << std::endl;
+            QGraphicsScene::mousePressEvent(mouseEvent);
+        } else {
+            std::cout << "          and is sent to selected items now:" << std::endl;
+            sendClickToSelectedItems();
+            mouseEvent->accept();
+            std::cout << "          and accepted" << std::endl;
+            return;
+        }
     }
     QGraphicsScene::mouseReleaseEvent(mouseEvent);
 }
@@ -230,123 +171,6 @@ void GraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) {
 //****************************************************************************
 //********** PRIVATE *********************************************************
 //****************************************************************************
-
-void GraphicsScene::updateAllViews(const QList<QRectF> &updateRegions) const {
-    QList<QGraphicsView*> views = QGraphicsScene::views();
-    foreach(QGraphicsView *view, views) {
-        view->updateScene(updateRegions);
-    }
-}
-
-void GraphicsScene::switchToDefaultState() {
-    m_editingState = Editing::NoEditing;
-    activateAllItemSelection();
-    unsetAllItemsCursor();
-    unsetCursorInViews();
-}
-
-void GraphicsScene::switchToPointerState() {
-    m_editingState = Editing::Pointer;
-    activateAllItemSelection();
-    expandAllItemsFlags(
-        QGraphicsItem::ItemIsMovable |
-        QGraphicsItem::ItemSendsGeometryChanges);
-    setAllItemsCursor(CursorRental::pointer());
-}
-
-void GraphicsScene::switchToPenState() {
-    m_editingState = Editing::Pen;
-    if(selectedGraphicsItems().empty()) {
-        activateOneItemRequestedSelection();
-    } else {
-        activateOneItemSelection();
-        setCursorInViews(CursorRental::pen());
-    }
-}
-
-void GraphicsScene::switchToEraserState() {
-    m_editingState = Editing::Eraser;
-    if(selectedGraphicsItems().empty()) {
-        activateOneItemRequestedSelection();
-    } else {
-        activateOneItemSelection();
-        setCursorInViews(CursorRental::eraser());
-    }
-}
-
-void GraphicsScene::activateAllItemSelection() {
-    m_selectionState = SelectionState::AllItems;
-    if(mouseGrabberItem())
-        mouseGrabberItem()->ungrabMouse();
-    setAllItemsFlags(QGraphicsItem::ItemIsSelectable);
-    setAllItemsEnabled(true);
-}
-
-void GraphicsScene::activateOneItemRequestedSelection() {
-    m_selectionState = SelectionState::OneItemRequested;
-}
-
-void GraphicsScene::activateOneItemSelection() {
-    m_selectionState = SelectionState::OneItemRequested;
-    if(selectedGraphicsItems().empty()) {
-    } else {
-        if(selectedGraphicsItems().size() > 1)
-            reduceSelection(1);
-        m_selectionState = SelectionState::OneItem;
-        setAllItemsFlags(0);
-        setAllItemsEnabled(false, true);
-        activateItem(selectedGraphicsItems().first());
-    }
-}
-
-void GraphicsScene::activateItem(GraphicsItem *item) {
-    item->setFlags(
-        QGraphicsItem::ItemIsSelectable |
-        QGraphicsItem::ItemIsMovable |
-        QGraphicsItem::ItemSendsGeometryChanges);
-    item->setEnabled(true);
-    item->setSelected(true);
-    item->grabMouse();
-}
-
-//TODO: method is not used!!!
-void GraphicsScene::swapActiveItemTo(GraphicsItem *newActiveItem) {
-    if(m_selectionState != SelectionState::OneItem)
-        return;
-    GraphicsItem *currentItem = selectedGraphicsItems().first();
-    currentItem->setFlags(0);
-    currentItem->setEnabled(false);
-    activateItem(newActiveItem);
-}
-
-void GraphicsScene::setAllItemsEnabled(bool enabled, bool selectedOnesExcluded) {
-    //TODO: actually here an GraphicsItem should be used instead of QGraphicsItem!!!
-    //But as items() is probably much faster than graphicsItems(), I use this variant up to now.
-    foreach(QGraphicsItem* item, items()) {
-        if(!(selectedOnesExcluded && item->isSelected()))
-            item->setEnabled(enabled);
-    }
-}
-
-void GraphicsScene::setAllItemsFlags(QGraphicsItem::GraphicsItemFlags flags) {
-    //TODO: actually here an GraphicsItem should be used instead of QGraphicsItem!!!
-    //But as items() is probably much faster than graphicsItems(), I use this variant up to now.
-    foreach(QGraphicsItem* item, items()) {
-        if(item->isSelected())
-            item->setFlags(flags | QGraphicsItem::ItemIsSelectable);
-        else
-            item->setFlags(flags);
-    }
-}
-
-void GraphicsScene::expandAllItemsFlags(QGraphicsItem::GraphicsItemFlags flags) {
-    //TODO: actually here an GraphicsItem should be used instead of QGraphicsItem!!!
-    //But as items() is probably much faster than graphicsItems(), I use this variant up to now.
-    foreach(QGraphicsItem* item, items()) {
-        item->setFlags(flags | item->flags());
-    }
-}
-
 void GraphicsScene::setAllItemsCursor(const QCursor &cursor) {
     //TODO: actually here an GraphicsItem should be used instead of QGraphicsItem!!!
     //But as items() is probably much faster than graphicsItems(), I use this variant up to now.
@@ -377,21 +201,6 @@ void GraphicsScene::unsetCursorInViews() {
 
 void GraphicsScene::sendClickToSelectedItems() {
     foreach(GraphicsItem *item, selectedGraphicsItems()) {
-        item->clickReceived(m_clickedPoint, m_editingState);
+        item->receivedClickOn(m_clickedPoint);
     }
-}
-
-void GraphicsScene::reduceSelection(int leaveBehind) {
-    QList<GraphicsItem*> selectedItems = selectedGraphicsItems();
-    for(int i = leaveBehind; i <= selectedItems.size(); ++i) {
-        selectedItems.last()->setSelected(false);
-    }
-}
-
-bool GraphicsScene::isGraphicsItemEditing(Editing::State editingStyle) const {
-    if(editingStyle == Editing::NoEditing ||
-        editingStyle == Editing::Pen ||
-        editingStyle == Editing::Eraser)
-        return true;
-    return false;
 }

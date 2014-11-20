@@ -1,10 +1,8 @@
 #include "MainWindow.h"
-#include "Cursor.h"
-
-
-#include "src/basic_objects/SplineToothProfile.h"
-#include "src/helpers.h"
 #include <cmath>
+#include "src/helpers.h"
+#include "Cursor.h"
+#include "tool_bars/ToolBarManager.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), projectChanged(true) {
     std::cout << "MainWindow is created" << std::endl;
@@ -47,10 +45,10 @@ void MainWindow::createMainProgramPart() {
     setCentralWidget(m_view);
 
 // MODEL/VIEW THINGS
-    m_sceneModel = new SceneTreeModel(m_scene, this);
-    SelectionModel *selectionModel = new SelectionModel(m_sceneModel);
+    m_model = new Model(m_scene, this);
+    SelectionModel *selectionModel = new SelectionModel(m_model);
 
-    m_objectSchedule  = new ObjectScheduleViewWidget(m_sceneModel, this);
+    m_objectSchedule  = new ObjectScheduleViewWidget(m_model, this);
 
 // SELECTION THINGS
     m_objectAttributesWidget = new ObjectAttributesWidget(selectionModel, this);
@@ -107,6 +105,7 @@ void MainWindow::createFileMenuAndToolbar() {
 
 void MainWindow::createEditToolbar() {
     m_editToolBar = new EditingToolBar(this);
+    ToolBarManager::getToolBarManager()->control(m_editToolBar);
     m_editToolBar->addListener(m_scene);
     m_editToolBar->addListener(m_view);
     addToolBar(m_editToolBar);
@@ -170,8 +169,8 @@ void MainWindow::newProject() {
 void MainWindow::openProject() {
     if((projectChanged && savedProjectOrOk()) || !projectChanged) {
         QString fileName = QFileDialog::getOpenFileName(this, tr("Choose a funny gear project"), QString(), tr(".fg"));
-        if(!fileName.isEmpty());
-            // TODO: loadFile(fileName);
+        if(!fileName.isEmpty())
+            ;// TODO: loadFile(fileName);
     }
 }
 

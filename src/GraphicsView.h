@@ -3,10 +3,10 @@
 
 #include "stable.h"
 #include "definitions.h"
-#include "tool_bars/ToolBarListener.h"
+#include "tool_bars/EditingToolBarListener.h"
 #include "tool_bars/EditingToolBar.h"
 
-class GraphicsView : public QGraphicsView, public ToolBarListener {
+class GraphicsView : public QGraphicsView, public EditingToolBarListener {
 
 Q_OBJECT
 
@@ -15,14 +15,14 @@ public:
     GraphicsView(QGraphicsScene *scene, QWidget *parent = 0);
     ~GraphicsView();
 
-    void wheelEvent(QWheelEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    void keyPressEvent(QKeyEvent *event);
-    void keyReleaseEvent(QKeyEvent *event);
+    void wheelEvent(QWheelEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
+    void keyReleaseEvent(QKeyEvent *event) override;
 
-    void stopEditing();
-    void startEditing(Editing::State editingState);
-    void executeEditingAction(Editing::Action editingAction);
+    void stopEditing() override;
+    void startEditing(Editing::State editingState) override;
+    void executeEditingAction(Editing::Action editingAction) override;
 
     void zoomToDefault();
     void zoomIn();

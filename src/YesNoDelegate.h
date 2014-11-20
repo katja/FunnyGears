@@ -4,8 +4,8 @@
 #include "stable.h"
 
 /** Special QStyledItemDelegate which allows toggling boolean values,
- *  represented by QIcons in SceneTreeModel by calling toggleValue(QModelIndex)
- *  in the SceneTreeModel.
+ *  represented by QIcons in Model by calling toggleValue(QModelIndex)
+ *  in the Model.
  */
 class YesNoDelegate : public QStyledItemDelegate {
 

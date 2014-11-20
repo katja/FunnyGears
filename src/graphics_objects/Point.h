@@ -12,14 +12,14 @@ public:
 
     Point(QGraphicsItem *parent = 0);
     Point(GraphicsSpline *parent);
-    ~Point();
+    virtual ~Point();
 
-    QRectF boundingRect() const;
-    QPainterPath shape() const;
+    QRectF boundingRect() const override;
+    QPainterPath shape() const override;
 
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
 
 private:
     GraphicsSpline *m_parentSpline;

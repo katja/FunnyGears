@@ -5,16 +5,21 @@
 const int GraphicsSpline::Type = GraphicsSpline::UserType + Type::GraphicsSplineType;
 
 bool GraphicsSpline::isGraphicsSplineItem(QGraphicsItem *item) {
-    if(item->type() == Type)
+    if(item && item->type() == Type)
         return true;
     return false;
 }
 
-GraphicsSpline::GraphicsSpline(GraphicsItem *parent) : GraphicsItem(parent), m_isTangentDrawn(false), m_tangentValue(-1.0f) {
+GraphicsSpline::GraphicsSpline() : GraphicsScheduleItem(), m_isTangentDrawn(false), m_tangentValue(-1.0f) {
     std::cout << "GraphicsSpline is created" << std::endl;
     m_spline = new Spline();
     int partColor = qrand() % 512 + 100;
     m_color = QColor(partColor / 5, partColor * 2 / 5, partColor % 256);
+    m_editingState = Editing::NoEditing;
+
+    addPoint(QPointF(10, 100));
+    addPoint(QPointF(-50, -20));
+    addPoint(QPointF(200, -5));
 
     setToolTip("Description of what will happen or what to do"); //TODO: Add description
     setFlags( QGraphicsItem::ItemIsMovable
@@ -28,18 +33,12 @@ GraphicsSpline::~GraphicsSpline() {
     delete m_spline;
 }
 
-GraphicsSpline* GraphicsSpline::copy() const {
-    std::cout << "COPY: ";
-    GraphicsSpline *copy = new GraphicsSpline(parentItem());
-    *(copy->m_spline) = *m_spline;
-    copy->m_color = m_color;
-    copy->m_isTangentDrawn = m_isTangentDrawn;
-    copy->m_tangentValue = m_tangentValue;
-    copy->m_points.clear();
-    for(int i = 0; i < m_points.size(); ++i) {
-        copy->m_points << m_points.at(i);
-    }
-    return copy;
+int GraphicsSpline::type() const {
+    return Type;
+}
+
+QString GraphicsSpline::defaultName() const {
+    return "Spline";
 }
 
 const Spline* GraphicsSpline::spline() const {
@@ -180,6 +179,7 @@ void GraphicsSpline::addPoint(QPointF scenePos) {
     prepareGeometryChange();
     m_points.append(p);
     m_spline->addControlPoint(p->pos());
+    std::cout << "Spline has children? " << QGraphicsItem::childItems().size() << std::endl;
 }
 
 void GraphicsSpline::removePoint(int index) {
@@ -205,20 +205,38 @@ void GraphicsSpline::pointMoveEvent(Point *point, QGraphicsSceneMouseEvent *even
     m_spline->moveControlPoint(m_points.indexOf(point), point->pos());
 }
 
-int GraphicsSpline::type() const {
-    return Type;
-}
-
-void GraphicsSpline::clickReceived(QPointF point, Editing::State state) {
-    std::cout << "GraphicsSpline::clickReceived and state: " << state << std::endl;
-    if(state == Editing::Pen)
+void GraphicsSpline::receivedClickOn(QPointF point) {
+    std::cout << "GraphicsSpline::clickedOn and state: " << m_editingState << std::endl;
+    if(m_editingState == Editing::Pen)
         addPoint(point);
-    else if(state == Editing::Eraser)
+    else if(m_editingState == Editing::Eraser)
         removePointNear(point);
 }
 
-QString GraphicsSpline::defaultName() const {
-    return "Spline";
+void GraphicsSpline::mousePressEvent(QGraphicsSceneMouseEvent *event) {
+    std::cout << "GraphicsSpline::mousePressEvent() tracked, nothing done, forwarded to QGraphicsItem" << std::endl;
+    QGraphicsItem::mousePressEvent(event);
+}
+void GraphicsSpline::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
+    std::cout << "GraphicsSpline::mouseReleaseEvent() tracked, nothing done, forwarded to QGraphicsItem" << std::endl;
+    QGraphicsItem::mouseReleaseEvent(event);
+}
+
+void GraphicsSpline::stopEditing() {
+    m_editingState = Editing::NoEditing;
+}
+
+void GraphicsSpline::startEditing(Editing::State editingState) {
+    if(editingState == Editing::Pointer ||
+        editingState == Editing::Pen ||
+        editingState == Editing::Eraser)
+        m_editingState = editingState;
+    else
+        stopEditing();
+}
+
+void GraphicsSpline::executeEditingAction(Editing::Action editingAction) {
+    Q_UNUSED(editingAction);
 }
 
 QPainterPath GraphicsSpline::controlPointPolygonPath(qreal width) const {

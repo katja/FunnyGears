@@ -16,6 +16,8 @@ namespace Editing {
         ZoomDefault = 0,
         ACTION_SIZE
     };
+
+    bool demandsWholeCanvas(State s);
 }
 
 #endif // EDITING_STATES_AND_ACTIONS

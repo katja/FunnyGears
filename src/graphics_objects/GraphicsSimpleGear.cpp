@@ -5,12 +5,12 @@
 const int GraphicsSimpleGear::Type = GraphicsSimpleGear::UserType + Type::GraphicsSimpleGearType;
 
 bool GraphicsSimpleGear::isGraphicsSimpleGearItem(QGraphicsItem *item) {
-    if(item->type() == Type)
+    if(item && item->type() == Type)
         return true;
     return false;
 }
 
-GraphicsSimpleGear::GraphicsSimpleGear(GraphicsItem *parent) : GraphicsItem(parent), m_simpleGear(0), m_radius(100), m_numberOfTeeth(10) {
+GraphicsSimpleGear::GraphicsSimpleGear() : GraphicsScheduleItem(), m_simpleGear(0), m_radius(100), m_numberOfTeeth(10) {
     std::cout << "GraphicsSimpleGear is created" << std::endl;
 
     int partColor = qrand() % 50 + 50;
@@ -25,6 +25,14 @@ GraphicsSimpleGear::GraphicsSimpleGear(GraphicsItem *parent) : GraphicsItem(pare
 
 GraphicsSimpleGear::~GraphicsSimpleGear() {
     std::cout << "GraphicsSimpleGear is deleted" << std::endl;
+}
+
+int GraphicsSimpleGear::type() const {
+    return Type;
+}
+
+QString GraphicsSimpleGear::defaultName() const {
+    return "Simple Gear";
 }
 
 QRectF GraphicsSimpleGear::boundingRect() const {
@@ -64,16 +72,8 @@ void GraphicsSimpleGear::paint(QPainter *painter, const QStyleOptionGraphicsItem
     painter->drawPath(angularPitchStrokesPath());
 }
 
-int GraphicsSimpleGear::type() const {
-    return Type;
-}
-
-void GraphicsSimpleGear::clickReceived(QPointF point, Editing::State state) {
-    std::cout << "GraphicsSimpleGear::clickReceived and state: " << state << std::endl;
-}
-
-QString GraphicsSimpleGear::defaultName() const {
-    return "Simple Gear";
+void GraphicsSimpleGear::receivedClickOn(QPointF point) {
+    std::cout << "GraphicsSimpleGear::clickReceived" << std::endl;
 }
 
 QPainterPath GraphicsSimpleGear::angularPitchStrokesPath() {

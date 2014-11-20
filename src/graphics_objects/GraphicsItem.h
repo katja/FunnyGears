@@ -3,9 +3,9 @@
 
 #include "stable.h"
 #include "definitions.h"
-#include "tool_bars/EditingStatesAndActions.h"
+#include "tool_bars/EditingToolBarListener.h"
 
-class GraphicsItem : public QGraphicsItem {
+class GraphicsItem : public QGraphicsItem, public EditingToolBarListener {
 
 public:
     static const int Type;// = GraphicsItem::UserType + Type::GraphicsItemType;
@@ -14,22 +14,15 @@ public:
     GraphicsItem(GraphicsItem *parent = 0);
     virtual ~GraphicsItem() {}
 
-    virtual int type() const;
-    virtual void clickReceived(QPointF point, Editing::State state) = 0;
+    virtual int type() const override;
+    virtual void receivedClickOn(QPointF point) = 0;
 
-    virtual QString defaultName() const;
+    void setParentItem(QGraphicsItem *newParent); //override from QGraphicsItem
 
-    QList<GraphicsItem*> childItems() const;
-    QList<GraphicsItem*> collidingItems(Qt::ItemSelectionMode mode = Qt::IntersectsItemShape) const;
-    GraphicsItem* commonAncestorItem(const GraphicsItem *other) const;
-    GraphicsItem* focusItem() const;
-    GraphicsItem* focusProxy() const;
-    GraphicsItem* panel() const;
-    GraphicsItem* parentItem() const;
-    GraphicsItem* topLevelItem() const;
+    virtual void stopEditing() override {}
+    virtual void startEditing(Editing::State) override {};
+    virtual void executeEditingAction(Editing::Action) override {};
 
-private:
-    QList<GraphicsItem*> toGraphicsList(QList<QGraphicsItem*> qlist) const;
 };
 
 #endif // GRAPHICS_ITEM

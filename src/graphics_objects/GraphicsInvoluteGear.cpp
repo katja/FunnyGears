@@ -5,12 +5,12 @@
 const int GraphicsInvoluteGear::Type = GraphicsInvoluteGear::UserType + Type::GraphicsInvoluteGearType;
 
 bool GraphicsInvoluteGear::isGraphicsInvoluteGearItem(QGraphicsItem *item) {
-    if(item->type() == Type)
+    if(item && item->type() == Type)
         return true;
     return false;
 }
 
-GraphicsInvoluteGear::GraphicsInvoluteGear(GraphicsItem *parent) : GraphicsItem(parent) {
+GraphicsInvoluteGear::GraphicsInvoluteGear() : GraphicsScheduleItem() {
     std::cout << "GraphicsInvoluteGear is created" << std::endl;
 }
 
@@ -33,7 +33,7 @@ int GraphicsInvoluteGear::type() const {
     return Type;
 }
 
-void GraphicsInvoluteGear::clickReceived(QPointF point, Editing::State state) {
+void GraphicsInvoluteGear::receivedClickOn(QPointF point) {
     std::cout << "GraphicsInvoluteGear received a click at " << point << std::endl;
 }
 

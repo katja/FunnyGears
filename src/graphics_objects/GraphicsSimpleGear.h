@@ -3,28 +3,26 @@
 
 #include "stable.h"
 #include "definitions.h"
-#include "graphics_objects/GraphicsItem.h"
+#include "graphics_objects/GraphicsScheduleItem.h"
 #include "basic_objects/SimpleGear.h"
 
 
-class GraphicsSimpleGear : public GraphicsItem {
+class GraphicsSimpleGear : public GraphicsScheduleItem {
 
 public:
-    static const int Type;// = GraphicsSimpleGear::UserType + Type::GraphicsSplineType;
+    static const int Type; // = GraphicsSimpleGear::UserType + Type::GraphicsSimpleGearType;
     static bool isGraphicsSimpleGearItem(QGraphicsItem *item);
 
-    GraphicsSimpleGear(GraphicsItem *parent = 0);
-    // GraphicsSimpleGear(ToothProfile *toothProfile, ToothProfileGraphicsItem *parent = 0);
+    GraphicsSimpleGear();
     virtual ~GraphicsSimpleGear();
 
-    // GraphicsSimpleGear* copy() const;
+    int type() const override; // from QGraphicsItem
+    virtual QString defaultName() const override; // from GraphicsScheduleItem
 
-    QRectF boundingRect() const;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    QRectF boundingRect() const override; // from QGraphicsItem
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override; // from QGraphicsItem
 
-    int type() const;
-    void clickReceived(QPointF point, Editing::State state);
-    QString defaultName() const;
+    void receivedClickOn(QPointF point) override; // from GraphicsItem
 
 
 private:

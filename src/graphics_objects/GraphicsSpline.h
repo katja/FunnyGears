@@ -3,20 +3,21 @@
 
 #include "stable.h"
 #include "definitions.h"
-#include "graphics_objects/GraphicsItem.h"
+#include "graphics_objects/GraphicsScheduleItem.h"
 #include "graphics_objects/Point.h"
 #include "basic_objects/Spline.h"
 
-class GraphicsSpline : public GraphicsItem {
+class GraphicsSpline : public GraphicsScheduleItem {
 
 public:
     static const int Type;// = GraphicsSpline::UserType + Type::GraphicsSplineType;
     static bool isGraphicsSplineItem(QGraphicsItem *item);
 
-    GraphicsSpline(GraphicsItem *parent = 0);
+    GraphicsSpline();
     virtual ~GraphicsSpline();
 
-    GraphicsSpline* copy() const;
+    int type() const override; //from QGraphicsItem
+    QString defaultName() const override; //from GraphicsItem
 
     const Spline* spline() const;
 
@@ -30,10 +31,10 @@ public:
 
     void refineSpline();
 
-    QRectF boundingRect() const;
-    QPainterPath shape() const;
+    QRectF boundingRect() const override;
+    QPainterPath shape() const override;
 
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     QColor color() const;
 
     void addPoint(QPointF scenePos);
@@ -41,9 +42,15 @@ public:
     void removePointNear(QPointF scenePos);
     void pointMoveEvent(Point *point, QGraphicsSceneMouseEvent *event);
 
-    int type() const;
-    void clickReceived(QPointF point, Editing::State state);
-    QString defaultName() const;
+    void receivedClickOn(QPointF point) override; //from GraphicsItem
+    void mousePressEvent(QGraphicsSceneMouseEvent *event) override; //from QGraphicsItem
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override; //from QGraphicsItem
+
+    void stopEditing() override;
+    void startEditing(Editing::State editingState) override;
+    void executeEditingAction(Editing::Action editingAction) override;
+
+    void setParentItem(QGraphicsItem *newParent); //override from QGraphicsItem
 
 private:
     Spline *m_spline;
@@ -53,6 +60,7 @@ private:
     real m_tangentValue;
 
     QColor m_color;
+    Editing::State m_editingState;
 
     QPainterPath controlPointPolygonPath(qreal width = 0) const;
     QPainterPath splineCurvePath() const;

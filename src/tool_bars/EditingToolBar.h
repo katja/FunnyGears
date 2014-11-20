@@ -2,21 +2,25 @@
 #define EDITING_TOOL_BAR
 
 #include "stable.h"
-#include "tool_bars/ToolBarListener.h"
+#include "tool_bars/ToolBar.h"
+#include "tool_bars/EditingToolBarListener.h"
 #include "tool_bars/EditingStatesAndActions.h"
 
-class EditingToolBar : public QToolBar {
+class EditingToolBar : public QToolBar, public ToolBar {
 
 Q_OBJECT
 
 public:
     EditingToolBar(QWidget *parent = 0);
-    ~EditingToolBar();
+    virtual ~EditingToolBar();
 
-    bool addListener(ToolBarListener *listener);
-    bool removeListener(ToolBarListener *listener);
+    virtual bool addListener(ToolBarListener *listener) override; //from ToolBar
+    virtual bool removeListener(ToolBarListener *listener) override; //from ToolBar
+    virtual bool hasListener(ToolBarListener *listener) override; //from ToolBar
 
     void keyPressEvent(QKeyEvent *event);
+
+    Editing::State currentSelection() const;
 
 private slots:
     void toolChanged(bool);
@@ -25,8 +29,9 @@ private slots:
 private:
     QHash<Editing::State, QAction*>     m_editingStatesHash;
     QHash<Editing::Action, QAction*>    m_editingActionsHash;
-    QActionGroup                       *m_editActionGroup;
-    QList<ToolBarListener*>             m_listenerList;
+    QActionGroup                       *m_editingStatesActionGroup;
+    QList<EditingToolBarListener*>      m_listenerList;
+    ToolBarListener*                    m_tempListener;
 
     void createEditingStateActions();
     void createEditingActionActions();
@@ -35,6 +40,8 @@ private:
 
     void stopEditing();
     void startEditing(Editing::State);
+
+    bool listensToMe(ToolBarListener *listener) const;
 
 };
 

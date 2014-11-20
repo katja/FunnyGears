@@ -3,24 +3,20 @@
 
 #include "stable.h"
 #include "graphics_objects/GraphicsItem.h"
+#include "graphics_objects/GraphicsScheduleItem.h"
+
 class GraphicsScene;
-class SceneTreeModel;
+class Model;
 
 class SelectionModel : public QItemSelectionModel {
 
 Q_OBJECT
 
 public:
-    SelectionModel(SceneTreeModel *model);
+    SelectionModel(Model *model);
     ~SelectionModel();
 
 signals:
-    //signals a connected GraphicsScene needs to handle:
-    void selectOnly(GraphicsItem*);
-    void selectAlso(GraphicsItem*);
-    void selectNothing();
-    void selectNoMore(GraphicsItem*);
-
     void oneGraphicsItemSelected(GraphicsItem *item);
     void noneOrManyGraphicsItemsSelected();
 
@@ -31,19 +27,12 @@ private slots:
     void updateSelection(const QItemSelection &selected, const QItemSelection &deselected);
 
 private:
-    enum Connection {
-        MODEL, SCENE, ALL
-    };
+    Model *m_model;
 
-    SceneTreeModel *m_sceneTreeModel;
+    QList<GraphicsScheduleItem*> m_selectedItems;
 
-    QList<GraphicsItem*> m_selectedItems;
-
-    void changeSelectionInModel(GraphicsItem *item, QItemSelectionModel::SelectionFlags command = QItemSelectionModel::Select);
+    void changeSelectionInModel(GraphicsScheduleItem *item, QItemSelectionModel::SelectionFlags command = QItemSelectionModel::Select);
     void reportSelectionCount();
-    GraphicsItem* graphicOfRow(const QModelIndex &index);
-    bool selectionIncludesGraphicsItem(const QModelIndex &index, QItemSelectionModel::SelectionFlags command);
-
 
 };
 

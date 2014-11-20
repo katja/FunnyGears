@@ -1,0 +1,7 @@
+Do not forget the following things/experiments/experiences...
+
+... qgraphicsitem_cast<T>(item) only works with T having a 'type()' method and only casts, if type() returns the same value. So a cast will not take place, if T1 inherits from T, even if both have a type() method, as they probably won't return the same value!
+
+... the type() method of GraphicsItem and all subclasses return the static int Type. If a subclass only specifies the static int Type, but no type() method itself, Type of the parent class will be used in the parent class type() method, as Type is static!
+
+... the QGraphicsItem class has some interesting methods: grabMouse(), ungrabMouse(), (QGraphicsScene::mouseGrabberItem(),) grabKeyboard(), ungrabKeyboard(), isPanel(), focuxProxy(), filtersChildEvents(), ...

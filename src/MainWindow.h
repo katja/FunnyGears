@@ -4,7 +4,7 @@
 #include "stable.h"
 #include "GraphicsView.h"
 #include "GraphicsScene.h"
-#include "SceneTreeModel.h"
+#include "Model.h"
 #include "ObjectScheduleViewWidget.h"
 #include "ObjectAttributesWidget.h"
 
@@ -25,7 +25,7 @@ private:
     GraphicsView                *m_view;
     GraphicsScene               *m_scene;
 
-    SceneTreeModel              *m_sceneModel;
+    Model                       *m_model;
     ObjectScheduleViewWidget    *m_objectSchedule; // is a QDockWidget, has a TreeView
     ObjectAttributesWidget      *m_objectAttributesWidget; // is a QDockWidget
 

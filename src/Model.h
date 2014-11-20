@@ -1,30 +1,27 @@
-#ifndef SCENE_TREE_MODEL
-#define SCENE_TREE_MODEL
+#ifndef MODEL
+#define MODEL
 
 #include "stable.h"
-#include "SceneTreeItem.h"
-#include "GraphicsScene.h"
-#include "graphics_objects/GraphicsSpline.h"
+#include "graphics_objects/GraphicsScheduleItem.h"
 
-class SceneTreeModel : public QAbstractItemModel {
+class Model : public QAbstractItemModel {
 
 Q_OBJECT
 
 public:
-    //Any already inserted QGraphicsItems or GraphicsItems of the GraphicsScene used here are not observed in the SceneTreeModel!!!
-    SceneTreeModel(GraphicsScene *scene, QObject *parent = 0);
-    ~SceneTreeModel();
+    /** Constructor of a Model for the given @param scene
+     *  Note that the model uses a special invisible root item, which is added to the scene
+     *  As this root item is added first here in the constructor, any QGraphicsItems (or
+     *  GraphicsScheduleItems) added before, are ignored!
+     */
+    Model(QGraphicsScene *scene, QObject *parent = 0);
+    virtual ~Model();
 
-
+    /** Describes the different columns available in this model
+     */
     enum Data {
         NAME, VISIBILITY, TYPE
     };
-
-    /** Sets a new root item. Root Item may be an item of quite another scene tree.
-     *  Return value is the old root item.
-     *  You have to delete it, if it isn't needed any longer!
-     */
-    SceneTreeItem* setRoot(SceneTreeItem *rootItem);
 
     /** Returns the index of the item in the model
      *  specified by the given row, column and parent index.
@@ -40,7 +37,8 @@ public:
     QModelIndex parent(const QModelIndex &index) const; //When reimplementing this function in a subclass, be careful to avoid calling QModelIndex member functions, such as QModelIndex::parent(), since indexes belonging to your model will simply call your implementation, leading to infinite recursion.
 
     //Not necessary, but if implementation of rowCount is expensive, it would be good:
-    /** Returns true if parent has any children; otherwise returns false.
+    /** Returns true, if the corresponding GraphicsScheduleItem is found and has any
+     *  children; otherwise returns false.
      */
     bool hasChildren(const QModelIndex &parent = QModelIndex()) const;
 
@@ -54,6 +52,7 @@ public:
       * In this implementation the number of columns is independent of the given parent
       * and always 2. TODO: still correct?
       */
+
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
 
@@ -66,12 +65,6 @@ public:
      *  dataChanged() signal is emitted, if data was successfully set
      */
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole); //emit dataChanged() signal
-
-    /** Searches in the model for an item with given graphicsItem (with depth first search).
-     *  Returns model index of the first item with given graphicsItem
-     *  or QModelIndex() if graphicsItem can't be found in an item.
-     */
-    QModelIndex itemWithGraphicsItem(const GraphicsItem *graphicsItem);
 
     /** Toggles the boolean values (up to now there is only the visibility value).
      *  Returns true, if toggling was possible.
@@ -87,8 +80,18 @@ public:
      */
     Qt::ItemFlags flags(const QModelIndex &index) const; //The base class implementation returns a combination of flags that enables the item (ItemIsEnabled) and allows it to be selected (ItemIsSelectable). ItemIsEditable must be returned!
 
-    bool addItem(GraphicsItem *graphicsItem);
+    bool addItem(GraphicsScheduleItem *newItem, GraphicsScheduleItem *parent = 0);
     bool remove(QModelIndex index);
+
+    /** Returns a pointer to the GraphicsScheduleItem, which belongs to the given QModelIndex.
+     *  If Index is not valid or no corresponding GraphicsScheduleItem can be found
+     *  0 is returned.
+     */
+    GraphicsScheduleItem* getItemFromIndex(const QModelIndex &index) const;
+
+    /** Returns the QModelIndex (in column 0) which belongs to the given GraphicsScheduleItem.
+     */
+    QModelIndex getIndexFromItem(GraphicsScheduleItem *item) const;
 
 signals:
     void layoutChanged(const QList<QPersistentModelIndex> &parents = QList<QPersistentModelIndex>(), QAbstractItemModel::LayoutChangeHint hint = QAbstractItemModel::NoLayoutChangeHint);
@@ -97,12 +100,15 @@ signals:
     // void graphicsItemRemoved(QGraphicsItem *graphicsItem);
 
 private:
-    SceneTreeItem *m_rootItem;
+    QGraphicsScene *m_scene;
+    GraphicsScheduleItem *m_rootItem;
     QHash< Data, QHash<Qt::ItemDataRole, QString> > m_headHash;
 
-    GraphicsScene *m_graphicsScene;
-
-    SceneTreeItem* findItemBy(const QModelIndex &index) const;
+    /** Returns a pointer to the GraphicsScheduleItem, which belongs to the given QModelIndex.
+     *  If Index is not valid or no corresponding GraphicsScheduleItem can be found
+     *  m_rootItem is returned.
+     */
+    GraphicsScheduleItem* getInternItemFromIndex(const QModelIndex &index) const;
 };
 
-#endif // SCENE_TREE_MODEL
+#endif // MODEL

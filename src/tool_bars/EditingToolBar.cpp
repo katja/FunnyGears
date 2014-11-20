@@ -5,29 +5,49 @@ EditingToolBar::EditingToolBar(QWidget *parent) : QToolBar(tr("Edit"), parent) {
 
     createEditingStateActions();
     createEditingActionActions();
-
 }
 
 EditingToolBar::~EditingToolBar() {
 }
 
 bool EditingToolBar::addListener(ToolBarListener *listener) {
-    if(m_listenerList.contains(listener))
-        return false;
-    m_listenerList << listener;
-    return true;
+    //EditingToolBar accepts only EditingToolBarListeners.
+    std::cout << "EditingToolBar::addListener(ToolBarListener) called" << std::endl;
+
+    if(listensToMe(listener)) {
+        EditingToolBarListener *editingListener = static_cast<EditingToolBarListener*>(listener);
+        if(m_listenerList.contains(editingListener))
+            return false;
+        m_listenerList << editingListener;
+        editingListener->startEditing(currentSelection()); //inform new listener of current editing state
+        return true;
+    }
+    return false;
 }
 
 bool EditingToolBar::removeListener(ToolBarListener *listener) {
-    if(!m_listenerList.contains(listener))
-        return false;
-    m_listenerList.removeOne(listener);
-    return true;
+    std::cout << "EditingToolBar::removeListener(ToolBarListener) called" << std::endl;
+    if(listensToMe(listener)) {
+        EditingToolBarListener *editingListener = static_cast<EditingToolBarListener*>(listener);
+        if(!m_listenerList.contains(editingListener))
+            return false;
+        m_listenerList.removeOne(editingListener);
+        return true;
+    }
+    return false;
+}
+
+bool EditingToolBar::hasListener(ToolBarListener *listener) {
+    for(ToolBarListener *l : m_listenerList) {
+        if(l == listener)
+            return true;
+    }
+    return false;
 }
 
 void EditingToolBar::keyPressEvent(QKeyEvent *event) {
-    if(event->key() == Qt::Key_Escape && m_editActionGroup->checkedAction()) {
-        m_editActionGroup->checkedAction()->setChecked(false);
+    if(event->key() == Qt::Key_Escape && m_editingStatesActionGroup->checkedAction()) {
+        m_editingStatesActionGroup->checkedAction()->setChecked(false);
         event->accept();
     } else {
         QAction *action = editingStateActionWithKeyEvent(event);
@@ -40,8 +60,15 @@ void EditingToolBar::keyPressEvent(QKeyEvent *event) {
     }
 }
 
+Editing::State EditingToolBar::currentSelection() const {
+    QAction *action = m_editingStatesActionGroup->checkedAction();
+    if(action)
+        return m_editingStatesHash.key(action, Editing::NoEditing); //If action is not found, Editing::NoEditing is returned
+    return Editing::NoEditing; //if no action checked
+}
+
 void EditingToolBar::toolChanged(bool checked) {
-    QAction *action = m_editActionGroup->checkedAction();
+    QAction *action = m_editingStatesActionGroup->checkedAction();
     if(checked && action) {
         stopEditing();
         startEditing(m_editingStatesHash.key(action, Editing::NoEditing));
@@ -65,14 +92,14 @@ void EditingToolBar::createEditingStateActions() {
     equipAction(m_editingStatesHash.value(Editing::ZoomIn), tr("ZoomIn"), tr("zoom in at clicked position"));
     equipAction(m_editingStatesHash.value(Editing::ZoomOut), tr("ZoomOut"), tr("zoom out at clicked position"));
 
-    m_editActionGroup = new QActionGroup(this);
-    m_editActionGroup->setExclusive(true);
+    m_editingStatesActionGroup = new QActionGroup(this);
+    m_editingStatesActionGroup->setExclusive(true);
 
     for(int i = 1; i < Editing::STATE_SIZE; ++i) {
-        m_editActionGroup->addAction(m_editingStatesHash.value(static_cast<Editing::State>(i)));
+        m_editingStatesActionGroup->addAction(m_editingStatesHash.value(static_cast<Editing::State>(i)));
     }
 
-    addActions(m_editActionGroup->actions());
+    addActions(m_editingStatesActionGroup->actions());
 }
 
 void EditingToolBar::createEditingActionActions() {
@@ -102,7 +129,7 @@ QAction* EditingToolBar::editingStateActionWithKeyEvent(QKeyEvent *event) const 
         return 0;
 
     QKeySequence keySequence(key);
-    foreach(QAction *action, m_editActionGroup->actions()) {
+    foreach(QAction *action, m_editingStatesActionGroup->actions()) {
         if(action->shortcut() == keySequence)
             return action;
     }
@@ -110,19 +137,23 @@ QAction* EditingToolBar::editingStateActionWithKeyEvent(QKeyEvent *event) const 
 }
 
 void EditingToolBar::startEditing(Editing::State editingState) {
-    foreach(ToolBarListener *listener, m_listenerList) {
+    foreach(EditingToolBarListener *listener, m_listenerList) {
         listener->startEditing(editingState);
     }
 }
 
 void EditingToolBar::stopEditing() {
-    foreach(ToolBarListener *listener, m_listenerList) {
+    foreach(EditingToolBarListener *listener, m_listenerList) {
         listener->stopEditing();
     }
 }
 
 void EditingToolBar::executeZoomDefault() {
-    foreach(ToolBarListener *listener, m_listenerList) {
+    foreach(EditingToolBarListener *listener, m_listenerList) {
         listener->executeEditingAction(Editing::ZoomDefault);
     }
+}
+
+bool EditingToolBar::listensToMe(ToolBarListener *listener) const {
+    return listener->toolBarType() == EditingToolBarListener::toolBarClassType();
 }

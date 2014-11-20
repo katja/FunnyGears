@@ -19,6 +19,9 @@ using vector = typename std::vector<T>;
 enum Type {
     QGraphicsItemType,
     GraphicsItemType,
+    //All GraphicsItems go here...
+    GraphicsScheduleItemType,
+    //...and all also GraphicsScheduleItems go here!
     GraphicsSplineType,
     GraphicsSimpleGearType,
     GraphicsInvoluteGearType,
