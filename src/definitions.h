@@ -20,6 +20,7 @@ enum Type {
     QGraphicsItemType,
     GraphicsItemType,
     //All GraphicsItems go here...
+    GraphicsPointType,
     GraphicsScheduleItemType,
     //...and all also GraphicsScheduleItems go here!
     GraphicsSplineType,

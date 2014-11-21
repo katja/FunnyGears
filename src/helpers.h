@@ -3,13 +3,10 @@
 
 #include "stable.h"
 #include "definitions.h"
-#include "graphics_objects/Point.h"
 #include "basic_objects/Spline.h"
 
 ////////////////////////////////////
 ////////// STREAMING ///////////////
-
-std::ostream& operator <<(std::ostream &os, const Point &point);
 
 std::ostream& operator <<(std::ostream &os, const QPointF &point);
 

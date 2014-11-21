@@ -26,8 +26,8 @@ public:
         Q_UNUSED(widget);
     }
 
-    void receivedClickOn(QPointF point) override {
-        Q_UNUSED(point);
+    void receivedClickOn(QPointF scenePos) override {
+        Q_UNUSED(scenePos);
     }
 };
 #endif // GRAPHICS_ROOT_ITEM

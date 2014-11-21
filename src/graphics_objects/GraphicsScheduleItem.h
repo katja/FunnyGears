@@ -2,7 +2,7 @@
 #define GRAPHICS_SCHEDULE_ITEM
 
 #include "stable.h"
-#include "graphis_objects/GraphicsItem.h"
+#include "graphics_objects/GraphicsItem.h"
 
 /** Abstract class for all objects which should be rendered and displayed in the object schedule.
  *  This class is intended to be used in combination with the Model and the ObjectSchedule class.

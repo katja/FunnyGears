@@ -1,4 +1,4 @@
-#include "basic_objects/GraphicsInvoluteGear.h"
+#include "graphics_objects/GraphicsInvoluteGear.h"
 #include "helpers.h"
 #include "preferences.h"
 
@@ -33,8 +33,8 @@ int GraphicsInvoluteGear::type() const {
     return Type;
 }
 
-void GraphicsInvoluteGear::receivedClickOn(QPointF point) {
-    std::cout << "GraphicsInvoluteGear received a click at " << point << std::endl;
+void GraphicsInvoluteGear::receivedClickOn(QPointF scenePos) {
+    std::cout << "GraphicsInvoluteGear received a click at " << scenePos << std::endl;
 }
 
 QString GraphicsInvoluteGear::defaultName() const {

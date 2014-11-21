@@ -103,7 +103,6 @@ QList<GraphicsItem*> GraphicsScene::selectedGraphicsItems() const {
         if(GraphicsItem::isGraphicsItem(qItem)) {
             list << static_cast<GraphicsItem*>(qItem);
         }
-        std::cout << std::endl;
     }
     return list;
 }

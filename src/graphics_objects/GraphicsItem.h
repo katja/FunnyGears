@@ -15,7 +15,7 @@ public:
     virtual ~GraphicsItem() {}
 
     virtual int type() const override;
-    virtual void receivedClickOn(QPointF point) = 0;
+    virtual void receivedClickOn(QPointF scenePos) = 0;
 
     void setParentItem(QGraphicsItem *newParent); //override from QGraphicsItem
 

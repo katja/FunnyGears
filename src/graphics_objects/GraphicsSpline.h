@@ -4,7 +4,6 @@
 #include "stable.h"
 #include "definitions.h"
 #include "graphics_objects/GraphicsScheduleItem.h"
-#include "graphics_objects/Point.h"
 #include "basic_objects/Spline.h"
 
 class GraphicsSpline : public GraphicsScheduleItem {
@@ -31,46 +30,49 @@ public:
 
     void refineSpline();
 
-    QRectF boundingRect() const override;
-    QPainterPath shape() const override;
-
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-    QColor color() const;
-
     void addPoint(QPointF scenePos);
     void removePoint(int index);
     void removePointNear(QPointF scenePos);
-    void pointMoveEvent(Point *point, QGraphicsSceneMouseEvent *event);
 
-    void receivedClickOn(QPointF point) override; //from GraphicsItem
-    void mousePressEvent(QGraphicsSceneMouseEvent *event) override; //from QGraphicsItem
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override; //from QGraphicsItem
+    QRectF boundingRect() const override; // from QGraphicsItem
+    QPainterPath shape() const override; // from QGraphicsItem
 
-    void stopEditing() override;
-    void startEditing(Editing::State editingState) override;
-    void executeEditingAction(Editing::Action editingAction) override;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;  // from QGraphicsItem
+    QColor color() const;
 
-    void setParentItem(QGraphicsItem *newParent); //override from QGraphicsItem
+    void receivedClickOn(QPointF scenePos) override; // from GraphicsItem
+    void mousePressEvent(QGraphicsSceneMouseEvent *event) override; // from QGraphicsItem
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override; // from QGraphicsItem
+
+    void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override; // from QGraphicsItem
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override; // from QGraphicsItem
+
+    void mouseMoveEvent(QGraphicsSceneMouseEvent  *event) override; // from QGraphicsItem
+
+    void startEditing(Editing::State editingState) override; // from EditingToolBarListener
+    void stopEditing() override; // from EditingToolBarListener
+    void executeEditingAction(Editing::Action editingAction) override; // from EditingToolBarListener
 
 private:
     Spline *m_spline;
-    QList<Point*> m_points;
 
     bool m_isTangentDrawn;
     real m_tangentValue;
 
     QColor m_color;
+    bool m_mouseIsOverEdge;
+    bool m_mouseIsOverPoint;
+    int m_indexOfPointUnderMouse;
     Editing::State m_editingState;
 
     QPainterPath controlPointPolygonPath(qreal width = 0) const;
+    QPainterPath controlPointsPaths() const;
     QPainterPath splineCurvePath() const;
     QPainterPath tangentPath() const;
 
-    void adjustInSplineRange(real &value) const;
+    void findPointAt(QPointF localPos);
 
-    void setMinAndMax(QPointF &min, QPointF &max, const Point *point) const;
-    void setMax(QPointF &max, const QPointF point) const;
-    void setMin(QPointF &max, const QPointF point) const;
+    void adjustInSplineRange(real &value) const;
 
 };
 

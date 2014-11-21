@@ -72,7 +72,7 @@ void GraphicsSimpleGear::paint(QPainter *painter, const QStyleOptionGraphicsItem
     painter->drawPath(angularPitchStrokesPath());
 }
 
-void GraphicsSimpleGear::receivedClickOn(QPointF point) {
+void GraphicsSimpleGear::receivedClickOn(QPointF scenePos) {
     std::cout << "GraphicsSimpleGear::clickReceived" << std::endl;
 }
 

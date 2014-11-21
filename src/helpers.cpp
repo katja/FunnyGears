@@ -1,13 +1,8 @@
 #include "helpers.h"
 #include "definitions.h"
-#include "graphics_objects/Point.h"
 
 ////////////////////////////////////
 ////////// STREAMING ///////////////
-
-std::ostream& operator<<(std::ostream &os, const Point &point) {
-    return os << "(" << point.pos().x() << ", " << point.pos().y() << ")";
-}
 
 std::ostream& operator<<(std::ostream &os, const QPointF &point) {
     return os << "(" << point.x() << ", " << point.y() << ")";

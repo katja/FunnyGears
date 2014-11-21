@@ -171,8 +171,8 @@ void Spline::addControlPoint(vec2 point) {
     }
 }
 
-void Spline::addControlPoint(QPointF point) {
-    addControlPoint(vec2(point.x(), point.y()));
+void Spline::addControlPoint(real x, real y) {
+    addControlPoint(vec2(x, y));
 }
 
 void Spline::removeControlPoint(uint index) {

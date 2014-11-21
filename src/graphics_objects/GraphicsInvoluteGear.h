@@ -19,7 +19,7 @@ public:
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override; //from QGraphicsItem
 
     virtual int type() const override; //from QGraphicsItem
-    virtual void receivedClickOn(QPointF point) override; //from GraphicisItem
+    virtual void receivedClickOn(QPointF scenePos) override; //from GraphicsItem
 
     virtual QString defaultName() const override; //from GraphicsScheduleItem
 };

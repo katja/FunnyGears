@@ -22,7 +22,7 @@ public:
     QRectF boundingRect() const override; // from QGraphicsItem
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override; // from QGraphicsItem
 
-    void receivedClickOn(QPointF point) override; // from GraphicsItem
+    void receivedClickOn(QPointF scenePos) override; // from GraphicsItem
 
 
 private:

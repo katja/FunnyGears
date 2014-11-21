@@ -1,9 +1,10 @@
 #if defined __cplusplus
 
 #include <iostream>
-#include <vector>
 #include <cassert>
+#include <cmath>
 #include <cstdint>
+#include <vector>
 
 /* QtWidget includes many Qt GUI classes.
  * Either QtWidgets has to be used or the list of really used QWidgets below.

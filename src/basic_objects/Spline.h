@@ -69,10 +69,10 @@ public:
      */
     void  addControlPoint(vec2 point);
 
-    /** Appends a control point at point.
+    /** Appends a control point at point with coordinates (x, y).
      *  @see addControlPoint(vec2 point)
      */
-    void  addControlPoint(QPointF point);
+    void  addControlPoint(real x, real y);
 
     /** Removes control point at given index.
      *  As a control point is normally influenced by more than one knot
