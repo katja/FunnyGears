@@ -1,6 +1,9 @@
 #include "graphics_objects/GraphicsSpline.h"
-#include "preferences.h"
 #include "helpers.h"
+#include "graphics_objects/NoEditingSplineState.h"
+#include "graphics_objects/PointerSplineState.h"
+#include "graphics_objects/PenSplineState.h"
+#include "graphics_objects/EraserSplineState.h"
 
 const int GraphicsSpline::Type = GraphicsSpline::UserType + Type::GraphicsSplineType;
 
@@ -10,14 +13,20 @@ bool GraphicsSpline::isGraphicsSplineItem(QGraphicsItem *item) {
     return false;
 }
 
-GraphicsSpline::GraphicsSpline() : m_isTangentDrawn(false), m_tangentValue(-1.0f),
-    m_mouseIsOverEdge(false), m_mouseIsOverPoint(false) , m_indexOfPointUnderMouse(-1) {
+GraphicsSpline::GraphicsSpline() : m_isTangentDrawn(false), m_tangentValue(-1.0f) {
 
     std::cout << "GraphicsSpline is created" << std::endl;
+
     m_spline = new Spline();
+
+    m_noEditingState = new NoEditingSplineState(this);
+    m_pointerState = new PointerSplineState(this);
+    m_penState = new PenSplineState(this);
+    m_eraserState = new EraserSplineState(this);
+    m_state = m_noEditingState;
+
     int partColor = qrand() % 512 + 100;
     m_color = QColor(partColor / 5, partColor * 2 / 5, partColor % 256);
-    m_editingState = Editing::NoEditing;
 
     setToolTip("Description of what will happen or what to do"); //TODO: Add description
     setFlags( QGraphicsItem::ItemIsMovable
@@ -30,6 +39,10 @@ GraphicsSpline::GraphicsSpline() : m_isTangentDrawn(false), m_tangentValue(-1.0f
 GraphicsSpline::~GraphicsSpline() {
     std::cout << "GraphicsSpline is deleted" << std::endl;
     delete m_spline;
+    delete m_noEditingState;
+    delete m_pointerState;
+    delete m_penState;
+    delete m_eraserState;
 }
 
 int GraphicsSpline::type() const {
@@ -76,7 +89,6 @@ void GraphicsSpline::setTangentValue(real value) {
     m_tangentValue = value;
 }
 
-
 real GraphicsSpline::tangentValue() {
     adjustInSplineRange(m_tangentValue);
     return m_tangentValue;
@@ -106,14 +118,41 @@ void GraphicsSpline::removePoint(int index) {
 void GraphicsSpline::removePointNear(QPointF scenePos) {
     const vector<vec2>& controlPoints = m_spline->controlPoints();
     for(uint i = 0; i < controlPoints.size(); ++i) {
-        if((QPointF(controlPoints[i].x(), controlPoints[i].y()) - scenePos).manhattanLength() <= 5) {
+        if((positionOfPoint(i) - scenePos).manhattanLength() <= 5) {
             removePoint(i);
             return;
         }
     }
 }
 
+QPointF GraphicsSpline::positionOfPoint(int index) {
+    const vector<vec2>& controlPoints = m_spline->controlPoints();
+    return QPointF(controlPoints[index].x(), controlPoints[index].y());
+}
+
+int GraphicsSpline::indexOfPointAt(QPointF localPos, qreal radius) {
+    const vector<vec2> controlPoints = m_spline->controlPoints();
+    for(uint i = 0; i < controlPoints.size(); ++i) {
+        // localPos is in circle around controlpoint c, if
+        // (localPos_x - c_x)^2 + (localPos_y - c_y)^2 <= radius^2
+        QPointF c = positionOfPoint(i);
+        if((localPos.x() - c.x()) * (localPos.x() - c.x()) + (localPos.y() - c.y()) * (localPos.y() - c.y()) <= radius * radius)
+            return i;
+    }
+    return -1;
+}
+
 QRectF GraphicsSpline::boundingRect() const {
+    return m_state->boundingRect();
+}
+
+QRectF GraphicsSpline::normalBoundingRect(qreal radius) const {
+    // Explanation to selection of default radius:
+    // When updating the spline from selected to not selected the bounding rect would be smaller
+    // but painting should clean selection. Therefore every time the space for the selected curve
+    // is used. As the control points form the bounding rect, the additional space for them
+    // must be included, too.
+
     const vector<vec2>& controlPoints = m_spline->controlPoints();
     if(controlPoints.empty()) {
         return QRectF();
@@ -133,13 +172,8 @@ QRectF GraphicsSpline::boundingRect() const {
         if(controlPoints[i].y() > max.y())
             max.setY(controlPoints[i].y());
     }
-    // when updating the spline from selected to not selected the bounding rect would be smaller
-    // but painting should clean selection. Therefore every time the space for the selected curve
-    // is used. As the control points form the bounding rect, the additional space for them
-    // must be included, too.
-    qreal additional = Preferences::HighlightedLineWidth / 2.0f + Preferences::PointRadius;
-    min -= QPointF(additional, additional);
-    max += QPointF(additional, additional);
+    min -= QPointF(radius, radius);
+    max += QPointF(radius, radius);
 
     QRectF boundingRect = QRectF(min, max);
     if(m_isTangentDrawn) {
@@ -149,135 +183,15 @@ QRectF GraphicsSpline::boundingRect() const {
 }
 
 QPainterPath GraphicsSpline::shape() const {
+    return m_state->shape();
+}
+
+QPainterPath GraphicsSpline::normalShape() const {
     //only the control polygon path is used here, as with the spline path this would be too slow
     if(isActive())
-        return controlPointPolygonPath(Preferences::HighlightedLineWidth) + controlPointsPaths();
+        return controlPointPolygonPath(Preferences::HighlightedLineWidth) + controlPointsPaths(Preferences::PointRadius + 0.5f * Preferences::HighlightedLineWidth);
     else
-        return controlPointPolygonPath(Preferences::SimpleLineWidth) + controlPointsPaths();
-}
-
-void GraphicsSpline::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    Q_UNUSED(widget);
-
-    painter->setBrush(Qt::NoBrush);
-
-    QPen pen;
-    pen.setCapStyle(Qt::RoundCap);
-    pen.setJoinStyle(Qt::RoundJoin);
-
-    if(option->state & QStyle::State_Selected || m_mouseIsOverEdge || m_mouseIsOverPoint) {
-        if(option->state & QStyle::State_Sunken) {
-            pen.setColor(Preferences::ActiveColor);
-        } else if (m_mouseIsOverEdge) {
-            pen.setColor(Preferences::HoverColor);
-        } else { // no edge hover and selected
-            pen.setColor(Preferences::SelectionColor);
-        }
-        pen.setWidth(Preferences::HighlightedLineWidth);
-        painter->setPen(pen);
-        painter->drawPath(controlPointPolygonPath());
-        painter->drawPath(controlPointsPaths());
-        painter->drawPath(splineCurvePath());
-
-        if(m_mouseIsOverPoint) {
-            pen.setWidth(Preferences::HighlightedLineWidth);
-            pen.setColor(Preferences::HoverColor);
-            painter->setPen(pen);
-            vec2 center = m_spline->controlPoints().at(m_indexOfPointUnderMouse);
-            painter->drawEllipse(QPointF(center.x(), center.y()), Preferences::PointRadius, Preferences::PointRadius);
-        }
-    }
-
-    pen.setColor(m_color);
-    pen.setWidth(Preferences::SimpleLineWidth);
-    pen.setStyle(Qt::DotLine);
-    painter->setPen(pen);
-    painter->drawPath(controlPointPolygonPath());
-    pen.setStyle(Qt::SolidLine);
-    painter->setPen(pen);
-    painter->drawPath(controlPointsPaths());
-    painter->drawPath(splineCurvePath());
-
-    if(m_isTangentDrawn) {
-        pen.setColor(darkenColor(m_color));
-        painter->setPen(pen);
-        painter->drawPath(tangentPath());
-    }
-
-    //TODO: remove following:
-    if(m_mouseIsOverEdge) {
-        pen.setWidth(0);
-        painter->setPen(pen);
-        painter->drawRect(boundingRect());
-    }
-}
-
-QColor GraphicsSpline::color() const {
-    return m_color;
-}
-
-void GraphicsSpline::receivedClickOn(QPointF scenePos) {
-    std::cout << "GraphicsSpline::receivedClickOn and state: " << m_editingState << std::endl;
-    if(m_editingState == Editing::Pen)
-        addPoint(scenePos);
-    else if(m_editingState == Editing::Eraser)
-        removePointNear(scenePos);
-}
-
-void GraphicsSpline::mousePressEvent(QGraphicsSceneMouseEvent *event) {
-    // std::cout << "GraphicsSpline::mousePressEvent() tracked, nothing done, forwarded to QGraphicsItem" << std::endl;
-    QGraphicsItem::mousePressEvent(event);
-}
-void GraphicsSpline::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
-    // std::cout << "GraphicsSpline::mouseReleaseEvent() tracked, nothing done, forwarded to QGraphicsItem" << std::endl;
-    QGraphicsItem::mouseReleaseEvent(event);
-}
-
-void GraphicsSpline::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {
-    if(controlPointsPaths().contains(event->pos())) {
-        std::cout << "GraphicsSpline::hoverEnterEvent on point" << std::endl;
-        m_mouseIsOverPoint = true;
-        findPointAt(event->pos());
-    } else {
-        std::cout << "GraphicsSpline::hoverEnterEvent whole spline" << std::endl;
-        m_mouseIsOverEdge = true;
-    }
-    update();
-}
-
-void GraphicsSpline::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) {
-    Q_UNUSED(event);
-    std::cout << "GraphicsSpline::hoverLeaveEvent" << std::endl;
-    m_mouseIsOverEdge = false;
-    m_mouseIsOverPoint = false;
-    update();
-}
-
-
-void GraphicsSpline::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
-    if(m_mouseIsOverPoint) {
-        prepareGeometryChange();
-        m_spline->moveControlPoint(m_indexOfPointUnderMouse, event->pos());
-    } else {
-        GraphicsItem::mouseMoveEvent(event);
-    }
-}
-
-void GraphicsSpline::startEditing(Editing::State editingState) {
-    if(editingState == Editing::Pointer ||
-        editingState == Editing::Pen ||
-        editingState == Editing::Eraser)
-        m_editingState = editingState;
-    else
-        stopEditing();
-}
-
-void GraphicsSpline::stopEditing() {
-    m_editingState = Editing::NoEditing;
-}
-
-void GraphicsSpline::executeEditingAction(Editing::Action editingAction) {
-    Q_UNUSED(editingAction);
+        return controlPointPolygonPath(Preferences::SimpleLineWidth) + controlPointsPaths(Preferences::PointRadius + 0.5f * Preferences::SimpleLineWidth);
 }
 
 QPainterPath GraphicsSpline::controlPointPolygonPath(qreal width) const {
@@ -326,13 +240,12 @@ QPainterPath GraphicsSpline::controlPointPolygonPath(qreal width) const {
     // }
 }
 
-QPainterPath GraphicsSpline::controlPointsPaths() const {
+QPainterPath GraphicsSpline::controlPointsPaths(qreal radius) const {
     const vector<vec2> controlPoints = m_spline->controlPoints();
 
     QPainterPath pointsPath;
-    qreal r = Preferences::PointRadius;
     for(uint i = 0; i < controlPoints.size(); ++i) {
-        pointsPath.addEllipse(QPointF(controlPoints[i].x(), controlPoints[i].y()), r, r);
+        pointsPath.addEllipse(QPointF(controlPoints[i].x(), controlPoints[i].y()), radius, radius);
     }
     return pointsPath;
 }
@@ -378,17 +291,103 @@ QPainterPath GraphicsSpline::tangentPath() const {
     return path;
 }
 
-void GraphicsSpline::findPointAt(QPointF localPos) {
-    const vector<vec2> controlPoints = m_spline->controlPoints();
-    for(uint i = 0; i < controlPoints.size(); ++i) {
-        QPainterPath ellipse;
-        qreal r = Preferences::PointRadius;
-        ellipse.addEllipse(QPointF(controlPoints[i].x(), controlPoints[i].y()), r, r);
-        if(ellipse.contains(localPos)) {
-            m_indexOfPointUnderMouse = i;
-            return;
-        }
+void GraphicsSpline::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    Q_UNUSED(widget);
+
+    painter->setBrush(Qt::NoBrush);
+
+    QPen pen;
+    pen.setCapStyle(Qt::RoundCap);
+    pen.setJoinStyle(Qt::RoundJoin);
+
+    // Paint Backgound
+    pen.setWidth(Preferences::HighlightedLineWidth);
+    m_state->paintBackground(pen, painter, option);
+
+    // Paint Foreground
+    pen.setWidth(Preferences::SimpleLineWidth);
+    pen.setColor(m_color);
+    // control polygon:
+    pen.setStyle(Qt::DotLine);
+    painter->setPen(pen);
+    painter->drawPath(controlPointPolygonPath());
+    // curve:
+    pen.setStyle(Qt::SolidLine);
+    painter->setPen(pen);
+    painter->drawPath(controlPointsPaths());
+    painter->drawPath(splineCurvePath());
+
+    //Paint additional foreground
+    m_state->paintForeground(pen, painter, option);
+
+    //Paint additional things
+    if(m_isTangentDrawn) {
+        pen.setColor(darkenColor(m_color));
+        painter->setPen(pen);
+        painter->drawPath(tangentPath());
     }
+}
+
+QColor GraphicsSpline::color() const {
+    return m_color;
+}
+
+void GraphicsSpline::receivedClickOn(QPointF scenePos) {
+    m_state->receivedClickOn(scenePos);
+}
+
+void GraphicsSpline::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {
+    m_state->hoverEnterEvent(event);
+}
+
+void GraphicsSpline::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) {
+    m_state->hoverLeaveEvent(event);
+}
+
+void GraphicsSpline::hoverMoveEvent(QGraphicsSceneHoverEvent *event) {
+    m_state->hoverMoveEvent(event);
+}
+
+void GraphicsSpline::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
+    m_state->mouseMoveEvent(event);
+}
+
+void GraphicsSpline::mouseMovePointEvent(uint index, QGraphicsSceneMouseEvent *event) {
+    prepareGeometryChange();
+    m_spline->moveControlPoint(index, event->pos());
+}
+
+void GraphicsSpline::mouseMoveWholeSplineEvent(QGraphicsSceneMouseEvent *event) {
+    GraphicsItem::mouseMoveEvent(event);
+}
+
+void GraphicsSpline::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
+    m_state->mouseReleaseEvent(event);
+    if(!event->isAccepted())
+        GraphicsItem::mouseReleaseEvent(event);
+}
+
+void GraphicsSpline::startEditing(Editing::State editingState) {
+    switch(editingState) {
+        case Editing::Pointer:
+            m_state = m_pointerState; break;
+        case Editing::Pen:
+            m_state = m_penState; break;
+        case Editing::Eraser:
+            m_state = m_eraserState; break;
+        default:
+            m_state = m_noEditingState;
+    }
+    update();
+}
+
+void GraphicsSpline::stopEditing() {
+    m_state = m_noEditingState;
+    update();
+}
+
+void GraphicsSpline::executeEditingAction(Editing::Action editingAction) {
+    Q_UNUSED(editingAction);
 }
 
 void GraphicsSpline::adjustInSplineRange(real &value) const {

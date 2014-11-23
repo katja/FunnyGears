@@ -12,8 +12,6 @@ EditingToolBar::~EditingToolBar() {
 
 bool EditingToolBar::addListener(ToolBarListener *listener) {
     //EditingToolBar accepts only EditingToolBarListeners.
-    std::cout << "EditingToolBar::addListener(ToolBarListener) called" << std::endl;
-
     if(listensToMe(listener)) {
         EditingToolBarListener *editingListener = static_cast<EditingToolBarListener*>(listener);
         if(m_listenerList.contains(editingListener))
@@ -26,7 +24,6 @@ bool EditingToolBar::addListener(ToolBarListener *listener) {
 }
 
 bool EditingToolBar::removeListener(ToolBarListener *listener) {
-    std::cout << "EditingToolBar::removeListener(ToolBarListener) called" << std::endl;
     if(listensToMe(listener)) {
         EditingToolBarListener *editingListener = static_cast<EditingToolBarListener*>(listener);
         if(!m_listenerList.contains(editingListener))

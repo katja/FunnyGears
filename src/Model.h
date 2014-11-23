@@ -83,6 +83,10 @@ public:
     bool addItem(GraphicsScheduleItem *newItem, GraphicsScheduleItem *parent = 0);
     bool remove(QModelIndex index);
 
+    /** Clears the selection of every iten in the model
+     */
+    void clearSelection();
+
     /** Returns a pointer to the GraphicsScheduleItem, which belongs to the given QModelIndex.
      *  If Index is not valid or no corresponding GraphicsScheduleItem can be found
      *  0 is returned.

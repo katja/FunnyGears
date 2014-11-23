@@ -36,11 +36,7 @@ GraphicsScene::~GraphicsScene() {
 
 void GraphicsScene::setSelectionModel(SelectionModel *selectionModel) {
     m_selectionModel = selectionModel;
-    connect(this, SIGNAL(selectionChanged()), this, SLOT(reactOnSelectionChange()));
-    connect(m_selectionModel, SIGNAL(selectOnly(GraphicsItem*)), this, SLOT(selectOnly(GraphicsItem*)));
-    connect(m_selectionModel, SIGNAL(selectAlso(GraphicsItem*)), this, SLOT(selectAlso(GraphicsItem*)));
-    connect(m_selectionModel, SIGNAL(selectNoMore(GraphicsItem*)), this, SLOT(selectNoMore(GraphicsItem*)));
-    connect(m_selectionModel, SIGNAL(selectNothing()), this, SLOT(selectNothing()));
+    connect(this, SIGNAL(selectionChanged()), this, SLOT(informModelOfSelectionChange()));
 }
 
 void GraphicsScene::drawForeground(QPainter *painter, const QRectF &rect) {
@@ -126,8 +122,8 @@ void GraphicsScene::executeEditingAction(Editing::Action editingAction) {
 //********** PRIVATE SLOTS ****************************************************
 //****************************************************************************
 
-void GraphicsScene::reactOnSelectionChange() {
-    if(m_selectionModel && !m_selectionChangeInProgress) //TODO: delete m_selectionChangeInProgress, if it is not longer needed!!!
+void GraphicsScene::informModelOfSelectionChange() {
+    if(m_selectionModel)
         m_selectionModel->sceneSelectionChanged(this);
 }
 
@@ -136,31 +132,25 @@ void GraphicsScene::reactOnSelectionChange() {
 //****************************************************************************
 
 void GraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) {
-    std::cout << "GraphicsScene::mousePressEvent tracked" << std::endl;
     m_clickedPoint = mouseEvent->scenePos();
     if(Editing::demandsWholeCanvas(m_editingState)) {
         mouseEvent->accept();
-        std::cout << "          and accepted" << std::endl;
         return;
     }
     QGraphicsScene::mousePressEvent(mouseEvent);
 }
 
 void GraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) {
-    std::cout << "GraphicsScene::mouseReleaseEvent tracked" << std::endl;
     if(Editing::demandsWholeCanvas(m_editingState) && m_clickedPoint == mouseEvent->scenePos()) {
         //Following: Hack to select the select the suitable QGraphicsItem, if clicked on one
         //This is necessary, as the selection happens on the mousePressEvent,
         //but if it is selected, then the mouse is released, an editing click is send
         //to the graphics item, which was meant to be a selection click
         if(selectedGraphicsItems().isEmpty()) {
-            std::cout << "          and is now send away with mousePressEvent" << std::endl;
             QGraphicsScene::mousePressEvent(mouseEvent);
         } else {
-            std::cout << "          and is sent to selected items now:" << std::endl;
             sendClickToSelectedItems();
             mouseEvent->accept();
-            std::cout << "          and accepted" << std::endl;
             return;
         }
     }

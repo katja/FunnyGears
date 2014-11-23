@@ -13,7 +13,6 @@ SelectionModel::~SelectionModel() {
 }
 
 void SelectionModel::sceneSelectionChanged(GraphicsScene *scene) {
-    std::cout << "SelectionModel::sceneSelectionChanged" << std::endl;
     QList<QGraphicsItem*> selectedItems = scene->selectedItems();
     //Deselection:
     foreach(GraphicsScheduleItem *currentlySelected, m_selectedItems) {
@@ -34,7 +33,6 @@ void SelectionModel::sceneSelectionChanged(GraphicsScene *scene) {
 }
 
 void SelectionModel::updateSelection(const QItemSelection &selected, const QItemSelection &deselected) {
-    std::cout << "SelectionModel::updateSelection" << std::endl;
     foreach(QModelIndex index, selected.indexes()) {
         if(index.isValid() && index.column() == Model::NAME) {
             GraphicsScheduleItem *graphicsItem = m_model->getItemFromIndex(index);
@@ -57,7 +55,6 @@ void SelectionModel::updateSelection(const QItemSelection &selected, const QItem
 }
 
 void SelectionModel::changeSelectionInModel(GraphicsScheduleItem *item, QItemSelectionModel::SelectionFlags command) {
-    std::cout << "SelectionModel::changeSelectionInModel" << std::endl;
     QModelIndex index = m_model->getIndexFromItem(item);
 
     if(index.isValid()) {

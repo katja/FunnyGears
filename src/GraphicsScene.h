@@ -28,7 +28,7 @@ public:
     void executeEditingAction(Editing::Action editingAction);
 
 private slots:
-    void reactOnSelectionChange();
+    void informModelOfSelectionChange();
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);

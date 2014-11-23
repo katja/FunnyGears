@@ -58,8 +58,7 @@ bool Model::hasChildren(const QModelIndex &parentIndex) const {
     GraphicsScheduleItem *parent = getInternItemFromIndex(parentIndex);
     if(!parent) {
         return false;
-    }
-    else {
+    } else {
         return (parent->numberOfChildren() > 0);
     }
 }
@@ -155,16 +154,13 @@ Qt::ItemFlags Model::flags(const QModelIndex &index) const {
 }
 
 bool Model::addItem(GraphicsScheduleItem *newItem, GraphicsScheduleItem *parent) {
-    std::cout << "Model::addItem" << std::endl;
     if(parent == 0) { //parent is rootItem
-        int lastRow = m_rootItem->numberOfChildren();//rowCount(QModelIndex());
-        std::cout << "       as top level item, on row " << lastRow << std::endl;
+        int lastRow = m_rootItem->numberOfChildren();
         beginInsertRows(QModelIndex(), lastRow, lastRow + 1);
         newItem->setParentItem(m_rootItem);
         endInsertRows();
     } else {
         int row = parent->numberOfChildren();
-        std::cout << "       as child item, on row " << row << std::endl;
         QModelIndex parentIndex = createIndex(parent->childNumber(), 0, parent);
         beginInsertRows(parentIndex, row, row + 1);
         newItem->setParentItem(parent);
@@ -183,6 +179,10 @@ bool Model::remove(QModelIndex index) {
     delete item;
     endRemoveRows();
     return true;
+}
+
+void Model::clearSelection() {
+    m_rootItem->clearSelection();
 }
 
 GraphicsScheduleItem* Model::getItemFromIndex(const QModelIndex &index) const {

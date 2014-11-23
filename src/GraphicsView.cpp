@@ -52,6 +52,7 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent *event) {
 void GraphicsView::keyPressEvent(QKeyEvent *event) {
     if(event->key() == Qt::Key_Space) {
         setDragMode(QGraphicsView::ScrollHandDrag);
+        setInteractive(false); // disables the event from being passed to graphics scene and all the items
     } else {
         QGraphicsView::keyPressEvent(event);
     }
@@ -60,6 +61,7 @@ void GraphicsView::keyPressEvent(QKeyEvent *event) {
 void GraphicsView::keyReleaseEvent(QKeyEvent *event) {
     if(event->key() == Qt::Key_Space) {
         setDragMode(QGraphicsView::RubberBandDrag);
+        setInteractive(true);  // enables again the event from being passed to graphics scene and all the items
     } else {
         QGraphicsView::keyReleaseEvent(event);
     }

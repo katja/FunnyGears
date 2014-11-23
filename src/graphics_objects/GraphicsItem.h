@@ -19,6 +19,8 @@ public:
 
     void setParentItem(QGraphicsItem *newParent); //override from QGraphicsItem
 
+    bool noItemInSceneSelected();
+
     virtual void stopEditing() override {}
     virtual void startEditing(Editing::State) override {};
     virtual void executeEditingAction(Editing::Action) override {};

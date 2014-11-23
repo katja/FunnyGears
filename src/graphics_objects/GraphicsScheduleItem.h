@@ -64,6 +64,10 @@ public:
      */
     void toggleVisibility();
 
+    /** Clears selection of this item and all child items
+     */
+    void clearSelection();
+
 protected:
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant &var) override;
 

@@ -47,8 +47,8 @@ SelectionModel* ObjectScheduleViewWidget::setSelectionModel(SelectionModel *mode
 void ObjectScheduleViewWidget::addSpline() {
     GraphicsSpline *spline = new GraphicsSpline();
     m_model->addItem(spline);
+    m_model->clearSelection();
     spline->setSelected(true);
-    std::cout << "addSpline() in ObjectScheduleViewWidget has finished and model says: " << m_model->hasChildren(QModelIndex()) << std::endl;
 }
 
 void ObjectScheduleViewWidget::addGearTooth() {

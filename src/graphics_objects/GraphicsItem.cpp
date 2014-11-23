@@ -23,3 +23,7 @@ void GraphicsItem::setParentItem(QGraphicsItem *newParent) {
     ToolBarManager::getToolBarManager()->addListenerToToolBars(this);
     QGraphicsItem::setParentItem(newParent);
 }
+
+bool GraphicsItem::noItemInSceneSelected() {
+    return scene()->selectedItems().empty();
+}

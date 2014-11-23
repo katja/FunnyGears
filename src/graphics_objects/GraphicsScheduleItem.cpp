@@ -64,25 +64,32 @@ void GraphicsScheduleItem::toggleVisibility() {
     setVisible(!isVisible());
 }
 
+void GraphicsScheduleItem::clearSelection() {
+    for(GraphicsScheduleItem *child : m_children) {
+        child->clearSelection();
+    }
+    setSelected(false);
+}
+
 QVariant GraphicsScheduleItem::itemChange(GraphicsItemChange change, const QVariant &var) {
-    std::cout << "    itemChange " << change << ": ";
+    // std::cout << "    itemChange " << change << ": ";
     if (change == ItemParentChange) {
-        std::cout << "        ItemParentHasChanged" << std::endl;
+        // std::cout << "        ItemParentHasChanged" << std::endl;
         // var is the new parent
         QGraphicsItem *newParent = qvariant_cast<QGraphicsItem*>(var);
         handleNewParent(newParent);
     } else if (change == ItemChildAddedChange) {
-        std::cout << "        ItemChildAddedChange" << std::endl;
+        // std::cout << "        ItemChildAddedChange" << std::endl;
         // var holds the child to be added
         QGraphicsItem *newChild = qvariant_cast<QGraphicsItem*>(var);
         handleChildAdded(newChild);
     } else if (change == ItemChildRemovedChange) {
-        std::cout << "        ItemChildRemovedChange" << std::endl;
+        // std::cout << "        ItemChildRemovedChange" << std::endl;
         // var holds the child to be removed
         QGraphicsItem *oldChild = qvariant_cast<QGraphicsItem*>(var);
         handleChildRemoved(oldChild);
     } else if (change == ItemSceneChange) {
-        std::cout << "        ItemSceneChange" << std::endl;
+        // std::cout << "        ItemSceneChange" << std::endl;
         // var is the new scene, scene() has still the old one
         QGraphicsScene *scene = qvariant_cast<QGraphicsScene*>(var);
         handleSceneChange(scene);
@@ -92,55 +99,55 @@ QVariant GraphicsScheduleItem::itemChange(GraphicsItemChange change, const QVari
     //     bool value = var.toBool();
     //     handleSelectionChange(value);
     } else {
-        std::cout << std::endl;
+        // std::cout << std::endl;
     }
     return QGraphicsItem::itemChange(change, var);
 }
 
 void GraphicsScheduleItem::handleNewParent(QGraphicsItem *newParent) {
-    std::cout << "handleNewParent ";
+    // std::cout << "handleNewParent ";
     if(!isGraphicsScheduleItem(newParent)) {
-        std::cout << "found NO suitable item!!!" << std::endl;
+        // std::cout << "found NO suitable item!!!" << std::endl;
         return;
     }
     GraphicsScheduleItem *parent = static_cast<GraphicsScheduleItem*>(newParent);
     if(m_parent == parent) {
-        std::cout << "found already has this parent!!!" << std::endl;
+        // std::cout << "found already has this parent!!!" << std::endl;
         return;
     }
     m_parent = parent;
-    std::cout << "finished" << std::endl;
+    // std::cout << "finished" << std::endl;
 }
 
 void GraphicsScheduleItem::handleChildAdded(QGraphicsItem *newChild) {
-    std::cout << "handleChildAdded ";
+    // std::cout << "handleChildAdded ";
     if(!isGraphicsScheduleItem(newChild)) {
-        std::cout << "found NO suitable child!!!" << std::endl;
+        // std::cout << "found NO suitable child!!!" << std::endl;
         return;
     }
     GraphicsScheduleItem *child = static_cast<GraphicsScheduleItem*>(newChild);
     if(m_children.contains(child)) {
-        std::cout << "found this child already in its child items!!!" << std::endl;
+        // std::cout << "found this child already in its child items!!!" << std::endl;
         return;
     }
     m_children.append(child);
-    std::cout << "finished" << std::endl;
+    // std::cout << "finished" << std::endl;
 }
 
 void GraphicsScheduleItem::handleChildRemoved(QGraphicsItem *oldChild) {
-    std::cout << "handleChildRemoved ";
+    // std::cout << "handleChildRemoved ";
     if(!isGraphicsScheduleItem(oldChild)) {
-        std::cout << "found NO suitable item to remove!!!" << std::endl;
+        // std::cout << "found NO suitable item to remove!!!" << std::endl;
         return;
     }
     GraphicsScheduleItem *child = static_cast<GraphicsScheduleItem*>(oldChild);
     int countRemoved = m_children.removeAll(child);
-    std::cout << "removed " << countRemoved << " children, finished" << std::endl;
+    // std::cout << "removed " << countRemoved << " children, finished" << std::endl;
 }
 
 // TODO: if this method isn't used, delete it!!!
 void GraphicsScheduleItem::handleSceneChange(QGraphicsScene* newScene) {
-    std::cout << "handleSceneChange finished" << std::endl;
+    // std::cout << "handleSceneChange finished" << std::endl;
 }
 
 // void GraphicsScheduleItem::handleSelectionChange(bool isSelected) {
