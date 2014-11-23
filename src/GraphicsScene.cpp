@@ -27,11 +27,6 @@ void GraphicsScene::initialize() {
 
 GraphicsScene::~GraphicsScene() {
     std::cout << "GraphicsScene is deleted" << std::endl;
-    //TODO: I think the Graphicsitems should be deleted by the scene itself, so no removing before has to take place
-    //      Like that they are automatically deleted from QGraphicsScene.
-    // foreach(GraphicsItem *graphicsItem, graphicsItems()) {
-    //     removeItem(graphicsItem);
-    // }
 }
 
 void GraphicsScene::setSelectionModel(SelectionModel *selectionModel) {
@@ -54,7 +49,6 @@ void GraphicsScene::drawForeground(QPainter *painter, const QRectF &rect) {
 }
 
 void GraphicsScene::drawBackground(QPainter *painter, const QRectF &rect) {
-
     QPen pen(Preferences::BackgroundGridColor);
     pen.setWidth(0); // => cosmetic pen (always one pixel wide, independent of transformation)
     painter->setPen(pen);
@@ -107,10 +101,15 @@ QList<GraphicsItem*> GraphicsScene::selectedGraphicsItems() const {
 //So don't stop things again!
 void GraphicsScene::startEditing(Editing::State editingState) {
     m_editingState = editingState;
+    if(m_editingState == Editing::Pointer)
+        setAllItemsCursor(CursorRental::pointer());
+    else if(m_editingState == Editing::Eraser)
+        setAllItemsCursor(CursorRental::eraser());
 }
 
 void GraphicsScene::stopEditing() {
     m_editingState = Editing::NoEditing;
+    unsetAllItemsCursor();
 }
 
 void GraphicsScene::executeEditingAction(Editing::Action editingAction) {
@@ -161,30 +160,14 @@ void GraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) {
 //********** PRIVATE *********************************************************
 //****************************************************************************
 void GraphicsScene::setAllItemsCursor(const QCursor &cursor) {
-    //TODO: actually here an GraphicsItem should be used instead of QGraphicsItem!!!
-    //But as items() is probably much faster than graphicsItems(), I use this variant up to now.
     foreach(QGraphicsItem* item, items()) {
         item->setCursor(cursor);
     }
 }
 
 void GraphicsScene::unsetAllItemsCursor() {
-    //TODO: actually here an GraphicsItem should be used instead of QGraphicsItem!!!
-    //But as items() is probably much faster than graphicsItems(), I use this variant up to now.
     foreach(QGraphicsItem* item, items()) {
         item->unsetCursor();
-    }
-}
-
-void GraphicsScene::setCursorInViews(const QCursor &cursor) {
-    foreach(QGraphicsView *view, views()) {
-        view->setCursor(cursor);
-    }
-}
-
-void GraphicsScene::unsetCursorInViews() {
-    foreach(QGraphicsView *view, views()) {
-        view->unsetCursor();
     }
 }
 

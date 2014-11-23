@@ -1,5 +1,6 @@
 #include "GraphicsView.h"
 #include "preferences.h"
+#include "Cursor.h"
 
 GraphicsView::GraphicsView(QWidget *parent) : QGraphicsView(parent) {
     initialize();
@@ -69,13 +70,28 @@ void GraphicsView::keyReleaseEvent(QKeyEvent *event) {
 
 void GraphicsView::stopEditing() {
     m_editingState = Editing::NoEditing;
+    const QCursor cursor = this->cursor();
+    unsetCursor();
 }
 
 void GraphicsView::startEditing(Editing::State editingState) {
-    if(editingState == Editing::ZoomIn || editingState == Editing::ZoomOut)
-        m_editingState = editingState;
+    //The following two lines result in a correct display of the mouse cursor
+    //Probably Qt has a bug here, as different similar problems are reported.
+    //Without the two lines the mouse curser has its 'normal' pointer shape after
+    //a mouse over with a different cursor shape happens.
+    setDragMode(QGraphicsView::ScrollHandDrag);
+    setDragMode(QGraphicsView::RubberBandDrag);
+    if(editingState == Editing::ZoomIn)
+        setCursor(CursorRental::zoomIn());
+    else if(editingState == Editing::ZoomOut)
+        setCursor(CursorRental::zoomOut());
+    else if(editingState == Editing::Pen) {
+        setCursor(CursorRental::pen());
+    }
     else
-        stopEditing();
+        unsetCursor();
+
+    m_editingState = editingState;
 }
 
 void GraphicsView::executeEditingAction(Editing::Action editingAction) {

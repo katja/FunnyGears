@@ -45,8 +45,6 @@ private:
 
     void setAllItemsCursor(const QCursor &cursor);
     void unsetAllItemsCursor();
-    void setCursorInViews(const QCursor &cursor);
-    void unsetCursorInViews();
     void sendClickToSelectedItems();
 };
 
