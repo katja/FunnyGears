@@ -11,13 +11,13 @@ ObjectScheduleViewWidget::ObjectScheduleViewWidget(Model *model, QWidget *parent
 
     m_treeView = new ModelTreeView(m_model);
 
-    m_addItemButton      = new QPushButton(QIcon("images/Add.png"), "", this);
-    m_removeItemButton   = new QPushButton(QIcon("images/Remove.png"), "", this);
+    m_addItemButton      = new QPushButton(QIcon(":/images/Add.png"), "", this);
+    m_removeItemButton   = new QPushButton(QIcon(":/images/Remove.png"), "", this);
 
     setWidgetLayout();
 
-    QAction *addSplineAction = new QAction("Create own spline curve", this);
-    QAction *addGearToothAction = new QAction("Create own gear", this);
+    QAction *addSplineAction = new QAction("Create spline curve", this);
+    QAction *addGearToothAction = new QAction("Use curve as gear tooth", this);
     QAction *addInvoluteGearAction = new QAction("Add involute gear", this);
 
     m_addMenu = new QMenu(this);

@@ -68,9 +68,9 @@ void MainWindow::createMenusAndToolbars() {
 }
 
 void MainWindow::createProgramMenu() {
-    connect(createAction(m_aboutAction, tr("&About"), tr("about the program")),
+    connect(createAction(m_aboutAction, tr("About"), tr("about the program")),
         SIGNAL(triggered()), this, SLOT(about()));
-    connect(createAction(m_exitAction,  tr("E&xit"),  tr("quit program"), QKeySequence::Quit),
+    connect(createAction(m_exitAction,  tr("Exit"),  tr("quit program"), QKeySequence::Quit),
         SIGNAL(triggered()), this, SLOT(quitProgram()));
 
     m_programMenu = menuBar()->addMenu(tr("Funny Gears"));
@@ -80,16 +80,16 @@ void MainWindow::createProgramMenu() {
 }
 
 void MainWindow::createFileMenuAndToolbar() {
-    connect(createAction(m_newAction,   tr("&New"),   tr("create new project"), QKeySequence::New),
+    connect(createAction(m_newAction,   tr("New"),   tr("create new project"), QKeySequence::New),
         SIGNAL(triggered()), this, SLOT(newProject()));
-    connect(createAction(m_openAction,  tr("&Open"),  tr("open saved objects"), QKeySequence::Open),
+    connect(createAction(m_openAction,  tr("Open"),  tr("open saved objects"), QKeySequence::Open),
         SIGNAL(triggered()), this, SLOT(openProject()));
-    connect(createAction(m_saveAction,  tr("&Save"),  tr("save current objects"), QKeySequence::Save),
+    connect(createAction(m_saveAction,  tr("Save"),  tr("save current objects"), QKeySequence::Save),
         SIGNAL(triggered()), this, SLOT(saveProject()));
     connect(createAction(m_saveAsAction,tr("Save As"),  tr("save current objects in new file"), QKeySequence::SaveAs),
         SIGNAL(triggered()), this, SLOT(saveAsProject()));
 
-    m_fileMenu = menuBar()->addMenu(tr("&File"));
+    m_fileMenu = menuBar()->addMenu(tr("File"));
     m_fileMenu->addAction(m_newAction);
     m_fileMenu->addAction(m_openAction);
     m_fileMenu->addAction(m_saveAction);
@@ -127,7 +127,7 @@ void MainWindow::createViewMenu() {
     m_toggleObjectScheduleAction = m_objectSchedule->toggleViewAction();
     m_toggleObjectAttributesAction = m_objectAttributesWidget->toggleViewAction();
 
-    m_viewMenu = menuBar()->addMenu(tr("&View"));
+    m_viewMenu = menuBar()->addMenu(tr("View"));
     m_viewMenu->addAction(m_toggleFileToolBarAction);
     m_viewMenu->addAction(m_toggleEditToolBarAction);
     m_viewMenu->addSeparator();
@@ -138,7 +138,7 @@ void MainWindow::createViewMenu() {
 }
 
 QAction* MainWindow::createAction(QAction *&action, QString name, QString toolTip, QKeySequence shortcut) {
-    QString iconFileName = QString("images/" + name + ".png");
+    QString iconFileName = QString(":/images/" + name + ".png");
     QFile iconFile(iconFileName);
     if(iconFile.exists()) {
         action = new QAction(QIcon(iconFileName), name, this);

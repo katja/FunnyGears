@@ -93,9 +93,9 @@ QVariant Model::data(const QModelIndex &index, int role) const {
             }
         } else if (role == Qt::DecorationRole && index.column() == VISIBILITY) {
             if(item->isVisible())
-                return QIcon("images/EyeOpen.png");
+                return QIcon(":/images/EyeOpen.png");
             else
-                return QIcon("images/EyeClosed.png");
+                return QIcon(":/images/EyeClosed.png");
         }
     }
     return QVariant();

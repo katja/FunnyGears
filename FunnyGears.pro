@@ -20,8 +20,10 @@ RCC_DIR = $$OBJECTS_DIR/.rrc
 UI_DIR  = $$OBJECTS_DIR/.ui
 
 INCLUDEPATH += ./src/
+INCLUDEPATH +=  /usr/include
 
 ICON    = images/Gear.icns      # Mac solution for the icon of the app
+RESOURCES = images.qrc
 
 PRECOMPILED_HEADER = src/stable.h
 
@@ -38,5 +40,3 @@ SOURCES = \
     src/graphics_objects/*.cpp \
     src/graphics_widgets/*.cpp \
     src/tool_bars/*.cpp
-
-INCLUDEPATH += /usr/include

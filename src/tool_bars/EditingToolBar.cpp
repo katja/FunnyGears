@@ -111,7 +111,7 @@ void EditingToolBar::equipAction(QAction *action, QString name, QString toolTip,
     action->setText(name);
     action->setToolTip(toolTip);
 
-    QString iconFileName = QString("images/" + name + ".png");
+    QString iconFileName = QString(":/images/" + name + ".png");
     QFile iconFile(iconFileName);
     if(iconFile.exists())
         action->setIcon(QIcon(iconFileName));
