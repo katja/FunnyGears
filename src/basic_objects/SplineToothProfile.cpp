@@ -29,10 +29,10 @@ vec2 SplineToothProfile::start() const {
 }
 
 vec2 SplineToothProfile::stop() const {
-    return evaluate(upperDomainLimit());
+    return evaluate(upperDomainLimit() - 0.01f);
 }
 
-real SplineToothProfile::getMinimumDistanceToOrigin() const {
+real SplineToothProfile::minimumDistanceToOrigin() const {
     vector<vec2> possiblePoints(2 * m_controlPoints.size());
     int numOfPossiblePoints = pointsWithNormalsThroughOrigin(possiblePoints);
     real minDistance = possiblePoints[0].norm();
@@ -43,7 +43,7 @@ real SplineToothProfile::getMinimumDistanceToOrigin() const {
     return minDistance;
 }
 
-real SplineToothProfile::getMaximumDistanceToOrigin() const {
+real SplineToothProfile::maximumDistanceToOrigin() const {
     vector<vec2> possiblePoints(2 * m_controlPoints.size());
     int numOfPossiblePoints = pointsWithNormalsThroughOrigin(possiblePoints);
     real maxDistance = possiblePoints[0].norm();

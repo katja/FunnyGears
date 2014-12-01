@@ -1,20 +1,25 @@
 #include "SplineGear.h"
 #include <Eigen/Geometry>
 
+#include "helpers.h"
+
 SplineGear::SplineGear(SplineToothProfile *toothOfGear) : m_toothProfile(toothOfGear) {
+    std::cout << "SplineGear is created" << std::endl;
     m_radius = 0.0f;
     m_numberOfTeeth = 0;
     update();
 }
 
-SplineGear::~SplineGear() {}
+SplineGear::~SplineGear() {
+    std::cout << "SplineGear is deleted" << std::endl;
+}
 
 void SplineGear::update() {
     m_degree = m_toothProfile->degree();
     if(isValid()) {
         if(m_radius <= 0) {
             // Assume for simplicity a radius which lies in the middle of max and min points around the center
-            m_radius = (m_toothProfile->getMaximumDistanceToOrigin() + m_toothProfile->getMinimumDistanceToOrigin()) / 2;
+            m_radius = (maximumDistanceToCenter() + minimumDistanceToCenter()) / 2.0f;
         }
         if(m_numberOfTeeth == 0) {
             // If the tooth profile would suit 9.x times in a circle, only use 9 teeth to avoid overlapping start and end points
@@ -30,8 +35,8 @@ void SplineGear::update() {
 // is pointing to the right, the y-axis points downward. Therefore "in clock direction"
 // is a mathematical "counter clock direction"
 bool SplineGear::toothDescribedInClockDirection() const {
-    vec2 first = m_toothProfile->evaluate(lowerDomainLimit());
-    vec2 last = m_toothProfile->evaluate(upperDomainLimit());
+    vec2 first = m_toothProfile->evaluate(m_toothProfile->lowerDomainLimit());
+    vec2 last = m_toothProfile->evaluate(m_toothProfile->upperDomainLimit() - 0.01f);
     return (first.x() * last.y() - first.y() * last.x() > 0.0f);
     //is 0 if points lie on one line through the origin.
 }
@@ -40,13 +45,19 @@ real SplineGear::angularPitch() const { //Teilungswinkel
     return 2.0f * M_PI / m_numberOfTeeth;
 }
 
+real SplineGear::maximumDistanceToCenter() const {
+    return m_toothProfile->maximumDistanceToOrigin();
+}
+
+real SplineGear::minimumDistanceToCenter() const {
+    return m_toothProfile->minimumDistanceToOrigin();
+}
+
 uint SplineGear::maximumPossibleToothCount() const {
     //minimum angular pitch with m_toothProfile:
     vec2 start = m_toothProfile->start();
     vec2 stop  = m_toothProfile->stop();
     // if angularPitch > PI (more than half of circle), concstruction will fail!
-    // start.normalize();
-    // stop.normalize();
     real minAngularPitch = acos((start.normalized().dot(stop.normalized())));
 
     return static_cast<uint>(floor((2.0f * M_PI) / minAngularPitch));
@@ -101,9 +112,10 @@ void SplineGear::updateKnotsAndControlPoints() {
             m_controlPoints[j + tooth * pPT] = Eigen::Rotation2D<real>(rotationInRad) * m_toothProfile->controlPoint(j); //rotate the controlPoint[j] by (2 * M_PI) / m_numberOfTeeth
         }
     }
+
     // add the points to close the curve
     for(uint i = 0; i < m_degree; ++i) {
-        m_controlPoints[m_numberOfTeeth + i] = m_toothProfile->controlPoint(i);
+        m_controlPoints[m_numberOfTeeth * pPT + i] = m_toothProfile->controlPoint(i);
     }
 
     // Update knots:
@@ -182,23 +194,22 @@ void SplineGear::setDegree(uint degree) {
 
 void SplineGear::addControlPoint(vec2 point) {
     m_toothProfile->addControlPoint(point);
-    updateKnotsAndControlPoints();
+    update();
 }
 
 void SplineGear::addControlPoint(real x, real y) {
-    m_toothProfile->addControlPoint(x, y);
-    updateKnotsAndControlPoints();
+    addControlPoint(vec2(x, y));
 }
 
 void SplineGear::removeControlPoint(uint index) {
     m_toothProfile->removeControlPoint(relatedIndexInFirstTooth(index));
-    updateKnotsAndControlPoints();
+    update();
 }
 
 void SplineGear::moveControlPoint(uint index, vec2 newPosition) {
     vec2 newPositionInTooth = relatedPositionInFirstTooth(toothIndex(index), newPosition);
     m_toothProfile->moveControlPoint(relatedIndexInFirstTooth(index), newPositionInTooth);
-    updateKnotsAndControlPoints();
+    update();
 }
 
 void SplineGear::moveControlPoint(uint index, QPointF newPosition) {
@@ -217,7 +228,7 @@ void SplineGear::setTornToEdges(bool tearToEdges) {
     if(isTornToEdges() == tearToEdges)
         return;
     m_toothProfile->setTornToEdges(tearToEdges);
-    updateKnotsAndControlPoints();
+    update();
 }
 
 bool SplineGear::isTornToEdges() const {
@@ -248,6 +259,6 @@ vec2 SplineGear::relatedPositionInFirstTooth(uint toothIndex, vec2 position) con
     if(toothIndex == 0)
         return position;
     int rotationDirection = (toothDescribedInClockDirection()) ? 1 : -1;
-    real rotationInRad = toothIndex * (-rotationDirection) * angularPitch(); //the minus sign is necessary, as the first tooth from a following tooth is searched
+    real rotationInRad = -(rotationDirection * toothIndex * angularPitch()); //the minus sign is necessary, as the first tooth from a following tooth is searched
     return Eigen::Rotation2D<real>(rotationInRad) * position;
 }

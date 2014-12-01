@@ -2,8 +2,11 @@
 #include "YesNoDelegate.h"
 
 #include "graphics_objects/GraphicsSpline.h"
-#include "graphics_objects/GraphicsSimpleGear.h"
+#include "graphics_objects/GraphicsSplineGear.h"
 #include "graphics_objects/GraphicsInvoluteGear.h"
+
+#include "basic_objects/SplineGear.h"
+#include "basic_objects/SplineToothProfile.h"
 
 ObjectScheduleViewWidget::ObjectScheduleViewWidget(Model *model, QWidget *parent)
 : QDockWidget("Object Schedule", parent, Qt::Widget), m_model(model) {
@@ -45,15 +48,26 @@ SelectionModel* ObjectScheduleViewWidget::setSelectionModel(SelectionModel *mode
 }
 
 void ObjectScheduleViewWidget::addSpline() {
-    GraphicsSpline *spline = new GraphicsSpline();
-    m_model->addItem(spline);
+    Spline *spline = new Spline();
+    GraphicsSpline *gSpline = new GraphicsSpline(spline);
+    m_model->addItem(gSpline);
     m_model->clearSelection();
-    spline->setSelected(true);
+    gSpline->setSelected(true);
 }
 
 void ObjectScheduleViewWidget::addGearTooth() {
-    GraphicsSimpleGear *gear = new GraphicsSimpleGear();
-    m_model->addItem(gear);
+    std::cout << "ObjectScheduleViewWidget::addGearTooth 1/5" << std::endl;
+    SplineToothProfile *toothProfile = new SplineToothProfile();
+    std::cout << "ObjectScheduleViewWidget::addGearTooth 2/5" << std::endl;
+    SplineGear *gear = new SplineGear(toothProfile);
+    std::cout << "ObjectScheduleViewWidget::addGearTooth 3/5" << std::endl;
+    GraphicsSpline *gearSpline = new GraphicsSpline(gear);
+    std::cout << "ObjectScheduleViewWidget::addGearTooth 4/5" << std::endl;
+    // GraphicsSplineGear *gear = new GraphicsSplineGear();
+    m_model->addItem(gearSpline);
+    m_model->clearSelection();
+    gearSpline->setSelected(true);
+    std::cout << "ObjectScheduleViewWidget::addGearTooth 5/5" << std::endl;
 }
 
 void ObjectScheduleViewWidget::addInvoluteGear() {

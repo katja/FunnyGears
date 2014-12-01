@@ -4,7 +4,7 @@
 #include "basic_objects/SplineToothProfile.h"
 #include "definitions.h"
 
-class SplineGear : public SplineToothProfile {
+class SplineGear : public Spline {
 public:
     // Given toothOfGear is used to build a gear "around" this tooth. If tooth is changed
     // call updateKnotsAndControlPoints() to update the gear curve.
@@ -44,6 +44,18 @@ public:
      *  @return the angular pitch of a transverse gear
      */
     real angularPitch() const;
+
+    /** @brief Returns the maximum distance to the gear center
+     *
+     *  @return maximum distance to gear center
+     */
+    real maximumDistanceToCenter() const;
+
+    /** @brief Returns the minimum distance to the gear center
+     *
+     *  @return minimum distance to gear center
+     */
+    real minimumDistanceToCenter() const;
 
     /** @brief Returns the maximal possible tooth count
      *

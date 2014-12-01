@@ -13,11 +13,15 @@ bool GraphicsSpline::isGraphicsSplineItem(QGraphicsItem *item) {
     return false;
 }
 
-GraphicsSpline::GraphicsSpline() : m_isTangentDrawn(false), m_tangentValue(-1.0f) {
+GraphicsSpline::GraphicsSpline(Spline *spline) : m_isTangentDrawn(false), m_tangentValue(-1.0f) {
 
     std::cout << "GraphicsSpline is created" << std::endl;
 
-    m_spline = new Spline();
+    if(spline == 0) {
+        std::cout << "Spline is 0. and now set to new Spline()" << std::endl;
+        spline = new Spline();
+    }
+    m_spline = spline;
 
     m_noEditingState = new NoEditingSplineState(this);
     m_pointerState = new PointerSplineState(this);
@@ -152,7 +156,6 @@ QRectF GraphicsSpline::normalBoundingRect(qreal radius) const {
     // but painting should clean selection. Therefore every time the space for the selected curve
     // is used. As the control points form the bounding rect, the additional space for them
     // must be included, too.
-
     const vector<vec2>& controlPoints = m_spline->controlPoints();
     if(controlPoints.empty()) {
         return QRectF();

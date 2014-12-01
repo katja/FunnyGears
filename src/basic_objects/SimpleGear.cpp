@@ -2,7 +2,7 @@
 
 SimpleGear::SimpleGear(const ToothProfile &toothProfile) : m_toothProfile(toothProfile.clone()) {
     // Assume for simplicity a radius which lies in the middle of max and min points around the center
-    m_radius = (m_toothProfile->getMaximumDistanceToOrigin() + m_toothProfile->getMinimumDistanceToOrigin()) / 2;
+    m_radius = (m_toothProfile->maximumDistanceToOrigin() + m_toothProfile->minimumDistanceToOrigin()) / 2;
     // If the tooth profile would suit 9.x times in a circle, only use 9 teeth to avoid overlapping start and end points
     m_numberOfTeeth = (uint) floor((M_PI * 2.0) / getAngularPitch());
 }
@@ -25,22 +25,22 @@ void SimpleGear::setRadius(real radius) {
 }
 
 real SimpleGear::minRadius() const {
-    return m_toothProfile->getMinimumDistanceToOrigin();
+    return m_toothProfile->minimumDistanceToOrigin();
 }
 
 real SimpleGear::maxRadius() const {
-    return m_toothProfile->getMaximumDistanceToOrigin();
+    return m_toothProfile->maximumDistanceToOrigin();
 }
 
 real SimpleGear::getRootRadius() const {
     //TODO: Maybe offer different possibilities for calculation of a root radius
-    real min = m_toothProfile->getMinimumDistanceToOrigin();
+    real min = m_toothProfile->minimumDistanceToOrigin();
     return min;
 }
 
 real SimpleGear::getTipRadius() const {
     //TODO: Maybe offer different possibilities for calculation of a tip radius
-    real max = m_toothProfile->getMaximumDistanceToOrigin();
+    real max = m_toothProfile->maximumDistanceToOrigin();
     return max;
 }
 

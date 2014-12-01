@@ -14,7 +14,7 @@ public:
     static const int Type;// = GraphicsSpline::UserType + Type::GraphicsSplineType;
     static bool isGraphicsSplineItem(QGraphicsItem *item);
 
-    GraphicsSpline();
+    GraphicsSpline(Spline *spline = 0);
     virtual ~GraphicsSpline();
 
     int type() const override; //from QGraphicsItem

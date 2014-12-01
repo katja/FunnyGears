@@ -141,8 +141,8 @@ void GraphicsScheduleItem::handleChildRemoved(QGraphicsItem *oldChild) {
         return;
     }
     GraphicsScheduleItem *child = static_cast<GraphicsScheduleItem*>(oldChild);
-    int countRemoved = m_children.removeAll(child);
-    // std::cout << "removed " << countRemoved << " children, finished" << std::endl;
+    m_children.removeAll(child);
+    // std::cout << "removed children, finished" << std::endl;
 }
 
 // TODO: if this method isn't used, delete it!!!
