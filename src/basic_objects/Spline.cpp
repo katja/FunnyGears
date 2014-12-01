@@ -20,6 +20,8 @@ Spline::Spline(const Spline &other) {
 
 Spline::Spline(vector<vec2> controlPoints, vector<real> knots) {
     std::cout << "Spline is created with given points and knots" << std::endl;
+    // m_degree is set on relation between number of knots and number of control points.
+    // but if following is not given, m_degree would have to be negative! => not possible
     if(knots.size() < controlPoints.size() + 2)
         throw;
     m_knots = knots;
@@ -155,6 +157,10 @@ const vector<vec2>& Spline::controlPoints() const {
     return m_controlPoints;
 }
 
+vec2 Spline::controlPoint(uint i) const {
+    return m_controlPoints[i];
+}
+
 void Spline::addControlPoint(vec2 point) {
     if(m_tornToEdges && isValid()) {
         makeDifferentLastKnots();
@@ -187,10 +193,14 @@ void Spline::removeControlPoint(uint index) {
     updateClosedCurve();
 }
 
-void Spline::moveControlPoint(uint index, QPointF newPosition) {
+void Spline::moveControlPoint(uint index, vec2 newPosition) {
     if(index >= m_controlPoints.size())
         return;
-    m_controlPoints[index] = vec2(newPosition.x(), newPosition.y());
+    m_controlPoints[index] = newPosition;
+}
+
+void Spline::moveControlPoint(uint index, QPointF newPosition) {
+    moveControlPoint(index, vec2(newPosition.x(), newPosition.y()));
 }
 
 uint Spline::numberOfKnots() const {
@@ -272,12 +282,12 @@ void Spline::refineAt(real knotValue, uint multiplicity) {
     }
     //copy now new points into control points vector:
     m_controlPoints.resize(m_controlPoints.size() + multiplicity);
-    //do NOT replace int by uint!!!
+    int n_int = (int) n;
     int i = m_controlPoints.size() - 1 - multiplicity;
-    for(; i >= n; --i) {
+    for(; i >= n_int; --i) {
         m_controlPoints[i + multiplicity] = m_controlPoints.at(i);
     }
-    //do NOT replace int by uint!!!
+    //do NOT replace 'int j' by 'uint j'!!!
     for(int j = newPoints.size() - 1; j >= 0; --j, --i) {
         m_controlPoints[i + multiplicity] = newPoints[j];
     }
@@ -392,6 +402,9 @@ uint Spline::lowerNextKnot(real value) const {
 }
 
 void Spline::getIntersectionPointsWithRay(const Ray &ray, vector<vec2> &intersectionPoints) const {
+    if(!isValid())
+        return; //=> number of control points is not at least 2
+
     //first test the control point polygon.
     //If the ray has no intersection with it, there can't be an intersection with the spline curve, too.
     for(uint i = 0; i < m_controlPoints.size() - 1; ++i) {
@@ -413,8 +426,8 @@ void Spline::getIntersectionPointsWithRay(const Ray &ray, vector<vec2> &intersec
             //TODO: I don't think that the following is correct!!! What happens, if i == 0????
             else {
                 if(upperDomainLimit() - lowerDomainLimit() > 0.1f) {
-                    int startPointIndex = i - (m_degree - 1);
-                    int stopPointIndex = i + m_degree;
+                    long startPointIndex = i - (m_degree - 1);
+                    unsigned long stopPointIndex = i + m_degree;
                     if(startPointIndex < 0)
                         startPointIndex = 0;
                     if(stopPointIndex >= m_controlPoints.size())
