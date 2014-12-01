@@ -9,6 +9,7 @@ class ToothProfile {
         virtual ToothProfile* clone() const = 0;
 
         virtual vec2 start() const = 0;
+        virtual vec2 stop() const = 0;
         virtual real getMinimumDistanceToOrigin() const = 0;
         virtual real getMaximumDistanceToOrigin() const = 0;
         virtual void sampledCurve(vector<vec2> &samples) const = 0;

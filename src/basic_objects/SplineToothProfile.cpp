@@ -28,6 +28,10 @@ vec2 SplineToothProfile::start() const {
     return evaluate(lowerDomainLimit());
 }
 
+vec2 SplineToothProfile::stop() const {
+    return evaluate(upperDomainLimit());
+}
+
 real SplineToothProfile::getMinimumDistanceToOrigin() const {
     vector<vec2> possiblePoints(2 * m_controlPoints.size());
     int numOfPossiblePoints = pointsWithNormalsThroughOrigin(possiblePoints);

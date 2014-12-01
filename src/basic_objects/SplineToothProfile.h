@@ -10,13 +10,14 @@ public:
     SplineToothProfile(int degree = 2);
     SplineToothProfile(const Spline &other);
     virtual ~SplineToothProfile();
-    SplineToothProfile* create() const;
-    SplineToothProfile* clone() const;
+    SplineToothProfile* create() const override; // from ToothProfile
+    SplineToothProfile* clone() const override; // from ToothProfile
 
-    vec2 start() const;
-    real getMinimumDistanceToOrigin() const;
-    real getMaximumDistanceToOrigin() const;
-    void sampledCurve(vector<vec2> &samples) const;
+    vec2 start() const override; // from ToothProfile
+    vec2 stop() const override; // from ToothProfile
+    real getMinimumDistanceToOrigin() const override; // from ToothProfile
+    real getMaximumDistanceToOrigin() const override; // from ToothProfile
+    void sampledCurve(vector<vec2> &samples) const override; // from ToothProfile
 
 private:
     /** Searches for points in the spline curve whose normales pass the origin.
