@@ -95,3 +95,11 @@ real angleBetween(const vec2 &a, const vec2 &b) {
     real angle = acos((a.dot(b)) / (a.norm() * b.norm()));
     return angle;
 }
+
+QVector<QPointF> convertToQVectorWithQPointFs(const vector<vec2> &v) {
+    QVector<QPointF> qV(v.size());
+    for(uint i = 0; i < v.size(); ++i) {
+        qV[i] = QPointF(v.at(i).x(), v.at(i).y());
+    }
+    return qV;
+};

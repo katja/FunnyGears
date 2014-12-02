@@ -31,6 +31,8 @@ QColor darkenColor(const QColor &color, int degree = 60);
 
 real angleBetween(const vec2 &a, const vec2 &b);
 
+QVector<QPointF> convertToQVectorWithQPointFs(const vector<vec2> &v);
+
 ////////////////////////////////////
 ////////// TEMPLATE HELPERS ////////
 // They are implemented in header file, because this is necessary for templates

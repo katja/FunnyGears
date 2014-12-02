@@ -48,26 +48,19 @@ SelectionModel* ObjectScheduleViewWidget::setSelectionModel(SelectionModel *mode
 }
 
 void ObjectScheduleViewWidget::addSpline() {
-    Spline *spline = new Spline();
-    GraphicsSpline *gSpline = new GraphicsSpline(spline);
-    m_model->addItem(gSpline);
+    GraphicsSpline *spline = new GraphicsSpline();
+    m_model->addItem(spline);
     m_model->clearSelection();
-    gSpline->setSelected(true);
+    spline->setSelected(true);
 }
 
 void ObjectScheduleViewWidget::addGearTooth() {
-    std::cout << "ObjectScheduleViewWidget::addGearTooth 1/5" << std::endl;
-    SplineToothProfile *toothProfile = new SplineToothProfile();
-    std::cout << "ObjectScheduleViewWidget::addGearTooth 2/5" << std::endl;
-    SplineGear *gear = new SplineGear(toothProfile);
-    std::cout << "ObjectScheduleViewWidget::addGearTooth 3/5" << std::endl;
-    GraphicsSpline *gearSpline = new GraphicsSpline(gear);
-    std::cout << "ObjectScheduleViewWidget::addGearTooth 4/5" << std::endl;
-    // GraphicsSplineGear *gear = new GraphicsSplineGear();
-    m_model->addItem(gearSpline);
+    SplineGear *gear = new SplineGear(new SplineToothProfile());
+    // GraphicsSpline *graphicsGear = new GraphicsSpline(gear);
+    GraphicsSplineGear *graphicsGear = new GraphicsSplineGear(gear);
+    m_model->addItem(graphicsGear);
     m_model->clearSelection();
-    gearSpline->setSelected(true);
-    std::cout << "ObjectScheduleViewWidget::addGearTooth 5/5" << std::endl;
+    graphicsGear->setSelected(true);
 }
 
 void ObjectScheduleViewWidget::addInvoluteGear() {

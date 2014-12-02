@@ -17,10 +17,6 @@ GraphicsSpline::GraphicsSpline(Spline *spline) : m_isTangentDrawn(false), m_tang
 
     std::cout << "GraphicsSpline is created" << std::endl;
 
-    if(spline == 0) {
-        std::cout << "Spline is 0. and now set to new Spline()" << std::endl;
-        spline = new Spline();
-    }
     m_spline = spline;
 
     m_noEditingState = new NoEditingSplineState(this);
@@ -202,10 +198,8 @@ QPainterPath GraphicsSpline::controlPointPolygonPath(qreal width) const {
     if(controlPoints.empty())
         return QPainterPath();
 
-    QPainterPath controlPointPolygon(QPointF(controlPoints[0].x(), controlPoints[0].y())); //startpoint
-    for(uint i = 1; i < controlPoints.size(); ++i) {
-        controlPointPolygon.lineTo(QPointF(controlPoints[i].x(), controlPoints[i].y()));
-    }
+    QPainterPath controlPointPolygon;
+    controlPointPolygon.addPolygon(QPolygonF(convertToQVectorWithQPointFs(controlPoints)));
 
     if(width == 0) { // used for painting
         return controlPointPolygon;
@@ -215,32 +209,6 @@ QPainterPath GraphicsSpline::controlPointPolygonPath(qreal width) const {
         stroker.setCapStyle(Qt::RoundCap);
         return stroker.createStroke(controlPointPolygon);
     }
-    //TODO: is the above the faster one, or the below??? Test it!!!
-
-    // if(width == 0) { // used for painting
-    //     QPainterPath controlPointPolygon(QPointF(controlPoints[0].x(), controlPoints[0].y())); //startpoint
-    //     for(uint i = 1; i < controlPoints.size(); ++i) {
-    //         controlPointPolygon.lineTo(QPointF(controlPoints[i].x(), controlPoints[0].y()));
-    //     }
-    //     return controlPointPolygon;
-
-    // } else { // width != 0, used for shape
-    //     QPainterPath controlPointPolygon;
-    //     for(uint i = 1; i < controlPoints.size(); ++i) {
-    //         QPointF b = QPointF(controlPoints[i].x(), controlPoints[i].y());
-    //         QPointF a = QPointF(controlPoints[i - 1].x(), controlPoints[i - 1].y());
-    //         QVector2D direction(b - a);
-    //         direction.normalize();
-    //         QPointF additional = -(direction * 0.6 * width).toPointF();
-    //         QPainterPath linePath(a + additional + QPointF(-additional.y(), additional.x()));
-    //         linePath.lineTo(b - additional + QPointF(-additional.y(), additional.x()));
-    //         linePath.lineTo(b - additional - QPointF(-additional.y(), additional.x()));
-    //         linePath.lineTo(a + additional - QPointF(-additional.y(), additional.x()));
-    //         linePath.closeSubpath();
-    //         controlPointPolygon.addPath(linePath);
-    //     }
-    //     return controlPointPolygon;
-    // }
 }
 
 QPainterPath GraphicsSpline::controlPointsPaths(qreal radius) const {
@@ -260,7 +228,7 @@ QPainterPath GraphicsSpline::splineCurvePath() const {
     // but with as less as possible calculation time. I tried much things, taking into
     // account the size of the bounding rect, the number of control points and so on,
     // but got the most acceptable solution not with much calcuations, but with the following:
-    uint samples = static_cast<uint>(ceil(300.0f / m_spline->numberOfControlPoints()));
+    uint samples = static_cast<uint>(ceil(350.0f / m_spline->numberOfControlPoints()));
     // The 300.0f is only an experimentation value. There may be better assumptions, but
     // the one used here, is at least calculated very fast and allows constant/linear
     // calculation time with respect to the control points

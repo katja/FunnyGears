@@ -14,11 +14,11 @@ public:
     static const int Type;// = GraphicsSpline::UserType + Type::GraphicsSplineType;
     static bool isGraphicsSplineItem(QGraphicsItem *item);
 
-    GraphicsSpline(Spline *spline = 0);
+    GraphicsSpline(Spline *spline = new Spline());
     virtual ~GraphicsSpline();
 
-    int type() const override; //from QGraphicsItem
-    QString defaultName() const override; //from GraphicsItem
+    virtual int type() const override; //from QGraphicsItem
+    virtual QString defaultName() const override; //from GraphicsItem
 
     const Spline* spline() const;
 
@@ -45,16 +45,16 @@ public:
     int indexOfPointAt(QPointF localPos, qreal radius = Preferences::PointRadius);
 
     QRectF boundingRect() const override; // from QGraphicsItem
-    QRectF normalBoundingRect(qreal controlPointRadius = Preferences::PointRadius + 0.5f * Preferences::HighlightedLineWidth) const;
+    virtual QRectF normalBoundingRect(qreal controlPointRadius = Preferences::PointRadius + 0.5f * Preferences::HighlightedLineWidth) const;
     QPainterPath shape() const override; // from QGraphicsItem
-    QPainterPath normalShape() const;
+    virtual QPainterPath normalShape() const;
 
-    QPainterPath controlPointPolygonPath(qreal width = 0) const;
-    QPainterPath controlPointsPaths(qreal radius = Preferences::PointRadius) const;
-    QPainterPath splineCurvePath() const;
-    QPainterPath tangentPath() const;
+    virtual QPainterPath controlPointPolygonPath(qreal width = 0) const;
+    virtual QPainterPath controlPointsPaths(qreal radius = Preferences::PointRadius) const;
+    virtual QPainterPath splineCurvePath() const;
+    virtual QPainterPath tangentPath() const;
 
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;  // from QGraphicsItem
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;  // from QGraphicsItem
     QColor color() const;
 
     void receivedClickOn(QPointF scenePos) override; // from GraphicsItem

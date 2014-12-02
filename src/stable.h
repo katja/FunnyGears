@@ -45,6 +45,7 @@
 #include <QSpinBox>
 #include <QStatusBar>
 #include <QStyledItemDelegate>
+#include <QTime>
 #include <QToolBar>
 #include <QToolButton>
 #include <QToolTip>

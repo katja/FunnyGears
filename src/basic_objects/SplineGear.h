@@ -36,6 +36,19 @@ public:
      */
     bool toothDescribedInClockDirection() const;
 
+    /** @brief Returns the number of teeth
+     *
+     *  @return number of teeth
+     */
+    uint numberOfTeeth() const;
+
+    /** @brief sets the number of teeth to @p numberOfTeeth
+     *
+     *  If given @p numberOfTeeth is @c 0, the number of teeth is set to maximumPossibleToothCount()
+     *  @param numberOfTeeth new number of teeth
+     */
+    void setNumberOfTeeth(uint numberOfTeeth);
+
     /** @brief Returns the angular pitch of the gear (German: Teilungswinkel)
      *
      *  The angular pitch is quasi the angle needed for one tooth.
@@ -62,6 +75,15 @@ public:
      *  This maximal tooth count depends on the current used @p m_toothProfile.
      */
     uint maximumPossibleToothCount() const;
+
+    /** @brief Returns a starting point of the first tooth
+     *
+     *  As the gear can have every shape, it is not possible to use a special gear point.
+     *  So the first visible curve point of the @p m_toothProfile is used.
+     *  @return starting point of the (first) tooth
+     *  @warning test the spline for validness before!
+     */
+    vec2 startPointForTooth() const;
 
     /** @brief Recalculcates the knots and control points.
      *
@@ -191,6 +213,16 @@ public:
      *  @return True if curve can be drawn.
      */
     bool isValid() const override; // from Spline
+
+    /** @brief Turns the @p positionInFirstTooth around toothIndex teeth
+     *
+     *  Assumes that @p positionInFirstTooth lies in first tooth and turns it around
+     *  the gear center, until it reaches the given @p toothIndex
+     *  @param toothIndex target tooth index
+     *  @param positionInFirstTooth an arbitrary point
+     *  @return turned position point @p positionInFirstTooth
+     */
+    vec2 relatedPositionInTooth(uint toothIndex, vec2 positionInFirstTooth) const;
 
 private:
     SplineToothProfile *m_toothProfile;

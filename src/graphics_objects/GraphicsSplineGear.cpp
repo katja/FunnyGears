@@ -10,7 +10,7 @@ bool GraphicsSplineGear::isGraphicsSplineGearItem(QGraphicsItem *item) {
     return false;
 }
 
-GraphicsSplineGear::GraphicsSplineGear() : m_splineGear(0) {
+GraphicsSplineGear::GraphicsSplineGear(SplineGear *gear) : GraphicsSpline(gear), m_splineGear(gear) {
     std::cout << "GraphicsSplineGear is created" << std::endl;
 
     int partColor = qrand() % 50 + 50;
@@ -35,62 +35,53 @@ QString GraphicsSplineGear::defaultName() const {
     return "Spline Gear";
 }
 
-QRectF GraphicsSplineGear::boundingRect() const {
+QRectF GraphicsSplineGear::normalBoundingRect(qreal controlPointRadius) const {
     real maxRadius = Preferences::AngularPitchStrokesLength;
-    if(m_splineGear != 0 && m_splineGear->maximumDistanceToCenter() > maxRadius) {
+    if(m_splineGear != 0 && m_splineGear->isValid() && m_splineGear->maximumDistanceToCenter() > maxRadius) {
         maxRadius = m_splineGear->maximumDistanceToCenter();
     }
     return QRectF(-maxRadius, -maxRadius, 2 * maxRadius, 2 * maxRadius);
 }
 
-// void GraphicsSplineGear::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-//     Q_UNUSED(widget);
+void GraphicsSplineGear::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    Q_UNUSED(widget);
 
-//     painter->setBrush(Qt::NoBrush);
+    painter->setBrush(darkenColor(m_color));
+    painter->drawPath(angularPitchStrokesPath());
 
-//     QPen pen;
-//     pen.setCapStyle(Qt::RoundCap);
-//     pen.setJoinStyle(Qt::RoundJoin);
-
-//     // Paint Backgound
-//     pen.setWidth(Preferences::HighlightedLineWidth);
-//     m_state->paintBackground(pen, painter, option);
-
-//     // Paint Foreground
-//     pen.setWidth(Preferences::SimpleLineWidth);
-//     pen.setColor(m_color);
-//     // control polygon:
-//     pen.setStyle(Qt::DotLine);
-//     painter->setPen(pen);
-//     painter->drawPath(controlPointPolygonPath());
-//     // curve:
-//     pen.setStyle(Qt::SolidLine);
-//     painter->setPen(pen);
-//     painter->drawPath(controlPointsPaths());
-//     painter->drawPath(splineCurvePath());
-
-//     //Paint additional foreground
-//     m_state->paintForeground(pen, painter, option);
-
-//     //Paint additional things
-//     if(m_isTangentDrawn) {
-//         pen.setColor(darkenColor(m_color));
-//         painter->setPen(pen);
-//         painter->drawPath(tangentPath());
-//     }
-// }
-
-void GraphicsSplineGear::receivedClickOn(QPointF scenePos) {
-    std::cout << "GraphicsSplineGear::clickReceived" << std::endl;
+    GraphicsSpline::paint(painter, option, widget);
 }
 
-QPainterPath GraphicsSplineGear::angularPitchStrokesPath() {
+QPainterPath GraphicsSplineGear::splineCurvePath() const {
+    if(!m_splineGear->isValid())
+        return QPainterPath();
+    // try to find out a good sampling value, which allows nice smooth curve,
+    // but with as less as possible calculation time. Here the simple approach is used
+    // to use 500 samples per tooth
+    vector<QPointF> curve(500 * m_splineGear->numberOfTeeth());
+    m_splineGear->curve(curve);
     QPainterPath path;
-    path.lineTo(0, Preferences::AngularPitchStrokesLength);
-    path.moveTo(0,0);
-    path.lineTo(0, -Preferences::AngularPitchStrokesLength);
-    path.moveTo(0,0);
-    path.lineTo(Preferences::AngularPitchStrokesLength, 0);
-    path.moveTo(0,0);
+    path.addPolygon(QPolygonF(convertToQVector(curve)));
+    return path;
+}
+
+
+QPainterPath GraphicsSplineGear::angularPitchStrokesPath() const {
+    vec2 startPoint(0, -Preferences::AngularPitchStrokesLength);
+
+    if(m_splineGear->isValid()) {
+        startPoint = m_splineGear->startPointForTooth();
+        startPoint = startPoint.normalized() * Preferences::AngularPitchStrokesLength;
+    } else if(m_splineGear->numberOfControlPoints() > 0) {
+        startPoint = m_splineGear->controlPoint(0);
+        startPoint = startPoint.normalized() * Preferences::AngularPitchStrokesLength;
+    }
+
+    QPainterPath path;
+    for(uint i = 0; i < m_splineGear->numberOfTeeth(); ++i) {
+        vec2 turnedPoint = m_splineGear->relatedPositionInTooth(i, startPoint);
+        path.lineTo(QPointF(turnedPoint.x(), turnedPoint.y()));
+        path.moveTo(0,0);
+    }
     return path;
 }

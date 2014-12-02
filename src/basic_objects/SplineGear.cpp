@@ -7,6 +7,10 @@ SplineGear::SplineGear(SplineToothProfile *toothOfGear) : m_toothProfile(toothOf
     std::cout << "SplineGear is created" << std::endl;
     m_radius = 0.0f;
     m_numberOfTeeth = 0;
+    m_toothProfile->addControlPoint(0, -100);
+    m_toothProfile->addControlPoint(10, -100);
+    m_toothProfile->addControlPoint(15, -60);
+    m_toothProfile->addControlPoint(20, -90);
     update();
 }
 
@@ -41,6 +45,15 @@ bool SplineGear::toothDescribedInClockDirection() const {
     //is 0 if points lie on one line through the origin.
 }
 
+uint SplineGear::numberOfTeeth() const {
+    return m_numberOfTeeth;
+}
+
+void SplineGear::setNumberOfTeeth(uint numberOfTeeth) {
+    m_numberOfTeeth = numberOfTeeth;
+    update();
+}
+
 real SplineGear::angularPitch() const { //Teilungswinkel
     return 2.0f * M_PI / m_numberOfTeeth;
 }
@@ -61,6 +74,10 @@ uint SplineGear::maximumPossibleToothCount() const {
     real minAngularPitch = acos((start.normalized().dot(stop.normalized())));
 
     return static_cast<uint>(floor((2.0f * M_PI) / minAngularPitch));
+}
+
+vec2 SplineGear::startPointForTooth() const {
+    return m_toothProfile->start();
 }
 
 /*Returns a new BSplineCurve representing the whole gear by putting together
@@ -245,6 +262,14 @@ void SplineGear::updateTornToEdges() {
 
 bool SplineGear::isValid() const {
     return m_toothProfile->isValid();
+}
+
+vec2 SplineGear::relatedPositionInTooth(uint toothIndex, vec2 positionInFirstTooth) const {
+    if(toothIndex == 0)
+        return positionInFirstTooth;
+    int rotationDirection = (toothDescribedInClockDirection()) ? 1 : -1;
+    real rotationInRad = rotationDirection * toothIndex * angularPitch();
+    return Eigen::Rotation2D<real>(rotationInRad) * positionInFirstTooth;
 }
 
 uint SplineGear::relatedIndexInFirstTooth(uint controlPointIndex) const {

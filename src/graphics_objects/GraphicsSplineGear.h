@@ -13,26 +13,23 @@ public:
     static const int Type; // = GraphicsSplineGear::UserType + Type::GraphicsSplineGearType;
     static bool isGraphicsSplineGearItem(QGraphicsItem *item);
 
-    GraphicsSplineGear();
+    GraphicsSplineGear(SplineGear *gear);
     virtual ~GraphicsSplineGear();
 
     int type() const override; // from QGraphicsItem
     virtual QString defaultName() const override; // from GraphicsScheduleItem
 
-    QRectF boundingRect() const override; // from QGraphicsItem
-    // void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override; // from QGraphicsItem
-
-    void receivedClickOn(QPointF scenePos) override; // from GraphicsItem
+    QRectF normalBoundingRect(qreal controlPointRadius = Preferences::PointRadius + 0.5f * Preferences::HighlightedLineWidth) const override; // from GraphicsSpline
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override; // from QGraphicsItem
 
 
 private:
     SplineGear *m_splineGear;
-    // real m_radius;
-    // uint m_numberOfTeeth;
 
     QColor m_color;
 
-    QPainterPath angularPitchStrokesPath();
+    QPainterPath splineCurvePath() const override; // from GraphicsSpline
+    QPainterPath angularPitchStrokesPath() const;
 };
 
 #endif // GRAPHICS_SPLINE_GEAR
