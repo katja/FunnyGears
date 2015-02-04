@@ -5,6 +5,7 @@
 #include "Model.h"
 #include "ModelTreeView.h"
 #include "SelectionModel.h"
+#include "basic_objects/Spline.h"
 
 class ObjectScheduleViewWidget : public QDockWidget {
 
@@ -17,6 +18,8 @@ public:
     SelectionModel* setSelectionModel(SelectionModel *model);
 
 private slots:
+    void addActionsFor(GraphicsItem*);
+    void removeAdditionalActions();
     void addSpline();
     void addGearTooth();
     void addInvoluteGear();
@@ -26,6 +29,9 @@ private:
     ModelTreeView *m_treeView;
 
     QMenu *m_addMenu;
+
+    QAction *m_addGearToothAction;
+    const Spline *m_spline;
 
     QPushButton *m_addItemButton,
                 *m_removeItemButton;
