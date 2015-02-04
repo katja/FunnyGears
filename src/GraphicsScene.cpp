@@ -17,6 +17,7 @@ GraphicsScene::GraphicsScene(qreal x, qreal y, qreal width, qreal height, QObjec
 
 void GraphicsScene::initialize() {
     std::cout << "GraphicsScene is created" << std::endl;
+
     m_selectionModel = 0;
     m_selectionChangeInProgress = false;
     m_editingState = Editing::NoEditing;
@@ -46,6 +47,7 @@ void GraphicsScene::drawForeground(QPainter *painter, const QRectF &rect) {
     painter->drawLine(10, 140, 0, 150);
     painter->drawLine(-10, 140, 0, 150);
     painter->drawEllipse(-5, -5, 10, 10);
+
 }
 
 void GraphicsScene::drawBackground(QPainter *painter, const QRectF &rect) {

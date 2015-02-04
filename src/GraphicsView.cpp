@@ -12,7 +12,12 @@ GraphicsView::GraphicsView(QGraphicsScene *scene, QWidget *parent) : QGraphicsVi
 
 void GraphicsView::initialize() {
     std::cout << "GraphicsView is created" << std::endl;
-    setRenderHint(QPainter::Antialiasing);
+
+    setCacheMode(QGraphicsView::CacheBackground);
+
+    setRenderHint(
+          // QPainter::Antialiasing // this is for sure lovely, but slows down the rendering extremely!
+         QPainter::SmoothPixmapTransform);
     setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
     setMouseTracking(false);
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);

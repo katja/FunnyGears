@@ -7,10 +7,6 @@ SplineGear::SplineGear(SplineToothProfile *toothOfGear) : m_toothProfile(toothOf
     std::cout << "SplineGear is created" << std::endl;
     m_radius = 0.0f;
     m_numberOfTeeth = 0;
-    m_toothProfile->addControlPoint(0, -100);
-    m_toothProfile->addControlPoint(10, -100);
-    m_toothProfile->addControlPoint(15, -60);
-    m_toothProfile->addControlPoint(20, -90);
     update();
 }
 

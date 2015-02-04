@@ -1,3 +1,9 @@
+#LDFLAGS +=  -L/usr/local/opt/qt5/lib
+#LDFLAGS +=  -L/usr/local/opt/
+#
+#CPPFLAGS += -I/usr/local/opt/qt5/include
+#CPPFLAGS += -I/usr/local/opt/
+
 QT  +=  core gui \
         widgets \               # Without this line Qt won't recognise any QtWidgets!
         opengl widgets          # specify all modules used in the project here!
@@ -12,6 +18,7 @@ CONFIG  += debug                # Only during development necessary: Print debug
 CONFIG  += c++11
 QMAKE_CXXFLAGS += -stdlib=libc++
 QMAKE_CXXFLAGS += -mmacosx-version-min=10.7
+QMAKE_CXXFLAGS += -Wno-deprecated-register # Prevents the warnings, that 'register' variable is deprecated (appears because of glm library)
 
 DESTDIR = "app/"                # Project will be build in this directory
 OBJECTS_DIR = "compile/"        # Directory for intermediate objects when compiling
