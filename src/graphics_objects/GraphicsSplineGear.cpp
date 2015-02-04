@@ -37,8 +37,11 @@ QString GraphicsSplineGear::defaultName() const {
 
 QRectF GraphicsSplineGear::normalBoundingRect(qreal controlPointRadius) const {
     real maxRadius = Preferences::AngularPitchStrokesLength;
-    if(m_splineGear != 0 && m_splineGear->isValid() && m_splineGear->maximumDistanceToCenter() > maxRadius) {
-        maxRadius = m_splineGear->maximumDistanceToCenter();
+    if(m_splineGear != 0 && m_splineGear->isValid()) {
+        real distanceToFurthestPoint = m_splineGear->maximumDistanceOfControlPointToCenter()
+                                                    + controlPointRadius;
+        if(distanceToFurthestPoint > maxRadius)
+            maxRadius = distanceToFurthestPoint;
     }
     return QRectF(-maxRadius, -maxRadius, 2 * maxRadius, 2 * maxRadius);
 }

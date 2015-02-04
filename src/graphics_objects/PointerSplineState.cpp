@@ -82,8 +82,6 @@ void PointerSplineState::paintBackground(QPen &pen, QPainter *painter, const QSt
     if(m_mouseIsOverEdge || option->state & QStyle::State_Selected) {
         if(m_mouseIsOverEdge)
             pen.setColor(Preferences::HoverColor);
-        else if(option->state & QStyle::State_Sunken)
-            pen.setColor(Preferences::ActiveColor);
         else if(option->state & QStyle::State_Selected)
             pen.setColor(Preferences::SelectionColor);
 

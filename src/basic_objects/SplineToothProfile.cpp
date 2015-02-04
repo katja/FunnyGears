@@ -54,6 +54,32 @@ real SplineToothProfile::maximumDistanceToOrigin() const {
     return maxDistance;
 }
 
+real SplineToothProfile::minimumDistanceOfControlPointToOrigin() const {
+    if(numberOfControlPoints() <= 0)
+        return 0.0f;
+
+    real minDistance = m_controlPoints[0].norm();
+
+    for(int i = 1; i < m_controlPoints.size(); ++i) {
+        if(m_controlPoints[i].norm() < minDistance)
+            minDistance = m_controlPoints[i].norm();
+    }
+    return minDistance;
+}
+
+real SplineToothProfile::maximumDistanceOfControlPointToOrigin() const {
+    if(numberOfControlPoints() <= 0)
+        return 0.0f;
+
+    real maxDistance = m_controlPoints[0].norm();
+
+    for(int i = 1; i < m_controlPoints.size(); ++i) {
+        if(m_controlPoints[i].norm() > maxDistance)
+            maxDistance = m_controlPoints[i].norm();
+    }
+    return maxDistance;
+}
+
 void SplineToothProfile::sampledCurve(vector<vec2> &samples) const {
     //TODO: is this method necessary???
 }

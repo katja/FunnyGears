@@ -52,9 +52,7 @@ void EraserSplineState::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
 
 void EraserSplineState::paintBackground(QPen &pen, QPainter *painter, const QStyleOptionGraphicsItem *option) {
     if(option->state & QStyle::State_Selected) {
-        if(option->state & QStyle::State_Sunken)
-            pen.setColor(Preferences::ActiveColor);
-        else if(option->state & QStyle::State_Selected)
+        if(option->state & QStyle::State_Selected)
             pen.setColor(Preferences::SelectionColor);
 
         painter->setPen(pen);

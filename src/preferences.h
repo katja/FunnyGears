@@ -5,7 +5,6 @@
 
 namespace Preferences {
     extern QColor SelectionColor;
-    extern QColor ActiveColor;
     extern QColor HoverColor;
     extern QColor AttentionColor;
     extern QColor BackgroundGridColor;

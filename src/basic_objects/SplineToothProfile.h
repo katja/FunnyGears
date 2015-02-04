@@ -17,6 +17,8 @@ public:
     vec2 stop() const override; // from ToothProfile
     real minimumDistanceToOrigin() const override; // from ToothProfile
     real maximumDistanceToOrigin() const override; // from ToothProfile
+    real minimumDistanceOfControlPointToOrigin() const;
+    real maximumDistanceOfControlPointToOrigin() const;
     void sampledCurve(vector<vec2> &samples) const override; // from ToothProfile
 
 private:

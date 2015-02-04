@@ -62,6 +62,14 @@ real SplineGear::minimumDistanceToCenter() const {
     return m_toothProfile->minimumDistanceToOrigin();
 }
 
+real SplineGear::maximumDistanceOfControlPointToCenter() const {
+    return m_toothProfile->maximumDistanceOfControlPointToOrigin();
+}
+
+real SplineGear::minimumDistanceOfControlPointToCenter() const {
+    return m_toothProfile->minimumDistanceOfControlPointToOrigin();
+}
+
 uint SplineGear::maximumPossibleToothCount() const {
     //minimum angular pitch with m_toothProfile:
     vec2 start = m_toothProfile->start();

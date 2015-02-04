@@ -70,6 +70,18 @@ public:
      */
     real minimumDistanceToCenter() const;
 
+    /** @brief Returns the distance of the control point furthest away from center
+     *
+     *  @return maximum distance to gear center of a control point
+     */
+    real maximumDistanceOfControlPointToCenter() const;
+
+    /** @brief Returns the distance of the control point nearest to the center
+     *
+     *  @return minimum distance to gear center of a control point
+     */
+    real minimumDistanceOfControlPointToCenter() const;
+
     /** @brief Returns the maximal possible tooth count
      *
      *  This maximal tooth count depends on the current used @p m_toothProfile.
