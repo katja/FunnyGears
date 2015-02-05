@@ -4,6 +4,13 @@
 #include "tool_bars/ToolBarManager.h"
 #include "Cursor.h"
 
+
+// Following includes belong to testcase
+// #include "graphics_objects/GraphicsSpline.h"
+// #include "graphics_objects/GraphicsSplineGear.h"
+// #include "basic_objects/Spline.h"
+// #include "basic_objects/SplineGear.h"
+// #include "basic_objects/SplineToothProfile.h"
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), projectChanged(true) {
     std::cout << "MainWindow is created" << std::endl;
 
@@ -14,6 +21,28 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(par
 
     createMainProgramPart();
     createMenusAndToolbars();
+
+    // Following code is only for test reasons
+    // put it on to have 10 gears and a spline when starting
+    // Time measuring available in GraphicsView
+    // for(int i = 0; i < 10; ++i) {
+    //     Spline *s = new Spline();
+    //     s->addControlPoint(i + 20, 10);
+    //     s->addControlPoint(i + 10, 20);
+    //     s->addControlPoint(i + 0, 200);
+    //     s->addControlPoint(30, i + 150);
+    //     s->addControlPoint(40, i + 50);
+
+    //     GraphicsSpline *gs = new GraphicsSpline(s);
+    //     m_model->addItem(gs);
+    //     gs->setSelected(true);
+
+    //     SplineGear *gear = new SplineGear(new SplineToothProfile(*s));
+    //     GraphicsSplineGear *gg = new GraphicsSplineGear(gear);
+    //     m_model->addItem(gg);
+    //     m_model->clearSelection();
+    //     gg->setSelected(true);
+    // }
 
     statusBar()->showMessage(tr("Ready"));
 }
