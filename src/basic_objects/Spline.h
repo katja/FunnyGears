@@ -150,14 +150,14 @@ public:
     virtual uint multiplicity(uint knotIndex) const;
 
     /** Inserts knots and control points without changing the curve
-     *  until between every two knots is a maximum of minDist gap.
+     *  until between every two knots is a maximum of maxDist gap.
      *  With this knot refinement the control point polygon converges to the curve.
      *  Attention: This method really changes the spline curve!
-     *  So make a copy if you want the old representation is worthwhile!
-     *  @param minDist the maximal distance in the evaluable knot vector between two knots
+     *  So make a copy if you think the old representation is worthwhile!
+     *  @param maxDist the maximal distance in the evaluable knot vector between two knots
      *                 after the knot refinement
      */
-    virtual void knotRefinement(real minDist);
+    virtual void knotRefinement(real maxDist);
 
     /** Inserts a knot at the given knotValue and a suitable point without changing the curve.
      *  If the knot should have a multiplicity bigger than 1, give a suitable value

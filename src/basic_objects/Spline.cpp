@@ -2,7 +2,7 @@
 #include "helpers.h"
 
 Spline::Spline(uint degree) : m_degree(degree), m_isClosed(false), m_tornToEdges(false) {
-    std::cout << "Spline is created" << std::endl;
+    std::cout << "Spline is created with default constructor " << std::endl;
     if(m_degree <= 0)
         throw;
     for(uint i = 0; i <= m_degree; ++i)
@@ -32,6 +32,7 @@ Spline::Spline(vector<vec2> controlPoints, vector<real> knots) {
 }
 
 Spline::Spline(vector<vec2> interpolationPoints) {
+    std::cout << "Spline should be created here with given points to interpolate, but this is not yet implemented!" << std::endl;
     //TODO!!!
 }
 
@@ -230,14 +231,14 @@ uint Spline::multiplicity(uint knotIndex) const {
     return count;
 }
 
-void Spline::knotRefinement(real minDist) {
+void Spline::knotRefinement(real maxDist) {
     if(!isValid())
         return;
     //test each segment from lowest possible u value unto u = m_controlPoints.size() (must not be reached)
     uint i = m_degree;
     while(i < m_controlPoints.size()) {
         real dist = m_knots.at(i + 1) - m_knots.at(i);
-        if(dist > minDist) {
+        if(dist > maxDist) {
             real newValue = m_knots.at(i) + 0.5 * dist;
             refineAt(newValue);
         } else {
