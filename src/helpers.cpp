@@ -55,13 +55,14 @@ std::ostream& operator <<(std::ostream &os, const vector<real> v) {
 }
 
 std::ostream& operator <<(std::ostream &os, const Spline &spline) {
-    os << "Control Points: ";
+    os << "Degree: " << spline.degree();
+    os << "\nControl Points: (" << spline.numberOfControlPoints() << " x)\n";
     const vector<vec2> controlPoints = spline.controlPoints();
     foreach(vec2 point, controlPoints) {
         os << point << "    ";
     }
     os << "\n";
-    os << "Knots: ";
+    os << "Knots: (" << spline.numberOfKnots() << " x)\n";
     const vector<real> knots = spline.knots();
     for(uint i = 0; i < knots.size(); ++i) {
         os << knots.at(i);
@@ -69,13 +70,13 @@ std::ostream& operator <<(std::ostream &os, const Spline &spline) {
             os << ", ";
     }
     os << "\n";
-    os << "TornToEdges? ";
+    os << "Evaluable from " << spline.lowerDomainLimit() << " until " << spline.upperDomainLimit() << std::endl;
+    os << "\nTornToEdges? ";
     if(spline.isTornToEdges())
         os << "yes";
     else
         os << "no";
     os << "\n";
-    os << "Degree: " << spline.degree();
     return os;
 }
 
