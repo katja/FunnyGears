@@ -20,11 +20,14 @@ ObjectScheduleViewWidget::ObjectScheduleViewWidget(Model *model, QWidget *parent
     setWidgetLayout();
 
     QAction *addSplineAction = new QAction("Create spline curve", this);
-    QAction *addInvoluteGearAction = new QAction("Add involute gear", this);
+    addSplineAction->setShortcut(QKeySequence(Qt::Key_S)); // S like Spline, a combination is not working, f... !
+
     m_addGearToothAction = new QAction("Use curve as gear tooth", this);
+    m_addGearToothAction->setShortcut(QKeySequence(Qt::Key_G)); // G like Gear, a combination is not working, f... !
     m_addGearToothAction->setEnabled(false);
     m_spline = nullptr;
 
+    QAction *addInvoluteGearAction = new QAction("Add involute gear", this);
 
     m_addMenu = new QMenu(this);
     m_addMenu->addAction(addSplineAction);
@@ -71,6 +74,7 @@ void ObjectScheduleViewWidget::addActionsFor(GraphicsItem *graphicsItem) {
 
 void ObjectScheduleViewWidget::removeAdditionalActions() {
     m_addGearToothAction->setEnabled(false);
+    m_spline = nullptr;
 }
 
 void ObjectScheduleViewWidget::addSpline() {
