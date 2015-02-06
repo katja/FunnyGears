@@ -97,10 +97,13 @@ real GraphicsSpline::tangentValue() {
 void GraphicsSpline::refineSpline() {
     if(!m_spline->isValid())
         return;
+    real maxDist = (m_spline->upperDomainLimit() - m_spline->lowerDomainLimit()) / m_spline->numberOfControlPoints();
+    uint numberOfControlPointsBefore = m_spline->numberOfControlPoints();
     prepareGeometryChange();
-    real minDist = (m_spline->upperDomainLimit() - m_spline->lowerDomainLimit()) / m_spline->numberOfControlPoints();
-    m_spline->knotRefinement(minDist);
-    const vector<vec2> controlPoints = m_spline->controlPoints();
+    do {
+        m_spline->knotRefinement(maxDist);
+        maxDist = maxDist / 2.0f;
+    } while(numberOfControlPointsBefore == m_spline->numberOfControlPoints());
 }
 
 void GraphicsSpline::addPoint(QPointF scenePos) {
@@ -227,13 +230,14 @@ QPainterPath GraphicsSpline::splineCurvePath() const {
     // try to find out a good sampling value, which allows nice smooth curve,
     // but with as less as possible calculation time. I tried much things, taking into
     // account the size of the bounding rect, the number of control points and so on,
-    // but got the most acceptable solution not with much calcuations, but with the following:
-    uint samples = static_cast<uint>(ceil(350.0f / m_spline->numberOfControlPoints()));
-    // The 300.0f is only an experimentation value. There may be better assumptions, but
-    // the one used here, is at least calculated very fast and allows constant/linear
-    // calculation time with respect to the control points
+    // but got the most acceptable solution not with much calcuations, but with a constant
+    // sampling rate of about 400 samples per curve (independet of size, control points, ...)
+    // With the following, we add a little dependence on the control points.
+    uint samples = m_spline->numberOfControlPoints() * 2 + 400;
+    // There may be better assumptions, but with this one it is at least calculated very
+    // fast and allows nearly constant calculation time (with respect to the control points)
 
-    vector<QPointF> curve(samples * m_spline->numberOfControlPoints());
+    vector<QPointF> curve(samples);
     m_spline->curve(curve);
     QPainterPath path;
     path.addPolygon(QPolygonF(convertToQVector(curve)));

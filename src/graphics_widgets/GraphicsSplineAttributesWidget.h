@@ -15,8 +15,8 @@ public:
     GraphicsSplineAttributesWidget(QWidget *parent = 0);
     ~GraphicsSplineAttributesWidget();
 
-    void setItem(QGraphicsItem *graphicsItem);
-    bool worksOnItem(QGraphicsItem *graphicsItem);
+    void setItem(QGraphicsItem *graphicsItem) override; // from GraphicsItemAttributesWidget
+    bool worksOnItem(QGraphicsItem *graphicsItem)override; // from GraphicsItemAttributesWidget
 
 private slots:
     void changeDegree(int value);

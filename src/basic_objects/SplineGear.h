@@ -42,7 +42,7 @@ public:
      */
     uint numberOfTeeth() const;
 
-    /** @brief sets the number of teeth to @p numberOfTeeth
+    /** @brief Sets the number of teeth to @p numberOfTeeth
      *
      *  If given @p numberOfTeeth is @c 0, the number of teeth is set to maximumPossibleToothCount()
      *  @param numberOfTeeth new number of teeth
@@ -57,6 +57,24 @@ public:
      *  @return the angular pitch of a transverse gear
      */
     real angularPitch() const;
+
+    /** @brief Returns a default value for the radius between nearest and furthest point
+     *
+     *  Searches the #m_toothProfile for the two points with a maximum and a minimum
+     *  distance to the center and returns a value in the middle between these two.
+     *  @warning This requires a valid gear. So check #isValid() before!
+     *  @return default value for the radius in the middle
+     */
+    real defaultRadius() const;
+
+    /** @brief Sets the radius to @p radius
+     *
+     *  The given @p radius value has to be greater than 0.
+     *  Otherwise it won't be accepted.
+     *  After the new value is set, all knots and control points are updated.
+     *  @param radius new value for the radius
+     */
+    void setRadius(real radius);
 
     /** @brief Returns the maximum distance to the gear center
      *
@@ -105,6 +123,15 @@ public:
      *  So only execute this method, if isValid() returns true!
      */
     void updateKnotsAndControlPoints();
+
+    /** @brief Recalculates the control points
+     *
+     *  Calculates the control points necessary to form a gear. The control point
+     *  polygon can and should be shown, even when the curve can not be rendered.
+     *  Therefore it is useful to create the control points for the whole gear,
+     *  provided that the #m_toothProfile has any control points.
+     */
+    void updateControlPoints();
 
     /** @brief Removes all knots and control points and deletes them */
     void setBackKnotsAndControlPoints();
@@ -155,6 +182,32 @@ public:
      *  @see moveControlPoint(uint index, vec2 new Position)
      */
     void moveControlPoint(uint index, QPointF newPosition) override; // from Spline
+
+    /** @brief Increases the number of control points without changing the curve.
+     *
+     *  Inserts knots and control points in a way, that the control point polygon
+     *  convertes to the curve. Refinement will stop, when between every two knots is
+     *  a maximum 'gap' of maxDist.
+     *  This refinement works on the #m_toothProfile as so it can be guaranteed, to
+     *  refine in a uniformly way in each tooth.
+     *  @warning This method really changes the gear!
+     *  So make a copy if you want to preserve the old representation!
+     *  @param maxDist the maximal distance in the evaluable knot vector between two knots
+     *                 after the knot refinement
+     */
+    virtual void knotRefinement(real maxDist);
+
+    /** Inserts a knot at the given knotValue and a suitable point without changing the curve.
+     *  If the knot should have a multiplicity bigger than 1, give a suitable value
+     *  (smallest multiplicity value is 1, largest is m_degree)
+     *  The given @p knotValue is converted to a related value in the first tooth of the
+     *  gear and then inserted appropriately in the #m_toothProfile.
+     *  @warning This method does NOT check the validity of the curve, nor does it check
+     *  if the given knotValue is a possible value. So make sure you check this first!
+     *  @param knotValue a suitable new knotValue to insert
+     *  @param multiplicity how often this new knotValue should be inserted (0 < multiplicity <= m_degree)
+     */
+    virtual void refineAt(real knotValue, uint multiplicity = 1);
 
     /** @brief Gear is closed!
      *
@@ -240,10 +293,24 @@ private:
     SplineToothProfile *m_toothProfile;
     real m_radius;
     uint m_numberOfTeeth;
+    /** @brief Stores the turning direction to build the gear out of #m_toothProfile
+     *
+     *  Here a coordinate system like that of screen coordinates is assumed.
+     *  So the x-axis is pointing to the right, the @b y-axis points @b downward.
+     *  Therefore "in clock direction" is a mathematical "counter clock direction"!
+     *  @m_rotationDirection can have the three values
+     *      1, which means a clockwise turning
+     *      0, which means, that rotation direction is not specified
+     *     -1, which means a counter-clockwise direction
+     *  The variable is automatically updated on creation of the gear and when a
+     *  new control point is added (@see addControlPoint())
+     */
+    int m_rotationDirection;
 
     uint relatedIndexInFirstTooth(uint controlPointIndex) const;
     uint toothIndex(uint controlPointIndex) const;
     vec2 relatedPositionInFirstTooth(uint toothIndex, vec2 position) const;
+    real relatedKnotValueInFirstTooth(real gearValue) const;
 
 };
 

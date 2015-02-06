@@ -28,7 +28,21 @@ private:
 
     QColor m_color;
 
+    /** @brief Creates the path of the gear
+     *  @see GraphicsSpline::splineCurvePath()
+     */
     QPainterPath splineCurvePath() const override; // from GraphicsSpline
+
+    /** @brief Creates a fan-shaped path which marks the pitches of the gear
+     *
+     *  If a curve can be layed through the control points, the lines pass the start
+     *  point of the visible curve of each tooth (not the first control point).
+     *  If the relation of degree and controlpoints does not allow a rendering
+     *  of the curve, the lines pass the first control point of the tooth profile.
+     *  If no control point is available, one line of the fan will go from center on
+     *  upwards.
+     *  @return fan-shaped path to mark the teeth or better said the pitches
+     */
     QPainterPath angularPitchStrokesPath() const;
 };
 

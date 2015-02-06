@@ -1,13 +1,20 @@
 #include "ObjectAttributesWidget.h"
 #include "graphics_widgets/GraphicsSplineAttributesWidget.h"
+#include "graphics_widgets/GraphicsSplineGearAttributesWidget.h"
 
 ObjectAttributesWidget::ObjectAttributesWidget(SelectionModel *selectionModel, QWidget *parent)
 : QDockWidget("Object Attributes", parent, Qt::Widget), m_selectionModel(selectionModel) {
     std::cout << "ObjectAttributesWidget is created" << std::endl;
 
-    GraphicsSplineAttributesWidget *splineWidget = new GraphicsSplineAttributesWidget(this);
-    splineWidget->hide();
-    m_graphicsItemWidgets << splineWidget;
+    GraphicsItemAttributesWidget *widget;
+
+    widget = new GraphicsSplineAttributesWidget(this);
+    widget->hide();
+    m_graphicsItemWidgets << widget;
+
+    widget = new GraphicsSplineGearAttributesWidget(this);
+    widget->hide();
+    m_graphicsItemWidgets << widget;
 
     m_noContentWidget = new QWidget(this);
     setWidget(m_noContentWidget);
