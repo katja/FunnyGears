@@ -37,12 +37,12 @@ public:
 private:
     SplineGear *m_splineGear;
 
-    QColor m_color;
-
     /** @brief Creates the path of the gear
      *  @see GraphicsSpline::splineCurvePath()
      */
     QPainterPath splineCurvePath() const override; // from GraphicsSpline
+
+    QPainterPath pitchCirclePath() const;
 
     /** @brief Creates a fan-shaped path which marks the pitches of the gear
      *

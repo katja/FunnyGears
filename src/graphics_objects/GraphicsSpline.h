@@ -73,6 +73,9 @@ public:
     void stopEditing() override; // from EditingToolBarListener
     void executeEditingAction(Editing::Action editingAction) override; // from EditingToolBarListener
 
+protected:
+    QColor m_color;
+
 private:
     Spline *m_spline;
 
@@ -80,8 +83,6 @@ private:
 
     bool m_isTangentDrawn;
     real m_tangentValue;
-
-    QColor m_color;
 
     void adjustInSplineRange(real &value) const;
 

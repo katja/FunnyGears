@@ -86,8 +86,11 @@ void GraphicsSplineGear::paint(QPainter *painter, const QStyleOptionGraphicsItem
     Q_UNUSED(widget);
 
     //render line fan for better recognition of teeth:
-    painter->setBrush(darkenColor(m_color));
+    painter->setPen(darkenColor(m_color));
     painter->drawPath(angularPitchStrokesPath());
+
+    //render pitch circle
+    painter->drawPath(pitchCirclePath());
 
     //render spline or better, the gear:
     GraphicsSpline::paint(painter, option, widget);
@@ -108,6 +111,17 @@ QPainterPath GraphicsSplineGear::splineCurvePath() const {
     return path;
 }
 
+QPainterPath GraphicsSplineGear::pitchCirclePath() const { //Wälzkreis
+    QPainterPath path;
+    real part = 2.0f * M_PI / 96.0f;
+    real r = m_splineGear->radius();
+    path.moveTo(r, 0);
+    for(uint i = 1; i < 96; ++i) {
+        path.lineTo(cos(part * i) * r, -sin(part * i) * r);
+    }
+    path.lineTo(r, 0);
+    return path;
+}
 
 QPainterPath GraphicsSplineGear::angularPitchStrokesPath() const {
     vec2 startPoint(0, -Preferences::AngularPitchStrokesLength);
