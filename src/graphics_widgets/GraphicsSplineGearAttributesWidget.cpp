@@ -21,6 +21,12 @@ GraphicsSplineGearAttributesWidget(QWidget *parent) : GraphicsItemAttributesWidg
     m_pitchCircleVisibleCheckBox = new QCheckBox(tr("Show pitch circle"), this);
     connect(m_pitchCircleVisibleCheckBox, SIGNAL(toggled(bool)), this, SLOT(togglePitchCircleVisibility(bool)));
 
+    m_animateCheckbox = new QCheckBox(tr("Rotate the gear?"), this);
+    connect(m_animateCheckbox, SIGNAL(toggled(bool)), this, SLOT(toggleAnimation(bool)));
+    m_rotationVelocitySlider = new RealValuedSlider("Rotation velocity", this);
+    m_rotationVelocitySlider->setRange(-2.0f, 2.0f);
+    connect(m_rotationVelocitySlider, SIGNAL(valueChanged(real)), this, SLOT(changeRotationVelocity(real)));
+
     QWidget *gearWidget = new QWidget(this);
     QGridLayout *gearLayout = new QGridLayout(gearWidget);
     gearLayout->addWidget(m_numberOfTeethLabel,         0, 0, 1, 1);
@@ -28,6 +34,8 @@ GraphicsSplineGearAttributesWidget(QWidget *parent) : GraphicsItemAttributesWidg
     gearLayout->addWidget(m_radiusSlider,               1, 0, 1, 2);
     gearLayout->addWidget(m_pitchVisibleCheckBox,       2, 0, 1, 1);
     gearLayout->addWidget(m_pitchCircleVisibleCheckBox, 2, 1, 1, 1);
+    gearLayout->addWidget(m_animateCheckbox,            3, 0, 1, 1);
+    gearLayout->addWidget(m_rotationVelocitySlider,     3, 1, 1, 1);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0); //Sets border to 0, this results in same width as with only using the SplineAttributesWidget
@@ -64,6 +72,8 @@ updateAttributes() {
     m_radiusSlider->setValue(m_currentGear->radius());
     m_pitchVisibleCheckBox->setChecked(m_currentGear->isBasePitchVisible());
     m_pitchCircleVisibleCheckBox->setChecked(m_currentGear->isPitchCircleVisible());
+    m_animateCheckbox->setChecked(m_currentGear->isRotating());
+    m_rotationVelocitySlider->setValue(m_currentGear->rotationVelocity());
 }
 
 void GraphicsSplineGearAttributesWidget::
@@ -87,3 +97,12 @@ togglePitchCircleVisibility(bool isVisible) {
     m_currentGear->setPitchCircleVisibility(isVisible);
 }
 
+void GraphicsSplineGearAttributesWidget::
+toggleAnimation(bool isAnimated) {
+    m_currentGear->setRotating(isAnimated);
+}
+
+void GraphicsSplineGearAttributesWidget::
+changeRotationVelocity(real velocity) {
+    m_currentGear->setRotationVelocity(velocity);
+}

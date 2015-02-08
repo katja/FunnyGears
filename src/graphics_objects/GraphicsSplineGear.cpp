@@ -10,7 +10,15 @@ bool GraphicsSplineGear::isGraphicsSplineGearItem(QGraphicsItem *item) {
     return false;
 }
 
-GraphicsSplineGear::GraphicsSplineGear(SplineGear *gear) : GraphicsSpline(gear), m_splineGear(gear), m_isBasePitchVisible(true), m_isPitchCircleVisible(true) {
+GraphicsSplineGear::GraphicsSplineGear(SplineGear *gear) : GraphicsSpline(gear),
+    m_splineGear(gear),
+    m_isBasePitchVisible(true),
+    m_isPitchCircleVisible(true),
+    m_isRotating(false),
+    m_rotationVelocity(0.0f),
+    m_rotationDegree(0.0f)
+{
+
     std::cout << "GraphicsSplineGear is created" << std::endl;
 
     int partColor = qrand() % 50 + 50;
@@ -57,21 +65,21 @@ real GraphicsSplineGear::radius() const {
     return m_splineGear->radius();
 }
 
-real GraphicsSplineGear::minimumDistanceToCenter() {
+real GraphicsSplineGear::minimumDistanceToCenter() const {
     if(m_splineGear->isValid())
         return m_splineGear->minimumDistanceToCenter();
     else
         return m_splineGear->minimumDistanceOfControlPointToCenter();
 }
 
-real GraphicsSplineGear::maximumDistanceToCenter() {
+real GraphicsSplineGear::maximumDistanceToCenter() const {
     if(m_splineGear->isValid())
         return m_splineGear->maximumDistanceToCenter();
     else
         return m_splineGear->maximumDistanceOfControlPointToCenter();
 }
 
-bool GraphicsSplineGear::isBasePitchVisible() {
+bool GraphicsSplineGear::isBasePitchVisible() const {
     return m_isBasePitchVisible;
 }
 
@@ -80,13 +88,31 @@ void GraphicsSplineGear::setBasePitchVisibility(bool isVisible) {
     m_isBasePitchVisible = isVisible;
 }
 
-bool GraphicsSplineGear::isPitchCircleVisible() {
+bool GraphicsSplineGear::isPitchCircleVisible() const {
     return m_isPitchCircleVisible;
 }
 
 void GraphicsSplineGear::setPitchCircleVisibility(bool isVisible) {
     prepareGeometryChange();
     m_isPitchCircleVisible = isVisible;
+}
+
+bool GraphicsSplineGear::isRotating() const {
+    return m_isRotating;
+}
+
+void GraphicsSplineGear::setRotating(bool isAnimated) {
+    prepareGeometryChange();
+    m_isRotating = isAnimated;
+}
+
+real GraphicsSplineGear::rotationVelocity() const {
+    return m_rotationVelocity;
+}
+
+void GraphicsSplineGear::setRotationVelocity(real velocity) {
+    prepareGeometryChange();
+    m_rotationVelocity = velocity;
 }
 
 QRectF GraphicsSplineGear::normalBoundingRect(qreal controlPointRadius) const {
@@ -102,6 +128,11 @@ QRectF GraphicsSplineGear::normalBoundingRect(qreal controlPointRadius) const {
 
 void GraphicsSplineGear::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Q_UNUSED(widget);
+
+    if(m_isRotating) {
+        m_rotationDegree += m_rotationVelocity;
+        setRotation(m_rotationDegree);
+    }
 
     //render line fan for better recognition of teeth:
     painter->setPen(darkenColor(m_color));

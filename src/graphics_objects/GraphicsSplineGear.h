@@ -27,14 +27,19 @@ public:
     void setRadius(real radius);
     real radius() const;
 
-    real minimumDistanceToCenter();
-    real maximumDistanceToCenter();
+    real minimumDistanceToCenter() const;
+    real maximumDistanceToCenter() const;
 
-    bool isBasePitchVisible();
+    bool isBasePitchVisible() const;
     void setBasePitchVisibility(bool isVisible);
 
-    bool isPitchCircleVisible();
+    bool isPitchCircleVisible() const;
     void setPitchCircleVisibility(bool isVisible);
+
+    bool isRotating() const;
+    void setRotating(bool);
+    real rotationVelocity() const;
+    void setRotationVelocity(real velocity);
 
     QRectF normalBoundingRect(qreal controlPointRadius = Preferences::PointRadius + 0.5f * Preferences::HighlightedLineWidth) const override; // from GraphicsSpline
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override; // from QGraphicsItem
@@ -45,6 +50,10 @@ private:
 
     bool m_isBasePitchVisible;
     bool m_isPitchCircleVisible;
+
+    bool m_isRotating;
+    real m_rotationVelocity;
+    real m_rotationDegree;
 
     /** @brief Creates the path of the gear
      *  @see GraphicsSpline::splineCurvePath()

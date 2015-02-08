@@ -23,18 +23,21 @@ private slots:
     void changeNumberOfTeeth(int);
     void togglePitchVisiblity(bool);
     void togglePitchCircleVisibility(bool);
+    void toggleAnimation(bool);
+    void changeRotationVelocity(real);
 
 private:
     GraphicsSplineGear *m_currentGear;
 
     GraphicsSplineAttributesWidget *m_splineAttributesWidget;
 
-    QSpinBox *m_numberOfTeethSpinBox;
-    QLabel   *m_numberOfTeethLabel;
-    QCheckBox *m_pitchVisibleCheckBox;
-    QCheckBox *m_pitchCircleVisibleCheckBox;
-
-    RealValuedSlider *m_radiusSlider;
+    QLabel              *m_numberOfTeethLabel;
+    QSpinBox            *m_numberOfTeethSpinBox;
+    RealValuedSlider    *m_radiusSlider;
+    QCheckBox           *m_pitchVisibleCheckBox;
+    QCheckBox           *m_pitchCircleVisibleCheckBox;
+    QCheckBox           *m_animateCheckbox;
+    RealValuedSlider    *m_rotationVelocitySlider;
 
     void updateAttributes();
 
