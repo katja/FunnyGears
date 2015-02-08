@@ -12,15 +12,22 @@ GraphicsSplineGearAttributesWidget(QWidget *parent) : GraphicsItemAttributesWidg
     m_numberOfTeethLabel->setBuddy(m_numberOfTeethSpinBox);
     connect(m_numberOfTeethSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeNumberOfTeeth(int)));
 
-
     m_radiusSlider = new RealValuedSlider("Radius", this);
     connect(m_radiusSlider, SIGNAL(valueChanged(real)), this, SLOT(changeRadius(real)));
 
+    m_pitchVisibleCheckBox = new QCheckBox(tr("Show base pitch"), this);
+    connect(m_pitchVisibleCheckBox, SIGNAL(toggled(bool)), this, SLOT(togglePitchVisiblity(bool)));
+
+    m_pitchCircleVisibleCheckBox = new QCheckBox(tr("Show pitch circle"), this);
+    connect(m_pitchCircleVisibleCheckBox, SIGNAL(toggled(bool)), this, SLOT(togglePitchCircleVisibility(bool)));
+
     QWidget *gearWidget = new QWidget(this);
     QGridLayout *gearLayout = new QGridLayout(gearWidget);
-    gearLayout->addWidget(m_numberOfTeethLabel    , 0, 0, 1, 1);
-    gearLayout->addWidget(m_numberOfTeethSpinBox,   0, 1, 1, 1);
-    gearLayout->addWidget(m_radiusSlider,           1, 0, 1, 2);
+    gearLayout->addWidget(m_numberOfTeethLabel,         0, 0, 1, 1);
+    gearLayout->addWidget(m_numberOfTeethSpinBox,       0, 1, 1, 1);
+    gearLayout->addWidget(m_radiusSlider,               1, 0, 1, 2);
+    gearLayout->addWidget(m_pitchVisibleCheckBox,       2, 0, 1, 1);
+    gearLayout->addWidget(m_pitchCircleVisibleCheckBox, 2, 1, 1, 1);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0); //Sets border to 0, this results in same width as with only using the SplineAttributesWidget
@@ -55,6 +62,8 @@ updateAttributes() {
     m_radiusSlider->setEnabled(true);
     m_radiusSlider->setRange(m_currentGear->minimumDistanceToCenter(), m_currentGear->maximumDistanceToCenter());
     m_radiusSlider->setValue(m_currentGear->radius());
+    m_pitchVisibleCheckBox->setChecked(m_currentGear->isBasePitchVisible());
+    m_pitchCircleVisibleCheckBox->setChecked(m_currentGear->isPitchCircleVisible());
 }
 
 void GraphicsSplineGearAttributesWidget::
@@ -67,3 +76,14 @@ void GraphicsSplineGearAttributesWidget::
 changeRadius(real newRadius) {
     m_currentGear->setRadius(newRadius);
 }
+
+void GraphicsSplineGearAttributesWidget::
+togglePitchVisiblity(bool isVisible) {
+    m_currentGear->setBasePitchVisibility(isVisible);
+}
+
+void GraphicsSplineGearAttributesWidget::
+togglePitchCircleVisibility(bool isVisible) {
+    m_currentGear->setPitchCircleVisibility(isVisible);
+}
+

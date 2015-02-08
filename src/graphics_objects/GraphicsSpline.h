@@ -25,6 +25,9 @@ public:
     void changeDegree(int degree);
     void changeTornToEdges(bool tearToEdges);
 
+    void setVisibleControlPolygon(bool isVisible);
+    bool isControlPolygonVisible();
+
     void setTangentDrawn(bool draw);
     bool isTangentDrawn() const;
     void setTangentValue(real);
@@ -49,7 +52,7 @@ public:
     QPainterPath shape() const override; // from QGraphicsItem
     virtual QPainterPath normalShape() const;
 
-    virtual QPainterPath controlPointPolygonPath(qreal width = 0) const;
+    virtual QPainterPath controlPolygonPath(qreal width = 0) const;
     virtual QPainterPath controlPointsPaths(qreal radius = Preferences::PointRadius) const;
     virtual QPainterPath splineCurvePath() const;
     virtual QPainterPath tangentPath() const;
@@ -80,6 +83,8 @@ private:
     Spline *m_spline;
 
     SplineState *m_state, *m_noEditingState, *m_pointerState, *m_penState, *m_eraserState;
+
+    bool m_isControlPolygonVisible;
 
     bool m_isTangentDrawn;
     real m_tangentValue;

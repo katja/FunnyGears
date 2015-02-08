@@ -30,12 +30,21 @@ public:
     real minimumDistanceToCenter();
     real maximumDistanceToCenter();
 
+    bool isBasePitchVisible();
+    void setBasePitchVisibility(bool isVisible);
+
+    bool isPitchCircleVisible();
+    void setPitchCircleVisibility(bool isVisible);
+
     QRectF normalBoundingRect(qreal controlPointRadius = Preferences::PointRadius + 0.5f * Preferences::HighlightedLineWidth) const override; // from GraphicsSpline
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override; // from QGraphicsItem
 
 
 private:
     SplineGear *m_splineGear;
+
+    bool m_isBasePitchVisible;
+    bool m_isPitchCircleVisible;
 
     /** @brief Creates the path of the gear
      *  @see GraphicsSpline::splineCurvePath()

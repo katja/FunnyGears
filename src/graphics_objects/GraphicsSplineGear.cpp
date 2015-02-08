@@ -10,7 +10,7 @@ bool GraphicsSplineGear::isGraphicsSplineGearItem(QGraphicsItem *item) {
     return false;
 }
 
-GraphicsSplineGear::GraphicsSplineGear(SplineGear *gear) : GraphicsSpline(gear), m_splineGear(gear) {
+GraphicsSplineGear::GraphicsSplineGear(SplineGear *gear) : GraphicsSpline(gear), m_splineGear(gear), m_isBasePitchVisible(true), m_isPitchCircleVisible(true) {
     std::cout << "GraphicsSplineGear is created" << std::endl;
 
     int partColor = qrand() % 50 + 50;
@@ -71,6 +71,24 @@ real GraphicsSplineGear::maximumDistanceToCenter() {
         return m_splineGear->maximumDistanceOfControlPointToCenter();
 }
 
+bool GraphicsSplineGear::isBasePitchVisible() {
+    return m_isBasePitchVisible;
+}
+
+void GraphicsSplineGear::setBasePitchVisibility(bool isVisible) {
+    prepareGeometryChange();
+    m_isBasePitchVisible = isVisible;
+}
+
+bool GraphicsSplineGear::isPitchCircleVisible() {
+    return m_isPitchCircleVisible;
+}
+
+void GraphicsSplineGear::setPitchCircleVisibility(bool isVisible) {
+    prepareGeometryChange();
+    m_isPitchCircleVisible = isVisible;
+}
+
 QRectF GraphicsSplineGear::normalBoundingRect(qreal controlPointRadius) const {
     real maxRadius = Preferences::AngularPitchStrokesLength;
     if(m_splineGear != 0 && m_splineGear->isValid()) {
@@ -87,10 +105,12 @@ void GraphicsSplineGear::paint(QPainter *painter, const QStyleOptionGraphicsItem
 
     //render line fan for better recognition of teeth:
     painter->setPen(darkenColor(m_color));
-    painter->drawPath(angularPitchStrokesPath());
+    if(m_isBasePitchVisible)
+        painter->drawPath(angularPitchStrokesPath());
 
     //render pitch circle
-    painter->drawPath(pitchCirclePath());
+    if(m_isPitchCircleVisible)
+        painter->drawPath(pitchCirclePath());
 
     //render spline or better, the gear:
     GraphicsSpline::paint(painter, option, widget);

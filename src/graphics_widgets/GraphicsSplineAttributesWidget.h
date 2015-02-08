@@ -19,6 +19,7 @@ public:
     bool worksOnItem(QGraphicsItem *graphicsItem)override; // from GraphicsItemAttributesWidget
 
 private slots:
+    void toggleVisibilityOfControlPolygon(bool);
     void changeDegree(int value);
     void toggleTornToEdges(bool state);
     void toggleTangentDrawn(bool state);
@@ -27,6 +28,8 @@ private slots:
 
 private:
     GraphicsSpline *m_currentSpline;
+
+    QCheckBox *m_showControlPolygonCheckBox;
 
     QSpinBox    *m_degreeSpinBox;
     QLabel      *m_degreeLabel;

@@ -2,6 +2,9 @@
 
 GraphicsSplineAttributesWidget::GraphicsSplineAttributesWidget(QWidget *parent) : GraphicsItemAttributesWidget(parent) {
 
+    m_showControlPolygonCheckBox = new QCheckBox(tr("Show Control Polygon"), this);
+    connect(m_showControlPolygonCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleVisibilityOfControlPolygon(bool)));
+
     m_degreeLabel   = new QLabel(tr("Degree"));
     m_degreeSpinBox = new QSpinBox(this);
     m_degreeSpinBox->setMinimum(1);
@@ -23,15 +26,15 @@ GraphicsSplineAttributesWidget::GraphicsSplineAttributesWidget(QWidget *parent) 
     connect(m_refineButton, SIGNAL(clicked()), this, SLOT(refineSpline()));
 
     QGridLayout *layout = new QGridLayout(this);
-    layout->addWidget(m_degreeLabel,        0, 0, 1, 1);
-    layout->addWidget(m_degreeSpinBox,      0, 1, 1, 1);
-    layout->addWidget(m_tornToEdgesLabel,   1, 0, 1, 1);
-    layout->addWidget(m_tornToEdgesCheckBox,1, 1, 1, 1);
-    layout->addWidget(m_drawTangentCheckBox,2, 0, 3, 1);
-    layout->addWidget(m_tangentValueSlider, 2, 1, 3, 1);
-    layout->addWidget(m_refineButton,       5, 0, 1, 2);
+    layout->addWidget(m_showControlPolygonCheckBox, 0, 0, 1, 2);
+    layout->addWidget(m_degreeLabel,        1, 0, 1, 1);
+    layout->addWidget(m_degreeSpinBox,      1, 1, 1, 1);
+    layout->addWidget(m_tornToEdgesLabel,   2, 0, 1, 1);
+    layout->addWidget(m_tornToEdgesCheckBox,2, 1, 1, 1);
+    layout->addWidget(m_drawTangentCheckBox,3, 0, 1, 1);
+    layout->addWidget(m_tangentValueSlider, 3, 1, 1, 1);
+    layout->addWidget(m_refineButton,       4, 0, 1, 2);
     setLayout(layout);
-
 }
 
 GraphicsSplineAttributesWidget::~GraphicsSplineAttributesWidget() {
@@ -52,6 +55,7 @@ void GraphicsSplineAttributesWidget::updateAttributes() {
     const Spline *spline = m_currentSpline->spline();
     m_degreeSpinBox->setValue(spline->degree());
     m_tornToEdgesCheckBox->setChecked(spline->isTornToEdges());
+    m_showControlPolygonCheckBox->setChecked(m_currentSpline->isControlPolygonVisible());
     if(spline->isValid()) {
         m_drawTangentCheckBox->setEnabled(true);
         m_drawTangentCheckBox->setChecked(m_currentSpline->isTangentDrawn());
@@ -64,6 +68,11 @@ void GraphicsSplineAttributesWidget::updateAttributes() {
         m_tangentValueSlider->setEnabled(false);
         m_refineButton->setEnabled(false);
     }
+}
+
+void GraphicsSplineAttributesWidget::toggleVisibilityOfControlPolygon(bool isVisible) {
+    m_currentSpline->setVisibleControlPolygon(isVisible);
+    updateAttributes();
 }
 
 void GraphicsSplineAttributesWidget::changeDegree(int value) {

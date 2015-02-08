@@ -13,7 +13,7 @@ bool GraphicsSpline::isGraphicsSplineItem(QGraphicsItem *item) {
     return false;
 }
 
-GraphicsSpline::GraphicsSpline(Spline *spline) : m_isTangentDrawn(false), m_tangentValue(-1.0f) {
+GraphicsSpline::GraphicsSpline(Spline *spline) : m_isControlPolygonVisible(true), m_isTangentDrawn(false), m_tangentValue(-1.0f) {
 
     std::cout << "GraphicsSpline is created" << std::endl;
 
@@ -65,6 +65,15 @@ void GraphicsSpline::changeDegree(int degree) {
 void GraphicsSpline::changeTornToEdges(bool tearToEdges) {
     prepareGeometryChange();
     m_spline->setTornToEdges(tearToEdges);
+}
+
+void GraphicsSpline::setVisibleControlPolygon(bool isVisible) {
+    prepareGeometryChange();
+    m_isControlPolygonVisible = isVisible;
+}
+
+bool GraphicsSpline::isControlPolygonVisible() {
+    return m_isControlPolygonVisible;
 }
 
 void GraphicsSpline::setTangentDrawn(bool draw) {
@@ -191,26 +200,26 @@ QPainterPath GraphicsSpline::shape() const {
 QPainterPath GraphicsSpline::normalShape() const {
     //only the control polygon path is used here, as with the spline path this would be too slow
     if(isActive())
-        return controlPointPolygonPath(Preferences::HighlightedLineWidth) + controlPointsPaths(Preferences::PointRadius + 0.5f * Preferences::HighlightedLineWidth);
+        return controlPolygonPath(Preferences::HighlightedLineWidth) + controlPointsPaths(Preferences::PointRadius + 0.5f * Preferences::HighlightedLineWidth);
     else
-        return controlPointPolygonPath(Preferences::SimpleLineWidth) + controlPointsPaths(Preferences::PointRadius + 0.5f * Preferences::SimpleLineWidth);
+        return controlPolygonPath(Preferences::SimpleLineWidth) + controlPointsPaths(Preferences::PointRadius + 0.5f * Preferences::SimpleLineWidth);
 }
 
-QPainterPath GraphicsSpline::controlPointPolygonPath(qreal width) const {
+QPainterPath GraphicsSpline::controlPolygonPath(qreal width) const {
     const vector<vec2> controlPoints = m_spline->controlPoints();
     if(controlPoints.empty())
         return QPainterPath();
 
-    QPainterPath controlPointPolygon;
-    controlPointPolygon.addPolygon(QPolygonF(convertToQVectorWithQPointFs(controlPoints)));
+    QPainterPath controlPolygon;
+    controlPolygon.addPolygon(QPolygonF(convertToQVectorWithQPointFs(controlPoints)));
 
     if(width == 0) { // used for painting
-        return controlPointPolygon;
+        return controlPolygon;
     } else { // width != 0, used for shape
         QPainterPathStroker stroker;
         stroker.setWidth(width);
         stroker.setCapStyle(Qt::RoundCap);
-        return stroker.createStroke(controlPointPolygon);
+        return stroker.createStroke(controlPolygon);
     }
 }
 
@@ -282,14 +291,19 @@ void GraphicsSpline::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     // Paint Foreground
     pen.setWidth(Preferences::SimpleLineWidth);
     pen.setColor(m_color);
+
     // control polygon:
-    pen.setStyle(Qt::DotLine);
-    painter->setPen(pen);
-    painter->drawPath(controlPointPolygonPath());
+    if(m_isControlPolygonVisible) {
+        pen.setStyle(Qt::DotLine);
+        painter->setPen(pen);
+        painter->drawPath(controlPolygonPath());
+    }
+
     // curve:
     pen.setStyle(Qt::SolidLine);
     painter->setPen(pen);
-    painter->drawPath(controlPointsPaths());
+    if(m_isControlPolygonVisible)
+        painter->drawPath(controlPointsPaths());
     painter->drawPath(splineCurvePath());
 
     //Paint additional foreground

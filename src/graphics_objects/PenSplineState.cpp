@@ -37,7 +37,9 @@ void PenSplineState::paintBackground(QPen &pen, QPainter *painter, const QStyleO
         return;
 
     painter->setPen(pen);
-    painter->drawPath(m_spline->controlPointPolygonPath());
-    painter->drawPath(m_spline->controlPointsPaths());
+    if(m_spline->isControlPolygonVisible()) {
+        painter->drawPath(m_spline->controlPolygonPath());
+        painter->drawPath(m_spline->controlPointsPaths());
+    }
     painter->drawPath(m_spline->splineCurvePath());
 }

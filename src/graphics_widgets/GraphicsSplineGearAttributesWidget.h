@@ -21,6 +21,8 @@ public:
 private slots:
     void changeRadius(real);
     void changeNumberOfTeeth(int);
+    void togglePitchVisiblity(bool);
+    void togglePitchCircleVisibility(bool);
 
 private:
     GraphicsSplineGear *m_currentGear;
@@ -29,6 +31,8 @@ private:
 
     QSpinBox *m_numberOfTeethSpinBox;
     QLabel   *m_numberOfTeethLabel;
+    QCheckBox *m_pitchVisibleCheckBox;
+    QCheckBox *m_pitchCircleVisibleCheckBox;
 
     RealValuedSlider *m_radiusSlider;
 
