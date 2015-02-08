@@ -9,6 +9,8 @@
 
 class GraphicsSplineGearAttributesWidget : public GraphicsItemAttributesWidget {
 
+Q_OBJECT
+
 public:
     GraphicsSplineGearAttributesWidget(QWidget *parent = 0);
     ~GraphicsSplineGearAttributesWidget();
@@ -16,10 +18,21 @@ public:
     void setItem(QGraphicsItem *graphicsItem) override; // from GraphicsItemAttributesWidget
     bool worksOnItem(QGraphicsItem *graphicsItem) override; // from GraphicsItemAttributesWidget
 
+private slots:
+    void changeRadius(real);
+    void changeNumberOfTeeth(int);
+
 private:
     GraphicsSplineGear *m_currentGear;
 
     GraphicsSplineAttributesWidget *m_splineAttributesWidget;
+
+    QSpinBox *m_numberOfTeethSpinBox;
+    QLabel   *m_numberOfTeethLabel;
+
+    RealValuedSlider *m_radiusSlider;
+
+    void updateAttributes();
 
 };
 

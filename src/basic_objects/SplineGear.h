@@ -76,6 +76,12 @@ public:
      */
     void setRadius(real radius);
 
+    /** @brief Returns the radius
+     *
+     *  @return radius
+     */
+    real radius() const;
+
     /** @brief Returns the maximum distance to the gear center
      *
      *  @return maximum distance to gear center

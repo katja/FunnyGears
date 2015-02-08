@@ -35,6 +35,42 @@ QString GraphicsSplineGear::defaultName() const {
     return "Spline Gear";
 }
 
+const SplineGear* GraphicsSplineGear::gear() const {
+    return m_splineGear;
+}
+
+void GraphicsSplineGear::setNumberOfTeeth(uint toothCount) {
+    prepareGeometryChange();
+    m_splineGear->setNumberOfTeeth(toothCount);
+}
+
+uint GraphicsSplineGear::numberOfTeeth() const {
+    return m_splineGear->numberOfTeeth();
+}
+
+void GraphicsSplineGear::setRadius(real radius) {
+    prepareGeometryChange();
+    m_splineGear->setRadius(radius);
+}
+
+real GraphicsSplineGear::radius() const {
+    return m_splineGear->radius();
+}
+
+real GraphicsSplineGear::minimumDistanceToCenter() {
+    if(m_splineGear->isValid())
+        return m_splineGear->minimumDistanceToCenter();
+    else
+        return m_splineGear->minimumDistanceOfControlPointToCenter();
+}
+
+real GraphicsSplineGear::maximumDistanceToCenter() {
+    if(m_splineGear->isValid())
+        return m_splineGear->maximumDistanceToCenter();
+    else
+        return m_splineGear->maximumDistanceOfControlPointToCenter();
+}
+
 QRectF GraphicsSplineGear::normalBoundingRect(qreal controlPointRadius) const {
     real maxRadius = Preferences::AngularPitchStrokesLength;
     if(m_splineGear != 0 && m_splineGear->isValid()) {

@@ -92,6 +92,10 @@ void SplineGear::setRadius(real radius) {
     update();
 }
 
+real SplineGear::radius() const {
+    return m_radius;
+}
+
 real SplineGear::maximumDistanceToCenter() const {
     return m_toothProfile->maximumDistanceToOrigin();
 }

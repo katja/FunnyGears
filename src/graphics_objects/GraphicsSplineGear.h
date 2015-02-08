@@ -19,6 +19,17 @@ public:
     int type() const override; // from QGraphicsItem
     virtual QString defaultName() const override; // from GraphicsScheduleItem
 
+    const SplineGear* gear() const;
+
+    void setNumberOfTeeth(uint toothCount);
+    uint numberOfTeeth() const;
+
+    void setRadius(real radius);
+    real radius() const;
+
+    real minimumDistanceToCenter();
+    real maximumDistanceToCenter();
+
     QRectF normalBoundingRect(qreal controlPointRadius = Preferences::PointRadius + 0.5f * Preferences::HighlightedLineWidth) const override; // from GraphicsSpline
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override; // from QGraphicsItem
 
