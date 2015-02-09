@@ -25,16 +25,21 @@ GraphicsSplineAttributesWidget::GraphicsSplineAttributesWidget(QWidget *parent) 
     m_refineButton = new QPushButton(tr("Add more control points"), this);
     connect(m_refineButton, SIGNAL(clicked()), this, SLOT(refineSpline()));
 
-    QGridLayout *layout = new QGridLayout(this);
-    layout->addWidget(m_showControlPolygonCheckBox, 0, 0, 1, 2);
-    layout->addWidget(m_degreeLabel,        1, 0, 1, 1);
-    layout->addWidget(m_degreeSpinBox,      1, 1, 1, 1);
-    layout->addWidget(m_tornToEdgesLabel,   2, 0, 1, 1);
-    layout->addWidget(m_tornToEdgesCheckBox,2, 1, 1, 1);
-    layout->addWidget(m_drawTangentCheckBox,3, 0, 1, 1);
-    layout->addWidget(m_tangentValueSlider, 3, 1, 1, 1);
-    layout->addWidget(m_refineButton,       4, 0, 1, 2);
-    setLayout(layout);
+    QGroupBox *splineWidget = new QGroupBox(tr("Spline Curve Attributes"), this);
+
+    QGridLayout *splineLayout = new QGridLayout(splineWidget);
+    splineLayout->addWidget(m_showControlPolygonCheckBox, 0, 0, 1, 2);
+    splineLayout->addWidget(m_degreeLabel,        1, 0, 1, 1);
+    splineLayout->addWidget(m_degreeSpinBox,      1, 1, 1, 1);
+    splineLayout->addWidget(m_tornToEdgesLabel,   2, 0, 1, 1);
+    splineLayout->addWidget(m_tornToEdgesCheckBox,2, 1, 1, 1);
+    splineLayout->addWidget(m_drawTangentCheckBox,3, 0, 1, 1);
+    splineLayout->addWidget(m_tangentValueSlider, 3, 1, 1, 1);
+    splineLayout->addWidget(m_refineButton,       4, 0, 1, 2);
+
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->setContentsMargins(4, 0, 4, 4); //use small margins at left, right and bottom
+    layout->addWidget(splineWidget);
 }
 
 GraphicsSplineAttributesWidget::~GraphicsSplineAttributesWidget() {

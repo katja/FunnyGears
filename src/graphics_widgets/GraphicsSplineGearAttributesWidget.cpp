@@ -5,6 +5,7 @@ GraphicsSplineGearAttributesWidget::
 GraphicsSplineGearAttributesWidget(QWidget *parent) : GraphicsItemAttributesWidget(parent)
 {
     m_splineAttributesWidget = new GraphicsSplineAttributesWidget(this);
+    m_splineAttributesWidget->layout()->setContentsMargins(0, 0, 0, 0); //Set border to 0, as with this the attributes group boxes of spline and gear can have same width
 
     m_numberOfTeethSpinBox = new QSpinBox(this);
     m_numberOfTeethSpinBox->setMinimum(2);
@@ -27,8 +28,10 @@ GraphicsSplineGearAttributesWidget(QWidget *parent) : GraphicsItemAttributesWidg
     m_rotationVelocitySlider->setRange(-2.0f, 2.0f);
     connect(m_rotationVelocitySlider, SIGNAL(valueChanged(real)), this, SLOT(changeRotationVelocity(real)));
 
-    QWidget *gearWidget = new QWidget(this);
+    QGroupBox *gearWidget = new QGroupBox(tr("Gear Attributes"), this);
+
     QGridLayout *gearLayout = new QGridLayout(gearWidget);
+    gearLayout->setContentsMargins(4, 0, 12, 12);
     gearLayout->addWidget(m_numberOfTeethLabel,         0, 0, 1, 1);
     gearLayout->addWidget(m_numberOfTeethSpinBox,       0, 1, 1, 1);
     gearLayout->addWidget(m_radiusSlider,               1, 0, 1, 2);
@@ -38,12 +41,11 @@ GraphicsSplineGearAttributesWidget(QWidget *parent) : GraphicsItemAttributesWidg
     gearLayout->addWidget(m_rotationVelocitySlider,     3, 1, 1, 1);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0); //Sets border to 0, this results in same width as with only using the SplineAttributesWidget
+    layout->setContentsMargins(4, 0, 4, 4); //use small margins at left, right and bottom
     // layout->setSpacing(0); //uses no space between widgets in layout (not border)
 
     layout->addWidget(m_splineAttributesWidget);
     layout->addWidget(gearWidget);
-    setLayout(layout);
 }
 
 GraphicsSplineGearAttributesWidget::
