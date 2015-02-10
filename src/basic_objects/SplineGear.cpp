@@ -31,7 +31,7 @@ void SplineGear::update() {
         }
         updateKnotsAndControlPoints();
         updateDistancesToCenter();
-        if(m_referenceRadius <= 0) {
+        if(absolute(m_referenceRadius - defaultReferenceRadius()) > 0.0001) {
             m_referenceRadius = defaultReferenceRadius();
         }
 
@@ -41,8 +41,7 @@ void SplineGear::update() {
         if(m_numberOfTeeth <= 0)
             m_numberOfTeeth = 6; // No special number, but there has to be one
         updateControlPoints();
-        if(m_referenceRadius <= 0)
-            m_referenceRadius = glm::length(m_toothProfile->controlPoint(0));
+        m_referenceRadius = glm::length(m_toothProfile->controlPoint(0));
 
     } else if(m_toothProfile->numberOfControlPoints() > 1) {
         vec2 first = m_toothProfile->controlPoint(0);
@@ -54,8 +53,7 @@ void SplineGear::update() {
             m_numberOfTeeth = static_cast<uint>(floor((2.0 * M_PI) / angleOfControlPoints));
         }
         updateControlPoints();
-        if(m_referenceRadius <= 0)
-            m_referenceRadius = glm::length(vec2((first + last) * 0.5));
+        m_referenceRadius = glm::length(vec2((first + last) * 0.5));
 
     } else { // no control points specified
         setBackKnotsAndControlPoints();
@@ -82,8 +80,6 @@ void SplineGear::setModule(real module) {
     if(module <= 0.0)
         return;
     setReferenceRadius(module * m_numberOfTeeth / 2.0);
-    if(glm::abs(this->module() - module) >= 0.0001)
-        std::cout << "ERROR: wanted to set a module of " << module << " and got instead " << this->module() << std::endl;
 }
 
 real SplineGear::defaultReferenceRadius() const {
@@ -92,15 +88,12 @@ real SplineGear::defaultReferenceRadius() const {
 }
 
 void SplineGear::setReferenceRadius(real radius) {
-    std::cout << "SplineGear::setReferenceRadius with radius = " << radius << ", whereas m_referenceRadius = " << m_referenceRadius << ", and default: " << defaultReferenceRadius() << std::endl;
     if(radius <= 0.0)
         return;
     real scaling = radius / m_referenceRadius;
     m_toothProfile->scale(scaling);
     update();
     m_referenceRadius = defaultReferenceRadius();
-    if(glm::abs(m_referenceRadius - radius) >= 0.0001)
-        std::cout << "ERROR: wanted to set a reference radius of " << radius << " and got instead " << m_referenceRadius << std::endl;
 }
 
 real SplineGear::referenceRadius() const {

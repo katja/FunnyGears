@@ -6,8 +6,9 @@
 #include "graphics_widgets/GraphicsItemAttributesWidget.h"
 #include "graphics_widgets/GraphicsSplineAttributesWidget.h"
 #include "graphics_objects/GraphicsSplineGear.h"
+#include "ChangingObjectListener.h"
 
-class GraphicsSplineGearAttributesWidget : public GraphicsItemAttributesWidget {
+class GraphicsSplineGearAttributesWidget : public GraphicsItemAttributesWidget, public ChangingObjectListener {
 
 Q_OBJECT
 
@@ -17,6 +18,8 @@ public:
 
     void setItem(QGraphicsItem *graphicsItem) override; // from GraphicsItemAttributesWidget
     bool worksOnItem(QGraphicsItem *graphicsItem) override; // from GraphicsItemAttributesWidget
+
+    void objectChanged(ChangingObject *object) override; // from ChangingObjectListener
 
 private slots:
     void updateModule();

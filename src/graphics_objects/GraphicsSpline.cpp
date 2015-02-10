@@ -120,11 +120,13 @@ void GraphicsSpline::addPoint(QPointF scenePos) {
     prepareGeometryChange();
     m_spline->addControlPoint(localPosition.x(), localPosition.y());
     update(boundingRect());
+    GraphicsItem::changed();
 }
 
 void GraphicsSpline::removePoint(int index) {
     prepareGeometryChange();
     m_spline->removeControlPoint(index);
+    GraphicsItem::changed();
 }
 
 void GraphicsSpline::removePointNear(QPointF scenePos) {
@@ -344,6 +346,7 @@ void GraphicsSpline::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
 void GraphicsSpline::mouseMovePointEvent(uint index, QGraphicsSceneMouseEvent *event) {
     prepareGeometryChange();
     m_spline->moveControlPoint(index, event->pos());
+    GraphicsItem::changed();
 }
 
 void GraphicsSpline::mouseMoveWholeSplineEvent(QGraphicsSceneMouseEvent *event) {

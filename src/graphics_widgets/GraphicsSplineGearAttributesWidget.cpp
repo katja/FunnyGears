@@ -80,6 +80,7 @@ setItem(QGraphicsItem *graphicsItem) {
     m_splineAttributesWidget->setItem(graphicsItem);
     m_currentGear = static_cast<GraphicsSplineGear*>(graphicsItem);
     updateAttributes();
+    m_currentGear->informAboutChange(this);
 }
 
 bool GraphicsSplineGearAttributesWidget::
@@ -87,6 +88,12 @@ worksOnItem(QGraphicsItem *graphicsItem) {
     if(GraphicsSplineGear::isGraphicsSplineGearItem(graphicsItem))
         return true;
     return false;
+}
+
+void GraphicsSplineGearAttributesWidget::
+objectChanged(ChangingObject *object) {
+    if(object == m_currentGear)
+        updateAttributes();
 }
 
 void GraphicsSplineGearAttributesWidget::
@@ -105,9 +112,7 @@ updateModule() {
     real module = m_moduleSpinBox->value();
     if(absolute(m_currentGear->module() - module) > Epsilon) {
         m_currentGear->setModule(module);
-        std::cout << "UPDATE MODULE IS DONE" << std::endl;
         updateAttributes();
-        std::cout << "UPDATE MODULE FINISHED" << std::endl;
     }
 }
 
@@ -116,9 +121,7 @@ updateRadius() {
     real radius = m_referenceRadiusSpinBox->value();
     if(absolute(m_currentGear->referenceRadius() - radius) > Epsilon) {
         m_currentGear->setReferenceRadius(radius);
-        std::cout << "UPDATE RADIUS IS DONE" << std::endl;
         updateAttributes();
-        std::cout << "UPDATE RADIUS FINISHED" << std::endl;
     }
 }
 

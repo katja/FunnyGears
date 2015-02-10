@@ -27,3 +27,17 @@ void GraphicsItem::setParentItem(QGraphicsItem *newParent) {
 bool GraphicsItem::noItemInSceneSelected() {
     return scene()->selectedItems().empty();
 }
+
+void GraphicsItem::informAboutChange(ChangingObjectListener *listener) {
+    m_changingListeners.push_back(listener);
+}
+
+void GraphicsItem::noMoreInformAboutChange(ChangingObjectListener *listener) {
+    m_changingListeners.remove(listener);
+}
+
+void GraphicsItem::changed() {
+    for(ChangingObjectListener* listener : m_changingListeners) {
+        listener->objectChanged(this);
+    }
+}
