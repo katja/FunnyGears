@@ -45,11 +45,11 @@ void GraphicsView::wheelEvent(QWheelEvent *event) {
     int treshold = 5; //must be a value of 0,..., 10
     if(qAbs(spinRange) >= treshold) {
 
-        qreal scaleFactor = 1.0f;
-        if(spinRange < 0 && transform().m11() < 15.0f) //zoom in! (if not already zoomed in with scaling of 15 or more)
-            scaleFactor = 1.1f - (1 / (spinRange + (10 - treshold))); //ensures that values are in [1.0, 1.1)
-        else if(spinRange > 0 && transform().m11() > 0.2f) //zoom out! (if not already zoomed out with scaling of 0.2 or less)
-            scaleFactor = 0.9f + (1 / (spinRange + (10 - treshold))); //ensures that values are in (0.9, 1.0]
+        qreal scaleFactor = 1.0;
+        if(spinRange < 0 && transform().m11() < 15.0) //zoom in! (if not already zoomed in with scaling of 15 or more)
+            scaleFactor = 1.1 - (1 / (spinRange + (10 - treshold))); //ensures that values are in [1.0, 1.1)
+        else if(spinRange > 0 && transform().m11() > 0.2) //zoom out! (if not already zoomed out with scaling of 0.2 or less)
+            scaleFactor = 0.9 + (1 / (spinRange + (10 - treshold))); //ensures that values are in (0.9, 1.0]
 
         scale(scaleFactor, scaleFactor);
     }
@@ -114,18 +114,18 @@ void GraphicsView::executeEditingAction(Editing::Action editingAction) {
 }
 
 void GraphicsView::zoomIn() {
-    qreal scaleFactor = 1.1f;
+    qreal scaleFactor = 1.1;
     scale(scaleFactor, scaleFactor);
 }
 
 void GraphicsView::zoomOut() {
-    qreal scaleFactor = 0.9f;
+    qreal scaleFactor = 0.9;
     scale(scaleFactor, scaleFactor);
 }
 
 void GraphicsView::zoomToDefault() {
-    fitInView(-0.5f * Preferences::ZoomDefaultX,
-            -0.5f * Preferences::ZoomDefaultY,
+    fitInView(-0.5 * Preferences::ZoomDefaultX,
+            -0.5 * Preferences::ZoomDefaultY,
             Preferences::ZoomDefaultX,
             Preferences::ZoomDefaultY,
             Qt::KeepAspectRatio);

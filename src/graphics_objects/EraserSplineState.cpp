@@ -76,7 +76,7 @@ void EraserSplineState::paintForeground(QPen &pen, QPainter *painter, const QSty
         pen.setColor(Preferences::AttentionColor);
         painter->setPen(pen);
         QPointF length = QPointF(m_snappingAreaSize, m_snappingAreaSize);
-        QPointF start = m_spline->positionOfPoint(m_indexOfPointUnderMouse) - 0.5f * length;
+        QPointF start = m_spline->positionOfPoint(m_indexOfPointUnderMouse) - 0.5 * length;
         painter->drawLine(start, start + length);
     }
     pen.setWidth(0);

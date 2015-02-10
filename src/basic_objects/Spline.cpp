@@ -1,5 +1,7 @@
 #include "basic_objects/Spline.h"
 #include "helpers.h"
+#include <cmath>
+#include <glm/glm.hpp>
 
 Spline::Spline(uint degree) : m_degree(degree), m_isClosed(false), m_tornToEdges(false) {
     std::cout << "Spline is created with default constructor " << std::endl;
@@ -69,6 +71,14 @@ vec2 Spline::evaluate(real value) const {
     return controlPointsCopy.at(m_degree);
 }
 
+vec2 Spline::firstPoint() const {
+    return evaluate(lowerDomainLimit());
+}
+
+vec2 Spline::lastPoint(real epsilon) const {
+    return evaluate(upperDomainLimit() - epsilon);
+}
+
 vec2 Spline::derivative(real value) const {
     if(!isValid() || value < lowerDomainLimit() || value >= upperDomainLimit())
         return vec2(0, 0);
@@ -79,16 +89,17 @@ vec2 Spline::derivative(real value) const {
     for(uint i = 0; i < m_degree + 1; ++i) {
         controlPointsCopy[i] = m_controlPoints.at(n - m_degree + i);
     }
+
     //Stop de Boor algorithm one step earlier than when evaluating a curve point
     deBoor(controlPointsCopy, value, n, m_degree, 1);
-    return (vec2(controlPointsCopy.at(m_degree) - controlPointsCopy.at(m_degree - 1))).normalized();
+    return glm::normalize(vec2(controlPointsCopy.at(m_degree) - controlPointsCopy.at(m_degree - 1)));
 }
 
 vec2 Spline::normal(real value) const {
     vec2 dv = derivative(value);
     if(dv == vec2(0,0))
         return dv;
-    return vec2(-dv.y(), dv.x());
+    return vec2(-dv.y, dv.x);
 }
 
 void Spline::curve(vector<QPointF> &curve) const {
@@ -101,9 +112,9 @@ void Spline::curve(vector<QPointF> &curve) const {
     real step = (uStop - u) / iStop;
     for(uint i = 0; i < iStop; ++i) {
         if(i == iStop - 1)
-            u = uStop - 0.001f;
+            u = uStop - 0.001;
         vec2 point = evaluate(u);
-        curve[i] = QPointF(point.x(), point.y());
+        curve[i] = QPointF(point.x, point.y);
         u += step;
         // update u as floating points are not very accurate
         // but nevertheless the whole spline should be visible:
@@ -402,6 +413,58 @@ uint Spline::lowerNextKnot(real value) const {
     return m_knots.size() - 1;
 }
 
+real Spline::minimumDistanceOfControlPointToOrigin() const {
+    if(m_controlPoints.size() <= 0)
+        return 0.0;
+
+    real minDistance = glm::length(m_controlPoints[0]);
+
+    for(uint i = 1; i < m_controlPoints.size(); ++i) {
+        real dist = glm::length(m_controlPoints[i]);
+        if(dist < minDistance)
+            minDistance = dist;
+    }
+    return minDistance;
+}
+
+real Spline::maximumDistanceOfControlPointToOrigin() const {
+    if(m_controlPoints.size() <= 0)
+        return 0.0;
+
+    real maxDistance = glm::length(m_controlPoints[0]);
+
+    for(uint i = 1; i < m_controlPoints.size(); ++i) {
+        real dist = glm::length(m_controlPoints[i]);
+        if(dist > maxDistance)
+            maxDistance = dist;
+    }
+    return maxDistance;
+}
+
+real Spline::minimumDistanceToOrigin() const {
+    vector<vec2> possiblePoints(2 * m_controlPoints.size());
+    int numOfPossiblePoints = pointsWithNormalsThroughOrigin(possiblePoints);
+    real minDistance = glm::length(possiblePoints[0]);
+    for(int i = 1; i < numOfPossiblePoints; ++i) {
+        real dist = glm::length(possiblePoints[i]);
+        if(dist < minDistance)
+            minDistance = dist;
+    }
+    return minDistance;
+}
+
+real Spline::maximumDistanceToOrigin() const {
+    vector<vec2> possiblePoints(2 * m_controlPoints.size());
+    int numOfPossiblePoints = pointsWithNormalsThroughOrigin(possiblePoints);
+    real maxDistance = glm::length(possiblePoints[0]);
+    for(int i = 1; i < numOfPossiblePoints; ++i) {
+        real dist = glm::length(possiblePoints[i]);
+        if(dist > maxDistance)
+            maxDistance = dist;
+    }
+    return maxDistance;
+}
+
 void Spline::getIntersectionPointsWithRay(const Ray &ray, vector<vec2> &intersectionPoints) const {
     if(!isValid())
         return; //=> number of control points is not at least 2
@@ -426,7 +489,7 @@ void Spline::getIntersectionPointsWithRay(const Ray &ray, vector<vec2> &intersec
             //examine resulting spline recursively.
             //TODO: I don't think that the following is correct!!! What happens, if i == 0????
             else {
-                if(upperDomainLimit() - lowerDomainLimit() > 0.1f) {
+                if(upperDomainLimit() - lowerDomainLimit() > 0.1) {
                     long startPointIndex = i - (m_degree - 1);
                     unsigned long stopPointIndex = i + m_degree;
                     if(startPointIndex < 0)
@@ -448,18 +511,30 @@ void Spline::getIntersectionPointsWithRay(const Ray &ray, vector<vec2> &intersec
     }
 }
 
+void Spline::scale(real scaling, vec2 origin) {
+    std::cout << "\nSCALING OF SPLINE - with " << scaling << std::endl;
+    std::cout << (*this) << std::endl;
+    for(uint i = 0; i < m_controlPoints.size(); ++i) {
+        m_controlPoints[i] = scaling * (m_controlPoints[i] - origin);
+        m_controlPoints[i] = m_controlPoints[i] + origin;
+    }
+    std::cout << (*this) << std::endl;
+}
+
 void Spline::deBoor(vector<vec2> &controlPoints, real value, real n) const {
     deBoor(controlPoints, value, n, m_degree, 0);
 }
 
 void Spline::deBoor(vector<vec2> &controlPoints, real value, real n, uint degree, uint stop) const {
+    if(stop == degree)
+        return;
     assert(controlPoints.size() >= degree + 1 && degree >= 0);
     uint lastIndex = controlPoints.size() - 1;
 
     for(int i = n, index = lastIndex; i > n - degree; --i, --index) {
         real alpha = (value - m_knots.at(i)) / (m_knots.at(i + degree) - m_knots.at(i));
         controlPoints[index] =
-            (1.0f - alpha) * controlPoints.at(index - 1)
+            (1.0 - alpha) * controlPoints.at(index - 1)
                 + alpha * controlPoints.at(index);
     }
     degree -= 1;
@@ -540,7 +615,7 @@ void Spline::makeDifferentFirstKnots() {
     real nextValue = m_knots.at(m_degree + 1);
     //do NOT replace int by uint!!!
     for(int i = m_degree; i >= 0; --i) {
-        nextValue -= 1.0f;
+        nextValue -= 1.0;
         m_knots[i] = nextValue;
     }
 }
@@ -548,7 +623,82 @@ void Spline::makeDifferentFirstKnots() {
 void Spline::makeDifferentLastKnots() {
     real lastValue = m_knots.at(m_controlPoints.size() - 1);
     for (uint i = 0; i <= m_degree; ++i) {
-        lastValue += 1.0f;
+        lastValue += 1.0;
         m_knots[m_controlPoints.size() + i] = lastValue;
+    }
+}
+
+int Spline::pointsWithNormalsThroughOrigin(vector<vec2> &samples, real epsilon) const {
+    if((samples.size() < 2 * m_controlPoints.size()) || !isValid())
+        return -1;
+
+    //Preparation of the sampleValues vector, which holds evaluable knots and one knot value between
+    uint evaluableKnots = m_controlPoints.size() + 1 - m_degree;
+    vector<real> sampleValues(evaluableKnots * 2 - 1);
+    //insert all evaluable knots at every second position of sampleValues
+    for(uint i = 0; i < evaluableKnots; ++i) {
+        sampleValues[2 * i] = m_knots[i + m_degree];
+    }
+    //insert an additional value between knot values
+    for(uint i = 1; i < sampleValues.size(); i += 2) {
+        sampleValues[i] = (sampleValues[i - 1] + sampleValues[i + 1]) / 2.0;
+    }
+    sampleValues[sampleValues.size() - 1] = sampleValues.back() - epsilon;
+
+    //Now search for all points of the spline curve whose normals pass the origin
+    //This is the case, when the cross product of the vector of the normal with
+    //the vector to the respective point is "0". But most times one won't simply find these
+    //points at the values of the sampleValues vector. Therefore the important thing is the
+    //sign of the cross product. If this changes, there had to be a point between the two
+    //just examined ones. In the while-loop this point is approached and given back, when
+    //epsilon is bigger than the left inaccuracy.
+    int foundPoints = 0;
+    int sign = 0; //Algebraic sign which signals direction of vector to point against normal in point
+
+    for(uint i = 0; i < sampleValues.size(); ++i) {
+        int throughOrigin = testThroughOrigin(sampleValues[i], sign, foundPoints, samples, epsilon);
+        if(throughOrigin < 0) {
+            real a = sampleValues[i - 1]; //this point must exist, as sampleValues[0] can not reach this if condition
+            real b = sampleValues[i];
+            while(throughOrigin != 1) {
+                throughOrigin = testThroughOrigin((a + b) / 2, sign, foundPoints, samples, epsilon);
+                if(throughOrigin == -1) {
+                    b = (a + b) / 2;
+                } else if (throughOrigin == 0) {
+                    a = (a + b) / 2;
+                }
+                if(b - a < epsilon) {
+                    // When there is a corner like it is possible when degree = 1,
+                    // the approach above won't work. Therefore this stopping is necessary, too.
+                    samples[foundPoints] = evaluate(a);
+                    foundPoints += 1;
+                    sign = 0;
+                    throughOrigin = 1; //leave the while-loop
+                }
+            }
+        }
+    }
+    return foundPoints;
+}
+
+// Returns:  1 ==> point found and inserted in samples with foundPoints increased by 1
+//           0 ==> no point found, direction same as in last test
+//          -1 ==> no point found, but direction changed => Please check values between!
+int Spline::testThroughOrigin(real evaluationValue, int &lastSign, int &foundPoints, vector<vec2> &samples, real epsilon) const {
+    vec2 p = evaluate(evaluationValue);
+    vec2 n = normal(evaluationValue);
+    real direction = p.x * n.y - p.y * n.x;
+    int currentSign = (direction < 0) ? -1 : 1;
+    if((currentSign > 0 && direction < epsilon) ||
+        (currentSign < 0 && (-1.0 * direction) < epsilon)) {
+        samples[foundPoints] = p;
+        foundPoints += 1;
+        lastSign = 0;
+        return 1;
+    } else if (lastSign * currentSign == -1) { //pointing to different directions
+        return -1;
+    } else {
+        lastSign = currentSign; //needed for the cases, when lastSign == 0
+        return 0;
     }
 }

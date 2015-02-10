@@ -19,13 +19,14 @@ public:
     int type() const override; // from QGraphicsItem
     virtual QString defaultName() const override; // from GraphicsScheduleItem
 
-    const SplineGear* gear() const;
+    real module() const;
+    void setModule(real module);
 
     void setNumberOfTeeth(uint toothCount);
     uint numberOfTeeth() const;
 
-    void setRadius(real radius);
-    real radius() const;
+    void setReferenceRadius(real radius);
+    real referenceRadius() const;
 
     real minimumDistanceToCenter() const;
     real maximumDistanceToCenter() const;
@@ -33,15 +34,15 @@ public:
     bool isBasePitchVisible() const;
     void setBasePitchVisibility(bool isVisible);
 
-    bool isPitchCircleVisible() const;
-    void setPitchCircleVisibility(bool isVisible);
+    bool isReferenceCircleVisible() const;
+    void setReferenceCircleVisibility(bool isVisible);
 
     bool isRotating() const;
     void setRotating(bool);
     real rotationVelocity() const;
     void setRotationVelocity(real velocity);
 
-    QRectF normalBoundingRect(qreal controlPointRadius = Preferences::PointRadius + 0.5f * Preferences::HighlightedLineWidth) const override; // from GraphicsSpline
+    QRectF normalBoundingRect(qreal controlPointRadius = Preferences::PointRadius + 0.5 * Preferences::HighlightedLineWidth) const override; // from GraphicsSpline
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override; // from QGraphicsItem
 
 
@@ -49,7 +50,7 @@ private:
     SplineGear *m_splineGear;
 
     bool m_isBasePitchVisible;
-    bool m_isPitchCircleVisible;
+    bool m_isReferenceCircleVisible;
 
     bool m_isRotating;
     real m_rotationVelocity;
@@ -60,7 +61,7 @@ private:
      */
     QPainterPath splineCurvePath() const override; // from GraphicsSpline
 
-    QPainterPath pitchCirclePath() const;
+    QPainterPath referenceCirclePath() const;
 
     /** @brief Creates a fan-shaped path which marks the pitches of the gear
      *

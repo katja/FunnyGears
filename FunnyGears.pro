@@ -28,8 +28,9 @@ UI_DIR  = $$OBJECTS_DIR/.ui
 
 INCLUDEPATH += ./src/
 INCLUDEPATH +=  /usr/include
+INCLUDEPATH += /usr/local/opt/glm/include #for glm library
 
-ICON    = images/Gear.icns      # Mac solution for the icon of the app
+ICON = images/Gear.icns      # Mac solution for the icon of the app
 RESOURCES = images.qrc
 
 PRECOMPILED_HEADER = src/stable.h

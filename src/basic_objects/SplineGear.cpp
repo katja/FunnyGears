@@ -1,11 +1,15 @@
 #include "SplineGear.h"
-#include <Eigen/Geometry>
-
+#include <glm/glm.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 #include "helpers.h"
 
-SplineGear::SplineGear(SplineToothProfile *toothOfGear) : m_toothProfile(toothOfGear),
-    m_radius(0.0f), m_numberOfTeeth(0), m_rotationDirection(0) {
-
+SplineGear::SplineGear(Spline *toothOfGear) : m_toothProfile(toothOfGear),
+    m_referenceRadius(0.0),
+    m_numberOfTeeth(0),
+    m_rotationDirection(0),
+    m_minimumDistanceToCenter(-1.0),
+    m_maximumDistanceToCenter(-1.0)
+{
     std::cout << "SplineGear is created" << std::endl;
     update();
 }
@@ -21,36 +25,37 @@ void SplineGear::update() {
         // if no radius given, set a default one
         if(m_rotationDirection == 0)
             m_rotationDirection = toothDescribedInClockDirection() ? 1 : -1;
-        if(m_radius <= 0) {
-            m_radius = defaultRadius();
-        }
         if(m_numberOfTeeth == 0) {
             // If the tooth profile would suit 9.x times in a circle, only use 9 teeth to avoid overlapping start and end points
             m_numberOfTeeth = maximumPossibleToothCount();
         }
         updateKnotsAndControlPoints();
+        updateDistancesToCenter();
+        if(m_referenceRadius <= 0) {
+            m_referenceRadius = defaultReferenceRadius();
+        }
 
     } else if(m_toothProfile->numberOfControlPoints() == 1) {
         if(m_rotationDirection == 0)
             m_rotationDirection = 1;
-        if(m_radius <= 0)
-            m_radius = m_toothProfile->controlPoint(0).norm();
         if(m_numberOfTeeth <= 0)
             m_numberOfTeeth = 6; // No special number, but there has to be one
         updateControlPoints();
+        if(m_referenceRadius <= 0)
+            m_referenceRadius = glm::length(m_toothProfile->controlPoint(0));
 
     } else if(m_toothProfile->numberOfControlPoints() > 1) {
         vec2 first = m_toothProfile->controlPoint(0);
         vec2 last = m_toothProfile->controlPoint(m_toothProfile->numberOfControlPoints() - 1);
         if(m_rotationDirection == 0)
-            m_rotationDirection = (first.x() * last.y() - first.y() * last.x() > 0.0f) ? 1 : -1;
-        if(m_radius <= 0)
-            m_radius = (0.5f * (first + last)).norm();
+            m_rotationDirection = (first.x * last.y - first.y * last.x > 0.0) ? 1 : -1;
         if(m_numberOfTeeth <= 0) {
-            real angleOfControlPoints = acos(first.normalized().dot(last.normalized()));
-            m_numberOfTeeth = static_cast<uint>(floor((2.0f * M_PI) / angleOfControlPoints));
+            real angleOfControlPoints = angleBetween(first, last);
+            m_numberOfTeeth = static_cast<uint>(floor((2.0 * M_PI) / angleOfControlPoints));
         }
         updateControlPoints();
+        if(m_referenceRadius <= 0)
+            m_referenceRadius = glm::length(vec2((first + last) * 0.5));
 
     } else { // no control points specified
         setBackKnotsAndControlPoints();
@@ -61,10 +66,45 @@ void SplineGear::update() {
 // is pointing to the right, the y-axis points downward. Therefore "in clock direction"
 // is a mathematical "counter clock direction"
 bool SplineGear::toothDescribedInClockDirection() const {
-    vec2 first = m_toothProfile->evaluate(m_toothProfile->lowerDomainLimit());
-    vec2 last = m_toothProfile->evaluate(m_toothProfile->upperDomainLimit() - 0.01f);
-    return (first.x() * last.y() - first.y() * last.x() > 0.0f);
+    vec2 first = m_toothProfile->firstPoint();
+    vec2 last = m_toothProfile->lastPoint();
+    return (first.x * last.y - first.y * last.x > 0.0);
     //is 0 if points lie on one line through the origin.
+}
+
+real SplineGear::module() const {
+    if(m_numberOfTeeth <= 0.0)
+        return 0.0;
+    return 2.0 * m_referenceRadius / m_numberOfTeeth;
+}
+
+void SplineGear::setModule(real module) {
+    if(module <= 0.0)
+        return;
+    setReferenceRadius(module * m_numberOfTeeth / 2.0);
+    if(glm::abs(this->module() - module) >= 0.0001)
+        std::cout << "ERROR: wanted to set a module of " << module << " and got instead " << this->module() << std::endl;
+}
+
+real SplineGear::defaultReferenceRadius() const {
+    // Assume for simplicity a radius which lies in the middle of max and min points around the center
+    return (maximumDistanceToCenter() + minimumDistanceToCenter()) / 2.0;
+}
+
+void SplineGear::setReferenceRadius(real radius) {
+    std::cout << "SplineGear::setReferenceRadius with radius = " << radius << ", whereas m_referenceRadius = " << m_referenceRadius << ", and default: " << defaultReferenceRadius() << std::endl;
+    if(radius <= 0.0)
+        return;
+    real scaling = radius / m_referenceRadius;
+    m_toothProfile->scale(scaling);
+    update();
+    m_referenceRadius = defaultReferenceRadius();
+    if(glm::abs(m_referenceRadius - radius) >= 0.0001)
+        std::cout << "ERROR: wanted to set a reference radius of " << radius << " and got instead " << m_referenceRadius << std::endl;
+}
+
+real SplineGear::referenceRadius() const {
+    return m_referenceRadius;
 }
 
 uint SplineGear::numberOfTeeth() const {
@@ -77,31 +117,15 @@ void SplineGear::setNumberOfTeeth(uint numberOfTeeth) {
 }
 
 real SplineGear::angularPitch() const { //Teilungswinkel
-    return 2.0f * M_PI / m_numberOfTeeth;
-}
-
-real SplineGear::defaultRadius() const {
-    // Assume for simplicity a radius which lies in the middle of max and min points around the center
-    return (maximumDistanceToCenter() + minimumDistanceToCenter()) / 2.0f;
-}
-
-void SplineGear::setRadius(real radius) {
-    if(radius <= 0.0f)
-        return;
-    m_radius = radius;
-    update();
-}
-
-real SplineGear::radius() const {
-    return m_radius;
+    return 2.0 * M_PI / m_numberOfTeeth;
 }
 
 real SplineGear::maximumDistanceToCenter() const {
-    return m_toothProfile->maximumDistanceToOrigin();
+    return m_maximumDistanceToCenter;
 }
 
 real SplineGear::minimumDistanceToCenter() const {
-    return m_toothProfile->minimumDistanceToOrigin();
+    return m_minimumDistanceToCenter;
 }
 
 real SplineGear::maximumDistanceOfControlPointToCenter() const {
@@ -114,16 +138,37 @@ real SplineGear::minimumDistanceOfControlPointToCenter() const {
 
 uint SplineGear::maximumPossibleToothCount() const {
     //minimum angular pitch with m_toothProfile:
-    vec2 start = m_toothProfile->start();
-    vec2 stop  = m_toothProfile->stop();
+    vec2 start = m_toothProfile->firstPoint();
+    vec2 stop  = m_toothProfile->lastPoint();
     // if angularPitch > PI (more than half of circle), concstruction will fail!
-    real minAngularPitch = acos((start.normalized().dot(stop.normalized())));
+    real minAngularPitch = angleBetween(start, stop);
 
-    return static_cast<uint>(floor((2.0f * M_PI) / minAngularPitch));
+    return static_cast<uint>(floor((2.0 * M_PI) / minAngularPitch));
 }
 
 vec2 SplineGear::startPointForTooth() const {
-    return m_toothProfile->start();
+    return m_toothProfile->firstPoint();
+}
+
+void SplineGear::updateDistancesToCenter() {
+    if(m_numberOfTeeth == 1) {
+        m_minimumDistanceToCenter = m_toothProfile->minimumDistanceToOrigin();
+        m_maximumDistanceToCenter = m_toothProfile->maximumDistanceToOrigin();
+    } else {
+        //Create a spline of two following teeth
+        uint knotsSize = 2 * m_toothProfile->numberOfControlPoints() + m_degree + 1;
+        std::vector<real> knots(knotsSize);
+        std::vector<vec2> controlPoints(2 * m_toothProfile->numberOfControlPoints());
+        for(uint i = 0; i < knotsSize; ++i) {
+            knots[i] = m_knots[i];
+        }
+        for(uint i = 0; i < controlPoints.size(); ++i) {
+            controlPoints[i] = m_controlPoints[i];
+        }
+        Spline s(controlPoints, knots);
+        m_minimumDistanceToCenter = s.minimumDistanceToOrigin();
+        m_maximumDistanceToCenter = s.maximumDistanceToOrigin();
+    }
 }
 
 /*Returns a new BSplineCurve representing the whole gear by putting together
@@ -205,7 +250,7 @@ void SplineGear::updateKnotsAndControlPoints() {
         if(similarStartKnots + similarEndKnots > m_degree) {
             // knot values must be adapted for concatenation
             // choose a new value for continuation
-            real newLastValue = givenKnots[l_2] + 1.0f; //<== This may be a bad choice, but at least it's a simple calculation
+            real newLastValue = givenKnots[l_2] + 1.0; //<== This may be a bad choice, but at least it's a simple calculation
             // for a better choice how to carry on, test if a different knot value exists
             i = 1;
             foundSame = true;
@@ -241,7 +286,7 @@ void SplineGear::updateControlPoints() {
     for(uint tooth = 0; tooth < m_numberOfTeeth; ++tooth) {
         real rotationInRad = tooth * m_rotationDirection * angularPitch();
         for(uint j = 0; j < ppt; ++j) {
-            m_controlPoints[j + tooth * ppt] = Eigen::Rotation2D<real>(rotationInRad) * m_toothProfile->controlPoint(j); //rotate the controlPoint[j] by (2 * M_PI) / m_numberOfTeeth
+            m_controlPoints[j + tooth * ppt] = glm::rotate(m_toothProfile->controlPoint(j), rotationInRad); //rotate the controlPoint[j] by (2 * M_PI) / m_numberOfTeeth
         }
     }
 
@@ -334,7 +379,7 @@ vec2 SplineGear::relatedPositionInTooth(uint toothIndex, vec2 positionInFirstToo
     if(toothIndex == 0)
         return positionInFirstTooth;
     real rotationInRad = m_rotationDirection * toothIndex * angularPitch();
-    return Eigen::Rotation2D<real>(rotationInRad) * positionInFirstTooth;
+    return glm::rotate(positionInFirstTooth, rotationInRad);
 }
 
 uint SplineGear::relatedIndexInFirstTooth(uint controlPointIndex) const {
@@ -349,7 +394,7 @@ vec2 SplineGear::relatedPositionInFirstTooth(uint toothIndex, vec2 position) con
     if(toothIndex == 0)
         return position;
     real rotationInRad = -(m_rotationDirection * toothIndex * angularPitch()); //the minus sign is necessary, as the first tooth from a following tooth is searched
-    return Eigen::Rotation2D<real>(rotationInRad) * position;
+    return glm::rotate(position, rotationInRad);
 }
 
 real SplineGear::relatedKnotValueInFirstTooth(real gearValue) const {

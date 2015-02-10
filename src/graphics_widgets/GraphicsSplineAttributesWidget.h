@@ -29,7 +29,7 @@ private slots:
 private:
     GraphicsSpline *m_currentSpline;
 
-    QCheckBox *m_showControlPolygonCheckBox;
+    QCheckBox   *m_showControlPolygonCheckBox;
 
     QSpinBox    *m_degreeSpinBox;
     QLabel      *m_degreeLabel;

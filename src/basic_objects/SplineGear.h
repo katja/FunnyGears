@@ -1,14 +1,14 @@
 #ifndef SPLINE_GEAR
 #define SPLINE_GEAR
 
-#include "basic_objects/SplineToothProfile.h"
+#include "basic_objects/Spline.h"
 #include "definitions.h"
 
 class SplineGear : public Spline {
 public:
     // Given toothOfGear is used to build a gear "around" this tooth. If tooth is changed
     // call updateKnotsAndControlPoints() to update the gear curve.
-    SplineGear(SplineToothProfile *toothOfGear);
+    SplineGear(Spline *toothOfGear);
 
     //Does NOT delete the Spline it is linked to!!!
     virtual ~SplineGear();
@@ -16,7 +16,7 @@ public:
     /** @brief Updates important values for the gear.
      *
      *  @p m_degree is set to the degree of the current @p m_toothProfile.
-     *  @p m_radius is only changed, if @p m_radius <= 0 and if isValid().
+     *  @p m_referenceRadius is only changed, if @p m_referenceRadius <= 0 and if isValid().
      *                It is then set to the middle value of toothOfGear.
      *  @p m_numberOfTeeth is only changed, if @p m_numberOfTeeth == 0 and if isValid().
      *                It is then set to maximumPossibleToothCount().
@@ -35,6 +35,47 @@ public:
      *  and false otherwise.
      */
     bool toothDescribedInClockDirection() const;
+
+    /** @brief Returns the module of the gear
+     *
+     *  If the gear is not valid at the moment and therefore
+     *  no tooth count or pitch is available, this method returns 0.0
+     *
+     *  @return module of the gear
+     */
+    real module() const;
+
+    /** @brief Sets the module to the given value
+     *
+     *  Given @p module must be a value greater than 0
+     *  otherwise it is not accepted and nothing will change!
+     *  @param module new value for the module of the gear
+     */
+    void setModule(real module);
+
+    /** @brief Returns a default value for the radius between nearest and furthest point
+     *
+     *  Searches the #m_toothProfile for the two points with a maximum and a minimum
+     *  distance to the center and returns a value in the middle between these two.
+     *  @warning This requires a valid gear. So check #isValid() before!
+     *  @return default value for the radius in the middle
+     */
+    real defaultReferenceRadius() const;
+
+    /** @brief Sets the radius to @p radius
+     *
+     *  The given @p radius value has to be greater than 0.
+     *  Otherwise it won't be accepted.
+     *  After the new value is set, all knots and control points are updated.
+     *  @param radius new value for the radius
+     */
+    void setReferenceRadius(real radius);
+
+    /** @brief Returns the radius
+     *
+     *  @return radius
+     */
+    real referenceRadius() const;
 
     /** @brief Returns the number of teeth
      *
@@ -57,30 +98,6 @@ public:
      *  @return the angular pitch of a transverse gear
      */
     real angularPitch() const;
-
-    /** @brief Returns a default value for the radius between nearest and furthest point
-     *
-     *  Searches the #m_toothProfile for the two points with a maximum and a minimum
-     *  distance to the center and returns a value in the middle between these two.
-     *  @warning This requires a valid gear. So check #isValid() before!
-     *  @return default value for the radius in the middle
-     */
-    real defaultRadius() const;
-
-    /** @brief Sets the radius to @p radius
-     *
-     *  The given @p radius value has to be greater than 0.
-     *  Otherwise it won't be accepted.
-     *  After the new value is set, all knots and control points are updated.
-     *  @param radius new value for the radius
-     */
-    void setRadius(real radius);
-
-    /** @brief Returns the radius
-     *
-     *  @return radius
-     */
-    real radius() const;
 
     /** @brief Returns the maximum distance to the gear center
      *
@@ -120,6 +137,15 @@ public:
      *  @warning test the spline for validness before!
      */
     vec2 startPointForTooth() const;
+
+    /** @brief Calculates the minimum and maximum distances to the center
+     *
+     *  As the calculation of the minimum and maximum distance to the center
+     *  is expensive, these values are stored and should only be updated, when
+     *  necessary. This is done f.ex. every time when on a valid gear the #update()
+     *  method is called.
+     */
+    void updateDistancesToCenter();
 
     /** @brief Recalculcates the knots and control points.
      *
@@ -296,8 +322,8 @@ public:
     vec2 relatedPositionInTooth(uint toothIndex, vec2 positionInFirstTooth) const;
 
 private:
-    SplineToothProfile *m_toothProfile;
-    real m_radius;
+    Spline *m_toothProfile;
+    real m_referenceRadius;
     uint m_numberOfTeeth;
     /** @brief Stores the turning direction to build the gear out of #m_toothProfile
      *
@@ -312,6 +338,9 @@ private:
      *  new control point is added (@see addControlPoint())
      */
     int m_rotationDirection;
+
+    real m_minimumDistanceToCenter;
+    real m_maximumDistanceToCenter;
 
     uint relatedIndexInFirstTooth(uint controlPointIndex) const;
     uint toothIndex(uint controlPointIndex) const;

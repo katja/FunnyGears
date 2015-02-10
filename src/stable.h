@@ -51,9 +51,7 @@
 #include <QToolTip>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-#include <QVector2D>
 #include <QWidget>
-
 
 /* Other Qt classes not included in QtWidget: */
 #include <QIcon>

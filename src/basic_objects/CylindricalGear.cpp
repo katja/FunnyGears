@@ -1,5 +1,5 @@
 #include "basic_objects/CylindricalGear.h"
-#include <Eigen/Geometry>
+#include <glm/gtx/rotate_vector.hpp>
 
 void CylindricalGear::gearProfile(vector<vec2> &gearProfile) const {
     uint pointsPerTooth = gearProfile.size() / getNumberOfTeeth();
@@ -16,15 +16,15 @@ void CylindricalGear::gearProfile(vector<vec2> &gearProfile) const {
     vec2 first = toothProfileVector[0];
     vec2 last = toothProfileVector[pointsPerTooth];
     int rotationDirection = 1;
-    if((first[0] * last[1] - first[1] * last[0]) < 0)
+    if((first.x * last.y - first.y * last.x) < 0)
         rotationDirection = -1;
 
     real rotationPerToothInRad = rotationDirection * 2 * M_PI / numberOfTeeth;
 
-    real rotationInRad = 0.0f;
+    real rotationInRad = 0.0;
     for(uint i = 0; i < numberOfTeeth; ++i) {
         for(uint j = 0; j < pointsPerTooth; ++j) {
-            gearProfile[i * pointsPerTooth + j] = Eigen::Rotation2D<real>(rotationInRad) * toothProfileVector[j];
+            gearProfile[i * pointsPerTooth + j] = glm::rotate(toothProfileVector[j], rotationInRad);
         }
         rotationInRad += rotationPerToothInRad;
     }

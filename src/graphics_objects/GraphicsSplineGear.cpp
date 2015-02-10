@@ -1,6 +1,7 @@
 #include "graphics_objects/GraphicsSplineGear.h"
 #include "preferences.h"
 #include "helpers.h"
+#include <glm/glm.hpp>
 
 const int GraphicsSplineGear::Type = GraphicsSplineGear::UserType + Type::GraphicsSplineGearType;
 
@@ -13,10 +14,10 @@ bool GraphicsSplineGear::isGraphicsSplineGearItem(QGraphicsItem *item) {
 GraphicsSplineGear::GraphicsSplineGear(SplineGear *gear) : GraphicsSpline(gear),
     m_splineGear(gear),
     m_isBasePitchVisible(true),
-    m_isPitchCircleVisible(true),
+    m_isReferenceCircleVisible(true),
     m_isRotating(false),
-    m_rotationVelocity(0.0f),
-    m_rotationDegree(0.0f)
+    m_rotationVelocity(0.0),
+    m_rotationDegree(0.0)
 {
 
     std::cout << "GraphicsSplineGear is created" << std::endl;
@@ -43,8 +44,14 @@ QString GraphicsSplineGear::defaultName() const {
     return "Spline Gear";
 }
 
-const SplineGear* GraphicsSplineGear::gear() const {
-    return m_splineGear;
+
+real GraphicsSplineGear::module() const {
+    return m_splineGear->module();
+}
+
+void GraphicsSplineGear::setModule(real module) {
+    prepareGeometryChange();
+    m_splineGear->setModule(module);
 }
 
 void GraphicsSplineGear::setNumberOfTeeth(uint toothCount) {
@@ -56,13 +63,13 @@ uint GraphicsSplineGear::numberOfTeeth() const {
     return m_splineGear->numberOfTeeth();
 }
 
-void GraphicsSplineGear::setRadius(real radius) {
+void GraphicsSplineGear::setReferenceRadius(real radius) {
     prepareGeometryChange();
-    m_splineGear->setRadius(radius);
+    m_splineGear->setReferenceRadius(radius);
 }
 
-real GraphicsSplineGear::radius() const {
-    return m_splineGear->radius();
+real GraphicsSplineGear::referenceRadius() const {
+    return m_splineGear->referenceRadius();
 }
 
 real GraphicsSplineGear::minimumDistanceToCenter() const {
@@ -88,13 +95,13 @@ void GraphicsSplineGear::setBasePitchVisibility(bool isVisible) {
     m_isBasePitchVisible = isVisible;
 }
 
-bool GraphicsSplineGear::isPitchCircleVisible() const {
-    return m_isPitchCircleVisible;
+bool GraphicsSplineGear::isReferenceCircleVisible() const {
+    return m_isReferenceCircleVisible;
 }
 
-void GraphicsSplineGear::setPitchCircleVisibility(bool isVisible) {
+void GraphicsSplineGear::setReferenceCircleVisibility(bool isVisible) {
     prepareGeometryChange();
-    m_isPitchCircleVisible = isVisible;
+    m_isReferenceCircleVisible = isVisible;
 }
 
 bool GraphicsSplineGear::isRotating() const {
@@ -140,8 +147,8 @@ void GraphicsSplineGear::paint(QPainter *painter, const QStyleOptionGraphicsItem
         painter->drawPath(angularPitchStrokesPath());
 
     //render pitch circle
-    if(m_isPitchCircleVisible)
-        painter->drawPath(pitchCirclePath());
+    if(m_isReferenceCircleVisible)
+        painter->drawPath(referenceCirclePath());
 
     //render spline or better, the gear:
     GraphicsSpline::paint(painter, option, widget);
@@ -162,10 +169,10 @@ QPainterPath GraphicsSplineGear::splineCurvePath() const {
     return path;
 }
 
-QPainterPath GraphicsSplineGear::pitchCirclePath() const { //Wälzkreis
+QPainterPath GraphicsSplineGear::referenceCirclePath() const { //Wälzkreis
     QPainterPath path;
-    real part = 2.0f * M_PI / 96.0f;
-    real r = m_splineGear->radius();
+    real part = 2.0 * M_PI / 96.0;
+    real r = m_splineGear->referenceRadius();
     path.moveTo(r, 0);
     for(uint i = 1; i < 96; ++i) {
         path.lineTo(cos(part * i) * r, -sin(part * i) * r);
@@ -179,16 +186,16 @@ QPainterPath GraphicsSplineGear::angularPitchStrokesPath() const {
 
     if(m_splineGear->isValid()) {
         startPoint = m_splineGear->startPointForTooth();
-        startPoint = startPoint.normalized() * Preferences::AngularPitchStrokesLength;
+        startPoint = glm::normalize(startPoint) * Preferences::AngularPitchStrokesLength;
     } else if(m_splineGear->numberOfControlPoints() > 0) {
         startPoint = m_splineGear->controlPoint(0);
-        startPoint = startPoint.normalized() * Preferences::AngularPitchStrokesLength;
+        startPoint = glm::normalize(startPoint) * Preferences::AngularPitchStrokesLength;
     }
 
     QPainterPath path;
     for(uint i = 0; i < m_splineGear->numberOfTeeth(); ++i) {
         vec2 turnedPoint = m_splineGear->relatedPositionInTooth(i, startPoint);
-        path.lineTo(QPointF(turnedPoint.x(), turnedPoint.y()));
+        path.lineTo(QPointF(turnedPoint.x, turnedPoint.y));
         path.moveTo(0,0);
     }
     return path;

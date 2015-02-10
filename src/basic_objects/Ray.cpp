@@ -1,6 +1,5 @@
 #include "basic_objects/Ray.h"
-#include <Eigen/LU>
-#include <Eigen/Dense>
+#include <glm/glm.hpp>
 
 Ray::Ray() {
 }
@@ -8,7 +7,7 @@ Ray::Ray() {
 Ray::Ray(vec2 origin, vec2 direction) : m_origin(origin), m_direction(direction) {
     if(m_direction == vec2(0,0))
         throw;
-    m_direction.normalize();
+    m_direction = glm::normalize(m_direction);
 }
 
 const vec2& Ray::origin() const {
@@ -29,9 +28,9 @@ real Ray::distanceToPoint(vec2 &point) const {
     //Shortest distance exists, where (point - ray(t1)) is vertical to direction
     // => ((origin + t1 * direction) - point) * direction = 0  as direction is normalized:
     // <=> t = (point - origin) * direction
-    real t1 = (point - m_origin).dot(m_direction);
-    if(t1 >= 0.0f)
-        return ((m_origin + t1 * m_direction) - point).norm();
+    real t1 = glm::dot((point - m_origin), m_direction);
+    if(t1 >= 0.0)
+        return glm::length((m_origin + t1 * m_direction) - point);
     else
         return  std::numeric_limits<real>::max();
 }
@@ -48,13 +47,12 @@ bool Ray::intersect(vec2 startLine, vec2 endLine, vec2 &intersectionPoint) const
     vec2 x = startLine - endLine;
     vec2 y = m_direction;
     vec2 z = startLine - m_origin;
-    m2x2 matrix;
-    matrix << x, y;
-    if(matrix.determinant() != 0) {
-        m2x2 invMatrix = matrix.inverse();
+    m2x2 matrix = m2x2(x, y);
+    if(glm::determinant(matrix) != 0) {
+        m2x2 invMatrix = glm::inverse(matrix);
         vec2 t = invMatrix * z;
-        if (0 <= t(0) && t(0) <= 1 && 0 <= t(1)) {
-            intersectionPoint = m_origin + t(1) * y;
+        if(0 <= t.x && t.x <= 1 && 0 <= t.y) {
+            intersectionPoint = m_origin + t.y * y;
             return true;
         }
     }

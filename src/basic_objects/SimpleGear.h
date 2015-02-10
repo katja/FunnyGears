@@ -1,56 +1,56 @@
-#ifndef SIMPLE_GEAR
-#define SIMPLE_GEAR
+// #ifndef SIMPLE_GEAR
+// #define SIMPLE_GEAR
 
-#include "basic_objects/CylindricalGear.h"
-#include "basic_objects/ToothProfile.h"
+// #include "basic_objects/CylindricalGear.h"
+// #include "basic_objects/ToothProfile.h"
 
-class SimpleGear : public CylindricalGear {
+// class SimpleGear : public CylindricalGear {
 
-public:
-    /** Simple Gear constructor which takes a copy of any class of a tooth profile
-     *  The intern copy of the given ToothProfile must not be changed or intern values
-     *  have to be set again!
-     */
-    SimpleGear(const ToothProfile &toothProfile);
+// public:
+//     /** Simple Gear constructor which takes a copy of any class of a tooth profile
+//      *  The intern copy of the given ToothProfile must not be changed or intern values
+//      *  have to be set again!
+//      */
+//     SimpleGear(const ToothProfile &toothProfile);
 
-    /** Simple Gear copy constructor */
-    SimpleGear(const SimpleGear &other);
+//     /** Simple Gear copy constructor */
+//     SimpleGear(const SimpleGear &other);
 
-    virtual ~SimpleGear();
+//     virtual ~SimpleGear();
 
-    /** Returns the momentarily set radius for this gear */
-    real getRadius() const;
+//     /** Returns the momentarily set radius for this gear */
+//     real getRadius() const;
 
-    /** Sets the radius of the gear to given @param radius, if this is possible
-     *  If given @param radius is smaller than minRadius() or bigger than maxRadius()
-     *  nothing is done!
-     */
-    void setRadius(real radius);
+//     * Sets the radius of the gear to given @param radius, if this is possible
+//      *  If given @param radius is smaller than minRadius() or bigger than maxRadius()
+//      *  nothing is done!
 
-    /** Gives a bottom limit for a radius value */
-    real minRadius() const;
+//     void setRadius(real radius);
 
-    /** Gives an upper limit for a radius value */
-    real maxRadius() const;
+//     /** Gives a bottom limit for a radius value */
+//     real minRadius() const;
 
-    real getRootRadius() const;
+//     /** Gives an upper limit for a radius value */
+//     real maxRadius() const;
 
-    real getTipRadius() const;
+//     real getRootRadius() const;
 
-    uint getNumberOfTeeth() const;
+//     real getTipRadius() const;
 
-    void setNumberOfTeeth(uint numberOfTeeth);
+//     uint getNumberOfTeeth() const;
 
-    real getAngularPitch() const; //purely virtual method of CylindricalGear
+//     void setNumberOfTeeth(uint numberOfTeeth);
 
-    //necessary:
-    void getSampledProfileOfATooth(vector<vec2> &toothProfile) const; //purely virtual method of CylindricalGear
+//     real getAngularPitch() const; //purely virtual method of CylindricalGear
 
-private:
-    ToothProfile *m_toothProfile;
-    real m_radius;
-    uint m_numberOfTeeth;
-};
+//     //necessary:
+//     void getSampledProfileOfATooth(vector<vec2> &toothProfile) const; //purely virtual method of CylindricalGear
+
+// private:
+//     ToothProfile *m_toothProfile;
+//     real m_radius;
+//     uint m_numberOfTeeth;
+// };
 
 
-#endif // SIMPLE_GEAR
+// #endif // SIMPLE_GEAR

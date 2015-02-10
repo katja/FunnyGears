@@ -65,7 +65,7 @@ void GraphicsSplineAttributesWidget::updateAttributes() {
         m_drawTangentCheckBox->setEnabled(true);
         m_drawTangentCheckBox->setChecked(m_currentSpline->isTangentDrawn());
         m_tangentValueSlider->setEnabled(m_currentSpline->isTangentDrawn());
-        m_tangentValueSlider->setRange(spline->lowerDomainLimit(), spline->upperDomainLimit() - 0.01f);
+        m_tangentValueSlider->setRange(spline->lowerDomainLimit(), spline->upperDomainLimit() - 0.0001);
         m_tangentValueSlider->setValue(m_currentSpline->tangentValue());
         m_refineButton->setEnabled(true);
     } else {

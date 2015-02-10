@@ -48,7 +48,7 @@ public:
     int indexOfPointAt(QPointF localPos, qreal radius = Preferences::PointRadius);
 
     QRectF boundingRect() const override; // from QGraphicsItem
-    virtual QRectF normalBoundingRect(qreal controlPointRadius = Preferences::PointRadius + 0.5f * Preferences::HighlightedLineWidth) const;
+    virtual QRectF normalBoundingRect(qreal controlPointRadius = Preferences::PointRadius + 0.5 * Preferences::HighlightedLineWidth) const;
     QPainterPath shape() const override; // from QGraphicsItem
     virtual QPainterPath normalShape() const;
 

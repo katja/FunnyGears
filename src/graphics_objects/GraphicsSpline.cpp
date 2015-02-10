@@ -13,7 +13,7 @@ bool GraphicsSpline::isGraphicsSplineItem(QGraphicsItem *item) {
     return false;
 }
 
-GraphicsSpline::GraphicsSpline(Spline *spline) : m_isControlPolygonVisible(true), m_isTangentDrawn(false), m_tangentValue(-1.0f) {
+GraphicsSpline::GraphicsSpline(Spline *spline) : m_isControlPolygonVisible(true), m_isTangentDrawn(false), m_tangentValue(-1.0) {
 
     std::cout << "GraphicsSpline is created" << std::endl;
 
@@ -111,7 +111,7 @@ void GraphicsSpline::refineSpline() {
     prepareGeometryChange();
     do {
         m_spline->knotRefinement(maxDist);
-        maxDist = maxDist / 2.0f;
+        maxDist = maxDist / 2.0;
     } while(numberOfControlPointsBefore == m_spline->numberOfControlPoints());
 }
 
@@ -139,7 +139,7 @@ void GraphicsSpline::removePointNear(QPointF scenePos) {
 
 QPointF GraphicsSpline::positionOfPoint(int index) {
     const vector<vec2>& controlPoints = m_spline->controlPoints();
-    return QPointF(controlPoints[index].x(), controlPoints[index].y());
+    return QPointF(controlPoints[index].x, controlPoints[index].y);
 }
 
 int GraphicsSpline::indexOfPointAt(QPointF localPos, qreal radius) {
@@ -170,18 +170,18 @@ QRectF GraphicsSpline::normalBoundingRect(qreal radius) const {
     }
 
     QPointF min, max;
-    min = QPointF(controlPoints[0].x(), controlPoints[0].y());
+    min = QPointF(controlPoints[0].x, controlPoints[0].y);
     max = min;
     for(uint i = 1; i < controlPoints.size(); ++i) {
         //calculate bounding rect (is the bounding rect of control points)
-        if(controlPoints[i].x() < min.x())
-            min.setX(controlPoints[i].x());
-        if(controlPoints[i].y() < min.y())
-            min.setY(controlPoints[i].y());
-        if(controlPoints[i].x() > max.x())
-            max.setX(controlPoints[i].x());
-        if(controlPoints[i].y() > max.y())
-            max.setY(controlPoints[i].y());
+        if(controlPoints[i].x < min.x())
+            min.setX(controlPoints[i].x);
+        if(controlPoints[i].y < min.y())
+            min.setY(controlPoints[i].y);
+        if(controlPoints[i].x > max.x())
+            max.setX(controlPoints[i].x);
+        if(controlPoints[i].y > max.y())
+            max.setY(controlPoints[i].y);
     }
     min -= QPointF(radius, radius);
     max += QPointF(radius, radius);
@@ -200,9 +200,9 @@ QPainterPath GraphicsSpline::shape() const {
 QPainterPath GraphicsSpline::normalShape() const {
     //only the control polygon path is used here, as with the spline path this would be too slow
     if(isActive())
-        return controlPolygonPath(Preferences::HighlightedLineWidth) + controlPointsPaths(Preferences::PointRadius + 0.5f * Preferences::HighlightedLineWidth);
+        return controlPolygonPath(Preferences::HighlightedLineWidth) + controlPointsPaths(Preferences::PointRadius + 0.5 * Preferences::HighlightedLineWidth);
     else
-        return controlPolygonPath(Preferences::SimpleLineWidth) + controlPointsPaths(Preferences::PointRadius + 0.5f * Preferences::SimpleLineWidth);
+        return controlPolygonPath(Preferences::SimpleLineWidth) + controlPointsPaths(Preferences::PointRadius + 0.5 * Preferences::SimpleLineWidth);
 }
 
 QPainterPath GraphicsSpline::controlPolygonPath(qreal width) const {
@@ -228,7 +228,7 @@ QPainterPath GraphicsSpline::controlPointsPaths(qreal radius) const {
 
     QPainterPath pointsPath;
     for(uint i = 0; i < controlPoints.size(); ++i) {
-        pointsPath.addEllipse(QPointF(controlPoints[i].x(), controlPoints[i].y()), radius, radius);
+        pointsPath.addEllipse(QPointF(controlPoints[i].x, controlPoints[i].y), radius, radius);
     }
     return pointsPath;
 }
@@ -264,12 +264,12 @@ QPainterPath GraphicsSpline::tangentPath() const {
     QPainterPath path;
     vec2 tangentVecPoint = m_spline->evaluate(m_tangentValue);
     vec2 derivative = m_spline->derivative(m_tangentValue);
-    vec2 start = tangentVecPoint - 0.5f * Preferences::TangentLength * derivative;
-    vec2 stop = tangentVecPoint + 0.5f * Preferences::TangentLength * derivative;
+    vec2 start = tangentVecPoint - 0.5 * Preferences::TangentLength * derivative;
+    vec2 stop = tangentVecPoint + 0.5 * Preferences::TangentLength * derivative;
     QVector<QPointF> tangentLine(2);
-    tangentLine[0] = QPointF(start(0), start(1));
-    tangentLine[1] = QPointF(stop(0), stop(1));
-    QPointF tangentPoint = QPointF(tangentVecPoint(0), tangentVecPoint(1));
+    tangentLine[0] = QPointF(start.x, start.y);
+    tangentLine[1] = QPointF(stop.x, stop.y);
+    QPointF tangentPoint = QPointF(tangentVecPoint.x, tangentVecPoint.y);
     path.addEllipse(tangentPoint, Preferences::PointRadius, Preferences::PointRadius);
     path.addPolygon(QPolygonF(tangentLine));
     return path;
@@ -383,6 +383,6 @@ void GraphicsSpline::adjustInSplineRange(real &value) const {
     if(value < m_spline->lowerDomainLimit()) {
         value = m_spline->lowerDomainLimit();
     } else if (value >= m_spline->upperDomainLimit()) {
-        value = m_spline->upperDomainLimit() - 0.01f;
+        value = m_spline->upperDomainLimit() - 0.0001;
     }
 }

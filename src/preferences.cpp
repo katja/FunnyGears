@@ -14,12 +14,12 @@ qreal Preferences::SimpleLineWidth(1);
 
 qreal Preferences::HighlightedLineWidth(3);
 
-qreal Preferences::PointRadius(2.0f);
+qreal Preferences::PointRadius(2.0);
 
-qreal Preferences::TangentLength(80.0f);
+qreal Preferences::TangentLength(80.0);
 
-qreal Preferences::AngularPitchStrokesLength(300.0f);
+qreal Preferences::AngularPitchStrokesLength(300.0);
 
-qreal Preferences::ZoomDefaultX(750.0f);
+qreal Preferences::ZoomDefaultX(750.0);
 
-qreal Preferences::ZoomDefaultY(750.0f);
+qreal Preferences::ZoomDefaultY(750.0);

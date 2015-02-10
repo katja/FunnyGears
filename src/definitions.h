@@ -2,13 +2,15 @@
 #define DEFINITIONS
 
 #include "stable.h"
-#include <Eigen/Core>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/mat2x2.hpp>
 
 typedef double          real;
 typedef unsigned int    uint;
-typedef Eigen::Vector2d vec2;
-typedef Eigen::Vector3d vec3;
-typedef Eigen::Matrix2d m2x2;
+typedef glm::dvec2      vec2;
+typedef glm::dvec3      vec3;
+typedef glm::dmat2x2    m2x2;
 
 
 //As typedefs must not include a template

@@ -1,5 +1,6 @@
 #include "helpers.h"
 #include "definitions.h"
+#include "glm/glm.hpp"
 
 ////////////////////////////////////
 ////////// STREAMING ///////////////
@@ -13,7 +14,7 @@ std::ostream& operator<<(std::ostream &os, const QRectF &rect) {
 }
 
 std::ostream& operator <<(std::ostream &os, const vec2 vec) {
-    return os << "[" << vec.x() << "| " << vec.y() << "]";
+    return os << "[" << vec.x << "| " << vec.y << "]";
 }
 
 std::ostream& operator <<(std::ostream &os, const QVector<vec2> vector) {
@@ -71,7 +72,7 @@ std::ostream& operator <<(std::ostream &os, const Spline &spline) {
     }
     os << "\n";
     os << "Evaluable from " << spline.lowerDomainLimit() << " until " << spline.upperDomainLimit() << std::endl;
-    os << "\nTornToEdges? ";
+    os << "TornToEdges? ";
     if(spline.isTornToEdges())
         os << "yes";
     else
@@ -92,15 +93,13 @@ QColor darkenColor(const QColor &color, int degree) {
 }
 
 real angleBetween(const vec2 &a, const vec2 &b) {
-    //normally one should use abs(a.dot(b)), but this uses the std C abs(), which is only defined on integers and therefore causes wrong results.
-    real angle = acos((a.dot(b)) / (a.norm() * b.norm()));
-    return angle;
+    return acos(glm::dot(glm::normalize(a), glm::normalize(b)));
 }
 
 QVector<QPointF> convertToQVectorWithQPointFs(const vector<vec2> &v) {
     QVector<QPointF> qV(v.size());
     for(uint i = 0; i < v.size(); ++i) {
-        qV[i] = QPointF(v.at(i).x(), v.at(i).y());
+        qV[i] = QPointF(v.at(i).x, v.at(i).y);
     }
     return qV;
 };

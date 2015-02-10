@@ -33,7 +33,7 @@ void ModelTreeView::drawBranches(QPainter *painter, const QRect &rect, const QMo
     QPixmap *m_circle = new QPixmap(QString(":/images/Circle.png"));
     double scale = 0.65f;
     double h = rect.height() * scale;
-    double dy = (-h + rect.height()) / 2.0f;
+    double dy = (-h + rect.height()) / 2.0;
     double dx = rect.width() - h;
     if(dx < 0) {
         h = h - dx;

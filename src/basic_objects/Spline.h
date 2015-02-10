@@ -34,6 +34,27 @@ public:
      */
     virtual vec2 evaluate(real value) const;
 
+    /** @brief Returns the first point of the spline curve
+     *
+     *  Evaluates at the first value, where evaluation can take place
+     *  @warning This method requires a valid Spline. So check validness (#isValid()) before!
+     *  @return first point of curve
+    */
+    virtual vec2 firstPoint() const;
+
+    /** @brief Returns the last point of the spline curve
+     *
+     *  Evaluates at one of the highest possible values, where evaluation
+     *  can take place. As the highest possible value must remain a bit smaller
+     *  than upperDomainLimit(), @p epsilon is passed to specify the difference
+     *  to this highest value.
+     *  @warning: This method requires a valid Spline. So check the validness before
+     *  (#isValid())
+     *  @param epsilon Specifies the distance to the upperDomainLimit() for the evaluation
+     *  @return last point of curve (depends on epsilon)
+     */
+    virtual vec2 lastPoint(real epsilon = 0.00001) const;
+
     /** Uses de Boor algorithm to get the derivative vector at the given value
      *  If Spline is not valid or value is not valid, it returns a 0-vector.
      *  @param value specifies the position of the spline for the derivative
@@ -248,16 +269,16 @@ public:
 
     /** Returns the lowest value, which can be evaluated.
      *  If spline is not valid in the current state it returns -1.0
-     *  @return lowest possible value, which can be evaluated, or -1.0f if spline is not valid
+     *  @return lowest possible value, which can be evaluated, or -1.0 if spline is not valid
      */
     virtual real lowerDomainLimit() const;
 
     /** Gives a limit for the highest value that can be evaluated.
      *  Attention: this value MUST NOT BE REACHED! It has to be a little
      *  bit smaller!
-     *  It first checks the spline with isValid() and if it is not, it return -1.0f
+     *  It first checks the spline with isValid() and if it is not, it return -1.0
      *  @return limit for the highest value, which must not be reached when evaluating
-     *  the spline or -1.0f if spline is not valid
+     *  the spline or -1.0 if spline is not valid
      */
     virtual real upperDomainLimit() const;
 
@@ -270,6 +291,34 @@ public:
      */
     virtual uint lowerNextKnot(real value) const;
 
+    /** @brief Returns the smallest distance of a control point to the origin
+     *
+     *  Searches the control points for the nearest one to the origin
+     *  and returns the distance of this point to the origin
+     *  @return smallest distance of a control point to the origin
+     */
+    virtual real minimumDistanceOfControlPointToOrigin() const;
+
+    /** @brief Returns the largest distance of a control point to the origin
+     *
+     *  Searches the control points for the furthest one from to the origin
+     *  and returns the distance of this point to the origin
+     *  @return largest distance of a control point to the origin
+     */
+    virtual real maximumDistanceOfControlPointToOrigin() const;
+
+    /** @brief Searches the spline for the nearest point to the origin
+     *
+     *  @return the distance to the nearest found point of the spline to the origin
+     */
+    virtual real minimumDistanceToOrigin() const;
+
+    /** @brief Searches the spline for the furthest point to the origin
+     *
+     *  @return the distance to the furthest found point of the spline to the origin
+     */
+    virtual real maximumDistanceToOrigin() const;
+
     /** Cuts given ray with the spline curve and expands the vector intersectionPoints with
      *  found (approximated) intersection points. Already present values in the
      *  intersectionPoints vector will not be deleted!
@@ -277,6 +326,10 @@ public:
      *  @param intersectionPoints found intersection points are inserted in this vector.
      */
     virtual void getIntersectionPointsWithRay(const Ray &ray, vector<vec2> &intersectionPoints) const;
+
+    /*///////////////TTTTTTTTTTTTTTTTTTTOOOOOOOOOOOOOOOOOOOOOODDDDDDDDDDDDDDDDDDDDDDOOOOOOOOOOOOOOOOO!!!!!!!!!!!!!!!!!!!
+     */
+    virtual void scale(real scaling, vec2 origin = vec2(0, 0));
 
 protected:
     vector<real>    m_knots;
@@ -320,6 +373,42 @@ protected:
      *  @see isValid()
      */
     void makeDifferentLastKnots();
+
+    /** @brief Searches the spline for points whose normales pass the origin.
+     *
+     *  Found points are necessary f.ex. for the calculation of the minimum and maximum
+     *  distances of the curve to the origin.
+     *  As resizing of the given @param samples vector should be prohibited, the samples
+     *  vector must at least have the size of:
+     *  2 x number of control points
+     *  When a smaller samples vector is given, "-1" is returned.
+     *  @param samples the points whose normals pass the origin are inserted in this given vector
+     *  @return number of inserted points or '-1' when given samples vector is too small
+     */
+    int pointsWithNormalsThroughOrigin(vector<vec2> &samples, real epsilon = 0.00001) const;
+    /** @brief Examines the normal of the spline at value @p evaluationValue
+     *
+     *  The sign passed in @p lastSign should contain the sign of the cross product of the
+     *  normal with the vector to the point of the curve last evaluated.
+     *
+     *  If the normal in the given @p evaluationValue passes the origin (or nearly the origin
+     *  with only a divergence smaller than given @p epsilon) the return value is '1' and
+     *  the spline point at @p evaluationValue is entered in @p samples at position @p foundPoints.
+     *  Also the @p foundPoints is increased by one and @p lastSign is set to '0'.
+     *
+     *  If the normal does not pass the origin but the sign saved and given in @p lastSign
+     *  differs from the cross product (of normal and curve point) in the given @p evaluationValue
+     *  '-1' is returned. This means, that the direction changed, but no point is found and
+     *  therefore one should check a value between the last tested ones again.
+     *
+     *  If the normal does not pass the origin and the sign is the same as the one saved in
+     *  @p lastSign, '0' is returned
+     *
+     *  @return  1 ==> point found and inserted in samples with foundPoints increased by 1
+     *           0 ==> no point found, direction same as in last test
+     *          -1 ==> no point found, but direction changed => Please check values between!
+     */
+    int testThroughOrigin(real evaluationValue, int &lastSign, int &foundPoints, vector<vec2> &samples, real epsilon) const;
 
 };
 

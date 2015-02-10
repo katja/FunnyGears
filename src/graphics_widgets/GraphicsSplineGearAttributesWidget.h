@@ -19,10 +19,11 @@ public:
     bool worksOnItem(QGraphicsItem *graphicsItem) override; // from GraphicsItemAttributesWidget
 
 private slots:
+    void updateModule();
     void changeRadius(real);
     void changeNumberOfTeeth(int);
     void togglePitchVisiblity(bool);
-    void togglePitchCircleVisibility(bool);
+    void toggleReferenceCircleVisibility(bool);
     void toggleAnimation(bool);
     void changeRotationVelocity(real);
 
@@ -31,11 +32,13 @@ private:
 
     GraphicsSplineAttributesWidget *m_splineAttributesWidget;
 
+    QLabel              *m_moduleLabel;
+    QDoubleSpinBox      *m_moduleSpinBox;
     QLabel              *m_numberOfTeethLabel;
     QSpinBox            *m_numberOfTeethSpinBox;
-    RealValuedSlider    *m_radiusSlider;
+    RealValuedSlider    *m_referenceRadiusSlider;
     QCheckBox           *m_pitchVisibleCheckBox;
-    QCheckBox           *m_pitchCircleVisibleCheckBox;
+    QCheckBox           *m_referenceCircleVisibleCheckBox;
     QCheckBox           *m_animateCheckbox;
     RealValuedSlider    *m_rotationVelocitySlider;
 
