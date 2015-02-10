@@ -1,5 +1,6 @@
 #include "graphics_widgets/GraphicsSplineGearAttributesWidget.h"
 #include "basic_objects/SplineGear.h"
+#include "helpers.h"
 
 GraphicsSplineGearAttributesWidget::
 GraphicsSplineGearAttributesWidget(QWidget *parent) : GraphicsItemAttributesWidget(parent)
@@ -16,14 +17,27 @@ GraphicsSplineGearAttributesWidget(QWidget *parent) : GraphicsItemAttributesWidg
     m_moduleLabel->setBuddy(m_moduleSpinBox);
     connect(m_moduleSpinBox, SIGNAL(editingFinished()), this, SLOT(updateModule()));
 
+    m_referenceRadiusSpinBox = new QDoubleSpinBox(this);
+    m_referenceRadiusSpinBox->setDecimals(2);
+    m_referenceRadiusSpinBox->setMinimum(5.0);
+    m_referenceRadiusSpinBox->setMaximum(500.0);
+    m_referenceRadiusSpinBox->setSingleStep(1.0);
+    m_referenceRadiusLabel = new QLabel(tr("Reference radius"), this);
+    m_referenceRadiusLabel->setBuddy(m_referenceRadiusSpinBox);
+    connect(m_referenceRadiusSpinBox, SIGNAL(editingFinished()), this, SLOT(updateRadius()));
+
+    QGroupBox *radiusModuleBox = new QGroupBox(tr("Depend on each other"), this);
+    QGridLayout *radiusModuleLayout = new QGridLayout(radiusModuleBox);
+    radiusModuleLayout->addWidget(m_moduleLabel,            0, 0, 1, 1);
+    radiusModuleLayout->addWidget(m_moduleSpinBox,          0, 1, 1, 1);
+    radiusModuleLayout->addWidget(m_referenceRadiusLabel,   1, 0, 1, 1);
+    radiusModuleLayout->addWidget(m_referenceRadiusSpinBox, 1, 1, 1, 1);
+
     m_numberOfTeethSpinBox = new QSpinBox(this);
     m_numberOfTeethSpinBox->setMinimum(2);
     m_numberOfTeethLabel = new QLabel(tr("Number of teeth"), this);
     m_numberOfTeethLabel->setBuddy(m_numberOfTeethSpinBox);
     connect(m_numberOfTeethSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeNumberOfTeeth(int)));
-
-    m_referenceRadiusSlider = new RealValuedSlider("Reference circle radius", this);
-    connect(m_referenceRadiusSlider, SIGNAL(valueChanged(real)), this, SLOT(changeRadius(real)));
 
     m_pitchVisibleCheckBox = new QCheckBox(tr("Show base pitch"), this);
     connect(m_pitchVisibleCheckBox, SIGNAL(toggled(bool)), this, SLOT(togglePitchVisiblity(bool)));
@@ -41,11 +55,9 @@ GraphicsSplineGearAttributesWidget(QWidget *parent) : GraphicsItemAttributesWidg
 
     QGridLayout *gearLayout = new QGridLayout(gearWidget);
     gearLayout->setContentsMargins(4, 0, 12, 12);
-    gearLayout->addWidget(m_moduleLabel,                0, 0, 1, 1);
-    gearLayout->addWidget(m_moduleSpinBox,              0, 1, 1, 1);
+    gearLayout->addWidget(radiusModuleBox,              0, 0, 1, 2);
     gearLayout->addWidget(m_numberOfTeethLabel,         1, 0, 1, 1);
     gearLayout->addWidget(m_numberOfTeethSpinBox,       1, 1, 1, 1);
-    gearLayout->addWidget(m_referenceRadiusSlider,               2, 0, 1, 2);
     gearLayout->addWidget(m_pitchVisibleCheckBox,       3, 0, 1, 1);
     gearLayout->addWidget(m_referenceCircleVisibleCheckBox, 3, 1, 1, 1);
     gearLayout->addWidget(m_animateCheckbox,            4, 0, 1, 1);
@@ -80,9 +92,8 @@ worksOnItem(QGraphicsItem *graphicsItem) {
 void GraphicsSplineGearAttributesWidget::
 updateAttributes() {
     m_moduleSpinBox->setValue(m_currentGear->module());
+    m_referenceRadiusSpinBox->setValue(m_currentGear->referenceRadius());
     m_numberOfTeethSpinBox->setValue(m_currentGear->numberOfTeeth());
-    m_referenceRadiusSlider->setRange(m_currentGear->minimumDistanceToCenter(), m_currentGear->maximumDistanceToCenter());
-    m_referenceRadiusSlider->setValue(m_currentGear->referenceRadius());
     m_pitchVisibleCheckBox->setChecked(m_currentGear->isBasePitchVisible());
     m_referenceCircleVisibleCheckBox->setChecked(m_currentGear->isReferenceCircleVisible());
     m_animateCheckbox->setChecked(m_currentGear->isRotating());
@@ -92,11 +103,22 @@ updateAttributes() {
 void GraphicsSplineGearAttributesWidget::
 updateModule() {
     real module = m_moduleSpinBox->value();
-    if(m_currentGear->module() != module) {
+    if(absolute(m_currentGear->module() - module) > Epsilon) {
         m_currentGear->setModule(module);
-        std::cout << "before updateAttributes" << std::endl;
+        std::cout << "UPDATE MODULE IS DONE" << std::endl;
         updateAttributes();
-        std::cout << "after  updateAttributes" << std::endl;
+        std::cout << "UPDATE MODULE FINISHED" << std::endl;
+    }
+}
+
+void GraphicsSplineGearAttributesWidget::
+updateRadius() {
+    real radius = m_referenceRadiusSpinBox->value();
+    if(absolute(m_currentGear->referenceRadius() - radius) > Epsilon) {
+        m_currentGear->setReferenceRadius(radius);
+        std::cout << "UPDATE RADIUS IS DONE" << std::endl;
+        updateAttributes();
+        std::cout << "UPDATE RADIUS FINISHED" << std::endl;
     }
 }
 
@@ -104,14 +126,6 @@ void GraphicsSplineGearAttributesWidget::
 changeNumberOfTeeth(int newToothCount) {
     if(newToothCount > 0 && m_currentGear->numberOfTeeth() != (uint)newToothCount) {
         m_currentGear->setNumberOfTeeth(static_cast<uint>(newToothCount));
-        updateAttributes();
-    }
-}
-
-void GraphicsSplineGearAttributesWidget::
-changeRadius(real newRadius) {
-    if(m_currentGear->referenceRadius() != newRadius) {
-        m_currentGear->setReferenceRadius(newRadius);
         updateAttributes();
     }
 }
@@ -135,3 +149,5 @@ void GraphicsSplineGearAttributesWidget::
 changeRotationVelocity(real velocity) {
     m_currentGear->setRotationVelocity(velocity);
 }
+
+const real GraphicsSplineGearAttributesWidget::Epsilon = 0.0001;

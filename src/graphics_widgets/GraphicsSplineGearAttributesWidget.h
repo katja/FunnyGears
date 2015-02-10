@@ -20,7 +20,7 @@ public:
 
 private slots:
     void updateModule();
-    void changeRadius(real);
+    void updateRadius();
     void changeNumberOfTeeth(int);
     void togglePitchVisiblity(bool);
     void toggleReferenceCircleVisibility(bool);
@@ -34,13 +34,16 @@ private:
 
     QLabel              *m_moduleLabel;
     QDoubleSpinBox      *m_moduleSpinBox;
+    QLabel              *m_referenceRadiusLabel;
+    QDoubleSpinBox      *m_referenceRadiusSpinBox;
     QLabel              *m_numberOfTeethLabel;
     QSpinBox            *m_numberOfTeethSpinBox;
-    RealValuedSlider    *m_referenceRadiusSlider;
     QCheckBox           *m_pitchVisibleCheckBox;
     QCheckBox           *m_referenceCircleVisibleCheckBox;
     QCheckBox           *m_animateCheckbox;
     RealValuedSlider    *m_rotationVelocitySlider;
+
+    static const real Epsilon;
 
     void updateAttributes();
 
