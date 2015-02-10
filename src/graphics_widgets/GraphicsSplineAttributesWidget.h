@@ -6,8 +6,9 @@
 #include "graphics_widgets/GraphicsItemAttributesWidget.h"
 #include "graphics_objects/GraphicsSpline.h"
 #include "RealValuedSlider.h"
+#include "ChangingObjectListener.h"
 
-class GraphicsSplineAttributesWidget : public GraphicsItemAttributesWidget {
+class GraphicsSplineAttributesWidget : public GraphicsItemAttributesWidget, public ChangingObjectListener {
 
 Q_OBJECT
 
@@ -17,6 +18,8 @@ public:
 
     void setItem(QGraphicsItem *graphicsItem) override; // from GraphicsItemAttributesWidget
     bool worksOnItem(QGraphicsItem *graphicsItem)override; // from GraphicsItemAttributesWidget
+
+    void objectChanged(ChangingObject *object) override; // from ChangingObjectListener
 
 private slots:
     void toggleVisibilityOfControlPolygon(bool);
