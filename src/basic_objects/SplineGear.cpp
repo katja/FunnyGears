@@ -277,7 +277,7 @@ void SplineGear::updateControlPoints() {
     m_controlPoints.resize(m_numberOfTeeth * ppt + m_degree); // the '+ m_degree' is necessary to close the curve
 
     for(uint tooth = 0; tooth < m_numberOfTeeth; ++tooth) {
-        real rotationInRad = tooth * m_rotationDirection * angularPitch();
+        real rotationInRad = (real)tooth * (real)m_rotationDirection * angularPitch();
         for(uint j = 0; j < ppt; ++j) {
             m_controlPoints[j + tooth * ppt] = glm::rotate(m_toothProfile->controlPoint(j), rotationInRad); //rotate the controlPoint[j] by (2 * M_PI) / m_numberOfTeeth
         }
@@ -371,7 +371,7 @@ bool SplineGear::isValid() const {
 vec2 SplineGear::relatedPositionInTooth(uint toothIndex, vec2 positionInFirstTooth) const {
     if(toothIndex == 0)
         return positionInFirstTooth;
-    real rotationInRad = m_rotationDirection * toothIndex * angularPitch();
+    real rotationInRad = (real)m_rotationDirection * (real)toothIndex * angularPitch();
     return glm::rotate(positionInFirstTooth, rotationInRad);
 }
 
@@ -386,7 +386,7 @@ uint SplineGear::toothIndex(uint controlPointIndex) const {
 vec2 SplineGear::relatedPositionInFirstTooth(uint toothIndex, vec2 position) const {
     if(toothIndex == 0)
         return position;
-    real rotationInRad = -(m_rotationDirection * toothIndex * angularPitch()); //the minus sign is necessary, as the first tooth from a following tooth is searched
+    real rotationInRad = -((real)m_rotationDirection * (real)toothIndex * angularPitch()); //the minus sign is necessary, as the first tooth from a following tooth is searched
     return glm::rotate(position, rotationInRad);
 }
 
