@@ -56,12 +56,13 @@ GraphicsSplineGearAttributesWidget(QWidget *parent) : GraphicsItemAttributesWidg
     QGridLayout *gearLayout = new QGridLayout(gearWidget);
     gearLayout->setContentsMargins(4, 0, 12, 12);
     gearLayout->addWidget(radiusModuleBox,              0, 0, 1, 2);
-    gearLayout->addWidget(m_numberOfTeethLabel,         1, 0, 1, 1);
-    gearLayout->addWidget(m_numberOfTeethSpinBox,       1, 1, 1, 1);
-    gearLayout->addWidget(m_pitchVisibleCheckBox,       3, 0, 1, 1);
-    gearLayout->addWidget(m_referenceCircleVisibleCheckBox, 3, 1, 1, 1);
-    gearLayout->addWidget(m_animateCheckbox,            4, 0, 1, 1);
-    gearLayout->addWidget(m_rotationVelocitySlider,     4, 1, 1, 1);
+    gearLayout->addWidget(m_numberOfTeethLabel,         1, 0);
+    gearLayout->addWidget(m_numberOfTeethSpinBox,       1, 1);
+    gearLayout->addWidget(m_pitchVisibleCheckBox,       3, 0);
+    gearLayout->addWidget(m_referenceCircleVisibleCheckBox, 3, 1);
+    gearLayout->addWidget(m_animateCheckbox,            4, 0);
+    gearLayout->addWidget(m_rotationVelocitySlider,     4, 1);
+    gearLayout->setRowStretch(5, 1); // As row 5 is not filled with a widget, the layout fills with empty space, if it is larger than needed
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(4, 0, 4, 4); //use small margins at left, right and bottom

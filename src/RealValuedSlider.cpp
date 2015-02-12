@@ -26,15 +26,13 @@ RealValuedSlider::RealValuedSlider(const QString &title, QWidget *parent) : QGro
     m_maxLabel->setBuddy(m_slider);
     m_valueLabel->setBuddy(m_slider);
 
-    QGridLayout *gridLayout = new QGridLayout;
+    QGridLayout *gridLayout = new QGridLayout(this);
     gridLayout->setHorizontalSpacing(0);
     gridLayout->setVerticalSpacing(0);
-    gridLayout->setRowStretch(2, 2);
     gridLayout->addWidget(m_slider,     0, 0, 1, 3);
     gridLayout->addWidget(m_minLabel,   1, 0);
     gridLayout->addWidget(m_maxLabel,   1, 2);
     gridLayout->addWidget(m_valueLabel, 2, 1, Qt::AlignTop);
-    setLayout(gridLayout);
 
     connect(m_slider, SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged(int)));
 }
