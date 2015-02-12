@@ -87,7 +87,7 @@ void ObjectScheduleViewWidget::addSpline() {
 void ObjectScheduleViewWidget::addGearTooth() {
     if(!m_spline)
         return;
-    SplineGear *gear = new SplineGear(new Spline(*m_spline));
+    SplineGear *gear = new SplineGear(*m_spline);
     GraphicsSplineGear *graphicsGear = new GraphicsSplineGear(gear);
     m_model->addItem(graphicsGear);
     m_model->clearSelection();

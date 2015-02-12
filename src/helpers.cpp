@@ -96,11 +96,19 @@ real angleBetween(const vec2 &a, const vec2 &b) {
     return acos(glm::dot(glm::normalize(a), glm::normalize(b)));
 }
 
-real absolute(const real &a) {
-    if(a < 0.0)
-        return -a;
+real absolute(const real &number) {
+    if(number < 0.0)
+        return -number;
     else
-        return a;
+        return number;
+}
+
+real toRad(const real &degree) {
+    return degree * M_PI / 180.0;
+}
+
+real toDegree(const real &rad) {
+    return rad * 180.0 / M_PI;
 }
 
 QVector<QPointF> convertToQVectorWithQPointFs(const vector<vec2> &v) {

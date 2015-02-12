@@ -31,7 +31,11 @@ QColor darkenColor(const QColor &color, int degree = 60);
 
 real angleBetween(const vec2 &a, const vec2 &b);
 
-real absolute(const real &a);
+real absolute(const real &number);
+
+real toRad(const real &degree);
+
+real toDegree(const real &rad);
 
 QVector<QPointF> convertToQVectorWithQPointFs(const vector<vec2> &v);
 
