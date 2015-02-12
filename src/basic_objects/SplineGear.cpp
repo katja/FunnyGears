@@ -3,7 +3,7 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include "helpers.h"
 
-SplineGear::SplineGear(Spline *toothOfGear) : m_toothProfile(toothOfGear),
+SplineGear::SplineGear(const Spline &toothOfGear) : m_toothProfile(new Spline(toothOfGear)),
     m_referenceRadius(0.0),
     m_numberOfTeeth(0),
     m_rotationDirection(0),
@@ -16,6 +16,7 @@ SplineGear::SplineGear(Spline *toothOfGear) : m_toothProfile(toothOfGear),
 
 SplineGear::~SplineGear() {
     std::cout << "SplineGear is deleted" << std::endl;
+    delete m_toothProfile;
 }
 
 void SplineGear::update() {

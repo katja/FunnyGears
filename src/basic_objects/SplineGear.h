@@ -8,7 +8,7 @@ class SplineGear : public Spline {
 public:
     // Given toothOfGear is used to build a gear "around" this tooth. If tooth is changed
     // call updateKnotsAndControlPoints() to update the gear curve.
-    SplineGear(Spline *toothOfGear);
+    SplineGear(const Spline &toothOfGear);
 
     //Does NOT delete the Spline it is linked to!!!
     virtual ~SplineGear();
