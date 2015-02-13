@@ -110,9 +110,9 @@ void Spline::curve(vector<QPointF> &curve) const {
     uint samples = curve.size();
 
     real step = (uStop - uStart) / (samples - 1);
-    for(uint i = 0; i <= samples; ++i) {
+    for(uint i = 0; i < samples; ++i) {
         real u = step * (real)i + uStart;
-        if(i == samples)
+        if(i == samples - 1)
             u = uStop; // prevent by all means a overflow of uStop
         vec2 point = evaluate(u);
         curve[i] = QPointF(point.x, point.y);
@@ -406,7 +406,7 @@ real Spline::lowerDomainLimit() const {
 real Spline::upperDomainLimit(real epsilon) const {
     if(!isValid())
         return -1.0; //No curve available at the moment!
-    return m_knots[m_controlPoints.size()]; //is equal to: m_knots[m_knots.size() - 1 - m_degree]
+    return m_knots[m_controlPoints.size()] - epsilon; //is equal to: m_knots[m_knots.size() - 1 - m_degree] - epsilon
 }
 
 uint Spline::lowerNextKnot(real value) const {

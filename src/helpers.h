@@ -33,7 +33,7 @@ real dot(const vec2 &a, const vec2& b);
 
 real cross(const vec2 &a, const vec2 &b);
 
-real normalize(const vec2 &a);
+vec2 normalize(const vec2 &a);
 
 real angleBetween(const vec2 &a, const vec2 &b);
 

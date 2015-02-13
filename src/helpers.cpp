@@ -100,14 +100,14 @@ real cross(const vec2 &a, const vec2 &b) {
     return a.x * b.y - a.y * b.x;
 }
 
-real normalize(const vec2 &a) {
-    return a / sqrt(a.x * a.x + a.y * a.y);
+vec2 normalize(const vec2 &a) {
+    return a * (1.0 * sqrt(a.x * a.x + a.y * a.y));
 }
 
 real angleBetween(const vec2 &a, const vec2 &b) {
-    real nA = a / sqrt(a.x * a.x + a.y * a.y);
-    real nB = b / sqrt(b.x * b.x + b.y * b.y);
-    return angleBetweenN(a, b);
+    vec2 nA = a * (1.0 / sqrt(a.x * a.x + a.y * a.y));
+    vec2 nB = b * (1.0 / sqrt(b.x * b.x + b.y * b.y));
+    return angleBetweenN(nA, nB);
 }
 
 real angleBetweenN(const vec2 &normalizedA, const vec2 &normalizedB) {
