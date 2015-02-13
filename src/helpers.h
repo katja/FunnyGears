@@ -29,7 +29,17 @@ std::ostream& operator <<(std::ostream &os, const Spline &spline);
 
 QColor darkenColor(const QColor &color, int degree = 60);
 
+real dot(const vec2 &a, const vec2& b);
+
+real cross(const vec2 &a, const vec2 &b);
+
+real normalize(const vec2 &a);
+
 real angleBetween(const vec2 &a, const vec2 &b);
+
+real angleBetweenN(const vec2 &normalizedA, const vec2 &normalizedB);
+
+real square(const real &number);
 
 real absolute(const real &number);
 

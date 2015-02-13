@@ -71,7 +71,7 @@ std::ostream& operator <<(std::ostream &os, const Spline &spline) {
             os << ", ";
     }
     os << "\n";
-    os << "Evaluable from " << spline.lowerDomainLimit() << " until " << spline.upperDomainLimit() << std::endl;
+    os << "Evaluable from " << spline.lowerDomainLimit() << " until " << spline.upperDomainLimit(0.0) << std::endl;
     os << "TornToEdges? ";
     if(spline.isTornToEdges())
         os << "yes";
@@ -92,8 +92,30 @@ QColor darkenColor(const QColor &color, int degree) {
     return darkenedColor;
 }
 
+real dot(const vec2 &a, const vec2 &b) {
+    return a.x * b.x + a.y * b.y;
+}
+
+real cross(const vec2 &a, const vec2 &b) {
+    return a.x * b.y - a.y * b.x;
+}
+
+real normalize(const vec2 &a) {
+    return a / sqrt(a.x * a.x + a.y * a.y);
+}
+
 real angleBetween(const vec2 &a, const vec2 &b) {
-    return acos(glm::dot(glm::normalize(a), glm::normalize(b)));
+    real nA = a / sqrt(a.x * a.x + a.y * a.y);
+    real nB = b / sqrt(b.x * b.x + b.y * b.y);
+    return angleBetweenN(a, b);
+}
+
+real angleBetweenN(const vec2 &normalizedA, const vec2 &normalizedB) {
+    return acos(normalizedA.x * normalizedB.x + normalizedA.y * normalizedB.y);
+}
+
+real square(const real &number) {
+    return number * number;
 }
 
 real absolute(const real &number) {
