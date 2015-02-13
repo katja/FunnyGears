@@ -106,7 +106,7 @@ real GraphicsSpline::tangentValue() {
 void GraphicsSpline::refineSpline() {
     if(!m_spline->isValid())
         return;
-    real maxDist = (m_spline->upperDomainLimit() - m_spline->lowerDomainLimit()) / m_spline->numberOfControlPoints();
+    real maxDist = (m_spline->upperDomainLimit(0.0) - m_spline->lowerDomainLimit()) / m_spline->numberOfControlPoints();
     uint numberOfControlPointsBefore = m_spline->numberOfControlPoints();
     prepareGeometryChange();
     do {
@@ -385,7 +385,7 @@ void GraphicsSpline::executeEditingAction(Editing::Action editingAction) {
 void GraphicsSpline::adjustInSplineRange(real &value) const {
     if(value < m_spline->lowerDomainLimit()) {
         value = m_spline->lowerDomainLimit();
-    } else if (value >= m_spline->upperDomainLimit()) {
-        value = m_spline->upperDomainLimit() - 0.0001;
+    } else if (value > m_spline->upperDomainLimit()) {
+        value = m_spline->upperDomainLimit();
     }
 }

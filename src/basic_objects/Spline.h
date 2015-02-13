@@ -58,14 +58,14 @@ public:
     /** Uses de Boor algorithm to get the derivative vector at the given value
      *  If Spline is not valid or value is not valid, it returns a 0-vector.
      *  @param value specifies the position of the spline for the derivative
-     *  @return derivation vector of the spline evaluated at value
+     *  @return (normalized) derivation vector of the spline evaluated at value
      */
     virtual vec2 derivative(real value) const;
 
     /** Uses derivative to form the normal
      *  If Spline is not valid or value is not valid, it returns a 0-vector.
      *  @param value specifies the position of the spline for the normal
-     *  @return normal vector of the spline evaluated at value
+     *  @return (normalized) normal vector of the spline evaluated at value
      */
     virtual vec2 normal(real value) const;
 
@@ -274,13 +274,17 @@ public:
     virtual real lowerDomainLimit() const;
 
     /** Gives a limit for the highest value that can be evaluated.
-     *  Attention: this value MUST NOT BE REACHED! It has to be a little
+     *  @warning: this value MUST NOT BE REACHED! It has to be a little
      *  bit smaller!
+     *  To get a value which can be evaluated, @p epsilon is passed.
      *  It first checks the spline with isValid() and if it is not, it return -1.0
-     *  @return limit for the highest value, which must not be reached when evaluating
-     *  the spline or -1.0 if spline is not valid
+     *  @param epsilon is subtracted of the returned value, to get a value which can
+     *         be evaluated with #evaluate(real)
+     *  @return limit for the highest value, which in case that @p epsilon is '0.0'
+     *          must not be reached when evaluating the spline,
+     *          or -1.0 if spline is not valid
      */
-    virtual real upperDomainLimit() const;
+    virtual real upperDomainLimit(real epsilon = 0.00001) const;
 
     /** Returns the index of the knot in the knot array,
      *  whose value is smaller or equal to the given value.

@@ -76,11 +76,11 @@ vec2 Spline::firstPoint() const {
 }
 
 vec2 Spline::lastPoint(real epsilon) const {
-    return evaluate(upperDomainLimit() - epsilon);
+    return evaluate(upperDomainLimit(epsilon));
 }
 
 vec2 Spline::derivative(real value) const {
-    if(!isValid() || value < lowerDomainLimit() || value >= upperDomainLimit())
+    if(!isValid() || value < lowerDomainLimit() || value >= upperDomainLimit(0.0))
         return vec2(0, 0);
     //TODO: is is necessary here to test these requirements???
 
@@ -105,22 +105,26 @@ vec2 Spline::normal(real value) const {
 void Spline::curve(vector<QPointF> &curve) const {
     if(!isValid())
         return;
-    real u = lowerDomainLimit();
+    real uStart = lowerDomainLimit();
     real uStop = upperDomainLimit();
-    uint iStop = curve.size();
+    uint samples = curve.size();
 
-    real step = (uStop - u) / iStop;
-    for(uint i = 0; i < iStop; ++i) {
-        if(i == iStop - 1)
-            u = uStop - 0.001;
+    real step = (uStop - uStart) / (samples - 1);
+    for(uint i = 0; i <= samples; ++i) {
+        real u = step * (real)i + uStart;
+        if(i == samples)
+            u = uStop; // prevent by all means a overflow of uStop
         vec2 point = evaluate(u);
         curve[i] = QPointF(point.x, point.y);
-        u += step;
-        // update u as floating points are not very accurate
-        // but nevertheless the whole spline should be visible:
-        if((i & 0xF) == 0) {
-            step = (uStop - u) / (iStop - i);
-        }
+        // Following is not needed any more, when instead of the former used simple
+        // addition is the now used more complex calculation done in every loop.
+        // The former solution was simpler, but in a bad case could result in an overflow
+        // of uStop, which must not happen!
+        // // update u as floating points are not very accurate
+        // // but nevertheless the whole spline should be visible:
+        // if((i & 0xF) == 0) {
+        //     step = (uStop - u) / (samples - i);
+        // }
     }
 }
 
@@ -399,7 +403,7 @@ real Spline::lowerDomainLimit() const {
     return m_knots[m_degree];
 }
 
-real Spline::upperDomainLimit() const {
+real Spline::upperDomainLimit(real epsilon) const {
     if(!isValid())
         return -1.0; //No curve available at the moment!
     return m_knots[m_controlPoints.size()]; //is equal to: m_knots[m_knots.size() - 1 - m_degree]
@@ -489,7 +493,7 @@ void Spline::getIntersectionPointsWithRay(const Ray &ray, vector<vec2> &intersec
             //examine resulting spline recursively.
             //TODO: I don't think that the following is correct!!! What happens, if i == 0????
             else {
-                if(upperDomainLimit() - lowerDomainLimit() > 0.1) {
+                if(upperDomainLimit(0.0) - lowerDomainLimit() > 0.1) {
                     long startPointIndex = i - (m_degree - 1);
                     unsigned long stopPointIndex = i + m_degree;
                     if(startPointIndex < 0)

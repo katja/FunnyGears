@@ -138,6 +138,15 @@ public:
      */
     vec2 startPointForTooth() const;
 
+    /** @brief Calculates and returns a tooth profile Spline whose evaluable curve
+     *  covers a whole pitch of the gear
+     *
+     *  @warning: if gear is not valid, when method is called, a nullptr will be returned!
+     *
+     *  @return Spline in the form of a whole pitch of the gear
+     */
+    Spline* completeToothProfile() const;
+
     /** @brief Calculates the minimum and maximum distances to the center
      *
      *  As the calculation of the minimum and maximum distance to the center

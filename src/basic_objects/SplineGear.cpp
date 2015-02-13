@@ -144,10 +144,29 @@ vec2 SplineGear::startPointForTooth() const {
     return m_toothProfile->firstPoint();
 }
 
+Spline* SplineGear::completeToothProfile() const {
+    if(!isValid())
+        return nullptr;
+
+    //Create a spline of two following teeth
+    uint numberOfControlPoints = m_toothProfile->numberOfControlPoints() + m_degree;
+    uint numberOfKnots = numberOfControlPoints + m_degree + 1;
+    std::vector<real> knots(numberOfKnots);
+    std::vector<vec2> controlPoints(numberOfControlPoints);
+    for(uint i = 0; i < numberOfKnots; ++i) {
+        knots[i] = m_knots[i];
+    }
+    for(uint i = 0; i < numberOfControlPoints; ++i) {
+        controlPoints[i] = m_controlPoints[i];
+    }
+
+    return new Spline(controlPoints, knots);
+}
+
 void SplineGear::updateDistancesToCenter() {
     if(m_numberOfTeeth == 1) {
-        m_minimumDistanceToCenter = m_toothProfile->minimumDistanceToOrigin();
-        m_maximumDistanceToCenter = m_toothProfile->maximumDistanceToOrigin();
+        m_minimumDistanceToCenter = this->minimumDistanceToOrigin();
+        m_maximumDistanceToCenter = this->maximumDistanceToOrigin();
     } else {
         //Create a spline of two following teeth
         uint knotsSize = 2 * m_toothProfile->numberOfControlPoints() + m_degree + 1;
@@ -178,7 +197,7 @@ New knots:   0---0---0---0---1---2---5---6---8---9
                 20--20--20--21--22--25--26--28--29
                 30--30--30--31--32--35--36--38--39
                 40--40--40                         --41--42--45
-The last 4 knots are needed to close the gear curve. As it is a connection with 3 times
+The last 3 knots are needed to close the gear curve. As it is a connection with 3 times
 the same knot, only one connecting control point is needed and not 'degree' control points.
 
 Example 2 (5 control points, degree = 3, numberOfTeeth = 4, tornToEdges = false):
