@@ -27,6 +27,7 @@ enum Type {
     //...and all also GraphicsScheduleItems go here!
     GraphicsSplineType,
     GraphicsSplineGearType,
+    GraphicsGearPairType,
     GraphicsInvoluteGearType,
     NumberOfTypes
 };

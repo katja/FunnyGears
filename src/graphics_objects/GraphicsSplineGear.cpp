@@ -44,7 +44,6 @@ QString GraphicsSplineGear::defaultName() const {
     return "Spline Gear";
 }
 
-
 real GraphicsSplineGear::module() const {
     return m_splineGear->module();
 }
@@ -120,6 +119,10 @@ real GraphicsSplineGear::rotationVelocity() const {
 void GraphicsSplineGear::setRotationVelocity(real velocity) {
     prepareGeometryChange();
     m_rotationVelocity = velocity;
+}
+
+GearPair* GraphicsSplineGear::constructAMatingGear() const {
+    return new GearPair(m_splineGear);
 }
 
 QRectF GraphicsSplineGear::normalBoundingRect(qreal controlPointRadius) const {

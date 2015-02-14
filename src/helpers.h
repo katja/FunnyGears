@@ -4,6 +4,7 @@
 #include "stable.h"
 #include "definitions.h"
 #include "basic_objects/Spline.h"
+#include "basic_objects/ContactPoint.h"
 
 ////////////////////////////////////
 ////////// STREAMING ///////////////
@@ -23,6 +24,10 @@ std::ostream& operator <<(std::ostream &os, const QVector<real> v);
 std::ostream& operator <<(std::ostream &os, const vector<real> v);
 
 std::ostream& operator <<(std::ostream &os, const Spline &spline);
+
+std::ostream& operator <<(std::ostream &os, const ErrorCode &error);
+
+std::ostream& operator <<(std::ostream &os, const ContactPoint &contactPoint);
 
 ////////////////////////////////////
 ////////// OTHER ///////////////////

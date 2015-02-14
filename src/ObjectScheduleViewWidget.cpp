@@ -4,9 +4,8 @@
 #include "graphics_objects/GraphicsSpline.h"
 #include "graphics_objects/GraphicsSplineGear.h"
 #include "graphics_objects/GraphicsInvoluteGear.h"
+#include "graphics_objects/GraphicsGearPair.h"
 
-#include "basic_objects/SplineGear.h"
-#include "basic_objects/Spline.h"
 
 ObjectScheduleViewWidget::ObjectScheduleViewWidget(Model *model, QWidget *parent)
 : QDockWidget("Object Schedule", parent, Qt::Widget), m_model(model) {
@@ -22,22 +21,29 @@ ObjectScheduleViewWidget::ObjectScheduleViewWidget(Model *model, QWidget *parent
     QAction *addSplineAction = new QAction("Create spline curve", this);
     addSplineAction->setShortcut(QKeySequence(Qt::Key_S)); // S like Spline, a combination is not working, f... !
 
-    m_addGearToothAction = new QAction("Use curve as gear tooth", this);
-    m_addGearToothAction->setShortcut(QKeySequence(Qt::Key_G)); // G like Gear, a combination is not working, f... !
-    m_addGearToothAction->setEnabled(false);
+    m_curveAsGearAction = new QAction("Use curve as gear tooth", this);
+    m_curveAsGearAction->setShortcut(QKeySequence(Qt::Key_G)); // G like Gear, a combination is not working, f... !
+    m_curveAsGearAction->setEnabled(false);
     m_spline = nullptr;
+
+    m_pairGearAction = new QAction("Construct a mating gear", this);
+    m_pairGearAction->setShortcut(QKeySequence(Qt::Key_M)); // M like Mating gear
+    m_pairGearAction->setEnabled(false);
+    m_graphicsSplineGear = nullptr;
 
     QAction *addInvoluteGearAction = new QAction("Add involute gear", this);
 
     m_addMenu = new QMenu(this);
     m_addMenu->addAction(addSplineAction);
-    m_addMenu->addAction(m_addGearToothAction);
+    m_addMenu->addAction(m_curveAsGearAction);
+    m_addMenu->addAction(m_pairGearAction);
     m_addMenu->addAction(addInvoluteGearAction);
 
     m_addItemButton->setMenu(m_addMenu);
 
     connect(addSplineAction,       SIGNAL(triggered()), this, SLOT(addSpline()));
-    connect(m_addGearToothAction,  SIGNAL(triggered()), this, SLOT(addGearTooth()));
+    connect(m_curveAsGearAction,   SIGNAL(triggered()), this, SLOT(addGearTooth()));
+    connect(m_pairGearAction,      SIGNAL(triggered()), this, SLOT(addGearPair()));
     connect(addInvoluteGearAction, SIGNAL(triggered()), this, SLOT(addInvoluteGear()));
     connect(m_removeItemButton,    SIGNAL(clicked()),   this, SLOT(removeItems()));
 }
@@ -59,22 +65,31 @@ SelectionModel* ObjectScheduleViewWidget::setSelectionModel(SelectionModel *mode
 }
 
 void ObjectScheduleViewWidget::addActionsFor(GraphicsItem *graphicsItem) {
+    m_curveAsGearAction->setEnabled(false);
+    m_pairGearAction->setEnabled(false);
+    m_spline = nullptr;
+    m_graphicsSplineGear = nullptr;
+
     if(GraphicsSpline::isGraphicsSplineItem(graphicsItem)) {
-        m_addGearToothAction->setEnabled(true);
+        m_curveAsGearAction->setEnabled(true);
         GraphicsSpline *graphicsSpline = static_cast<GraphicsSpline*>(graphicsItem);
         if(graphicsSpline)
             m_spline = graphicsSpline->spline();
         else
             m_spline = nullptr;
-    } else {
-        m_addGearToothAction->setEnabled(false);
-        m_spline = nullptr;
+    } else if(GraphicsSplineGear::isGraphicsSplineGearItem(graphicsItem)) {
+        m_pairGearAction->setEnabled(true);
+        m_graphicsSplineGear = static_cast<GraphicsSplineGear*>(graphicsItem);
+        if(!m_graphicsSplineGear)
+            m_graphicsSplineGear = nullptr;
     }
 }
 
 void ObjectScheduleViewWidget::removeAdditionalActions() {
-    m_addGearToothAction->setEnabled(false);
+    m_curveAsGearAction->setEnabled(false);
     m_spline = nullptr;
+    m_pairGearAction->setEnabled(false);
+    m_graphicsSplineGear = nullptr;
 }
 
 void ObjectScheduleViewWidget::addSpline() {
@@ -85,13 +100,24 @@ void ObjectScheduleViewWidget::addSpline() {
 }
 
 void ObjectScheduleViewWidget::addGearTooth() {
-    if(!m_spline)
+    if(m_spline == nullptr)
         return;
     SplineGear *gear = new SplineGear(*m_spline);
     GraphicsSplineGear *graphicsGear = new GraphicsSplineGear(gear);
     m_model->addItem(graphicsGear);
     m_model->clearSelection();
     graphicsGear->setSelected(true);
+}
+
+void ObjectScheduleViewWidget::addGearPair() {
+    std::cout << "addGearPair arrived" << std::endl;
+    if(m_graphicsSplineGear == nullptr)
+        return;
+    std::cout << "addGearPair is executed" << std::endl;
+    GraphicsGearPair *graphicsgearPair = new GraphicsGearPair(m_graphicsSplineGear->constructAMatingGear());
+    m_model->addItem(graphicsgearPair);
+    m_model->clearSelection();
+    graphicsgearPair->setSelected(true);
 }
 
 void ObjectScheduleViewWidget::addInvoluteGear() {
@@ -149,7 +175,7 @@ void ObjectScheduleViewWidget::setWidgetLayout() {
     QWidget *mainWidget  = new QWidget(this);
 
     QGridLayout *gLayout = new QGridLayout(mainWidget);
-    gLayout->addWidget(m_treeView,  0, 0, 1, 2); // addWidget(widget, fromRow, fromColumn, rowSpan, columnSpan, alignment = 0)
+    gLayout->addWidget(m_treeView,        0, 0, 1, 2); // addWidget(widget, fromRow, fromColumn, rowSpan, columnSpan, alignment = 0)
     gLayout->addWidget(m_addItemButton,   2, 0);
     gLayout->addWidget(m_removeItemButton,2, 1);
 

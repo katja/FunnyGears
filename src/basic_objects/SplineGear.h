@@ -10,7 +10,6 @@ public:
     // call updateKnotsAndControlPoints() to update the gear curve.
     SplineGear(const Spline &toothOfGear);
 
-    //Does NOT delete the Spline it is linked to!!!
     virtual ~SplineGear();
 
     /** @brief Updates important values for the gear.

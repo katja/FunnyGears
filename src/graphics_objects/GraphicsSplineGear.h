@@ -5,6 +5,7 @@
 #include "definitions.h"
 #include "graphics_objects/GraphicsSpline.h"
 #include "basic_objects/SplineGear.h"
+#include "basic_objects/GearPair.h"
 
 
 class GraphicsSplineGear : public GraphicsSpline {
@@ -41,6 +42,8 @@ public:
     void setRotating(bool);
     real rotationVelocity() const;
     void setRotationVelocity(real velocity);
+
+    GearPair* constructAMatingGear() const;
 
     QRectF normalBoundingRect(qreal controlPointRadius = Preferences::PointRadius + 0.5 * Preferences::HighlightedLineWidth) const override; // from GraphicsSpline
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override; // from QGraphicsItem

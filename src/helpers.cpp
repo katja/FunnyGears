@@ -56,6 +56,7 @@ std::ostream& operator <<(std::ostream &os, const vector<real> v) {
 }
 
 std::ostream& operator <<(std::ostream &os, const Spline &spline) {
+    os << "SPLINE with properties...\n";
     os << "Degree: " << spline.degree();
     os << "\nControl Points: (" << spline.numberOfControlPoints() << " x)\n";
     const vector<vec2> controlPoints = spline.controlPoints();
@@ -81,6 +82,35 @@ std::ostream& operator <<(std::ostream &os, const Spline &spline) {
     return os;
 }
 
+std::ostream& operator <<(std::ostream &os, const ErrorCode &error) {
+    switch(error) {
+        case ErrorCode::NO_ERROR:
+            return os << "no error";
+        case ErrorCode::NO_CUT_WITH_REFERENCE_RADIUS:
+            return os << "no cut with reference radius found";
+        case ErrorCode::NO_THICKNESS:
+            return os << "no cut with gear found and theirfore no thickness available";
+        default:
+            return os << "error case unknown";
+    }
+}
+
+std::ostream& operator <<(std::ostream &os, const ContactPoint &cp) {
+    os << "CONTACT POINT with properties...\n";
+    os << "Driving gear point:      " << cp.originPoint << "\n";
+    os << "Driving gear normal:     " << cp.originNormal << "\n";
+    os << "Driven gear  point:      " << cp.point << "\n";
+    os << "Driven gear  normal:     " << cp.normal << "\n";
+    os << "Contact position point:  " << cp.contactPosition << "\n";
+    os << "Contact position normal: " << cp.normalInContact << "\n";
+    os << "Forbidden area length:   " << cp.forbiddenAreaLength << "\n";
+    os << "Forbidden area end point:" << cp.forbiddenAreaEndPoint << "\n";
+    os << "This is a contact point: " << (cp.isCovered ? "no" : "yes") << "\n";
+    os << "Error: " << cp.error << "\n";
+    return os;
+}
+
+
 ////////////////////////////////////
 ////////// OTHER ///////////////////
 
@@ -101,7 +131,7 @@ real cross(const vec2 &a, const vec2 &b) {
 }
 
 vec2 normalize(const vec2 &a) {
-    return a * (1.0 * sqrt(a.x * a.x + a.y * a.y));
+    return a * (1.0 / sqrt(a.x * a.x + a.y * a.y));
 }
 
 real angleBetween(const vec2 &a, const vec2 &b) {
