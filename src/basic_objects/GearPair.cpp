@@ -40,6 +40,11 @@ Spline* GearPair::completeToothProfile() {
     return m_completeToothProfile;
 }
 
+//TODO: remove this!!!!
+std::list< PositionList* >* GearPair::pointsInSortedLists() {
+    return m_allContactPoints.positionLists();
+}
+
 void GearPair::setNumberOfTeethOfDrivenGear(uint numberOfTeeth) {
     m_drivenGear->setNumberOfTeeth(numberOfTeeth);
 }
@@ -116,7 +121,10 @@ void GearPair::constructListOfPossiblePairingPoints() {
 
 
 void GearPair::chooseCorrectPoints() {
-
+    m_allContactPoints.sort(
+        m_drivenGear->numberOfTeeth(),
+        !(m_drivingGear->toothDescribedInClockDirection())
+    );
 }
 
 ContactPoint GearPair::contactPointOf(const vec2 &point, const vec2 &normal) {

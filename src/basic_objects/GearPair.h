@@ -4,7 +4,9 @@
 #include "definitions.h"
 #include "helpers.h"
 #include "basic_objects/ContactPoint.h"
+#include "basic_objects/ContactPointSortingList.h"
 class SplineGear;
+
 
 class GearPair {
 
@@ -14,6 +16,7 @@ public:
 
     std::list<ContactPoint>* foundPoints();
     Spline* completeToothProfile();
+    std::list< PositionList* >* pointsInSortedLists();
 
     void setNumberOfTeethOfDrivenGear(uint numberOfTeeth);
     uint numberOfTeethOfDrivenGear() const;
@@ -44,7 +47,7 @@ private:
     real m_stepSize;
     bool m_liveCalculation;
 
-    std::list<ContactPoint> m_allContactPoints; //TODO make to a special ContactPointSelectorList ???!!!
+    ContactPointSortingList m_allContactPoints;
 
     void constructListOfPossiblePairingPoints();
     void chooseCorrectPoints();

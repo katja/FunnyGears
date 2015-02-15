@@ -44,8 +44,7 @@ QRectF GraphicsGearPair::boundingRect() const {
         if(bottomRight.y < point.point.y)
             bottomRight = vec2(bottomRight.x, point.point.y);
     }
-
-    return QRectF(topLeft.x - 20.0, topLeft.y - 20.0, bottomRight.x + 20.0, bottomRight.y + 20.0); //20.0 is the normal Length at the moment
+    return QRectF(QPointF(topLeft.x - 20.0, topLeft.y - 20.0), QPointF(bottomRight.x + 20.0, bottomRight.y + 20.0)); //20.0 is the normal Length at the moment
 }
 
 void GraphicsGearPair::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
@@ -60,7 +59,10 @@ void GraphicsGearPair::paint(QPainter *painter, const QStyleOptionGraphicsItem *
     path.addPolygon(QPolygonF(convertToQVector(curve)));
     painter->drawPath(path);
 
+    painter->drawRect(boundingRect());
+
     std::list<ContactPoint> *points = m_gearPair->foundPoints();
+    std::list< PositionList* > *positionLists = m_gearPair->pointsInSortedLists();
 
     uint r = 10;
     uint g = 0;
@@ -69,31 +71,45 @@ void GraphicsGearPair::paint(QPainter *painter, const QStyleOptionGraphicsItem *
     uint green = g;
     uint blue = b;
 
-    for(ContactPoint point : (*points)) {
-        paintContactPoint(point, painter, QColor(red, green, blue));
-
-        b = (b + 5) & 0x1FF;
-        if((b & 0x100) > 0)//count downwards
-            blue = 0x100 - ((b & 0xFF) + 1);
-        else
-            blue = b;
-
-        if((b & 0x180) > 0) {
-            r = (r + 5) & 0x1FF;
-            if((r & 0x100) > 0)//count downwards
-                red = 0x100 - ((r & 0xFF) + 1);
-            else
-                red = r;
+    for(PositionList *list : (*positionLists)) {
+        ContactPoint lastCP = list->list.front();
+        std::cout << "list pos: " << list->position << ", total lists size: " << positionLists->size() << " this list size: " << list->list.size() << std::endl;
+        if(list->position != 0) {
+            red = green = blue = 0;
+            // QColor fillColor = QColor(128 + list->position * 10, 0, 0);
+            // painter->setBrush(QBrush(fillColor));
         }
+        for(ContactPoint cp : list->list) {
+            paintContactPoint(cp, painter, QColor(red, green, blue));
 
-        if((r & 0x180) > 0) {
-            g = (g + 5) & 0x1FF;
-            if((g & 0x100) > 0)//count downwards
-                green = 0x100 - ((g & 0xFF) + 1);
+            b = (b + 5) & 0x1FF;
+            if((b & 0x100) > 0)//count downwards
+                blue = 0x100 - ((b & 0xFF) + 1);
             else
-                green = g;
+                blue = b;
+
+            if((b & 0x180) > 0) {
+                r = (r + 5) & 0x1FF;
+                if((r & 0x100) > 0)//count downwards
+                    red = 0x100 - ((r & 0xFF) + 1);
+                else
+                    red = r;
+            }
+
+            if((r & 0x180) > 0) {
+                g = (g + 5) & 0x1FF;
+                if((g & 0x100) > 0)//count downwards
+                    green = 0x100 - ((g & 0xFF) + 1);
+                else
+                    green = g;
+            }
+            if(lastCP.originPoint != cp.originPoint) { //not first list element
+                painter->drawLine(lastCP.point.x, lastCP.point.y, cp.point.x, cp.point.y);
+                lastCP = cp;
+            }
         }
     }
+    std::cout << std::endl;
 }
 
 
