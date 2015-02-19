@@ -48,8 +48,14 @@ GraphicsSplineAttributesWidget::~GraphicsSplineAttributesWidget() {
 
 void GraphicsSplineAttributesWidget::setItem(QGraphicsItem *graphicsItem) {
     m_currentSpline = static_cast<GraphicsSpline*>(graphicsItem);
-    updateAttributes();
-    m_currentSpline->informAboutChange(this);
+    if(m_currentSpline) {
+        updateAttributes();
+        m_currentSpline->informAboutChange(this);
+    }
+    else {
+        m_currentSpline = nullptr;
+        std::cerr << "ERRRRORRRRR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+    }
 }
 
 bool GraphicsSplineAttributesWidget::worksOnItem(QGraphicsItem *graphicsItem) {

@@ -235,7 +235,27 @@ public:
      *  @param maxDist the maximal distance in the evaluable knot vector between two knots
      *                 after the knot refinement
      */
-    virtual void knotRefinement(real maxDist);
+    void knotRefinement(real maxDist);
+
+    /** @brief
+     *  TODO
+     */
+    void cutOffEdges();
+
+    /** @brief Refines the spline curve of the #m_toothProfile in general
+     *
+     *  Inserts knots and control points in the #m_toothProfile without changing
+     *  the curve whereas new control points are inserted between every two possible
+     *  knot points, if the two knots have different values.
+     */
+    void refineEverywhere();
+
+    /** @brief Combines the methods #cutOffEdges() and #refineEverywhere()
+     *
+     *  The combination is faster, as it only updates the gear spline once and not after
+     *  each step.
+     */
+    void cutOffEdgesAndRefine();
 
     /** Inserts a knot at the given knotValue and a suitable point without changing the curve.
      *  If the knot should have a multiplicity bigger than 1, give a suitable value
@@ -247,7 +267,7 @@ public:
      *  @param knotValue a suitable new knotValue to insert
      *  @param multiplicity how often this new knotValue should be inserted (0 < multiplicity <= m_degree)
      */
-    virtual void refineAt(real knotValue, uint multiplicity = 1);
+    void refineAt(real knotValue, uint multiplicity = 1);
 
     /** @brief Gear is closed!
      *

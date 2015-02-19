@@ -4,15 +4,15 @@
 #include <glm/glm.hpp>
 
 Spline::Spline(uint degree) : m_degree(degree), m_isClosed(false), m_tornToEdges(false) {
-    std::cout << "Spline is created with default constructor " << std::endl;
+    // std::cout << "Spline is created with default constructor " << std::endl;
     if(m_degree <= 0)
         throw;
-    for(uint i = 0; i <= m_degree; ++i)
+    for(uint i = 1; i < m_degree; ++i)
         m_knots.push_back(i);
 }
 
 Spline::Spline(const Spline &other) {
-    std::cout << "Spline is created with copy constructor" << std::endl;
+    // std::cout << "Spline is created with copy constructor" << std::endl;
     m_knots = vector<real>(other.m_knots);
     m_controlPoints = vector<vec2>(other.m_controlPoints);
     m_degree = other.m_degree;
@@ -21,25 +21,25 @@ Spline::Spline(const Spline &other) {
 }
 
 Spline::Spline(vector<vec2> controlPoints, vector<real> knots) {
-    std::cout << "Spline is created with given points and knots" << std::endl;
+    // std::cout << "Spline is created with given points and knots" << std::endl;
     // m_degree is set on relation between number of knots and number of control points.
-    // but if following is not given, m_degree would have to be negative! => not possible
-    if(knots.size() < controlPoints.size() + 2)
+    // but if following is not given, m_degree would have to be null or negative! => not possible
+    if(knots.size() < controlPoints.size())
         throw;
     m_knots = knots;
     m_controlPoints = controlPoints;
-    m_degree = m_knots.size() - m_controlPoints.size() - 1;
+    m_degree = m_knots.size() - m_controlPoints.size() + 1;
     updateTornToEdges();
     updateClosedCurve();
 }
 
 Spline::Spline(vector<vec2> interpolationPoints) {
-    std::cout << "Spline should be created here with given points to interpolate, but this is not yet implemented!" << std::endl;
+    // std::cout << "Spline should be created here with given points to interpolate, but this is not yet implemented!" << std::endl;
     //TODO!!!
 }
 
 Spline::~Spline() {
-    std::cout << "Spline is deleted" << std::endl;
+    // std::cout << "Spline is deleted" << std::endl;
 }
 
 Spline& Spline::operator=(const Spline &other) {
@@ -62,10 +62,10 @@ Spline& Spline::operator=(const Spline &other) {
 }
 
 vec2 Spline::evaluate(real value) const {
-    uint n = lowerNextKnot(value); // value is element of [knot[n], knot[n+1])
+    uint n = lowerNextKnot(value); // value is element of range [knot[n], knot[n+1])
     vector<vec2> controlPointsCopy(m_degree + 1);
     for(uint i = 0; i < m_degree + 1; ++i) {
-        controlPointsCopy[i] = m_controlPoints.at(n - m_degree + i);
+        controlPointsCopy[i] = m_controlPoints.at(n - m_degree + 1 + i);
     }
     deBoor(controlPointsCopy, value, n);
     return controlPointsCopy.at(m_degree);
@@ -82,12 +82,12 @@ vec2 Spline::lastPoint(real epsilon) const {
 vec2 Spline::derivative(real value) const {
     if(!isValid() || value < lowerDomainLimit() || value >= upperDomainLimit(0.0))
         return vec2(0, 0);
-    //TODO: is is necessary here to test these requirements???
+    //TODO: is it necessary here to test these requirements???
 
     uint n = lowerNextKnot(value); // value is element of [knot[n], knot[n+1])
     vector<vec2> controlPointsCopy(m_degree + 1);
     for(uint i = 0; i < m_degree + 1; ++i) {
-        controlPointsCopy[i] = m_controlPoints.at(n - m_degree + i);
+        controlPointsCopy[i] = m_controlPoints.at(n - m_degree + 1 + i);
     }
 
     //Stop de Boor algorithm one step earlier than when evaluating a curve point
@@ -250,8 +250,8 @@ void Spline::knotRefinement(real maxDist) {
     if(!isValid())
         return;
     //test each segment from lowest possible u value unto u = m_controlPoints.size() (must not be reached)
-    uint i = m_degree;
-    while(i < m_controlPoints.size()) {
+    uint i = lowerDomainKnotIndex();
+    while(i < upperDomainKnotIndex()) {
         real dist = m_knots.at(i + 1) - m_knots.at(i);
         if(dist > maxDist) {
             real newValue = m_knots.at(i) + 0.5 * dist;
@@ -262,16 +262,53 @@ void Spline::knotRefinement(real maxDist) {
     }
 }
 
+void Spline::cutOffEdges() {
+    uint numberOfKnots = m_knots.size();
+    int m = m_degree - multiplicity(lowerDomainKnotIndex());
+    if(m < 0) {
+        std::cerr << "An ERROR occured! In Spline::cutOffEdges() a negative multiplicity was recognized!" << std::endl;
+        return;
+    } else if(m == 0) {
+        return;
+    }
+    refineAt(lowerDomainLimit(), (uint)m);
+    if(numberOfKnots != m_knots.size()) {
+        m_knots.erase(m_knots.begin(), m_knots.begin() + (m_degree - 1));
+        m_controlPoints.erase(m_controlPoints.begin(), m_controlPoints.begin() + (m_degree - 1));
+    }
+    numberOfKnots = m_knots.size();
+    refineAt(upperDomainLimit(0.000001), m_degree);
+    if(numberOfKnots != m_knots.size()) {
+        m_knots.erase(m_knots.end() - m_degree, m_knots.end());
+        m_controlPoints.erase(m_controlPoints.end() - m_degree, m_controlPoints.end());
+    }
+    checkTornToEdges();
+}
+
+void Spline::refineEverywhere() {
+    if(!isValid())
+        return;
+
+    vector<real> knotsToInsert;
+    for(uint i = lowerDomainKnotIndex(); i < upperDomainKnotIndex(); ++i) {
+        if(m_knots[i] != m_knots[i + 1])
+            knotsToInsert.push_back(0.5 * (m_knots[i] + m_knots[i + 1]));
+    }
+    for(uint i = 0; i < knotsToInsert.size(); ++i) {
+        refineAt(knotsToInsert[i]);
+    }
+}
+
 void Spline::refineAt(real knotValue, uint multiplicity) {
     //A multiplicity of 0 would mean no knot insertion and
     //an insertion with multiplicity > m_degree would lead to a hole in the spline curve!
-    if(multiplicity == 0 || multiplicity > m_degree)
+    if(multiplicity == 0 || multiplicityOfKnotValue(knotValue) + multiplicity > m_degree)
         return;
     //Use de Boor scheme to get the new point(s)
     uint n = lowerNextKnot(knotValue); // knotValue is element of [knot[n], knot[n+1])
     vector<vec2> controlPointsCopy(m_degree + 1);
     for(uint i = 0; i <= m_degree; ++i) {
-        controlPointsCopy[i] = m_controlPoints.at(n - m_degree + i);
+        controlPointsCopy[i] = m_controlPoints.at(n - m_degree + 1 + i);
     }
 
     vector<vec2> newPoints(m_degree + multiplicity - 1);
@@ -291,16 +328,18 @@ void Spline::refineAt(real knotValue, uint multiplicity) {
             for(uint j = 1; j <= m_degree; ++j) {
                 newPoints[j - 1] = controlPointsCopy.at(j);
             }
+
         } else {
             //copy only last point, as it will be overwritten in next deBoor step
             newPoints[newPoints.size() - i] = controlPointsCopy.back();
         }
     }
+
     //copy now new points into control points vector:
     m_controlPoints.resize(m_controlPoints.size() + multiplicity);
     int n_int = (int) n;
     int i = m_controlPoints.size() - 1 - multiplicity;
-    for(; i >= n_int; --i) {
+    for(; i > n_int; --i) {
         m_controlPoints[i + multiplicity] = m_controlPoints.at(i);
     }
     //do NOT replace 'int j' by 'uint j'!!!
@@ -349,9 +388,9 @@ bool Spline::checkTornToEdges() const {
         return false;
     real start = m_knots.at(0);
     real stop = m_knots.at(m_knots.size() - 1);
-    for(uint i = 1; i <= m_degree; ++i) {
+    for(uint i = 1; i < m_degree; ++i) {
         if(m_knots.at(i) != start
-            || m_knots.at(m_controlPoints.size() - 1 + i) != stop)
+            || m_knots.at(m_knots.size() - 1 - i) != stop)
             return false;
     }
     return true;
@@ -363,9 +402,12 @@ void Spline::updateTornToEdges() {
 
 bool Spline::isValidMessages(std::ostream &os) const {
     bool isValid = true;
-    if(m_controlPoints.size() != m_knots.size() - m_degree - 1) {
+    if(m_degree <= 0) {
+        os << "Degree is too small, has a value of " << m_degree << ", but must be at least 1" << std::endl;
+    }
+    if(m_controlPoints.size() != m_knots.size() - m_degree + 1) {
         os << "Number of control points does not suite to number of knots and degree\n";
-        os << "number of control points should be " << (m_knots.size() - m_degree - 1);
+        os << "number of control points should be " << (m_knots.size() - m_degree + 1);
         os << "but is " << m_controlPoints.size() << std::endl;
         isValid = false;
     }
@@ -381,8 +423,7 @@ bool Spline::isValidMessages(std::ostream &os) const {
             lastValue = m_knots.at(i);
             occurences = 1;
         }
-        if((occurences > m_degree && (i != m_degree || i != m_knots.size() - 1))
-            || occurences > (m_degree + 1)) {
+        if(occurences > m_degree) {
             os << "Multiplicity of knot " << i << " is too high (" << occurences << ")." << std::endl;
         }
     }
@@ -390,27 +431,35 @@ bool Spline::isValidMessages(std::ostream &os) const {
 }
 
 bool Spline::isValid() const {
-    if(m_degree <= 0 || m_knots.size() < 2)
+    if(m_degree <= 0)
         return false;
-    if(m_controlPoints.size() != m_knots.size() - m_degree - 1)
+    if(m_controlPoints.size() != m_knots.size() - m_degree + 1)
         return false;
     return m_controlPoints.size() > m_degree; //first visible for degree + 1 control points
+}
+
+uint Spline::lowerDomainKnotIndex() const {
+    return m_degree - 1;
+}
+
+uint Spline::upperDomainKnotIndex() const {
+    return m_controlPoints.size() - 1;
 }
 
 real Spline::lowerDomainLimit() const {
     if(!isValid())
         return -1.0; //No curve available at the moment!
-    return m_knots[m_degree];
+    return m_knots[m_degree - 1];
 }
 
 real Spline::upperDomainLimit(real epsilon) const {
     if(!isValid())
         return -1.0; //No curve available at the moment!
-    return m_knots[m_controlPoints.size()] - epsilon; //is equal to: m_knots[m_knots.size() - 1 - m_degree] - epsilon
+    return m_knots[m_controlPoints.size() - 1] - epsilon; //is equal to: m_knots[m_knots.size() - 1 - m_degree] - epsilon
 }
 
 uint Spline::lowerNextKnot(real value) const {
-    for(uint i = 1; i < m_knots.size(); ++i) { //TODO: can be optimized (suchen erst ab m_degree...)
+    for(uint i = 1; i < m_knots.size(); ++i) {
         if(m_knots[i] > value)
             return i - 1;
     }
@@ -475,7 +524,7 @@ void Spline::getIntersectionPointsWithRay(const Ray &ray, vector<vec2> &intersec
 
     //first test the control point polygon.
     //If the ray has no intersection with it, there can't be an intersection with the spline curve, too.
-    for(uint i = 0; i < m_controlPoints.size() - 1; ++i) {
+    for(int i = 0; (uint)i < m_controlPoints.size() - 1; ++i) {
         vec2 startLine, endLine, intersectionPoint;
         startLine = m_controlPoints[i];
         endLine = m_controlPoints[i + 1];
@@ -490,22 +539,45 @@ void Spline::getIntersectionPointsWithRay(const Ray &ray, vector<vec2> &intersec
             }
             //For higher degrees create a new spline with the points and knots which influence
             //the line, where the intersection occured. Refine knots of new spline and
-            //examine resulting spline recursively.
+            //examine the resulting spline recursively.
+            //In a spline with degree = d the control point i and (i+1) need the knots:
+            //      i ... i + d
+            //But as (d-1) control points before and after the examined line between two
+            //control points influence the curve, we have to examine these points, too.
+            //So, in a whole, we have to examine for the line between control points
+            //i and (i+1) the knots:
+            //      i - (d - 1) ... i + d + (d - 1) = i + 2 * d - 1
             //TODO: I don't think that the following is correct!!! What happens, if i == 0????
             else {
-                if(upperDomainLimit(0.0) - lowerDomainLimit() > 0.1) {
-                    long startPointIndex = i - (m_degree - 1);
-                    unsigned long stopPointIndex = i + m_degree;
-                    if(startPointIndex < 0)
-                        startPointIndex = 0;
-                    if(stopPointIndex >= m_controlPoints.size())
-                        stopPointIndex = m_controlPoints.size() - 1;
-                    vector<vec2> controlPoints = copyVectorPart(m_controlPoints, startPointIndex, stopPointIndex - startPointIndex + 1);
-                    vector<real> knots = copyVectorPart(m_knots, startPointIndex, controlPoints.size() + m_degree);
+                //TODO: bessere abschätzung möglich? z.b. abstand an der stelle von kontrollpolygon???
+                if(upperDomainLimit(0.0) - lowerDomainLimit() > 0.002) {
 
+                    int startKnotIndex = i - (m_degree - 1);
+                    uint stopKnotIndex = i + 2 * m_degree - 1;
+                    int startCPIndex = i - (m_degree - 1);
+                    uint lengthCP = 2 * m_degree; //on each side add (d-1) control points and we have the two of the line
+                    // uint lengthKnots = 3 * m_degree - 1; <== We don't need this, but it helps understanding the new spline
+
+                    if(startKnotIndex < 0) {
+                        lengthCP += startCPIndex;
+                        startKnotIndex = 0;
+                        startCPIndex = 0; //when knot index is negative, control point index will be negative, too
+                    }
+
+                    if(stopKnotIndex >= m_knots.size()) {
+                        lengthCP -= (stopKnotIndex - (m_knots.size() - 1));
+                        stopKnotIndex = m_knots.size() - 1;
+                    }
+                    vector<vec2> controlPoints = copyVectorPart(m_controlPoints, startCPIndex, lengthCP);
+                    vector<real> knots = copyVectorPart(m_knots, startKnotIndex, stopKnotIndex - startKnotIndex + 1);
+
+                    //This new spline has (if it does not lie anywhere at the borders)
+                    //(3 * degree - 1) knots and (2 * degree) control points
+                    //So the validness is given:
+                    //   degree =!= #knots + #ctrl-points + 1 = 3degree - 1 + 2degree + 1 = 1degree = degree
                     Spline splinePart(controlPoints, knots);
-                    real maxKnotPitch = m_knots.at(startPointIndex + m_degree + 1) - m_knots.at(startPointIndex + m_degree);
-                    splinePart.knotRefinement(maxKnotPitch);
+                    splinePart.cutOffEdges();
+                    splinePart.refineEverywhere();
                     splinePart.getIntersectionPointsWithRay(ray, intersectionPoints);
                 } else {
                     intersectionPoints.push_back(intersectionPoint);
@@ -516,13 +588,10 @@ void Spline::getIntersectionPointsWithRay(const Ray &ray, vector<vec2> &intersec
 }
 
 void Spline::scale(real scaling, vec2 origin) {
-    std::cout << "\nSCALING OF SPLINE - with " << scaling << std::endl;
-    std::cout << (*this) << std::endl;
     for(uint i = 0; i < m_controlPoints.size(); ++i) {
         m_controlPoints[i] = scaling * (m_controlPoints[i] - origin);
         m_controlPoints[i] = m_controlPoints[i] + origin;
     }
-    std::cout << (*this) << std::endl;
 }
 
 void Spline::deBoor(vector<vec2> &controlPoints, real value, real n) const {
@@ -554,29 +623,28 @@ void Spline::adjustKnots() {
 
     for(uint i = 1; i < m_knots.size(); ++i) {
 
-        //when torn to edges the first n = m_degree + 1 knots have to have the same value
-        if(m_tornToEdges && i <= m_degree) {
+        //when torn to edges the first n = m_degree knots must have the same value
+        if(m_tornToEdges && i < m_degree) {
             m_knots[i] = lastKnotValue;
             ++occurences;
         } else
-        //when torn to edges the last knots have to have the same value
-        //starting with knot[m_controlPoints.size()]. If this knot has same value
-        //as the one before, give it a new bigger value.
-        if(m_tornToEdges && i == m_controlPoints.size()) {
+        //when torn to edges the last knots must have the same value, starting with the
+        //knot at upperDomainKnotIndex() = m_controlPoints.size() - 1
+        //If this knot has the same value as the one before, give it a new bigger value.
+        if(m_tornToEdges && i == upperDomainKnotIndex()) {
             if(m_knots.at(i) == lastKnotValue)
                 m_knots[i] = lastKnotValue + 1;
             occurences = 1;
         } else
 
-        //when torn to edges the last n = m_degree + 1 (= m_knots.size() - m_controlPoints.size())
-        //knots need the same value
-        if(m_tornToEdges && i > m_controlPoints.size()) {
-            assert(occurences <= m_degree); //otherwise, number of control points to knots and to degree is not correct!
+        //when torn to edges the last n = m_degree knots need the same value
+        if(m_tornToEdges && i > m_knots.size() - 1 - m_degree) {
+            assert(occurences < m_degree); //otherwise, number of control points to knots and to degree is not correct!
             m_knots[i] = lastKnotValue;
             ++occurences;
         } else
 
-        //assure that there are not more than n = m_degree + 1 same knot values
+        //assure that there are not more than n = m_degree same knot values
         if(m_knots.at(i) == lastKnotValue) {
             ++occurences;
             if(occurences > m_degree + 1) {
@@ -596,39 +664,39 @@ void Spline::adjustKnots() {
 }
 
 void Spline::equalizeFirstKnots() {
-    real firstOtherKnot = m_knots.at(m_degree + 1);
-    real firstKnotsValue = m_knots.at(m_degree);
+    real firstOtherKnot = m_knots.at(m_degree);
+    real firstKnotsValue = m_knots.at(m_degree - 1);
     if(firstKnotsValue == firstOtherKnot)
         firstKnotsValue -= 1;
-    for(uint i = 0; i <= m_degree; ++i) {
+    for(uint i = 0; i < m_degree; ++i) {
         m_knots[i] = firstKnotsValue;
     }
 }
 
 void Spline::equalizeLastKnots() {
-    real lastOtherKnot = m_knots.at(m_controlPoints.size() - 1);
-    real lastKnotsValue = m_knots.at(m_controlPoints.size());
+    real lastOtherKnot = m_knots.at(m_controlPoints.size() - 2);
+    real lastKnotsValue = m_knots.at(m_controlPoints.size() - 1);
     if(lastOtherKnot == lastKnotsValue)
         lastKnotsValue += 1;
-    for(uint i = 0; i <= m_degree; ++i) {
-        m_knots[m_controlPoints.size() + i] = lastKnotsValue;
+    for(uint i = 0; i < m_degree; ++i) {
+        m_knots[m_controlPoints.size() - 1 + i] = lastKnotsValue;
     }
 }
 
 void Spline::makeDifferentFirstKnots() {
-    real nextValue = m_knots.at(m_degree + 1);
+    real nextValue = m_knots.at(m_degree);
     //do NOT replace int by uint!!!
-    for(int i = m_degree; i >= 0; --i) {
+    for(int i = m_degree - 1; i >= 0; --i) {
         nextValue -= 1.0;
         m_knots[i] = nextValue;
     }
 }
 
 void Spline::makeDifferentLastKnots() {
-    real lastValue = m_knots.at(m_controlPoints.size() - 1);
-    for (uint i = 0; i <= m_degree; ++i) {
+    real lastValue = m_knots.at(m_controlPoints.size() - 2);
+    for(uint i = 0; i < m_degree; ++i) {
         lastValue += 1.0;
-        m_knots[m_controlPoints.size() + i] = lastValue;
+        m_knots[m_controlPoints.size() - 1 + i] = lastValue;
     }
 }
 
@@ -637,11 +705,11 @@ int Spline::pointsWithNormalsThroughOrigin(vector<vec2> &samples, real epsilon) 
         return -1;
 
     //Preparation of the sampleValues vector, which holds evaluable knots and one knot value between
-    uint evaluableKnots = m_controlPoints.size() + 1 - m_degree;
+    uint evaluableKnots = m_controlPoints.size() - m_degree;  // former: m_controlPoints.size() + 1 - m_degree;
     vector<real> sampleValues(evaluableKnots * 2 - 1);
     //insert all evaluable knots at every second position of sampleValues
     for(uint i = 0; i < evaluableKnots; ++i) {
-        sampleValues[2 * i] = m_knots[i + m_degree];
+        sampleValues[2 * i] = m_knots[i + lowerDomainKnotIndex()];
     }
     //insert an additional value between knot values
     for(uint i = 1; i < sampleValues.size(); i += 2) {

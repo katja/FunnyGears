@@ -317,6 +317,20 @@ void GraphicsSpline::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
         painter->setPen(pen);
         painter->drawPath(tangentPath());
     }
+
+    // std::cout << "\n\nURSPUNGSSPLINE:\n" << (*m_spline) << std::endl;
+    // //TODO: delete following
+    // if(m_spline->isValid()) {
+    //     vector<vec2> intersectionPoints;
+    //     vec2 start = m_spline->firstPoint();
+    //     Ray ray(start, -(m_spline->normal(m_spline->lowerDomainLimit())));
+    //     m_spline->getIntersectionPointsWithRay(ray, intersectionPoints);
+
+    //     for(int i = 0; i < intersectionPoints.size(); ++i) {
+    //         painter->drawLine(start.x, start.y, intersectionPoints[i].x, intersectionPoints[i].y);
+    //         painter->drawEllipse(QPointF(intersectionPoints[i].x, intersectionPoints[i].y), 8, 8);
+    //     }
+    // }
 }
 
 QColor GraphicsSpline::color() const {

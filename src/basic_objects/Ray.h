@@ -43,7 +43,7 @@ public:
      * @param intersectionPoint if an intersection is found, found intersection point is written in intersectionPoint. If none is found, intersectionPoint isn't touched.
      * @return true if ray intersects the line, false otherwise
      */
-    bool intersect(vec2 startLine, vec2 endLine, vec2& intersectionPoint) const;
+    bool intersect(vec2 startLine, vec2 endLine, vec2& intersectionPoint, real epsilon = 0.0001) const;
 
 private:
     vec2 m_origin;

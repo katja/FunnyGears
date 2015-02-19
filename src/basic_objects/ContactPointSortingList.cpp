@@ -63,8 +63,6 @@ void ContactPointSortingList::sort(uint numberOfTeeth, bool isDescribedClockwise
     vec2 stopPitch = glm::rotate(startPitch, (*m_angularPitchRotation));
     m2x2 betweenStartStop = glm::inverse(m2x2(startPitch, stopPitch));
 
-    std::cout << "start: " << startPitch << ", stop: " << stopPitch << std::endl;
-
     PositionList *positionList = new PositionList();
     positionList->position = 0; // in examined angular pitch
 
@@ -74,19 +72,16 @@ void ContactPointSortingList::sort(uint numberOfTeeth, bool isDescribedClockwise
 
             if(glm::all(glm::greaterThanEqual(baryz, vec2(0,0)))) {
                 insertInCorrectList(*it, 0, positionList);
-                std::cout << "INSERTED IN NORMAL LIST" << std::endl;
 
             } else if (baryz.x > 0.0f && baryz.y < 0.0f) {
                 //startPitch still positive, stopPitch negative => point lies infront of start of tooth
                 int position = whichPositionBeforeAngularPitch(&(*it), startPitch);
                 insertInCorrectList(*it, position, positionList);
-                std::cout << "INSERTED BEFORE NORMAL LIST, " << it->point << std::endl;
 
             } else if (baryz.x < 0.0f && baryz.y > 0.0f) {
                 //startPitch negative, stopPitch still positive => point lies behind end of tooth
                 int position = whichPositionBehindAngularPitch(&(*it), stopPitch);
                 insertInCorrectList(*it, position, positionList);
-                std::cout << "INSERTED BEHIND NORMAL LIST, " << it->point << std::endl;
 
             }  //else: point lies nearly opposite tooth
 
@@ -96,33 +91,32 @@ void ContactPointSortingList::sort(uint numberOfTeeth, bool isDescribedClockwise
 
     m_sortingLists->push_back(positionList);
 
+    // Turn the points of the lists infront and behind of the examined angular pitch
+    // Afterwards all lists are mainly in the angular pitch
     for(PositionList *positionList : (*m_sortingLists)) {
         if(positionList->position != 0) {
             real rotationAngle = (*m_angularPitchRotation) * (real)positionList->position;
-            std::cout << "first one: " << positionList->list.front().point << std::endl;
-            for(std::vector<ContactPoint>::iterator it = positionList->list.begin(), end = positionList->list.end(); it != end; ++it) {
+            for(vector<ContactPoint>::iterator it = positionList->list.begin(), end = positionList->list.end(); it != end; ++it) {
                 it->rotate(rotationAngle);
             }
-            std::cout << "first one: " << positionList->list.front().point << std::endl;
         }
     }
-    //TODO: now turn the lists?!
 
     // // Now all points of all lists are compared and only points, which are not covered by any of the rectangles
     // // which are constructed by two other points with their forbidden area are chosen for the mating gear.
     // // First mark all points as not covered.
-    // for(std::vector< std::vector<ContactPoint>* >::iterator listIt = lists.begin(), listEnd = lists.end(); listIt != listEnd; ++listIt) {
-    //     for(std::vector<ContactPoint>::iterator it = (*listIt)->begin(), end = (*listIt)->end(); it != end; ++it) {
+    // for(vector< vector<ContactPoint>* >::iterator listIt = lists.begin(), listEnd = lists.end(); listIt != listEnd; ++listIt) {
+    //     for(vector<ContactPoint>::iterator it = (*listIt)->begin(), end = (*listIt)->end(); it != end; ++it) {
     //         it->isCovered = false;
     //     }
     // }
     // // Find all covered points
     // // This loop is very expensive but it is quite complicated to reduce the cicles, as no constraint is known for the points.
-    // for(std::vector< std::vector<ContactPoint>* >::iterator listIt = lists.begin(), listEnd = lists.end(); listIt != listEnd; ++listIt) {
-    //     for(std::vector<ContactPoint>::iterator it = (*listIt)->begin(), end = --((*listIt)->end()); it != end; ++it) {
+    // for(vector< vector<ContactPoint>* >::iterator listIt = lists.begin(), listEnd = lists.end(); listIt != listEnd; ++listIt) {
+    //     for(vector<ContactPoint>::iterator it = (*listIt)->begin(), end = --((*listIt)->end()); it != end; ++it) {
 
-    //         for(std::vector< std::vector<ContactPoint>* >::iterator list2It = lists.begin(), list2End = lists.end(); list2It != list2End; ++list2It) {
-    //             for(std::vector<ContactPoint>::iterator it2 = (*list2It)->begin(), end2 = (*list2It)->end(); it2 != end2; ++it2) {
+    //         for(vector< vector<ContactPoint>* >::iterator list2It = lists.begin(), list2End = lists.end(); list2It != list2End; ++list2It) {
+    //             for(vector<ContactPoint>::iterator it2 = (*list2It)->begin(), end2 = (*list2It)->end(); it2 != end2; ++it2) {
     //                 if(it != it2 && (it+1) != it2) {//don't compare points itself!
     //                     if(ContactPointIsCovered(*it2, *it, *(it+1))) {
     //                         it2->isCovered = true;
@@ -134,17 +128,17 @@ void ContactPointSortingList::sort(uint numberOfTeeth, bool isDescribedClockwise
     //     }
     // }
 
-    // std::vector<ContactPoint> chosenPoints = std::vector<ContactPoint>();
+    // vector<ContactPoint> chosenPoints = vector<ContactPoint>();
     // for(hpuint i = 0; i < positionList.size(); ++i) {
     //     if(positionList[i] == PointPosition::IN_ANGULAR_PITCH) {
-    //         for(std::vector<ContactPoint>::iterator it = lists[i]->begin(), end = lists[i]->end(); it != end; ++it) {
+    //         for(vector<ContactPoint>::iterator it = lists[i]->begin(), end = lists[i]->end(); it != end; ++it) {
     //             if(!it->isCovered) {
     //                 chosenPoints.push_back(*it);
     //             }
     //         }
     //     }
     // }
-    // return new std::vector<ContactPoint>(chosenPoints);
+    // return new vector<ContactPoint>(chosenPoints);
 }
 
 std::list< PositionList* >* ContactPointSortingList::positionLists() {
@@ -161,7 +155,6 @@ void ContactPointSortingList::insertInCorrectList(const ContactPoint &point, int
         m_sortingLists->push_back(list);
         list = new PositionList();
         list->position = position;
-        std::cout << "new position list created with position: " << list->position << ", and should be: " << position << std::endl;
         list->list.push_back(point);
     }
 }
@@ -245,21 +238,21 @@ int ContactPointSortingList::whichPositionBeforeAngularPitch(ContactPoint *conta
 //     ContactPoint ContactPoint,
 //     PointPosition lastPosition,
 //     PointPosition currentPosition,
-//     std::vector< std::vector<ContactPoint>* >& lists,
-//     std::vector<PointPosition>& positionList) {
+//     vector< vector<ContactPoint>* >& lists,
+//     vector<PointPosition>& positionList) {
 
 //     if(lastPosition != currentPosition && !lists.back()->empty()) {
 //         ContactPoint lastContactPoint = lists.back()->back();
 //         lists.back()->push_back(ContactPoint);
 //         turnPointsOfList(lists.back(), lastPosition);
 //         positionList.push_back(lastPosition);
-//         lists.push_back(new std::vector<ContactPoint>());
+//         lists.push_back(new vector<ContactPoint>());
 //         lists.back()->push_back(lastContactPoint);
 //     }
 //     lists.back()->push_back(ContactPoint);
 // }
 
-// void ContactPointSortingList::turnPointsOfList(std::vector<ContactPoint>* list, PointPosition positionOfListPoints) {
+// void ContactPointSortingList::turnPointsOfList(vector<ContactPoint>* list, PointPosition positionOfListPoints) {
 //     if(positionOfListPoints == PointPosition::IN_ANGULAR_PITCH) {
 //         return;
 //     } else {
@@ -269,7 +262,7 @@ int ContactPointSortingList::whichPositionBeforeAngularPitch(ContactPoint *conta
 //         } else { //positionOfListsPoints == PointPosition::BEHIND_ANGULAR_PITCH
 //             rotation = m_angularPitchRotation;
 //         }
-//         for(std::vector<ContactPoint>::iterator it = list->begin(), end = list->end(); it != end; ++it) {
+//         for(vector<ContactPoint>::iterator it = list->begin(), end = list->end(); it != end; ++it) {
 //             it->rotate(rotation);
 //         }
 //     }

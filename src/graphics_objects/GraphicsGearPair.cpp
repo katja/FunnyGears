@@ -71,9 +71,10 @@ void GraphicsGearPair::paint(QPainter *painter, const QStyleOptionGraphicsItem *
     uint green = g;
     uint blue = b;
 
+    real distance = m_gearPair->getDistanceOfCenters();
+
     for(PositionList *list : (*positionLists)) {
         ContactPoint lastCP = list->list.front();
-        std::cout << "list pos: " << list->position << ", total lists size: " << positionLists->size() << " this list size: " << list->list.size() << std::endl;
         if(list->position != 0) {
             red = green = blue = 0;
             // QColor fillColor = QColor(128 + list->position * 10, 0, 0);
@@ -82,14 +83,14 @@ void GraphicsGearPair::paint(QPainter *painter, const QStyleOptionGraphicsItem *
         for(ContactPoint cp : list->list) {
             paintContactPoint(cp, painter, QColor(red, green, blue));
 
-            b = (b + 5) & 0x1FF;
+            b = (b + 8) & 0x1FF;
             if((b & 0x100) > 0)//count downwards
                 blue = 0x100 - ((b & 0xFF) + 1);
             else
                 blue = b;
 
             if((b & 0x180) > 0) {
-                r = (r + 5) & 0x1FF;
+                r = (r + 8) & 0x1FF;
                 if((r & 0x100) > 0)//count downwards
                     red = 0x100 - ((r & 0xFF) + 1);
                 else
@@ -97,34 +98,36 @@ void GraphicsGearPair::paint(QPainter *painter, const QStyleOptionGraphicsItem *
             }
 
             if((r & 0x180) > 0) {
-                g = (g + 5) & 0x1FF;
+                g = (g + 8) & 0x1FF;
                 if((g & 0x100) > 0)//count downwards
                     green = 0x100 - ((g & 0xFF) + 1);
                 else
                     green = g;
             }
             if(lastCP.originPoint != cp.originPoint) { //not first list element
-                painter->drawLine(lastCP.point.x, lastCP.point.y, cp.point.x, cp.point.y);
+                painter->drawLine(lastCP.point.x + distance, lastCP.point.y, cp.point.x + distance, cp.point.y);
                 lastCP = cp;
             }
         }
     }
-    std::cout << std::endl;
 }
 
 
 void GraphicsGearPair::paintContactPoint(ContactPoint point, QPainter *painter, QColor color) {
+    painter->save();
     painter->setPen(color);
     if(point.error != ErrorCode::NO_ERROR) {
         painter->setPen(QColor(220, 0, 20)); //red
     }
 
+    real distance = m_gearPair->getDistanceOfCenters();
+
     //point, normal, originPoint, originNormal
-    painter->drawEllipse(QPointF(point.point.x, point.point.y), Preferences::PointRadius, Preferences::PointRadius);
+    painter->drawEllipse(QPointF(point.point.x + distance, point.point.y), Preferences::PointRadius, Preferences::PointRadius);
     painter->drawEllipse(QPointF(point.originPoint.x, point.originPoint.y), Preferences::PointRadius, Preferences::PointRadius);
-    vec2 endNormal = point.point + point.normal * 20.0;
-    painter->drawLine(point.point.x, point.point.y, endNormal.x, endNormal.y);
-    endNormal = point.originPoint + point.originNormal * 20.0;
+    vec2 endNormal = point.point + point.normal * point.forbiddenAreaLength;
+    painter->drawLine(point.point.x + distance, point.point.y, endNormal.x + distance, endNormal.y);
+    endNormal = point.originPoint - point.originNormal * point.forbiddenAreaLength;
     painter->drawLine(point.originPoint.x, point.originPoint.y, endNormal.x, endNormal.y);
 
     painter->setBrush(QBrush(color));
@@ -132,4 +135,6 @@ void GraphicsGearPair::paintContactPoint(ContactPoint point, QPainter *painter, 
     endNormal = point.contactPosition + point.normalInContact * 20.0;
     painter->drawLine(point.contactPosition.x, point.contactPosition.y, endNormal.x, endNormal.y);
     painter->setBrush(QBrush(Qt::NoBrush));
+
+    painter->restore();
 }

@@ -29,6 +29,8 @@ public:
     void setSamplingRate(uint samplingRate);
     uint samplingRate() const;
 
+    real getDistanceOfCenters() const;
+
 private:
     static const real DefaultMaxDrift;
     static const uint DefaultSamplingRate;
@@ -51,7 +53,8 @@ private:
 
     void constructListOfPossiblePairingPoints();
     void chooseCorrectPoints();
-    ContactPoint contactPointOf(const vec2 &point, const vec2 &normal);
-    vec2 normalAt(real value);
+    ContactPoint contactPointOf(const vec2 &point, const vec2 &normal) const;
+    void insertThicknessInContactPoint(ContactPoint& contactPoint) const;
+    vec2 normalAt(real value) const;
 };
 #endif // GEAR_PAIR

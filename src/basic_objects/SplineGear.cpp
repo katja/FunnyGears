@@ -150,9 +150,9 @@ Spline* SplineGear::completeToothProfile() const {
 
     //Create a spline of two following teeth
     uint numberOfControlPoints = m_toothProfile->numberOfControlPoints() + m_degree;
-    uint numberOfKnots = numberOfControlPoints + m_degree + 1;
-    std::vector<real> knots(numberOfKnots);
-    std::vector<vec2> controlPoints(numberOfControlPoints);
+    uint numberOfKnots = numberOfControlPoints + m_degree - 1;
+    vector<real> knots(numberOfKnots);
+    vector<vec2> controlPoints(numberOfControlPoints);
     for(uint i = 0; i < numberOfKnots; ++i) {
         knots[i] = m_knots[i];
     }
@@ -169,9 +169,9 @@ void SplineGear::updateDistancesToCenter() {
         m_maximumDistanceToCenter = this->maximumDistanceToOrigin();
     } else {
         //Create a spline of two following teeth
-        uint knotsSize = 2 * m_toothProfile->numberOfControlPoints() + m_degree + 1;
-        std::vector<real> knots(knotsSize);
-        std::vector<vec2> controlPoints(2 * m_toothProfile->numberOfControlPoints());
+        uint knotsSize = 2 * m_toothProfile->numberOfControlPoints() + m_degree - 1;
+        vector<real> knots(knotsSize);
+        vector<vec2> controlPoints(2 * m_toothProfile->numberOfControlPoints());
         for(uint i = 0; i < knotsSize; ++i) {
             knots[i] = m_knots[i];
         }
@@ -184,42 +184,43 @@ void SplineGear::updateDistancesToCenter() {
     }
 }
 
-/*Returns a new BSplineCurve representing the whole gear by putting together
-many of copies of the tooth profile bspline. It doesn't matter, if the spline is torn
-to edges or not, but as no control point is removed, if it is torn to the edges,
-the edge point is moved to the first control point of each tooth.
+/*Calculate the curve representing the whole gear by putting together many of copies
+of the m_toothProfile. It doesn't matter, if the spline is torn to edges or not, but as
+no control point is removed, if it is torn to the edges, the edge point is moved to the
+first control point of each tooth.
 
 Example 1 (9 control points, degree = 3, numberOfTeeth = 4, tornToEdges = true):
 
-Given knots: 0---0---0---0---1---2---5---6---8---9---9---9---9
-New knots:   0---0---0---0---1---2---5---6---8---9
-                10--10--10--11--12--15--16--18--19
-                20--20--20--21--22--25--26--28--29
-                30--30--30--31--32--35--36--38--39
-                40--40--40                         --41--42--45
+Given knots: 0---0---0---1---2---5---6---8---9---9---9
+New knots:   0---0---0---1---2---5---6---8---9
+            10--10--10--11--12--15--16--18--19
+            20--20--20--21--22--25--26--28--29
+            30--30--30--31--32--35--36--38--39
+            40--40--40                        --41--42
 The last 3 knots are needed to close the gear curve. As it is a connection with 3 times
 the same knot, only one connecting control point is needed and not 'degree' control points.
 
 Example 2 (5 control points, degree = 3, numberOfTeeth = 4, tornToEdges = false):
 
-Given knots: 0---1---3---4---5---8--10--11--13
-New knots:   0---1---3---4---5---8
-                10--13--14--15--18
-                20--23--24--25--28
-                30--33--34--35--38
-                40--43--44         --45--48--50
+Given knots: 1---3---4---5---8--10--11
+New knots:   1---3---4---5---8
+            10--13--14--15--18
+            20--23--24--25--28
+            30--33--34--35--38
+            40--43--44        --45--48
 The three knots of the last line are necessary for the smooth connection of the curve
 to form a circular curve.
 
-And now for the points:
-Given points: a--b--c--d--e--f--g--h--i
-New points:   a0-b0-c0-d0-e0-f0-g0-h0-i0
-              a1-b1-c1-d1-e1-f1-g1-h1-i1
-              a2-b2-c2-d2-e2-f2-g2-h2-i2
-              a3-b3-c3-d3-e3-f3-g3-h3-i3
+Example 3 (5 control points, degree = 4, numberOfTeeth = 4, tornToEdges = false):
 
-Remark: The corresponding points starting from line two are rotated around the origin.
-*/
+Given knots: 1---3---4---5---8--10--11--13
+New knots:   1---3---4---5---8
+            10--13--14--15--18
+            20--23--24--25--28
+            30--33--34--35--38
+            40--43--44--45    --48--50--53
+The three knots of the last line are necessary for the smooth connection of the curve
+to form a circular curve. */
 void SplineGear::updateKnotsAndControlPoints() {
 // UPDATE CONTROL POINTS:
     updateControlPoints();
@@ -232,19 +233,23 @@ void SplineGear::updateKnotsAndControlPoints() {
     // This simplifies the extension of the knots
     vector<real> knotInterspaces(ppt);
     for(uint i = 0; i < ppt; ++i) {
-        knotInterspaces[i] = givenKnots[2 + i] - givenKnots[1 + i];
+        knotInterspaces[i] = givenKnots[1 + i] - givenKnots[i];
     }
 
     // control problematic multiple similar knots:
-    uint k_1 = 1;
-    uint k_2 = givenKnots.size() - 1 - m_degree;
+    //... at the beginning:
+    uint k_1 = 0;
     uint l_1 = k_1 + 1;
-    uint l_2 = k_2 + 1;
+    //... and at the end:
+    uint l_2 = ppt; // = givenKnots.size() - 1 - m_degree
+    uint k_2 = ppt - 1;
+
+
     if(givenKnots[k_1] == givenKnots[l_1] && givenKnots[k_2] == givenKnots[l_2]) {
         // problematic are only splines with above condition
         uint i = 0;
         bool foundSame = true;
-        while(i < m_degree - 2 && foundSame) {
+        while(i < m_degree - 2 && foundSame) { //we already have two equal knots: at k_1 and l_1
             i += 1;
             if(givenKnots[l_1] != givenKnots[l_1 + i])
                 foundSame = false;
@@ -253,7 +258,7 @@ void SplineGear::updateKnotsAndControlPoints() {
 
         i = 0;
         foundSame = true;
-        while(i < m_degree - 1 && foundSame) {
+        while(i < m_degree - 2 && foundSame) {
             i += 1;
             if(givenKnots[k_2] != givenKnots[k_2 - i])
                 foundSame = false;
@@ -262,7 +267,7 @@ void SplineGear::updateKnotsAndControlPoints() {
 
         if(similarStartKnots + similarEndKnots > m_degree) {
             // knot values must be adapted for concatenation
-            // choose a new value for continuation
+            // choose a new value for step to next tooth
             real newLastValue = givenKnots[l_2] + 1.0; //<== This may be a bad choice, but at least it's a simple calculation
             // for a better choice how to carry on, test if a different knot value exists
             i = 1;
@@ -273,11 +278,12 @@ void SplineGear::updateKnotsAndControlPoints() {
                     foundSame = false;
                 }
             }
+            knotInterspaces[ppt - 1] = newLastValue - givenKnots[ppt - 1];
         }
     }
 
     // Now finally fill new knot vector
-    m_knots.resize(m_controlPoints.size() + m_degree + 1);
+    m_knots.resize(m_controlPoints.size() + m_degree - 1); //m_controlPoints are already updated!
     m_knots[0] = givenKnots[0];
     for(uint tooth = 0; tooth < m_numberOfTeeth; ++tooth) {
         for(uint j = 1; j <= ppt; ++j) {
@@ -286,11 +292,24 @@ void SplineGear::updateKnotsAndControlPoints() {
         }
     }
     uint lastFilledPosition = m_numberOfTeeth * ppt;
-    for(uint i = 1; i <= 2 * m_degree; ++i) {
+    for(uint i = 1; i < 2 * m_degree; ++i) {
         m_knots[lastFilledPosition + i] = m_knots[lastFilledPosition + i - 1] + knotInterspaces[(i - 1) % ppt]; //as 2 * m_degree may be greater than ppt, which is the size of the knotInterspaces vector, the modulo is necessary here
     }
 }
 
+/*
+Whereas the knots have to be put together in a suitable way, the control points
+only need to be rotated, so for a gear with 4 teeth and 9 control points in the
+m_toothProfile, we get:
+
+Given points: a--b--c--d--e--f--g--h--i
+New points:   a0-b0-c0-d0-e0-f0-g0-h0-i0
+              a1-b1-c1-d1-e1-f1-g1-h1-i1
+              a2-b2-c2-d2-e2-f2-g2-h2-i2
+              a3-b3-c3-d3-e3-f3-g3-h3-i3
+
+Remark: The corresponding points starting from line two are rotated around the origin.
+*/
 void SplineGear::updateControlPoints() {
     uint ppt = m_toothProfile->numberOfControlPoints(); // ppt = points per tooth
 
@@ -346,6 +365,22 @@ void SplineGear::moveControlPoint(uint index, QPointF newPosition) {
 
 void SplineGear::knotRefinement(real maxDist) {
     m_toothProfile->knotRefinement(maxDist);
+    update();
+}
+
+void SplineGear::cutOffEdges() {
+    m_toothProfile->cutOffEdges();
+    update();
+}
+
+void SplineGear::refineEverywhere() {
+    m_toothProfile->refineEverywhere();
+    update();
+}
+
+void SplineGear::cutOffEdgesAndRefine() {
+    m_toothProfile->cutOffEdges();
+    m_toothProfile->refineEverywhere();
     update();
 }
 
@@ -412,12 +447,11 @@ vec2 SplineGear::relatedPositionInFirstTooth(uint toothIndex, vec2 position) con
 
 real SplineGear::relatedKnotValueInFirstTooth(real gearValue) const {
     uint knotIndex = lowerNextKnot(gearValue);
-    if(knotIndex <= m_toothProfile->numberOfControlPoints())
+    if(knotIndex < m_toothProfile->numberOfControlPoints())
         return gearValue; //value belongs to first tooth
 
-    real knotIncreasementPerTooth = m_knots[m_toothProfile->numberOfControlPoints() + 1]
-                                    - m_knots[1];
-    real gearValueWithoutOffset = gearValue - m_knots[1];
+    real knotIncreasementPerTooth = m_knots[m_toothProfile->numberOfControlPoints()] - m_knots[0];
+    real gearValueWithoutOffset = gearValue - m_knots[0];
 
     int toothNumber;
     //store the quotient of 'gearValueWithoutOffset / knotIncreasementPerTooth' in toothNumber

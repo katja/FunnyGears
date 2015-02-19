@@ -180,6 +180,19 @@ public:
      */
     virtual void knotRefinement(real maxDist);
 
+    /** TODO!! description!!
+     *
+     */
+    virtual void cutOffEdges();
+
+    /** @brief Refines the spline curve in general
+     *
+     *  Inserts knots and control points without changing the curve whereas new control
+     *  points are inserted between every two possible knot points, if the two knots
+     *  have different values.
+     */
+    virtual void refineEverywhere();
+
     /** Inserts a knot at the given knotValue and a suitable point without changing the curve.
      *  If the knot should have a multiplicity bigger than 1, give a suitable value
      *  (smallest multiplicity value is 1, largest is m_degree)
@@ -267,6 +280,14 @@ public:
      */
     virtual bool isValidMessages(std::ostream &os) const;
 
+    /** @brief Returns index of first knot which can be evaluated
+     */
+    virtual uint lowerDomainKnotIndex() const;
+
+    /** @brief Returns index of last knot whose value must not be reached when evaluating
+     */
+    virtual uint upperDomainKnotIndex() const;
+
     /** Returns the lowest value, which can be evaluated.
      *  If spline is not valid in the current state it returns -1.0
      *  @return lowest possible value, which can be evaluated, or -1.0 if spline is not valid
@@ -331,7 +352,7 @@ public:
      */
     virtual void getIntersectionPointsWithRay(const Ray &ray, vector<vec2> &intersectionPoints) const;
 
-    /*///////////////TTTTTTTTTTTTTTTTTTTOOOOOOOOOOOOOOOOOOOOOODDDDDDDDDDDDDDDDDDDDDDOOOOOOOOOOOOOOOOO!!!!!!!!!!!!!!!!!!!
+    /*///////////////TODO !!!!!!!!!!!
      */
     virtual void scale(real scaling, vec2 origin = vec2(0, 0));
 

@@ -35,7 +35,7 @@ real Ray::distanceToPoint(vec2 &point) const {
         return  std::numeric_limits<real>::max();
 }
 
-bool Ray::intersect(vec2 startLine, vec2 endLine, vec2 &intersectionPoint) const {
+bool Ray::intersect(vec2 startLine, vec2 endLine, vec2 &intersectionPoint, real epsilon) const {
     //Use quasi barycentric coordinates for the calculation.
     //If x and y were a basis, t would be the coordinates for z
     //As the direction vector only has an origin and no length, it is best to use
@@ -44,15 +44,18 @@ bool Ray::intersect(vec2 startLine, vec2 endLine, vec2 &intersectionPoint) const
     //to express the direction vector. With this choice we get an intersection at the line
     //if it lies in positive direction of m_direction (=> t.y >= 0) and somewhere on the
     //line (=> 0 <= t.x <= 1)
+
+    //But first, move the origin value a little bit in the direction of the ray direction
+    vec2 origin = m_origin + epsilon * m_direction;
     vec2 x = startLine - endLine;
     vec2 y = m_direction;
-    vec2 z = startLine - m_origin;
+    vec2 z = startLine - origin;
     m2x2 matrix = m2x2(x, y);
     if(glm::determinant(matrix) != 0) {
         m2x2 invMatrix = glm::inverse(matrix);
         vec2 t = invMatrix * z;
         if(0 <= t.x && t.x <= 1 && 0 <= t.y) {
-            intersectionPoint = m_origin + t.y * y;
+            intersectionPoint = origin + t.y * y;
             return true;
         }
     }

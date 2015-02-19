@@ -14,7 +14,7 @@ struct PositionList {
     // -1 => 1 angular pitch   behind the examined one
     // -2 => 2 angular pitches behind the examined one
     //  ...
-    std::vector<ContactPoint> list;
+    vector<ContactPoint> list;
 };
 
 class ContactPointSortingList : public std::list<ContactPoint> {
@@ -75,7 +75,7 @@ private:
 
     // bool ContactPointIsCovered(ContactPoint point, ContactPoint a, ContactPoint b);
 
-    // void turnPointsOfList(std::vector<ContactPoint>* list, PointPosition positionOfListPoints);
+    // void turnPointsOfList(vector<ContactPoint>* list, PointPosition positionOfListPoints);
 
 };
 
