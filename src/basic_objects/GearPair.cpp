@@ -18,8 +18,7 @@ GearPair::GearPair(const SplineGear &drivingGear) :
     m_drivenGear(new SplineGear(Spline())),
     m_completeToothProfile(m_drivingGear->completeToothProfile()),
     m_maxDriftAngle(DefaultMaxDrift),
-    m_samplingRate(DefaultSamplingRate),
-    m_liveCalculation(false)
+    m_samplingRate(DefaultSamplingRate)
 {
 
     m_drivenGear->setNumberOfTeeth(m_drivingGear->numberOfTeeth());
@@ -43,6 +42,13 @@ GearPair::~GearPair() {
     for(NoneContactPoint *ncp : m_noneContactPoints)
         delete ncp;
     m_noneContactPoints.clear();
+}
+
+void GearPair::updateDrivingGearChange() {
+    if(m_completeToothProfile != nullptr)
+        delete m_completeToothProfile;
+    m_completeToothProfile = m_drivingGear->completeToothProfile();
+    doCalculation();
 }
 
 void GearPair::doCalculation() {

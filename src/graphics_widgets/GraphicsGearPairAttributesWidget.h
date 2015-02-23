@@ -4,10 +4,11 @@
 #include "stable.h"
 #include "definitions.h"
 #include "graphics_widgets/GraphicsItemAttributesWidget.h"
+#include "ChangingObjectListener.h"
 #include "graphics_objects/GraphicsGearPair.h"
 #include "RealValuedSlider.h"
 
-class GraphicsGearPairAttributesWidget : public GraphicsItemAttributesWidget {
+class GraphicsGearPairAttributesWidget : public GraphicsItemAttributesWidget, public ChangingObjectListener {
 
 Q_OBJECT
 
@@ -19,6 +20,8 @@ public:
     bool worksOnItem(QGraphicsItem *graphicsItem) override; // from GraphicsItemAttributesWidget
 
     void updateAttributes();
+
+    void objectChanged(ChangingObject *object) override; // from ChangingObjectListener
 
 private slots:
     void toggleSampledGearToothVisibility(bool);
@@ -33,6 +36,7 @@ private slots:
     void changeRotationVelocity(real);
     void changeSamplingRate(int);
     void changeMaxDriftAngle(int);
+    void toggleLiveUpdating(bool);
 
 private:
     GraphicsGearPair *m_currentGearPair;
@@ -45,12 +49,15 @@ private:
                 *m_pathOfContactCheckBox,
                 *m_pitchesCheckBox,
                 *m_pitchCirclesCheckBox,
-                *m_rotationCheckBox;
+                *m_rotationCheckBox,
+                *m_liveUpdatingCheckBox;
 
     RealValuedSlider *m_rotationVelocitySlider;
 
     QSpinBox *m_samplingRateSpinBox,
              *m_maxDriftAngleSpinBox;
+
+    bool m_isLiveUpdating;
 
 };
 

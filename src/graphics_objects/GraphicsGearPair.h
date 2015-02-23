@@ -8,8 +8,9 @@
 #include "graphics_objects/GraphicsMatingSplineGear.h"
 #include "basic_objects/GearPair.h"
 #include "basic_objects/ContactPoint.h"
+#include "ChangingObjectListener.h"
 
-class GraphicsGearPair : public GraphicsScheduleItem {
+class GraphicsGearPair : public GraphicsScheduleItem, public ChangingObjectListener {
 
 public:
     static const int Type; // = GraphicsItem::UserType + Type::GraphicsGearPairType;
@@ -22,6 +23,10 @@ public:
     QString defaultName() const override; // GraphicsItem
 
     void receivedClickOn(QPointF scenePos) override; //from GraphicsItem, does nothing here
+
+    void objectChanged(ChangingObject *object) override; // from ChangingObjectListener
+
+    void update();
 
     void setVisibilityOfSampledGearTooth(bool visible);
     bool visibilityOfSampledGearTooth() const;

@@ -14,6 +14,8 @@ public:
     GearPair(const SplineGear &drivingGear); //Driving gear = treibendes Rad
     ~GearPair();
 
+    void updateDrivingGearChange();
+
     void doCalculation();
 
     std::list<ContactPoint>* foundPoints();
@@ -62,7 +64,6 @@ private:
     real m_maxDriftAngle;
     uint m_samplingRate;
     real m_stepSize;
-    bool m_liveCalculation;
 
     ContactPointSortingList m_allContactPoints;
 

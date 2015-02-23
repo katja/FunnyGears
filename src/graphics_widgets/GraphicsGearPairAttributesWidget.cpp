@@ -48,6 +48,10 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     QLabel *maxDriftAngleLabel = new QLabel(tr("Max. drift angle"), this);
     maxDriftAngleLabel->setBuddy(m_maxDriftAngleSpinBox);
 
+    m_isLiveUpdating = false;
+    m_liveUpdatingCheckBox = new QCheckBox(tr("Update gear pair on changes"), this);
+    connect(m_liveUpdatingCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleLiveUpdating(bool)));
+
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addWidget(m_sampledGearToothCheckBox);
     layout->addWidget(m_noneContactPointsCheckBox);
@@ -63,6 +67,7 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     layout->addWidget(m_samplingRateSpinBox);
     layout->addWidget(maxDriftAngleLabel);
     layout->addWidget(m_maxDriftAngleSpinBox);
+    layout->addWidget(m_liveUpdatingCheckBox);
 
     layout->addStretch(1); //stretch the empty space at bottom and not _between_ the objects
 }
@@ -87,11 +92,21 @@ void GraphicsGearPairAttributesWidget::updateAttributes() {
         m_rotationVelocitySlider->setEnabled(false);
     m_samplingRateSpinBox->setValue(m_currentGearPair->samplingRate());
     m_maxDriftAngleSpinBox->setValue(m_currentGearPair->maxDriftAngleInDegree());
+    m_liveUpdatingCheckBox->setChecked(m_isLiveUpdating);
+}
+
+void GraphicsGearPairAttributesWidget::objectChanged(ChangingObject *object) {
+    if(m_currentGearPair == object) {
+        if(m_isLiveUpdating)
+            m_currentGearPair->update();
+        updateAttributes();
+    }
 }
 
 void GraphicsGearPairAttributesWidget::setItem(QGraphicsItem *graphicsItem) {
     m_currentGearPair = static_cast<GraphicsGearPair*>(graphicsItem);
     updateAttributes();
+    m_currentGearPair->informAboutChange(this);
 }
 
 bool GraphicsGearPairAttributesWidget::worksOnItem(QGraphicsItem *graphicsItem) {
@@ -148,4 +163,8 @@ void GraphicsGearPairAttributesWidget::changeSamplingRate(int samplingRate) {
 
 void GraphicsGearPairAttributesWidget::changeMaxDriftAngle(int maxDriftAngle) {
     m_currentGearPair->setMaxDriftAngleInDegree(maxDriftAngle);
+}
+
+void GraphicsGearPairAttributesWidget::toggleLiveUpdating(bool checked) {
+    m_isLiveUpdating = checked;
 }

@@ -31,21 +31,34 @@ GraphicsGearPair::GraphicsGearPair(GearPair *gearPair) :
     m_drivingGear = new GraphicsMatingSplineGear(m_gearPair->drivingGear(), this); // driving gear inserted as child
     m_drivenGear = new GraphicsMatingSplineGear(m_gearPair->drivenGear(), this); // driven gear inserted as child
     m_drivenGear->setTransform(QTransform().translate(gearPair->getDistanceOfCenters(), 0));
+
+    m_drivingGear->informAboutChange(this);
 }
 
 GraphicsGearPair::~GraphicsGearPair() {
+    delete m_drivingGear;
+    delete m_drivenGear;
 }
 
 int GraphicsGearPair::type() const {
     return Type;
 }
 
-
 QString GraphicsGearPair::defaultName() const {
     return "Gear Pair";
 }
 void GraphicsGearPair::receivedClickOn(QPointF scenePos) {
     Q_UNUSED(scenePos);
+}
+
+void GraphicsGearPair::objectChanged(ChangingObject *object) {
+    if(m_drivingGear == object)
+        GraphicsItem::changed();
+}
+
+void GraphicsGearPair::update() {
+    prepareGeometryChange();
+    m_gearPair->updateDrivingGearChange();
 }
 
 void GraphicsGearPair::setVisibilityOfSampledGearTooth(bool visible) {
