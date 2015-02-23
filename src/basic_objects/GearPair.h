@@ -21,7 +21,7 @@ public:
     std::list< PositionList* >* pointsInSortedLists();
     std::list< Triangle > triangles();
     ContactPoint startPoint() const;
-    std::vector< NoneContactPoint > noneContactPoints() const;
+    const std::vector< NoneContactPoint* >& noneContactPoints() const;
 
     SplineGear* drivingGear() const;
     SplineGear* drivenGear() const;
@@ -57,7 +57,7 @@ private:
     real m_module;
     Spline *m_completeToothProfile;
 
-    std::vector<NoneContactPoint> m_noneContactPoints;
+    std::vector<NoneContactPoint*> m_noneContactPoints;
 
     real m_maxDriftAngle;
     uint m_samplingRate;
@@ -67,8 +67,10 @@ private:
     ContactPointSortingList m_allContactPoints;
 
     void constructListOfPossiblePairingPoints();
+    void refineWithNext(real stepValue, real nextStepValue, uint partition);
     void chooseCorrectPoints();
-    ContactPoint contactPointOf(const vec2 &point, const vec2 &normal);
+
+    ContactPoint contactPointOf(const vec2 &point, const vec2 &normal, real stepValue);
     NoneContactPoint createNoneContactPoint(const ContactPoint &contactPoint);
     void insertThicknessInContactPoint(ContactPoint& contactPoint) const;
     vec2 normalAt(real value) const;

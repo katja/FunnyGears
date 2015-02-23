@@ -13,6 +13,8 @@ enum class ErrorCode {
 
 struct ContactPoint {
     ContactPoint() : isCovered(false), isRotated(false), error(ErrorCode::NO_ERROR) {}
+    real evaluationValue; //Spline curve of driving gear was evaluated at this value to get this ContactPoint
+    uint evaluationStep; //Evaluation number of ContactPoint
     vec2 point; //Point on driven gear
     vec2 normal; //Must be normalized! normal on driven gear
     vec2 originPoint; //Point on driving gear

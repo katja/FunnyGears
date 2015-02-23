@@ -40,11 +40,18 @@ GearPair::GearPair(const SplineGear &drivingGear) :
 }
 
 GearPair::~GearPair() {
+    for(NoneContactPoint *ncp : m_noneContactPoints)
+        delete ncp;
+    m_noneContactPoints.clear();
 }
 
 void GearPair::doCalculation() {
     m_allContactPoints.clear();
+
+    for(NoneContactPoint *ncp : m_noneContactPoints)
+        delete ncp;
     m_noneContactPoints.clear();
+
     m_stepSize = (m_completeToothProfile->upperDomainLimit() - m_completeToothProfile->lowerDomainLimit())
                     / (m_samplingRate - 1);
 
@@ -77,7 +84,8 @@ ContactPoint GearPair::startPoint() const {
     return m_allContactPoints.startPoint();
 }
 
-std::vector<NoneContactPoint> GearPair::noneContactPoints() const {
+//TODO: remove this!!!!
+const std::vector<NoneContactPoint*>& GearPair::noneContactPoints() const {
     return m_noneContactPoints;
 }
 
@@ -141,36 +149,57 @@ void GearPair::constructListOfPossiblePairingPoints() {
     vec2 nextPoint = m_completeToothProfile->evaluate(startValue);
     vec2 nextNormal = normalAt(startValue);
 
-    real stepValue;
+    real nextStepValue = startValue;
 
     for(uint step = 1; step < m_samplingRate; ++step) {
-        stepValue = startValue + m_stepSize * (real)step;
-        if(stepValue > m_completeToothProfile->upperDomainLimit()) {
-            stepValue = m_completeToothProfile->upperDomainLimit();
-        }
 
         vec2 point = nextPoint;
         vec2 normal = nextNormal;
+        real stepValue = nextStepValue;
 
-        ContactPoint contactPoint = contactPointOf(point, normal);
+        ContactPoint contactPoint = contactPointOf(point, normal, stepValue);
         m_allContactPoints.push_back(contactPoint);
 
-        nextPoint = m_completeToothProfile->evaluate(stepValue);
-        nextNormal = normalAt(stepValue);
+        nextStepValue = startValue + m_stepSize * (real)step;
+        if(nextStepValue > m_completeToothProfile->upperDomainLimit()) {
+            nextStepValue = m_completeToothProfile->upperDomainLimit();
+        }
+
+        nextPoint = m_completeToothProfile->evaluate(nextStepValue);
+        nextNormal = normalAt(nextStepValue);
 
         real angleBetweenNormals = angleBetweenN(normal, nextNormal);
-        real direction = (normal.x * nextNormal.y > normal.y * nextNormal.x) ? 1.0 : -1.0;
         if(angleBetweenNormals > m_maxDriftAngle) {
-            //TODO: Here we do not use an evaluation of the spline, instead only a connection from one to the next point and normal is created. Is this good????
-            uint partitions = static_cast<uint>(angleBetweenNormals / m_maxDriftAngle);
-            vec2 pointDiff = nextPoint - point;
-            for(uint partition = 1; partition <= partitions; ++partition) {
-                vec2 partitionPoint = point + pointDiff * static_cast<real>(partition / partitions);
-                vec2 partitionNormal = glm::rotate(normal, m_maxDriftAngle * direction * partition);
-                ContactPoint contactPoint = contactPointOf(partitionPoint, partitionNormal);
-                m_allContactPoints.push_back(contactPoint);
-            }
+
+            uint partition = static_cast<uint>(angleBetweenNormals / m_maxDriftAngle);
+            partition *= 2; //increase possible partitions, as the spline may increase with different values
+
+            refineWithNext(stepValue, nextStepValue, partition);
         }
+    }
+}
+
+void GearPair::refineWithNext(real stepValue, real nextStepValue, uint partition) {
+    vec2 normal = normalAt(stepValue);
+    vec2 nextNormal = normalAt(nextStepValue);
+
+    if(partition > 0 && angleBetweenN(normal, nextNormal) > m_maxDriftAngle) {
+        refineWithNext(stepValue, 0.5 * (stepValue + nextStepValue), partition - 1);
+        refineWithNext(0.5 * (stepValue + nextStepValue), nextStepValue, partition - 1);
+
+    } else if (partition > 0) {
+        stepValue = nextStepValue;
+        normal = nextNormal;
+        vec2 point = m_completeToothProfile->evaluate(stepValue);
+        ContactPoint contactPoint = contactPointOf(point, normal, stepValue);
+        m_allContactPoints.push_back(contactPoint);
+
+    } else { //partition == 0
+        std::cout << "Could not find with spline evaluation a good enough partition!!!" << std::endl;
+        vec2 point = m_completeToothProfile->evaluate(stepValue);
+        vec2 nextPoint = m_completeToothProfile->evaluate(nextStepValue);
+        ContactPoint contactPoint = contactPointOf(0.5 * (point + nextPoint), 0.5 * (normal + nextNormal), 0.5 * (stepValue + nextStepValue));
+        m_allContactPoints.push_back(contactPoint);
     }
 }
 
@@ -181,8 +210,9 @@ void GearPair::chooseCorrectPoints() {
     );
 }
 
-ContactPoint GearPair::contactPointOf(const vec2 &point, const vec2 &normal) {
+ContactPoint GearPair::contactPointOf(const vec2 &point, const vec2 &normal, real stepValue) {
     ContactPoint cp;
+    cp.evaluationValue = stepValue;
     cp.originPoint = point;
     cp.originNormal = normal;
     cp.error = ErrorCode::NO_ERROR;
@@ -230,12 +260,13 @@ ContactPoint GearPair::contactPointOf(const vec2 &point, const vec2 &normal) {
 }
 
 NoneContactPoint GearPair::createNoneContactPoint(const ContactPoint &cp) {
-    NoneContactPoint ncp;
-    ncp.originPoint = cp.originPoint;
-    ncp.originNormal = cp.originNormal;
+    NoneContactPoint *ncp = new NoneContactPoint();
+    ncp->originPoint = cp.originPoint;
+    ncp->originNormal = cp.originNormal;
+    ncp->evaluationValue = cp.evaluationValue;
 
-    real angleToY = angleBetweenN(normalize(ncp.originPoint), vec2(0, -1));
-    real direction = (ncp.originPoint.x > 0) ? -1.0 : 1.0;
+    real angleToY = angleBetweenN(normalize(ncp->originPoint), vec2(0, -1));
+    real direction = (ncp->originPoint.x > 0) ? -1.0 : 1.0;
 
     // Inspect one half of the path of the ContactPoint cp when the gear turns.
     // We use the half where the pitch point is lying, with x > 0.
@@ -248,18 +279,18 @@ NoneContactPoint GearPair::createNoneContactPoint(const ContactPoint &cp) {
         real angleA = angleAHalfCircle + (direction * angleToY);
         real angleB = angleA * m_drivingGearPitchRadius / m_drivenGearPitchRadius;
 
-        vec2 pointOfContact = glm::rotate(ncp.originPoint, angleA);
-        vec2 normalInContact = glm::rotate(ncp.originNormal, angleA);
+        vec2 pointOfContact = glm::rotate(ncp->originPoint, angleA);
+        vec2 normalInContact = glm::rotate(ncp->originNormal, angleA);
 
-        ncp.points.push_back(glm::rotate((pointOfContact - vec2(m_distanceOfCenters, 0.0)), angleB));
-        ncp.normals.push_back(glm::rotate(vec2(-normalInContact.x, -normalInContact.y), angleB));
+        ncp->points.push_back(glm::rotate((pointOfContact - vec2(m_distanceOfCenters, 0.0)), angleB));
+        ncp->normals.push_back(glm::rotate(vec2(-normalInContact.x, -normalInContact.y), angleB));
 
-        insertThicknessInContactPoint(ncp);
+        insertThicknessInContactPoint(*ncp);
 
         angleAHalfCircle += m_maxDriftAngle;
     }
     m_noneContactPoints.push_back(ncp);
-    return ncp;
+    return *ncp;
 }
 
 //Given ContactPoint already needs its point, normal, originPoint and originNormal!
