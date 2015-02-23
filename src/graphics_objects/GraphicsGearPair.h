@@ -70,7 +70,7 @@ public:
     void paintSampledGearTooth(QPainter *painter) const;
     void paintSampledGearToothSamplingPoints(QPainter *painter) const;
     void paintSampledContactPoints(QPainter *painter, bool, bool, bool) const;
-    void paintContactPoint(ContactPoint cp, QPainter *painter, QColor color, bool, bool, bool) const;
+    void paintContactPoint(const ContactPoint &point, QPainter *painter, QColor color, bool, bool, bool) const;
     void paintNoneContactPoints(QPainter *painter, bool, bool) const;
     void paintFilledForbiddenArea(QPainter *painter) const;
 

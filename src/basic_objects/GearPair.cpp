@@ -52,7 +52,7 @@ void GearPair::updateDrivingGearChange() {
 }
 
 void GearPair::doCalculation() {
-    m_allContactPoints.clear();
+    m_allContactPoints.clear(); //deletes all ContactPoint* of the list and when again sort(...) is called, the other saved lists are deleted, too
 
     for(NoneContactPoint *ncp : m_noneContactPoints)
         delete ncp;
@@ -66,8 +66,8 @@ void GearPair::doCalculation() {
 }
 
 //TODO: remove this!!!!
-std::list<ContactPoint>* GearPair::foundPoints() {
-    return &m_allContactPoints;
+const ContactPointSortingList& GearPair::foundPoints() {
+    return m_allContactPoints;
 }
 
 //TODO: remove this!!!!
@@ -76,17 +76,17 @@ Spline* GearPair::completeToothProfile() {
 }
 
 //TODO: remove this!!!!
-std::list< PositionList* >* GearPair::pointsInSortedLists() {
+const std::list<PositionList*>& GearPair::pointsInSortedLists() {
     return m_allContactPoints.positionLists();
 }
 
 //TODO: remove this!!!!
-std::list< Triangle > GearPair::triangles() {
+const std::list<Triangle>& GearPair::triangles() {
     return m_allContactPoints.triangles();
 }
 
 //TODO: remove this!!!!
-ContactPoint GearPair::startPoint() const {
+const ContactPoint& GearPair::startPoint() const {
     return m_allContactPoints.startPoint();
 }
 
@@ -163,7 +163,7 @@ void GearPair::constructListOfPossiblePairingPoints() {
         vec2 normal = nextNormal;
         real stepValue = nextStepValue;
 
-        ContactPoint contactPoint = contactPointOf(point, normal, stepValue);
+        ContactPoint *contactPoint = contactPointOf(point, normal, stepValue);
         m_allContactPoints.push_back(contactPoint);
 
         nextStepValue = startValue + m_stepSize * (real)step;
@@ -197,14 +197,14 @@ void GearPair::refineWithNext(real stepValue, real nextStepValue, uint partition
         stepValue = nextStepValue;
         normal = nextNormal;
         vec2 point = m_completeToothProfile->evaluate(stepValue);
-        ContactPoint contactPoint = contactPointOf(point, normal, stepValue);
+        ContactPoint *contactPoint = contactPointOf(point, normal, stepValue);
         m_allContactPoints.push_back(contactPoint);
 
     } else { //partition == 0
         std::cout << "Could not find with spline evaluation a good enough partition!!!" << std::endl;
         vec2 point = m_completeToothProfile->evaluate(stepValue);
         vec2 nextPoint = m_completeToothProfile->evaluate(nextStepValue);
-        ContactPoint contactPoint = contactPointOf(0.5 * (point + nextPoint), 0.5 * (normal + nextNormal), 0.5 * (stepValue + nextStepValue));
+        ContactPoint *contactPoint = contactPointOf(0.5 * (point + nextPoint), 0.5 * (normal + nextNormal), 0.5 * (stepValue + nextStepValue));
         m_allContactPoints.push_back(contactPoint);
     }
 }
@@ -216,18 +216,20 @@ void GearPair::chooseCorrectPoints() {
     );
 }
 
-ContactPoint GearPair::contactPointOf(const vec2 &point, const vec2 &normal, real stepValue) {
-    ContactPoint cp;
-    cp.evaluationValue = stepValue;
-    cp.originPoint = point;
-    cp.originNormal = normal;
-    cp.error = ErrorCode::NO_ERROR;
+ContactPoint* GearPair::contactPointOf(const vec2 &point, const vec2 &normal, real stepValue) {
+    ContactPoint *cp = new ContactPoint();
+    cp->evaluationValue = stepValue;
+    cp->originPoint = point;
+    cp->originNormal = normal;
+    cp->error = ErrorCode::NO_ERROR;
 
+    //find cut of normal in originPoint with reference radius
     real valueUnderRoot = square(dot(normal, point))
                             - dot(point, point)
                             + square(m_drivingGearPitchRadius);
     if(valueUnderRoot < 0) {
-        return createNoneContactPoint(cp);
+        //no cut with reference radius, so this point should not have a contact with the mating gear
+        return convertToNoneContactPoint(cp);
     }
     real t;
     if(dot(normalize(point), normal) >= 0.0) {
@@ -255,21 +257,20 @@ ContactPoint GearPair::contactPointOf(const vec2 &point, const vec2 &normal, rea
     real angleB = angleA * m_drivingGearPitchRadius / m_drivenGearPitchRadius;
 
     vec2 pointOfContact = glm::rotate(point, angleA);
-    cp.contactPosition = pointOfContact;
-    cp.point = glm::rotate((pointOfContact - vec2(m_distanceOfCenters, 0.0)), angleB);
-    cp.normalInContact = glm::rotate(normal, angleA);
-    cp.normal = glm::rotate(vec2(-cp.normalInContact.x, -cp.normalInContact.y), angleB);
+    cp->contactPosition = pointOfContact;
+    cp->point = glm::rotate((pointOfContact - vec2(m_distanceOfCenters, 0.0)), angleB);
+    cp->normalInContact = glm::rotate(normal, angleA);
+    cp->normal = glm::rotate(vec2(-cp->normalInContact.x, -cp->normalInContact.y), angleB);
 
-    insertThicknessInContactPoint(cp);
+    insertThicknessInContactPoint(*cp);
 
     return cp;
 }
 
-NoneContactPoint GearPair::createNoneContactPoint(const ContactPoint &cp) {
-    NoneContactPoint *ncp = new NoneContactPoint();
-    ncp->originPoint = cp.originPoint;
-    ncp->originNormal = cp.originNormal;
-    ncp->evaluationValue = cp.evaluationValue;
+NoneContactPoint* GearPair::convertToNoneContactPoint(ContactPoint *cp) {
+    NoneContactPoint *ncp = new NoneContactPoint(*cp);
+    delete cp;
+    cp = ncp;
 
     real angleToY = angleBetweenN(normalize(ncp->originPoint), vec2(0, -1));
     real direction = (ncp->originPoint.x > 0) ? -1.0 : 1.0;
@@ -295,8 +296,9 @@ NoneContactPoint GearPair::createNoneContactPoint(const ContactPoint &cp) {
 
         angleAHalfCircle += m_maxDriftAngle;
     }
-    m_noneContactPoints.push_back(ncp);
-    return *ncp;
+    m_noneContactPoints.push_back(new NoneContactPoint(*ncp));
+
+    return ncp;
 }
 
 //Given ContactPoint already needs its point, normal, originPoint and originNormal!
@@ -323,6 +325,51 @@ void GearPair::insertThicknessInContactPoint(ContactPoint& contactPoint) const {
             contactPoint.forbiddenAreaEndPoint = contactPoint.point + contactPoint.normal * thickness;
     }
 }
+
+
+
+    // for(NoneContactPoint *ncp1 : m_noneContactPoints) {
+    //     for(uint i1 = 1; i1 < ncp1->points.size(); ++i1) {
+
+    //         for(NoneContactPoint *ncp2 : m_noneContactPoints) {
+    //             for(uint i2 = 0; i2 < ncp2->points.size(); ++i2) {
+
+    //                 if(ncp1 == ncp2 && ???)
+    //                     ????
+
+
+
+    //             }
+    //         }
+
+    //     }
+    // }
+    // for(uint i = 0; i < m_noneContactPoints.size(); ++i) {
+    //     for(uint j = )
+    // }
+    // for(std::list< PositionList* >::iterator listIt = m_sortingLists->begin(), listEnd = m_sortingLists->end(); listIt != listEnd; ++listIt) {
+    //     for(vector<ContactPoint>::iterator it = ((*listIt)->list).begin(), end = --((*listIt)->list).end(); it != end; ++it) {
+
+    //         for(std::list< PositionList* >::iterator list2It = m_sortingLists->begin(), list2End = m_sortingLists->end(); list2It != list2End; ++list2It) {
+    //             for(vector<ContactPoint>::iterator it2 = ((*listIt)->list).begin(), end2 = ((*listIt)->list).end(); it2 != end2; ++it2) {
+    //                 if(it != it2 && (it+1) != it2) {//don't compare points itself!
+    //                     if(contactPointIsCovered(*it2, *it, *(it+1))) {
+    //                         it2->isCovered = true;
+    //                     }
+    //                 }
+    //             }
+    //         }
+
+    //     }
+    // }
+
+
+
+
+
+
+
+
 
 vec2 GearPair::normalAt(real t) const {
     vec2 normal = m_completeToothProfile->normal(t);

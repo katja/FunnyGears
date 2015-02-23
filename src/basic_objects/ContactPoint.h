@@ -2,6 +2,7 @@
 #define CONTACT_POINT
 
 #include "definitions.h"
+#include "helpers.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 
@@ -13,6 +14,22 @@ enum class ErrorCode {
 
 struct ContactPoint {
     ContactPoint() : isCovered(false), isRotated(false), error(ErrorCode::NO_ERROR) {}
+    ContactPoint(const ContactPoint &other) :
+        evaluationValue(other.evaluationValue),
+        evaluationStep(other.evaluationStep),
+        point(other.point),
+        normal(other.normal),
+        originPoint(other.originPoint),
+        originNormal(other.originNormal),
+        contactPosition(other.contactPosition),
+        normalInContact(other.normalInContact),
+        forbiddenAreaLength(other.forbiddenAreaLength),
+        forbiddenAreaEndPoint(other.forbiddenAreaEndPoint),
+        isCovered(other.isCovered),
+        isRotated(other.isRotated),
+        error(other.error)
+    {}
+
     real evaluationValue; //Spline curve of driving gear was evaluated at this value to get this ContactPoint
     uint evaluationStep; //Evaluation number of ContactPoint
     vec2 point; //Point on driven gear
@@ -43,8 +60,27 @@ struct NoneContactPoint : public ContactPoint {
     NoneContactPoint() {
         error = ErrorCode::NO_CUT_WITH_REFERENCE_RADIUS;
     }
-    std::vector<vec2> points;
-    std::vector<vec2> normals;
+    NoneContactPoint(const ContactPoint &cp) {
+        evaluationValue = cp.evaluationValue;
+        evaluationStep = cp.evaluationStep;
+        point = vec2(0, 0); //is not possible, when no cut with reference radius is available
+        normal = vec2(0, 0); //is not possible, when no cut with reference radius is available
+        originPoint = cp.originPoint;
+        originNormal = cp.originNormal;
+        contactPosition = vec2(0, 0);
+        normalInContact = vec2(0, 0);
+        forbiddenAreaLength = cp.forbiddenAreaLength;
+        forbiddenAreaEndPoint = vec2(0, 0);
+        isCovered = cp.isCovered;
+        isRotated = cp.isRotated;
+        error = ErrorCode::NO_CUT_WITH_REFERENCE_RADIUS;
+    }
+    NoneContactPoint(const NoneContactPoint &other) : ContactPoint(other),
+        points(other.points),
+        normals(other.normals)
+    {}
+    vector<vec2> points;
+    vector<vec2> normals;
 };
 
 

@@ -3,8 +3,9 @@
 
 #include "stable.h"
 #include "definitions.h"
-#include "basic_objects/Spline.h"
-#include "basic_objects/ContactPoint.h"
+class Spline;
+struct ContactPoint;
+enum class ErrorCode;
 
 ////////////////////////////////////
 ////////// STREAMING ///////////////

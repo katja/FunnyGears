@@ -249,14 +249,14 @@ void GraphicsGearPair::paintSampledGearTooth(QPainter *painter) const {
 }
 
 void GraphicsGearPair::paintSampledGearToothSamplingPoints(QPainter *painter) const {
-    std::list<ContactPoint> *points = m_gearPair->foundPoints();
-    for(ContactPoint point : (*points)) {
-        painter->drawEllipse(QPointF(point.originPoint.x, point.originPoint.y), 1.2, 1.2);
+    const std::list<ContactPoint*> points = m_gearPair->foundPoints();
+    for(ContactPoint *cp : points) {
+        painter->drawEllipse(QPointF(cp->originPoint.x, cp->originPoint.y), 1.2, 1.2);
     }
 }
 
 void GraphicsGearPair::paintSampledContactPoints(QPainter *painter, bool paintOriginPoints, bool paintTargetPoints, bool paintPathOfContact) const {
-    std::list< PositionList* > *positionLists = m_gearPair->pointsInSortedLists();
+    std::list< PositionList* > positionLists = m_gearPair->pointsInSortedLists();
 
     uint r = 10;
     uint g = 0;
@@ -265,15 +265,15 @@ void GraphicsGearPair::paintSampledContactPoints(QPainter *painter, bool paintOr
     uint green = g;
     uint blue = b;
 
-    for(PositionList *list : (*positionLists)) {
-        ContactPoint lastCP = list->list.front();
-        for(ContactPoint cp : list->list) {
+    for(PositionList *list : positionLists) {
+        ContactPoint *lastCP = list->points.front();
+        for(ContactPoint *cp : list->points) {
             if(list->position != 0) {
                 red = green = blue = 0;
                 // QColor fillColor = QColor(128 + list->position * 10, 0, 0);
                 // painter->setBrush(QBrush(fillColor));
             }
-            paintContactPoint(cp, painter, QColor(red, green, blue), paintOriginPoints, paintTargetPoints, paintPathOfContact);
+            paintContactPoint(*cp, painter, QColor(red, green, blue), paintOriginPoints, paintTargetPoints, paintPathOfContact);
 
             b = (b + 8) & 0x1FF;
             if((b & 0x100) > 0)//count downwards
@@ -296,15 +296,15 @@ void GraphicsGearPair::paintSampledContactPoints(QPainter *painter, bool paintOr
                 else
                     green = g;
             }
-            if(paintTargetPoints && lastCP.isRotated == cp.isRotated) { //both elements are in normal range, or both somewhere else
-                painter->drawLine(lastCP.point.x, lastCP.point.y, cp.point.x, cp.point.y);
+            if(paintTargetPoints && lastCP != cp) { //both elements are in normal range, or both somewhere else
+                painter->drawLine(lastCP->point.x, lastCP->point.y, cp->point.x, cp->point.y);
                 lastCP = cp;
             }
         }
     }
 }
 
-void GraphicsGearPair::paintContactPoint(ContactPoint point, QPainter *painter, QColor color, bool paintOriginPoints, bool paintTargetPoints, bool paintPathOfContact) const {
+void GraphicsGearPair::paintContactPoint(const ContactPoint &point, QPainter *painter, QColor color, bool paintOriginPoints, bool paintTargetPoints, bool paintPathOfContact) const {
     painter->save();
     painter->setPen(color);
     if(point.error != ErrorCode::NO_ERROR) {

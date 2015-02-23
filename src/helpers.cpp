@@ -2,6 +2,9 @@
 #include "definitions.h"
 #include "glm/glm.hpp"
 #include "glm/gtx/rotate_vector.hpp"
+#include "basic_objects/Spline.h"
+#include "basic_objects/ContactPoint.h"
+
 
 ////////////////////////////////////
 ////////// STREAMING ///////////////

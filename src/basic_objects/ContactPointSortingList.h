@@ -14,7 +14,7 @@ struct PositionList {
     // -1 => 1 angular pitch   behind the examined one
     // -2 => 2 angular pitches behind the examined one
     //  ...
-    vector<ContactPoint> list;
+    vector<ContactPoint*> points;
 };
 
 struct Triangle {
@@ -25,7 +25,7 @@ struct Triangle {
     bool pointIsInTriangle;
 };
 
-class ContactPointSortingList : public std::list<ContactPoint> {
+class ContactPointSortingList : public std::list<ContactPoint*> {
 
 public:
     ContactPointSortingList();
@@ -41,6 +41,14 @@ public:
 
     ~ContactPointSortingList();
 
+    //TODO: delete following few lines!!!!
+    const std::list<PositionList*>& positionLists();
+    const std::list<Triangle>& triangles();
+    const ContactPoint& startPoint() const;
+    //until here???
+
+    void clear();
+
     /** @brief Returns the currenctly available number of ContactPoints which do not have an Error
      *
      *  Iterates through all inserted ContactPoints and counts the points with
@@ -55,35 +63,30 @@ public:
      *  @warning: This methods requires at least one suitable ContactPoint in the list
      *            otherwise it returns a stub.
      */
-    ContactPoint getFirstNoneErrorContactPoint() const;
+    ContactPoint* getFirstNoneErrorContactPoint() const;
 
     void sort(uint numberOfTeeth, bool isDescribedClockwise);
-
-    //TODO: delete following few lines!!!!
-    std::list< PositionList* >* positionLists();
-    std::list< Triangle > triangles();
-    ContactPoint startPoint() const;
 
 private:
     real *m_angularPitchRotation;
     std::list< PositionList* > *m_sortingLists;
-    std::list< Triangle > m_triangles;
-    ContactPoint m_startPoint;
-
-    void deleteSortingLists(); // deletes the lists saved in m_sortingLists
+    std::list<Triangle> m_triangles;
+    ContactPoint *m_startPoint;
 
     // merely inserts the ContactPoint in the list, but if it has another position
     // than the list is used for, the @p list is pushed to m_sortingLists and a new list
     // is created to which @p list now points to
     // the point is inserted there as first object, too.
-    void insertInCorrectList(const ContactPoint &point, int position, PositionList *&list);
+    void copyInCorrectList(const ContactPoint &point, int position, PositionList *&list);
 
     int whichPositionBehindAngularPitch(ContactPoint *contactPoint, const vec2 &stopPitch);
     int whichPositionBeforeAngularPitch(ContactPoint *contactPoint, const vec2 &startPitch);
 
     bool intersectLines(vec2& intersection, vec2 lineAStart, vec2 lineAEnd, vec2 lineBStart, vec2 lineBEnd);
     bool isPointInTriangle(vec2 point, vec2 a, vec2 b, vec2 c);
-    bool contactPointIsCovered(ContactPoint candidate, ContactPoint a, ContactPoint b);
+    bool contactPointIsCovered(const ContactPoint &candidate, const ContactPoint &a, const ContactPoint &b);
+
+    void deleteSortingLists(); // deletes the lists saved in m_sortingLists
 
     // bool intersectLines(hpvec2& intersection, hpvec2 lineAStart, hpvec2 lineAEnd, hpvec2 lineBStart, hpvec2 lineBEnd);
 

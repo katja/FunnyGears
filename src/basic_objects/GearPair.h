@@ -18,11 +18,11 @@ public:
 
     void doCalculation();
 
-    std::list<ContactPoint>* foundPoints();
+    const ContactPointSortingList& foundPoints();
     Spline* completeToothProfile();
-    std::list< PositionList* >* pointsInSortedLists();
-    std::list< Triangle > triangles();
-    ContactPoint startPoint() const;
+    const std::list<PositionList*>& pointsInSortedLists();
+    const std::list<Triangle>& triangles();
+    const ContactPoint& startPoint() const;
     const std::vector< NoneContactPoint* >& noneContactPoints() const;
 
     SplineGear* drivingGear() const;
@@ -71,8 +71,8 @@ private:
     void refineWithNext(real stepValue, real nextStepValue, uint partition);
     void chooseCorrectPoints();
 
-    ContactPoint contactPointOf(const vec2 &point, const vec2 &normal, real stepValue);
-    NoneContactPoint createNoneContactPoint(const ContactPoint &contactPoint);
+    ContactPoint* contactPointOf(const vec2 &point, const vec2 &normal, real stepValue);
+    NoneContactPoint* convertToNoneContactPoint(ContactPoint *contactPoint);
     void insertThicknessInContactPoint(ContactPoint& contactPoint) const;
     vec2 normalAt(real value) const;
 };
