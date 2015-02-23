@@ -54,6 +54,12 @@ real toDegree(const real &rad);
 
 QVector<QPointF> convertToQVectorWithQPointFs(const vector<vec2> &v);
 
+
+QPainterPath circlePath(real radius);
+
+QPainterPath pitchesPath(uint numberOfSections, vec2 startPoint, real sectionLength);
+
+
 ////////////////////////////////////
 ////////// TEMPLATE HELPERS ////////
 // They are implemented in header file, because this is necessary for templates

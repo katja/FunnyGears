@@ -17,6 +17,14 @@ struct PositionList {
     vector<ContactPoint> list;
 };
 
+struct Triangle {
+    vec2 a;
+    vec2 b;
+    vec2 c;
+    vec2 point;
+    bool pointIsInTriangle;
+};
+
 class ContactPointSortingList : public std::list<ContactPoint> {
 
 public:
@@ -51,12 +59,16 @@ public:
 
     void sort(uint numberOfTeeth, bool isDescribedClockwise);
 
-    //TODO: delete this!!!!
+    //TODO: delete following few lines!!!!
     std::list< PositionList* >* positionLists();
+    std::list< Triangle > triangles();
+    ContactPoint startPoint() const;
 
 private:
     real *m_angularPitchRotation;
     std::list< PositionList* > *m_sortingLists;
+    std::list< Triangle > m_triangles;
+    ContactPoint m_startPoint;
 
     void deleteSortingLists(); // deletes the lists saved in m_sortingLists
 
@@ -68,6 +80,10 @@ private:
 
     int whichPositionBehindAngularPitch(ContactPoint *contactPoint, const vec2 &stopPitch);
     int whichPositionBeforeAngularPitch(ContactPoint *contactPoint, const vec2 &startPitch);
+
+    bool intersectLines(vec2& intersection, vec2 lineAStart, vec2 lineAEnd, vec2 lineBStart, vec2 lineBEnd);
+    bool isPointInTriangle(vec2 point, vec2 a, vec2 b, vec2 c);
+    bool contactPointIsCovered(ContactPoint candidate, ContactPoint a, ContactPoint b);
 
     // bool intersectLines(hpvec2& intersection, hpvec2 lineAStart, hpvec2 lineAEnd, hpvec2 lineBStart, hpvec2 lineBEnd);
 

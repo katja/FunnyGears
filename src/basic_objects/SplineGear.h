@@ -10,6 +10,8 @@ public:
     // call updateKnotsAndControlPoints() to update the gear curve.
     SplineGear(const Spline &toothOfGear);
 
+    SplineGear(const SplineGear &other);
+
     virtual ~SplineGear();
 
     /** @brief Updates important values for the gear.

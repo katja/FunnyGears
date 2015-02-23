@@ -14,7 +14,7 @@ ModelTreeView::ModelTreeView(Model *model, QWidget *parent) : QTreeView(parent),
     setItemDelegate(new YesNoDelegate(this));
     setModel(m_model);
 
-    setColumnWidth(Model::NAME, 150);
+    setColumnWidth(Model::NAME, 200);
     setColumnWidth(Model::VISIBILITY, 30);
 
 }

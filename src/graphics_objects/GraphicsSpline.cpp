@@ -13,11 +13,17 @@ bool GraphicsSpline::isGraphicsSplineItem(QGraphicsItem *item) {
     return false;
 }
 
-GraphicsSpline::GraphicsSpline(Spline *spline) : m_isControlPolygonVisible(true), m_isTangentDrawn(false), m_tangentValue(-1.0) {
-
+GraphicsSpline::GraphicsSpline(Spline *spline) :
+    m_spline(spline),
+    m_noEditingState(nullptr),
+    m_pointerState(nullptr),
+    m_penState(nullptr),
+    m_eraserState(nullptr),
+    m_isControlPolygonVisible(true),
+    m_isTangentDrawn(false),
+    m_tangentValue(-1.0)
+{
     std::cout << "GraphicsSpline is created" << std::endl;
-
-    m_spline = spline;
 
     m_noEditingState = new NoEditingSplineState(this);
     m_pointerState = new PointerSplineState(this);

@@ -2,14 +2,26 @@
 #include "basic_objects/SplineGear.h"
 #include "basic_objects/Ray.h"
 
-GearPair::GearPair(SplineGear *drivingGear) :
-    m_drivingGear(drivingGear),
+const real GearPair::DefaultMaxDrift = 0.1; //0.05; // ~ 3°
+const uint GearPair::DefaultSamplingRate = 30;//80;
+
+    // real m_drivingGearPitchRadius;
+    // real m_drivenGearPitchRadius;
+    // real m_distanceOfCenters;
+    // real m_drivenGearIndependentReferenceRadius;
+    // real m_module;
+    // ContactPointSortingList m_allContactPoints;
+
+GearPair::GearPair(const SplineGear &drivingGear) :
+    m_drivingGear(new SplineGear(drivingGear)),
+    //Set the default values, assume that a mostly similar mating gear
+    m_drivenGear(new SplineGear(Spline())),
+    m_completeToothProfile(m_drivingGear->completeToothProfile()),
     m_maxDriftAngle(DefaultMaxDrift),
     m_samplingRate(DefaultSamplingRate),
     m_liveCalculation(false)
 {
-    //Set the default values, assume that a mostly similar mating gear
-    m_drivenGear = new SplineGear(Spline(m_drivingGear->degree()));
+
     m_drivenGear->setNumberOfTeeth(m_drivingGear->numberOfTeeth());
     m_drivenGearPitchRadius = m_drivingGear->referenceRadius();
 
@@ -17,19 +29,27 @@ GearPair::GearPair(SplineGear *drivingGear) :
 
     m_module = 2.0 * m_drivingGear->referenceRadius() / m_drivingGear->numberOfTeeth();
 
-    m_drivenGearIndependentReferenceRadius = m_module * m_drivenGear->numberOfTeeth() / 2.0;
+    // m_drivenGearIndependentReferenceRadius = m_module * m_drivenGear->numberOfTeeth() / 2.0;
 
     m_distanceOfCenters = m_drivingGearPitchRadius + m_drivenGearPitchRadius;
 
-    m_completeToothProfile = m_drivingGear->completeToothProfile();
+    // m_completeToothProfile = m_drivingGear->completeToothProfile();
+
+    //TODO: refactor following and whole class
+    doCalculation();
+}
+
+GearPair::~GearPair() {
+}
+
+void GearPair::doCalculation() {
+    m_allContactPoints.clear();
+    m_noneContactPoints.clear();
     m_stepSize = (m_completeToothProfile->upperDomainLimit() - m_completeToothProfile->lowerDomainLimit())
                     / (m_samplingRate - 1);
 
     constructListOfPossiblePairingPoints();
     chooseCorrectPoints();
-}
-
-GearPair::~GearPair() {
 }
 
 //TODO: remove this!!!!
@@ -47,12 +67,50 @@ std::list< PositionList* >* GearPair::pointsInSortedLists() {
     return m_allContactPoints.positionLists();
 }
 
+//TODO: remove this!!!!
+std::list< Triangle > GearPair::triangles() {
+    return m_allContactPoints.triangles();
+}
+
+//TODO: remove this!!!!
+ContactPoint GearPair::startPoint() const {
+    return m_allContactPoints.startPoint();
+}
+
+std::vector<NoneContactPoint> GearPair::noneContactPoints() const {
+    return m_noneContactPoints;
+}
+
+SplineGear* GearPair::drivingGear() const {
+    return m_drivingGear;
+}
+
+SplineGear* GearPair::drivenGear() const {
+    return m_drivenGear;
+}
+
 void GearPair::setNumberOfTeethOfDrivenGear(uint numberOfTeeth) {
     m_drivenGear->setNumberOfTeeth(numberOfTeeth);
 }
 
 uint GearPair::numberOfTeethOfDrivenGear() const {
     return m_drivenGear->numberOfTeeth();
+}
+
+real GearPair::transmissionRatio() const {
+    return m_drivenGear->numberOfTeeth() / m_drivingGear->numberOfTeeth();
+}
+
+real GearPair::drivingGearPitchRadius() const {
+    return m_drivingGearPitchRadius;
+}
+
+real GearPair::drivenGearPitchRadius() const {
+    return m_drivenGearPitchRadius;
+}
+
+real GearPair::getDistanceOfCenters() const {
+    return m_distanceOfCenters;
 }
 
 void GearPair::setMaxDriftAngleInDegree(real degree) {
@@ -78,13 +136,6 @@ uint GearPair::samplingRate() const {
     return m_samplingRate;
 }
 
-real GearPair::getDistanceOfCenters() const {
-    return m_distanceOfCenters;
-}
-
-const real GearPair::DefaultMaxDrift = 3.0;
-const uint GearPair::DefaultSamplingRate = 80;
-
 void GearPair::constructListOfPossiblePairingPoints() {
     real startValue = m_completeToothProfile->lowerDomainLimit();
     vec2 nextPoint = m_completeToothProfile->evaluate(startValue);
@@ -101,11 +152,11 @@ void GearPair::constructListOfPossiblePairingPoints() {
         vec2 point = nextPoint;
         vec2 normal = nextNormal;
 
-        nextPoint = m_completeToothProfile->evaluate(stepValue);
-        nextNormal = normalAt(stepValue);
-
         ContactPoint contactPoint = contactPointOf(point, normal);
         m_allContactPoints.push_back(contactPoint);
+
+        nextPoint = m_completeToothProfile->evaluate(stepValue);
+        nextNormal = normalAt(stepValue);
 
         real angleBetweenNormals = angleBetweenN(normal, nextNormal);
         real direction = (normal.x * nextNormal.y > normal.y * nextNormal.x) ? 1.0 : -1.0;
@@ -123,7 +174,6 @@ void GearPair::constructListOfPossiblePairingPoints() {
     }
 }
 
-
 void GearPair::chooseCorrectPoints() {
     m_allContactPoints.sort(
         m_drivenGear->numberOfTeeth(),
@@ -131,7 +181,7 @@ void GearPair::chooseCorrectPoints() {
     );
 }
 
-ContactPoint GearPair::contactPointOf(const vec2 &point, const vec2 &normal) const {
+ContactPoint GearPair::contactPointOf(const vec2 &point, const vec2 &normal) {
     ContactPoint cp;
     cp.originPoint = point;
     cp.originNormal = normal;
@@ -141,8 +191,7 @@ ContactPoint GearPair::contactPointOf(const vec2 &point, const vec2 &normal) con
                             - dot(point, point)
                             + square(m_drivingGearPitchRadius);
     if(valueUnderRoot < 0) {
-        cp.error = ErrorCode::NO_CUT_WITH_REFERENCE_RADIUS;
-        return cp;
+        return createNoneContactPoint(cp);
     }
     real t;
     if(dot(normalize(point), normal) >= 0.0) {
@@ -178,7 +227,39 @@ ContactPoint GearPair::contactPointOf(const vec2 &point, const vec2 &normal) con
     insertThicknessInContactPoint(cp);
 
     return cp;
+}
 
+NoneContactPoint GearPair::createNoneContactPoint(const ContactPoint &cp) {
+    NoneContactPoint ncp;
+    ncp.originPoint = cp.originPoint;
+    ncp.originNormal = cp.originNormal;
+
+    real angleToY = angleBetweenN(normalize(ncp.originPoint), vec2(0, -1));
+    real direction = (ncp.originPoint.x > 0) ? -1.0 : 1.0;
+
+    // Inspect one half of the path of the ContactPoint cp when the gear turns.
+    // We use the half where the pitch point is lying, with x > 0.
+    // But as we have real numbers, we start with x = m_maxDriftAngle, to assure, that x
+    // is always positive.
+
+    real angleAHalfCircle = 0.0;
+    while(angleAHalfCircle < M_PI) {
+
+        real angleA = angleAHalfCircle + (direction * angleToY);
+        real angleB = angleA * m_drivingGearPitchRadius / m_drivenGearPitchRadius;
+
+        vec2 pointOfContact = glm::rotate(ncp.originPoint, angleA);
+        vec2 normalInContact = glm::rotate(ncp.originNormal, angleA);
+
+        ncp.points.push_back(glm::rotate((pointOfContact - vec2(m_distanceOfCenters, 0.0)), angleB));
+        ncp.normals.push_back(glm::rotate(vec2(-normalInContact.x, -normalInContact.y), angleB));
+
+        insertThicknessInContactPoint(ncp);
+
+        angleAHalfCircle += m_maxDriftAngle;
+    }
+    m_noneContactPoints.push_back(ncp);
+    return ncp;
 }
 
 //Given ContactPoint already needs its point, normal, originPoint and originNormal!
@@ -191,22 +272,18 @@ void GearPair::insertThicknessInContactPoint(ContactPoint& contactPoint) const {
         std::cerr << "CURIOS THINGS HAPPENED! A ray of the gear hadn't found a cutting!" << std::endl;
         contactPoint.error = ErrorCode::NO_THICKNESS;
     } else {
-        // std::cout << "For CP " << contactPoint.originPoint << " " << intersectionPoints.size() << " intersection points were found" << std::endl;
-        // std::cout << "Found Points: ";
         real epsilon = 1.0; //prevent finding the point itself as intersection point
         real thickness = 3.0 * m_drivingGear->maximumDistanceToCenter(); //gear can only have a thickness of 2.0f * maximumDistanceToCenter()
 
         for(vector<vec2>::iterator it = intersectionPoints.begin(), end = intersectionPoints.end(); it != end; ++it) {
             real distance = glm::length(*it - contactPoint.originPoint);
-            std::cout << *it << " => " << distance << ",\t";
             if(distance > epsilon && distance < thickness) {
                 thickness = distance;
             }
         }
         contactPoint.forbiddenAreaLength = thickness;
-        contactPoint.forbiddenAreaEndPoint = contactPoint.point + contactPoint.normal * thickness;
-        // std::cout << "\nand chosen one: " << contactPoint.forbiddenAreaLength << std::endl;
-        // std::cout << std::endl;
+        if(contactPoint.error != ErrorCode::NO_CUT_WITH_REFERENCE_RADIUS)
+            contactPoint.forbiddenAreaEndPoint = contactPoint.point + contactPoint.normal * thickness;
     }
 }
 
@@ -217,3 +294,6 @@ vec2 GearPair::normalAt(real t) const {
     }
     return normal;
 }
+
+
+

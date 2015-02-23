@@ -46,7 +46,7 @@ public:
     GearPair* constructAMatingGear() const;
 
     QRectF normalBoundingRect(qreal controlPointRadius = Preferences::PointRadius + 0.5 * Preferences::HighlightedLineWidth) const override; // from GraphicsSpline
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override; // from QGraphicsItem
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override; // from QGraphicsItem
 
 
 private:

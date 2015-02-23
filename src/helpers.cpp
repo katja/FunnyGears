@@ -1,6 +1,7 @@
 #include "helpers.h"
 #include "definitions.h"
 #include "glm/glm.hpp"
+#include "glm/gtx/rotate_vector.hpp"
 
 ////////////////////////////////////
 ////////// STREAMING ///////////////
@@ -170,3 +171,28 @@ QVector<QPointF> convertToQVectorWithQPointFs(const vector<vec2> &v) {
     }
     return qV;
 };
+
+QPainterPath circlePath(real radius) {
+    QPainterPath path;
+    uint samples = 96;
+    real sampleSize = 2.0 * M_PI / (real)samples;
+    path.moveTo(radius, 0);
+    for(uint i = 1; i < 96; ++i) {
+        path.lineTo(cos(sampleSize * i) * radius, -sin(sampleSize * i) * radius);
+    }
+    path.lineTo(radius, 0);
+    return path;
+}
+
+QPainterPath pitchesPath(uint numberOfSections, vec2 startPoint, real sectionLength) {
+    QPainterPath path;
+    real angularPitch = 2.0 * M_PI / (real)numberOfSections;
+    vec2 p = normalize(startPoint) * sectionLength;
+    for(uint i = 0; i < numberOfSections; ++i) {
+        real rotationInRad = angularPitch * i;
+        vec2 turnedPoint = glm::rotate(p, rotationInRad);
+        path.lineTo(QPointF(turnedPoint.x, turnedPoint.y));
+        path.moveTo(0,0);
+    }
+    return path;
+}

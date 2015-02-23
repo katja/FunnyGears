@@ -110,10 +110,8 @@ void ObjectScheduleViewWidget::addGearTooth() {
 }
 
 void ObjectScheduleViewWidget::addGearPair() {
-    std::cout << "addGearPair arrived" << std::endl;
     if(m_graphicsSplineGear == nullptr)
         return;
-    std::cout << "addGearPair is executed" << std::endl;
     GraphicsGearPair *graphicsgearPair = new GraphicsGearPair(m_graphicsSplineGear->constructAMatingGear());
     m_model->addItem(graphicsgearPair);
     m_model->clearSelection();

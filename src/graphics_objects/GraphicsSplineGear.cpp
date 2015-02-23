@@ -122,7 +122,7 @@ void GraphicsSplineGear::setRotationVelocity(real velocity) {
 }
 
 GearPair* GraphicsSplineGear::constructAMatingGear() const {
-    return new GearPair(m_splineGear);
+    return new GearPair(*m_splineGear);
 }
 
 QRectF GraphicsSplineGear::normalBoundingRect(qreal controlPointRadius) const {
@@ -173,16 +173,7 @@ QPainterPath GraphicsSplineGear::splineCurvePath() const {
 }
 
 QPainterPath GraphicsSplineGear::referenceCirclePath() const { //Wälzkreis
-    QPainterPath path;
-    uint samples = 96;
-    real sampleSize = 2.0 * M_PI / (real)samples;
-    real r = m_splineGear->referenceRadius();
-    path.moveTo(r, 0);
-    for(uint i = 1; i < 96; ++i) {
-        path.lineTo(cos(sampleSize * i) * r, -sin(sampleSize * i) * r);
-    }
-    path.lineTo(r, 0);
-    return path;
+    return circlePath(m_splineGear->referenceRadius());
 }
 
 QPainterPath GraphicsSplineGear::angularPitchStrokesPath() const {
