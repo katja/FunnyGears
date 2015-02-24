@@ -76,8 +76,8 @@ Spline* GearPair::completeToothProfile() {
 }
 
 //TODO: remove this!!!!
-const std::list<PositionList*>& GearPair::pointsInSortedLists() {
-    return m_allContactPoints.positionLists();
+const std::list<PointsWithPosition*>& GearPair::pointsInSortedLists() {
+    return m_allContactPoints.pointsWithPositions();
 }
 
 //TODO: remove this!!!!
@@ -210,7 +210,7 @@ void GearPair::refineWithNext(real stepValue, real nextStepValue, uint partition
 }
 
 void GearPair::chooseCorrectPoints() {
-    m_allContactPoints.sort(
+    m_allContactPoints.createCoveringLists(
         m_drivenGear->numberOfTeeth(),
         !(m_drivingGear->toothDescribedInClockDirection())
     );
@@ -347,10 +347,10 @@ void GearPair::insertThicknessInContactPoint(ContactPoint& contactPoint) const {
     // for(uint i = 0; i < m_noneContactPoints.size(); ++i) {
     //     for(uint j = )
     // }
-    // for(std::list< PositionList* >::iterator listIt = m_sortingLists->begin(), listEnd = m_sortingLists->end(); listIt != listEnd; ++listIt) {
+    // for(std::list< PointsWithPosition* >::iterator listIt = m_pointsWithPositionList->begin(), listEnd = m_pointsWithPositionList->end(); listIt != listEnd; ++listIt) {
     //     for(vector<ContactPoint>::iterator it = ((*listIt)->list).begin(), end = --((*listIt)->list).end(); it != end; ++it) {
 
-    //         for(std::list< PositionList* >::iterator list2It = m_sortingLists->begin(), list2End = m_sortingLists->end(); list2It != list2End; ++list2It) {
+    //         for(std::list< PointsWithPosition* >::iterator list2It = m_pointsWithPositionList->begin(), list2End = m_pointsWithPositionList->end(); list2It != list2End; ++list2It) {
     //             for(vector<ContactPoint>::iterator it2 = ((*listIt)->list).begin(), end2 = ((*listIt)->list).end(); it2 != end2; ++it2) {
     //                 if(it != it2 && (it+1) != it2) {//don't compare points itself!
     //                     if(contactPointIsCovered(*it2, *it, *(it+1))) {

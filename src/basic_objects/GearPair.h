@@ -20,7 +20,7 @@ public:
 
     const ContactPointSortingList& foundPoints();
     Spline* completeToothProfile();
-    const std::list<PositionList*>& pointsInSortedLists();
+    const std::list<PointsWithPosition*>& pointsInSortedLists();
     const std::list<Triangle>& triangles();
     const ContactPoint& startPoint() const;
     const std::vector< NoneContactPoint* >& noneContactPoints() const;

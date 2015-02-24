@@ -256,7 +256,7 @@ void GraphicsGearPair::paintSampledGearToothSamplingPoints(QPainter *painter) co
 }
 
 void GraphicsGearPair::paintSampledContactPoints(QPainter *painter, bool paintOriginPoints, bool paintTargetPoints, bool paintPathOfContact) const {
-    std::list< PositionList* > positionLists = m_gearPair->pointsInSortedLists();
+    std::list< PointsWithPosition* > pointsWithPositions = m_gearPair->pointsInSortedLists();
 
     uint r = 10;
     uint g = 0;
@@ -265,7 +265,7 @@ void GraphicsGearPair::paintSampledContactPoints(QPainter *painter, bool paintOr
     uint green = g;
     uint blue = b;
 
-    for(PositionList *list : positionLists) {
+    for(PointsWithPosition *list : pointsWithPositions) {
         ContactPoint *lastCP = list->points.front();
         for(ContactPoint *cp : list->points) {
             if(list->position != 0) {
