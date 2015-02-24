@@ -58,6 +58,8 @@ private:
              *m_maxDriftAngleSpinBox;
 
     bool m_isLiveUpdating;
+    int m_samplingRate;
+    int m_maxDriftAngle; //in degree
 
 };
 

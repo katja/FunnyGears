@@ -204,6 +204,9 @@ void GraphicsGearPair::paint(QPainter *painter, const QStyleOptionGraphicsItem *
         m_drivenGear->setRotation(-m_rotationDegree * m_gearPair->transmissionRatio());
     }
 
+    if(m_sampledGearToothIsVisible)
+            paintSampledGearTooth(painter);
+
     if(m_pathOfContactIsVisible)
         paintSampledContactPoints(painter, false, false, true);
 
@@ -216,8 +219,6 @@ void GraphicsGearPair::paintAdditionals(QPainter *painter, GraphicsMatingSplineG
             painter->drawPath(pitchesPath(m_drivingGear->numberOfTeeth(), m_gearPair->startPoint().originPoint, 250));
         if(m_pitchCirclesAreVisible)
             painter->drawPath(circlePath(m_gearPair->drivingGearPitchRadius()));
-        if(m_sampledGearToothIsVisible)
-            paintSampledGearTooth(painter);
         if(m_noneContactPointsAreVisible)
             paintNoneContactPoints(painter, true, false);
         paintSampledContactPoints(painter, true, false, false);

@@ -90,8 +90,10 @@ void GraphicsGearPairAttributesWidget::updateAttributes() {
         m_rotationVelocitySlider->setEnabled(true);
     else
         m_rotationVelocitySlider->setEnabled(false);
-    m_samplingRateSpinBox->setValue(m_currentGearPair->samplingRate());
-    m_maxDriftAngleSpinBox->setValue(m_currentGearPair->maxDriftAngleInDegree());
+    m_samplingRate = m_currentGearPair->samplingRate();
+    m_samplingRateSpinBox->setValue(m_samplingRate);
+    m_maxDriftAngle = m_currentGearPair->maxDriftAngleInDegree();
+    m_maxDriftAngleSpinBox->setValue(m_maxDriftAngle);
     m_liveUpdatingCheckBox->setChecked(m_isLiveUpdating);
 }
 
@@ -158,11 +160,17 @@ void GraphicsGearPairAttributesWidget::changeRotationVelocity(real velocity) {
 }
 
 void GraphicsGearPairAttributesWidget::changeSamplingRate(int samplingRate) {
-    m_currentGearPair->setSamplingRate(samplingRate);
+    if(m_samplingRate == samplingRate) //only update the gear pair, when samplingRate really changed!
+        return;
+    m_samplingRate = samplingRate;
+    m_currentGearPair->setSamplingRate(m_samplingRate);
 }
 
 void GraphicsGearPairAttributesWidget::changeMaxDriftAngle(int maxDriftAngle) {
-    m_currentGearPair->setMaxDriftAngleInDegree(maxDriftAngle);
+    if(m_maxDriftAngle == maxDriftAngle) //only update the gear pair, when maxDriftAngle really changed!
+        return;
+    m_maxDriftAngle = maxDriftAngle;
+    m_currentGearPair->setMaxDriftAngleInDegree(m_maxDriftAngle);
 }
 
 void GraphicsGearPairAttributesWidget::toggleLiveUpdating(bool checked) {
