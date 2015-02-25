@@ -3,27 +3,9 @@
 
 #include "definitions.h"
 #include "basic_objects/ContactPoint.h"
+#include "basic_objects/ContactPointHelpers.h"
+#include "basic_objects/ContactPointIterator.h"
 #include "stable.h"
-
-struct PointsWithPosition {
-    int position;
-    //  ...
-    //  2 => 2 angular pitches before the examined one
-    //  1 => 1 angular pitch   before the examined one
-    //  0 => in the examined pitch
-    // -1 => 1 angular pitch   behind the examined one
-    // -2 => 2 angular pitches behind the examined one
-    //  ...
-    vector<ContactPoint*> points;
-};
-
-struct Triangle {
-    vec2 a;
-    vec2 b;
-    vec2 c;
-    vec2 point;
-    bool pointIsInTriangle;
-};
 
 class ContactPointSortingList : public std::list<ContactPoint*> {
 
@@ -43,7 +25,8 @@ public:
 
     //TODO: delete following few lines!!!!
     const std::list<PointsWithPosition*>& pointsWithPositions();
-    const std::list<Triangle>& triangles();
+    const std::list<Triangle>& triangles(); //TODO: is not filled at the moment!!!
+    vector<vec2> gearPoints() const;
     const ContactPoint& startPoint() const;
     //until here???
 
@@ -73,13 +56,18 @@ private:
     real                            m_angularPitchRotation;
     std::list<PointsWithPosition*>  m_pointsWithPositionList;
     std::list<NoneContactPoint*>    m_noneContactPointList;
-    std::list<Triangle>             m_triangles;
+    std::list<Triangle>             m_triangles; //TODO: is not filled at the moment!!!
     ContactPoint                    *m_startPoint;
+    vector<vec2>                    m_gearPoints;
+    vector<ContactPoint*>           m_gearCPs;
 
     void copyPointsInSuitableLists(uint numberOfTeeth, bool isDescribedClockwise);
     void rotatePointsWithPositionToOnePitch();
-    void reduceNumberOfNoneContactPoints();
-    void findAllCoveredPoints();
+    // void reduceNumberOfNoneContactPoints();
+    bool getFirstNoneErrorCPIterator(vector<ContactPoint*>::iterator &it, vector<ContactPoint*> *&points);
+    void findAllCoveredPoints(); //TODO: is const at the moment, but as it probably won't remain it, is not marked as such
+    uint howManyContactPointsCoverPoint(const ContactPointIterator &it, std::vector<CPcutting> &cpCuttingsList) const;
+    uint howManyNoneContactPointsCoverPoint(const ContactPointIterator &it, std::vector<NCPcutting> &ncpCuttingsList) const;
 
     // merely inserts the ContactPoint in the list, but if it has another position
     // than the list is used for, the @p list is pushed to m_pointsWithPositionList and a new list
@@ -87,12 +75,14 @@ private:
     // the point is inserted there as first object, too.
     void copyInCorrectList(const ContactPoint &point, int position, PointsWithPosition *&list);
 
-    int whichPositionBehindAngularPitch(ContactPoint *contactPoint, const vec2 &stopPitch);
-    int whichPositionBeforeAngularPitch(ContactPoint *contactPoint, const vec2 &startPitch);
+    int whichPositionBehindAngularPitch(ContactPoint *contactPoint, const vec2 &stopPitch) const;
+    int whichPositionBeforeAngularPitch(ContactPoint *contactPoint, const vec2 &startPitch) const;
 
-    bool contactPointIsCovered(const ContactPoint &candidate, const ContactPoint &a, const ContactPoint &b);
-    bool intersectLines(vec2& intersection, vec2 lineAStart, vec2 lineAEnd, vec2 lineBStart, vec2 lineBEnd);
-    bool isPointInTriangle(vec2 point, vec2 a, vec2 b, vec2 c);
+    bool pointIsCovered(const vec2 &candidate, const ContactPoint &a, const ContactPoint &b) const;
+    bool contactPointIsCovered(const ContactPoint &candidate, const ContactPoint &a, const ContactPoint &b) const;
+    bool intersectLines(real &intersectionValue, vec2 &intersection, vec2 startLine, vec2 stopLine, vec2 startTestLine, vec2 stopTestLine) const;
+    bool intersectLines(vec2& intersection, vec2 lineAStart, vec2 lineAEnd, vec2 lineBStart, vec2 lineBEnd) const;
+    bool isPointInTriangle(vec2 point, vec2 a, vec2 b, vec2 c) const;
 
     void setBackLists(); //deletes the ContactPoints, NoneContactPoints and PointsWithPositions of m_pointsWithPositionList and m_noneContactPointList;
     void deleteSortingLists(); // deletes the lists saved in m_pointsWithPositionList

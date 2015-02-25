@@ -4,8 +4,12 @@
 #include "stable.h"
 #include "definitions.h"
 class Spline;
-struct ContactPoint;
 enum class ErrorCode;
+struct ContactPoint;
+struct CPcutting;
+struct NCPcutting;
+class ContactPointIterator;
+
 
 ////////////////////////////////////
 ////////// STREAMING ///////////////
@@ -29,6 +33,12 @@ std::ostream& operator <<(std::ostream &os, const Spline &spline);
 std::ostream& operator <<(std::ostream &os, const ErrorCode &error);
 
 std::ostream& operator <<(std::ostream &os, const ContactPoint &contactPoint);
+
+std::ostream& operator <<(std::ostream &os, const CPcutting &cutting);
+
+std::ostream& operator <<(std::ostream &os, const NCPcutting &cutting);
+
+std::ostream& operator <<(std::ostream &os, const ContactPointIterator &iterator);
 
 ////////////////////////////////////
 ////////// OTHER ///////////////////

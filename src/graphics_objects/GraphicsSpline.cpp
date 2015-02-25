@@ -333,7 +333,7 @@ void GraphicsSpline::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     //     m_spline->getIntersectionPointsWithRay(ray, intersectionPoints);
 
     //     for(int i = 0; i < intersectionPoints.size(); ++i) {
-    //         painter->drawLine(start.x, start.y, intersectionPoints[i].x, intersectionPoints[i].y);
+    //         painter->drawLine(QPointF(start.x, start.y), QPointF(intersectionPoints[i].x, intersectionPoints[i].y));
     //         painter->drawEllipse(QPointF(intersectionPoints[i].x, intersectionPoints[i].y), 8, 8);
     //     }
     // }

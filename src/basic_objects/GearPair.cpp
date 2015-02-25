@@ -2,15 +2,8 @@
 #include "basic_objects/SplineGear.h"
 #include "basic_objects/Ray.h"
 
-const real GearPair::DefaultMaxDrift = 0.1; //0.05; // ~ 3°
-const uint GearPair::DefaultSamplingRate = 30;//80;
-
-    // real m_drivingGearPitchRadius;
-    // real m_drivenGearPitchRadius;
-    // real m_distanceOfCenters;
-    // real m_drivenGearIndependentReferenceRadius;
-    // real m_module;
-    // ContactPointSortingList m_allContactPoints;
+const real GearPair::DefaultMaxDrift = 0.26; // ~ 15° //0.05; // ~ 3°
+const uint GearPair::DefaultSamplingRate = 60;//80;
 
 GearPair::GearPair(const SplineGear &drivingGear) :
     m_drivingGear(new SplineGear(drivingGear)),
@@ -95,6 +88,10 @@ const std::vector<NoneContactPoint*>& GearPair::noneContactPoints() const {
     return m_noneContactPoints;
 }
 
+vector<vec2> GearPair::gearPoints() const {
+    return m_allContactPoints.gearPoints();
+}
+
 SplineGear* GearPair::drivingGear() const {
     return m_drivingGear;
 }
@@ -152,51 +149,44 @@ uint GearPair::samplingRate() const {
 
 void GearPair::constructListOfPossiblePairingPoints() {
     real startValue = m_completeToothProfile->lowerDomainLimit();
-    vec2 nextPoint = m_completeToothProfile->evaluate(startValue);
+    vec2 startPoint = m_completeToothProfile->evaluate(startValue);
     vec2 nextNormal = normalAt(startValue);
-
     real nextStepValue = startValue;
 
-    for(uint step = 1; step < m_samplingRate; ++step) {
+    std::cout << "0 ContactPoint of: " << startValue << ", p: " << startPoint << ", n: " << nextNormal << std::endl;
+    ContactPoint *contactPoint = contactPointOf(startPoint, nextNormal, startValue);
+    m_allContactPoints.push_back(contactPoint);
 
-        vec2 point = nextPoint;
+    for(uint step = 1; step < m_samplingRate; ++step) {
         vec2 normal = nextNormal;
         real stepValue = nextStepValue;
-
-        ContactPoint *contactPoint = contactPointOf(point, normal, stepValue);
-        m_allContactPoints.push_back(contactPoint);
 
         nextStepValue = startValue + m_stepSize * (real)step;
         if(nextStepValue > m_completeToothProfile->upperDomainLimit()) {
             nextStepValue = m_completeToothProfile->upperDomainLimit();
         }
-
-        nextPoint = m_completeToothProfile->evaluate(nextStepValue);
         nextNormal = normalAt(nextStepValue);
 
         real angleBetweenNormals = angleBetweenN(normal, nextNormal);
-        if(angleBetweenNormals > m_maxDriftAngle) {
-
-            uint partition = static_cast<uint>(angleBetweenNormals / m_maxDriftAngle);
-            partition *= 2; //increase possible partitions, as the spline may increase with different values
-
-            refineWithNext(stepValue, nextStepValue, partition);
-        }
+        uint partition = 3 * (static_cast<uint>(angleBetweenNormals / m_maxDriftAngle));
+        insertRefinedContactPoints(stepValue, nextStepValue, partition);
     }
 }
 
-void GearPair::refineWithNext(real stepValue, real nextStepValue, uint partition) {
+void GearPair::insertRefinedContactPoints(real stepValue, real nextStepValue, uint partition) {
     vec2 normal = normalAt(stepValue);
     vec2 nextNormal = normalAt(nextStepValue);
 
     if(partition > 0 && angleBetweenN(normal, nextNormal) > m_maxDriftAngle) {
-        refineWithNext(stepValue, 0.5 * (stepValue + nextStepValue), partition - 1);
-        refineWithNext(0.5 * (stepValue + nextStepValue), nextStepValue, partition - 1);
+        real refineAt = 0.5 * (stepValue + nextStepValue);
+        insertRefinedContactPoints(stepValue, refineAt, partition - 1);
+        insertRefinedContactPoints(refineAt, nextStepValue, partition - 1);
 
     } else if (partition > 0) {
         stepValue = nextStepValue;
         normal = nextNormal;
         vec2 point = m_completeToothProfile->evaluate(stepValue);
+        std::cout << "1 ContactPoint of: " << stepValue << ", p: " << point << ", n: " << normal << std::endl;
         ContactPoint *contactPoint = contactPointOf(point, normal, stepValue);
         m_allContactPoints.push_back(contactPoint);
 
@@ -204,6 +194,7 @@ void GearPair::refineWithNext(real stepValue, real nextStepValue, uint partition
         std::cout << "Could not find with spline evaluation a good enough partition!!!" << std::endl;
         vec2 point = m_completeToothProfile->evaluate(stepValue);
         vec2 nextPoint = m_completeToothProfile->evaluate(nextStepValue);
+        std::cout << "2 ContactPoint of: " << 0.5 * (stepValue + nextStepValue) << ", p: " << 0.5 * (point + nextPoint) << ", n: " << 0.5 * (normal + nextNormal) << std::endl;
         ContactPoint *contactPoint = contactPointOf(0.5 * (point + nextPoint), 0.5 * (normal + nextNormal), 0.5 * (stepValue + nextStepValue));
         m_allContactPoints.push_back(contactPoint);
     }

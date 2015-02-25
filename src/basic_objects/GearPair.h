@@ -24,6 +24,7 @@ public:
     const std::list<Triangle>& triangles();
     const ContactPoint& startPoint() const;
     const std::vector< NoneContactPoint* >& noneContactPoints() const;
+    vector<vec2> gearPoints() const;
 
     SplineGear* drivingGear() const;
     SplineGear* drivenGear() const;
@@ -68,7 +69,7 @@ private:
     ContactPointSortingList m_allContactPoints;
 
     void constructListOfPossiblePairingPoints();
-    void refineWithNext(real stepValue, real nextStepValue, uint partition);
+    void insertRefinedContactPoints(real stepValue, real nextStepValue, uint partition);
     void chooseCorrectPoints();
 
     ContactPoint* contactPointOf(const vec2 &point, const vec2 &normal, real stepValue);

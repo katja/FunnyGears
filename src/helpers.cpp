@@ -4,6 +4,8 @@
 #include "glm/gtx/rotate_vector.hpp"
 #include "basic_objects/Spline.h"
 #include "basic_objects/ContactPoint.h"
+#include "basic_objects/ContactPointHelpers.h"
+#include "basic_objects/ContactPointIterator.h"
 
 
 ////////////////////////////////////
@@ -114,6 +116,41 @@ std::ostream& operator <<(std::ostream &os, const ContactPoint &cp) {
     return os;
 }
 
+std::ostream& operator <<(std::ostream &os, const CPcutting &cutting) {
+    os << "CPcutting with properties...\n";
+    os << "value t:         " << cutting.t << std::endl;
+    os << "cuttingPoint:    " << cutting.cuttingPoint << std::endl;
+    os << "iterator before: " << *cutting.placeBeforeCutting << std::endl;
+    os << "pointer to list: " << cutting.list << std::endl;
+    os << "location:        ";
+    if(cutting.location == IterationLocation::Ground)
+        os << "Ground";
+    else if(cutting.location == IterationLocation::Top)
+        os << "Top";
+    else
+        os << "Undefined";
+    return os << std::endl;
+}
+
+std::ostream& operator <<(std::ostream &os, const NCPcutting &cutting) {
+    os << "NCPcutting with properties...\n";
+    os << "value t:            " << cutting.t << std::endl;
+    os << "cuttingPoint:       " << cutting.cuttingPoint << std::endl;
+    os << "pointer to NCP:     " << cutting.ncp << std::endl;
+    os << "placeBeforeCutting: " << cutting.placeBeforeCutting << std::endl;
+    os << "location:           ";
+    if(cutting.location == IterationLocation::Ground)
+        os << "Ground";
+    else if(cutting.location == IterationLocation::Top)
+        os << "Top";
+    else
+        os << "Undefined";
+    return os << std::endl;
+}
+
+std::ostream& operator <<(std::ostream &os, const ContactPointIterator &iterator) {
+    return iterator.currentStateStream(os);
+}
 
 ////////////////////////////////////
 ////////// OTHER ///////////////////

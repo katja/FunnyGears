@@ -23,6 +23,10 @@ const std::list<Triangle>& ContactPointSortingList::triangles() {
     return m_triangles;
 }
 
+vector<vec2> ContactPointSortingList::gearPoints() const {
+    return m_gearPoints;
+}
+
 const ContactPoint& ContactPointSortingList::startPoint() const {
     return *m_startPoint;
 }
@@ -91,7 +95,14 @@ void ContactPointSortingList::createCoveringLists(uint numberOfTeeth, bool isDes
     // Now all points of all lists are compared and only points, which are not covered by any of the rectangles
     // which are constructed by two other points with their forbidden area are chosen for the mating gear.
 
-    reduceNumberOfNoneContactPoints();
+    std::cout << "POINTS WITH POSITION: " << std::endl;
+    for(PointsWithPosition *points : m_pointsWithPositionList) {
+        std::cout << "\nLIST mit position: " << points->position << std::endl;
+        for(ContactPoint *cp : points->points) {
+            std::cout << *cp << std::endl;
+        }
+    }
+
     findAllCoveredPoints();
 
     // vector<ContactPoint> chosenPoints = vector<ContactPoint>();
@@ -163,39 +174,202 @@ void ContactPointSortingList::rotatePointsWithPositionToOnePitch() {
     }
 }
 
-void ContactPointSortingList::reduceNumberOfNoneContactPoints() {
-    //TODO !!!
+// void ContactPointSortingList::reduceNumberOfNoneContactPoints() {
+//     //TODO !!!
+// }
+
+bool ContactPointSortingList::getFirstNoneErrorCPIterator(vector<ContactPoint*>::iterator &it, vector<ContactPoint*> *&points) {
+    std::list<PointsWithPosition*>::iterator listIt = m_pointsWithPositionList.begin();
+
+    while(listIt != m_pointsWithPositionList.end()) {
+
+        vector<ContactPoint*>::iterator cpIt = (*listIt)->points.begin();
+        while((*cpIt)->error != ErrorCode::NO_ERROR && cpIt != (*listIt)->points.end()) {
+            ++cpIt;
+        }
+
+        if(cpIt != (*listIt)->points.end()) {
+            it = cpIt;
+            points = &((*listIt)->points);
+            return true;
+        }
+    }
+    //to reach this line is normally not possible!
+    return false;
 }
 
 void ContactPointSortingList::findAllCoveredPoints() {
-    // Find all covered points
-    // This loop is very expensive but it is quite complicated to reduce the cicles, as no constraint is known for the points.
-    for(std::list< PointsWithPosition* >::iterator listIt = m_pointsWithPositionList.begin(), listEnd = m_pointsWithPositionList.end(); listIt != listEnd; ++listIt) {
-        for(vector<ContactPoint*>::iterator it = ((*listIt)->points).begin(), end = --((*listIt)->points).end(); it != end; ++it) {
 
-            for(std::list< PointsWithPosition* >::iterator list2It = m_pointsWithPositionList.begin(), list2End = m_pointsWithPositionList.end(); list2It != list2End; ++list2It) {
-                for(vector<ContactPoint*>::iterator it2 = ((*listIt)->points).begin(), end2 = ((*listIt)->points).end(); it2 != end2; ++it2) {
+    m_gearPoints.clear();
+    m_gearCPs.clear();
 
-                    if(it != it2 && (it+1) != it2) {//don't compare points itself!
-                        if(contactPointIsCovered(**it2, **it, **(it+1))) {
-                            (*it2)->isCovered = true;
-                        }
-                    }
+    vector<ContactPoint*>::iterator firstIterator;
+    vector<ContactPoint*> *firstPoints = nullptr;
+    if(!getFirstNoneErrorCPIterator(firstIterator, firstPoints))
+        return;
 
-                }
+    vec2 startPitch = glm::normalize((*firstIterator)->point);
+    vec2 stopPitch = glm::rotate(startPitch, m_angularPitchRotation);
+    m2x2 betweenStartStop = glm::inverse(m2x2(startPitch, stopPitch));
+
+    ContactPointIterator it;
+    it.startWith(firstIterator, firstPoints);
+    //TODO: this may be rubbish, if first point is covered!!!
+    m_gearPoints.push_back((*firstIterator)->point);
+    m_gearCPs.push_back(*firstIterator);
+    ++it;
+
+    // Do while loop preparations, the conditions for the termination
+    bool notYetAtOriginCondition;
+    bool notAtListEndCondition;
+    bool securityBreakCondition;
+    uint securityBreak = 0;
+    uint securityBreakTreshold = 0;
+    if(!m_noneContactPointList.empty())
+        securityBreakTreshold += m_noneContactPointList.size() * m_noneContactPointList.front()->points.size(); //every NoneContactPoint has same amound of points
+    for(PointsWithPosition *pointsWithPosition : m_pointsWithPositionList) {
+        securityBreakTreshold += 2 * pointsWithPosition->points.size();
+    }
+
+    do {
+        std::cout << "in do-while-loop with securityBreak = " << securityBreak << std::endl;
+        std::cout << "Current Iterator State: " << it << std::endl;
+        std::vector<CPcutting> cpCuttingsList;
+        std::vector<NCPcutting> ncpCuttingsList;
+        cpCuttingsList.reserve(this->size()); //only an estimation
+        ncpCuttingsList.reserve(4 * m_noneContactPointList.size()); // each path for a NoneContactPoint may in an unfortunate event have four cuttings with a line (cause of the form of the path like a loop)
+
+        uint occurencesCP = howManyContactPointsCoverPoint(it, cpCuttingsList);
+        uint occurencesNCP = howManyNoneContactPointsCoverPoint(it, ncpCuttingsList);
+
+        if(occurencesCP + occurencesNCP == 0) {
+            //point is not covered => it is a gear point
+            m_gearPoints.push_back(it.currentPoint());
+            m_gearCPs.push_back(it.currentCP());
+            ++it;
+            std::cout << "          did NOT find any cutting points ++it called" << std::endl;
+
+        } else {
+            //find first cutting
+            uint firstCP = 0;
+            for(uint i = 1; i < cpCuttingsList.size(); ++i) {
+                if(cpCuttingsList[i].t < cpCuttingsList[firstCP].t)
+                    firstCP = i;
+                std::cout << "first = " << firstCP << std::endl;
+            }
+            uint firstNCP = 0;
+            for(uint i = 1; i < ncpCuttingsList.size(); ++i) {
+                if(ncpCuttingsList[i].t < ncpCuttingsList[firstNCP].t)
+                    firstNCP = i;
+                std::cout << "firstNCP = " << firstNCP << std::endl;
             }
 
+            if(occurencesNCP == 0 || (occurencesCP > 0 && cpCuttingsList[firstCP].t < ncpCuttingsList[firstNCP].t)) {
+                //nearest cutting point is one of m_pointsWithPositionList
+                std::cout << "          DID find cutting points with first one one of CP (number of CP cuttings: " << occurencesCP << ", NCP cuttings: " << occurencesNCP << ")" << std::endl;
+                m_gearPoints.push_back(cpCuttingsList[firstCP].cuttingPoint);
+                std::cout << " CP Cutting continue with  : " << cpCuttingsList[firstCP] << std::endl;
+                it.continueWith(cpCuttingsList[firstCP]);
+
+            } else { // nearest cutting point is one of m_noneContactPointList
+                std::cout << "          DID find cutting points with first one one of NCP (number of CP cuttings: " << occurencesCP << ", NCP cuttings: " << occurencesNCP << ")" << std::endl;
+                m_gearPoints.push_back(ncpCuttingsList[firstNCP].cuttingPoint);
+                std::cout << "NCP Cutting continue with  : " << ncpCuttingsList[firstNCP] << std::endl;
+                it.continueWith(ncpCuttingsList[firstNCP]);
+            }
+        }
+
+        ++securityBreak;
+        securityBreakCondition = (securityBreak <= securityBreakTreshold);
+        notAtListEndCondition = !it.reachedEnd();
+        if(notAtListEndCondition) {
+            vec2 baryz = betweenStartStop * it.currentPoint();
+            bool isStillBetween = (baryz.x > 0) && (baryz.y > 0);
+            real epsilon = glm::length(m_gearPoints[0] - glm::rotate(it.currentPoint(), -m_angularPitchRotation));
+            notYetAtOriginCondition = (isStillBetween || epsilon > 1);
+        } else {
+            notYetAtOriginCondition = true;
+        }
+
+    } while(securityBreakCondition && notYetAtOriginCondition && notAtListEndCondition);
+
+    std::cout << "After while loop and securityBreakCondition:  " << securityBreakCondition << "   securityBreak = " << securityBreak << " of treshold: " << securityBreakTreshold << std::endl;
+    std::cout << "                 and notYetAtOriginCondition: " << notYetAtOriginCondition << std::endl;
+    std::cout << "                 and notAtListEndCondition:   " << notAtListEndCondition << std::endl;
+    std::cout << "GearPoints have a size of: " << m_gearPoints.size() << std::endl;
+
+}
+
+uint ContactPointSortingList::howManyContactPointsCoverPoint(const ContactPointIterator &it, std::vector<CPcutting> &cpCuttingsList) const {
+    uint foundCoverings = 0;
+
+    for(PointsWithPosition* pointsWithPosition : m_pointsWithPositionList) {
+        for(vector<ContactPoint*>::iterator previous = pointsWithPosition->points.begin(),
+                                            current = ++(pointsWithPosition->points.begin()),
+                                            end = pointsWithPosition->points.end();
+            current != end;
+            ++previous, ++current)
+        {
+            if(!it.belongsToQuad(*previous, *current)) { // do not test the point with its own quad!
+
+                real t;
+                vec2 intersection;
+                //test ground:
+                if(intersectLines(t, intersection, it.previousPoint(), it.currentPoint(), (*previous)->point, (*current)->point)) {
+                    cpCuttingsList.push_back(CPcutting{t, intersection, previous, &(pointsWithPosition->points), IterationLocation::Ground});
+                    ++foundCoverings;
+                    std::cout << " CP Cutting on Ground found: " << cpCuttingsList.back() << std::endl;
+                }
+                //test top:
+                if(intersectLines(t, intersection, it.previousPoint(), it.currentPoint(), (*previous)->forbiddenAreaEndPoint, (*current)->forbiddenAreaEndPoint)) {
+                    cpCuttingsList.push_back(CPcutting{t, intersection, previous, &(pointsWithPosition->points), IterationLocation::Top});
+                    ++foundCoverings;
+                    std::cout << " CP Cutting on Top found: " << cpCuttingsList.back() << std::endl;
+                }
+            }
         }
     }
+    return foundCoverings;
+}
+
+uint ContactPointSortingList::howManyNoneContactPointsCoverPoint(const ContactPointIterator &it, std::vector<NCPcutting> &ncpCuttingsList) const {
+    uint foundCoverings = 0;
+
+    for(NoneContactPoint *ncp : m_noneContactPointList) {
+        for(uint i = 1; i < ncp->points.size(); ++i) {
+            if(!it.belongsToQuad(ncp, i - 1, i)) { // do not test the point with its own quad!
+
+                vec2 previous = ncp->points[i - 1];
+                vec2 current = ncp->points[i];
+                vec2 previousEndPoint = previous + ncp->forbiddenAreaLength * ncp->normals[i - 1];
+                vec2 currentEndPoint = current + ncp->forbiddenAreaLength * ncp->normals[i];
+
+                real t;
+                vec2 intersection;
+                if(intersectLines(t, intersection, it.previousPoint(), it.currentPoint(), previous, current)) {
+                    ncpCuttingsList.push_back(NCPcutting{t, intersection, ncp, i - 1, IterationLocation::Ground});
+                    ++foundCoverings;
+                    std::cout << "NCP Cutting on Ground found: " << ncpCuttingsList.back() << std::endl;
+                }
+                if(intersectLines(t, intersection, it.previousPoint(), it.currentPoint(), previousEndPoint, currentEndPoint)) {
+                    ncpCuttingsList.push_back(NCPcutting{t, intersection, ncp, i - 1, IterationLocation::Top});
+                    ++foundCoverings;
+                    std::cout << "NCP Cutting on Top found: " << ncpCuttingsList.back() << std::endl;
+                }
+
+            }
+        }
+    }
+    return foundCoverings;
 }
 
 void ContactPointSortingList::copyInCorrectList(const ContactPoint &cp, int position, PointsWithPosition *&list) {
     //TODO: at the moment every point is inserted also in the first list, this is not correct!
     //      it is only here for testing reasons.
 
-    bool isFirstList = m_pointsWithPositionList.empty();
-    if(!isFirstList)
-            m_pointsWithPositionList.front()->points.push_back(new ContactPoint(cp)); //insert every cp in first list, undo that!
+    // bool isFirstList = m_pointsWithPositionList.empty();
+    // if(!isFirstList)
+    //         m_pointsWithPositionList.front()->points.push_back(new ContactPoint(cp)); //insert every cp in first list, undo that!
 
     list->points.push_back(new ContactPoint(cp));
 
@@ -215,7 +389,7 @@ void ContactPointSortingList::copyInCorrectList(const ContactPoint &cp, int posi
     }
 }
 
-int ContactPointSortingList::whichPositionBehindAngularPitch(ContactPoint *contactPoint, const vec2 &stopPitch) {
+int ContactPointSortingList::whichPositionBehindAngularPitch(ContactPoint *contactPoint, const vec2 &stopPitch) const {
     vec2 a = stopPitch;
     vec2 b = glm::rotate(a, m_angularPitchRotation);
 
@@ -232,7 +406,7 @@ int ContactPointSortingList::whichPositionBehindAngularPitch(ContactPoint *conta
     return i;
 }
 
-int ContactPointSortingList::whichPositionBeforeAngularPitch(ContactPoint *contactPoint, const vec2 &startPitch) {
+int ContactPointSortingList::whichPositionBeforeAngularPitch(ContactPoint *contactPoint, const vec2 &startPitch) const {
     vec2 b = startPitch;
     vec2 a = glm::rotate(b, -m_angularPitchRotation);
 
@@ -249,7 +423,19 @@ int ContactPointSortingList::whichPositionBeforeAngularPitch(ContactPoint *conta
     return i;
 }
 
-bool ContactPointSortingList::contactPointIsCovered(const ContactPoint &candidate, const ContactPoint &a, const ContactPoint &b) {
+bool ContactPointSortingList::pointIsCovered(const vec2 &candidate, const ContactPoint &a, const ContactPoint &b) const {
+    // in each case two tests to make
+    vec2 intersection;
+    if(intersectLines(intersection, a.point, a.forbiddenAreaEndPoint, b.point, b.forbiddenAreaEndPoint)) {
+        return isPointInTriangle(candidate, a.point, intersection, b.point)
+            || isPointInTriangle(candidate, a.forbiddenAreaEndPoint, intersection, b.forbiddenAreaEndPoint);
+    } else {
+        return isPointInTriangle(candidate, b.forbiddenAreaEndPoint, a.point, a.forbiddenAreaEndPoint)
+            || isPointInTriangle(candidate, b.point, a.point, b.forbiddenAreaEndPoint);
+        }
+}
+
+bool ContactPointSortingList::contactPointIsCovered(const ContactPoint &candidate, const ContactPoint &a, const ContactPoint &b) const {
     // in each case two tests to make!
     vec2 intersection;
     if(intersectLines(intersection, a.point, a.forbiddenAreaEndPoint, b.point, b.forbiddenAreaEndPoint)) {
@@ -261,7 +447,24 @@ bool ContactPointSortingList::contactPointIsCovered(const ContactPoint &candidat
         }
 }
 
-bool ContactPointSortingList::intersectLines(vec2& intersection, vec2 lineAStart, vec2 lineAEnd, vec2 lineBStart, vec2 lineBEnd) {
+bool ContactPointSortingList::intersectLines(real &intersectionValue, vec2 &intersection, vec2 startLine, vec2 stopLine, vec2 startTestLine, vec2 stopTestLine) const {
+    vec2 x = startTestLine - stopTestLine;
+    vec2 y = stopLine - startLine;
+    vec2 z = startTestLine - startLine;
+    m2x2 matrix = m2x2(x, y);
+    if(glm::determinant(matrix) != 0) {
+        m2x2 invMatrix = glm::inverse(matrix);
+        vec2 t = invMatrix * z;
+        if (0.0001 < t.x && 0.0001 < t.y && t.x < 0.9999 && t.y < 0.9999) {
+            intersectionValue = t.y;
+            intersection = startLine + t.y * y;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ContactPointSortingList::intersectLines(vec2 &intersection, vec2 lineAStart, vec2 lineAEnd, vec2 lineBStart, vec2 lineBEnd) const {
     vec2 x = lineAStart - lineAEnd;
     vec2 y = lineBEnd - lineBStart;
     vec2 z = lineAStart - lineBStart;
@@ -278,7 +481,7 @@ bool ContactPointSortingList::intersectLines(vec2& intersection, vec2 lineAStart
 }
 
 // TODO: is the epsilon value e a suitable one? Maybe it catches too much or too less?
-bool ContactPointSortingList::isPointInTriangle(vec2 point, vec2 a, vec2 b, vec2 c) {
+bool ContactPointSortingList::isPointInTriangle(vec2 point, vec2 a, vec2 b, vec2 c) const {
     real e = 0.00f;
     vec2 start = a - b;
     vec2 stop = c - b;
@@ -290,7 +493,7 @@ bool ContactPointSortingList::isPointInTriangle(vec2 point, vec2 a, vec2 b, vec2
     } else {
         isInTriangle = false;
     }
-    m_triangles.push_back(Triangle({a, b, c, point, isInTriangle}));
+    // m_triangles.push_back(Triangle({a, b, c, point, isInTriangle}));
     return isInTriangle;
 }
 

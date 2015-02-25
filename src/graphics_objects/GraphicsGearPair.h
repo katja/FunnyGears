@@ -73,6 +73,7 @@ public:
     void paintContactPoint(const ContactPoint &point, QPainter *painter, QColor color, bool, bool, bool) const;
     void paintNoneContactPoints(QPainter *painter, bool, bool) const;
     void paintFilledForbiddenArea(QPainter *painter) const;
+    void paintGearPoints(QPainter *painter) const;
 
 private:
     GearPair *m_gearPair;
