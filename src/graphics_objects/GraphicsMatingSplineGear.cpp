@@ -10,6 +10,7 @@ GraphicsMatingSplineGear::GraphicsMatingSplineGear(SplineGear *gear, GraphicsGea
 }
 
 GraphicsMatingSplineGear::~GraphicsMatingSplineGear() {
+    std::cout << "GraphicsMatingSplineGear is deleted" << std::endl;
 }
 
 void GraphicsMatingSplineGear::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {

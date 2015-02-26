@@ -23,7 +23,8 @@ public:
     const std::list<PointsWithPosition*>& pointsInSortedLists();
     const std::list<Triangle>& triangles();
     const ContactPoint& startPoint() const;
-    const std::vector< NoneContactPoint* >& noneContactPoints() const;
+    real usedAngularPitch() const;
+    const std::list<NoneContactPoint*>& noneContactPoints() const;
     vector<vec2> gearPoints() const;
 
     SplineGear* drivingGear() const;
@@ -60,8 +61,6 @@ private:
     real m_module;
     Spline *m_completeToothProfile;
 
-    std::vector<NoneContactPoint*> m_noneContactPoints;
-
     real m_maxDriftAngle;
     uint m_samplingRate;
     real m_stepSize;
@@ -73,7 +72,7 @@ private:
     void chooseCorrectPoints();
 
     ContactPoint* contactPointOf(const vec2 &point, const vec2 &normal, real stepValue);
-    NoneContactPoint* convertToNoneContactPoint(ContactPoint *contactPoint);
+    NoneContactPoint* convertToNoneContactPoint(ContactPoint *contactPoint) const;
     void insertThicknessInContactPoint(ContactPoint& contactPoint) const;
     vec2 normalAt(real value) const;
 };

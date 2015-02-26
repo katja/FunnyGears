@@ -81,6 +81,15 @@ struct NoneContactPoint : public ContactPoint {
     {}
     vector<vec2> points;
     vector<vec2> normals;
+
+    void rotate(real rotation) {
+        for(uint i = 0; i < points.size(); ++i) {
+            points[i] = glm::rotate(points[i], rotation);
+            normals[i] = glm::rotate(normals[i], rotation);
+        }
+        isRotated = true;
+    }
+
 };
 
 

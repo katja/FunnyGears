@@ -23,16 +23,38 @@ public:
 
     ~ContactPointSortingList();
 
+    // Most important method:
+    void createCoveringLists(uint numberOfTeeth, bool isDescribedClockwise);
+    void sort();
+    void clear();
+
     //TODO: delete following few lines!!!!
-    const std::list<PointsWithPosition*>& pointsWithPositions();
+    const std::list<PointsWithPosition*>& pointsWithPositions() const;
+    const std::list<NoneContactPoint*>& noneContactPoints() const;
     const std::list<Triangle>& triangles(); //TODO: is not filled at the moment!!!
     vector<vec2> gearPoints() const;
     const ContactPoint& startPoint() const;
+    real usedAngularPitch() const;
     //until here???
 
-    void clear();
+private:
+    real                            m_angularPitchRotation;
+    std::list<PointsWithPosition*>  m_pointsWithPositionList;
+    std::list<NoneContactPoint*>    m_noneContactPointList;
+    std::list<Triangle>             m_triangles; //TODO: is not filled at the moment!!!
+    ContactPoint                    *m_startPoint;
+    vec2                            m_examinedPitchStartDirection;
+    vec2                            m_examinedPitchStopDirection;
+    vector<vec2>                    m_gearPoints;
+    vector<ContactPoint*>           m_gearCPs;
 
-    void sort();
+    void setAngularPitch(uint numberOfTeeth, bool isDescribedClockwise);
+    bool setExaminedPitch();
+    void copyPointsInSuitableLists();
+    void reduceNumberOfNoneContactPoints();
+    void copyNoneContactPointsInRelevantPitches();
+    void rotatePointsWithPositionToOnePitch();
+    void findAllCoveredPoints();
 
     /** @brief Returns the currenctly available number of ContactPoints which do not have an Error
      *
@@ -50,22 +72,8 @@ public:
      */
     ContactPoint* getFirstNoneErrorContactPoint() const;
 
-    void createCoveringLists(uint numberOfTeeth, bool isDescribedClockwise);
-
-private:
-    real                            m_angularPitchRotation;
-    std::list<PointsWithPosition*>  m_pointsWithPositionList;
-    std::list<NoneContactPoint*>    m_noneContactPointList;
-    std::list<Triangle>             m_triangles; //TODO: is not filled at the moment!!!
-    ContactPoint                    *m_startPoint;
-    vector<vec2>                    m_gearPoints;
-    vector<ContactPoint*>           m_gearCPs;
-
-    void copyPointsInSuitableLists(uint numberOfTeeth, bool isDescribedClockwise);
-    void rotatePointsWithPositionToOnePitch();
-    // void reduceNumberOfNoneContactPoints();
     bool getFirstNoneErrorCPIterator(vector<ContactPoint*>::iterator &it, vector<ContactPoint*> *&points);
-    void findAllCoveredPoints(); //TODO: is const at the moment, but as it probably won't remain it, is not marked as such
+
     uint howManyContactPointsCoverPoint(const ContactPointIterator &it, std::vector<CPcutting> &cpCuttingsList) const;
     uint howManyNoneContactPointsCoverPoint(const ContactPointIterator &it, std::vector<NCPcutting> &ncpCuttingsList) const;
 
@@ -75,6 +83,7 @@ private:
     // the point is inserted there as first object, too.
     void copyInCorrectList(const ContactPoint &point, int position, PointsWithPosition *&list);
 
+    int pitchNumberOfPoint(vec2 point) const;
     int whichPositionBehindAngularPitch(ContactPoint *contactPoint, const vec2 &stopPitch) const;
     int whichPositionBeforeAngularPitch(ContactPoint *contactPoint, const vec2 &startPitch) const;
 
