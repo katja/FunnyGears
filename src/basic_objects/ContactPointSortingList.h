@@ -33,7 +33,8 @@ public:
     const std::list<NoneContactPoint*>& noneContactPoints() const;
     const std::list<Triangle>& triangles(); //TODO: is not filled at the moment!!!
     vector<vec2> gearPoints() const;
-    const ContactPoint& startPoint() const;
+    vec2 startOfExaminedPitch() const;
+    vec2 endOfExaminedPitch() const;
     real usedAngularPitch() const;
     //until here???
 
@@ -42,7 +43,6 @@ private:
     std::list<PointsWithPosition*>  m_pointsWithPositionList;
     std::list<NoneContactPoint*>    m_noneContactPointList;
     std::list<Triangle>             m_triangles; //TODO: is not filled at the moment!!!
-    ContactPoint                    *m_startPoint;
     vec2                            m_examinedPitchStartDirection;
     vec2                            m_examinedPitchStopDirection;
     vector<vec2>                    m_gearPoints;

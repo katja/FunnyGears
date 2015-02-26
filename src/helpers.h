@@ -3,6 +3,7 @@
 
 #include "stable.h"
 #include "definitions.h"
+#include "preferences.h"
 class Spline;
 enum class ErrorCode;
 struct ContactPoint;
@@ -23,6 +24,8 @@ std::ostream& operator <<(std::ostream &os, const vec2 vec);
 std::ostream& operator <<(std::ostream &os, const QVector<vec2> v);
 
 std::ostream& operator <<(std::ostream &os, const vector<vec2> v);
+
+std::ostream& operator <<(std::ostream &os, const vector<int> v);
 
 std::ostream& operator <<(std::ostream &os, const QVector<real> v);
 
@@ -45,6 +48,16 @@ std::ostream& operator <<(std::ostream &os, const ContactPointIterator &iterator
 
 QColor darkenColor(const QColor &color, int degree = 60);
 
+QColor lightUpColor(const QColor &color, real degree = 0.6);
+
+int max(int a, int b);
+
+real absolute(const real &number);
+
+real toRad(const real &degree);
+
+real toDegree(const real &rad);
+
 real dot(const vec2 &a, const vec2& b);
 
 real cross(const vec2 &a, const vec2 &b);
@@ -57,18 +70,17 @@ real angleBetweenN(const vec2 &normalizedA, const vec2 &normalizedB);
 
 real square(const real &number);
 
-real absolute(const real &number);
-
-real toRad(const real &degree);
-
-real toDegree(const real &rad);
-
 QVector<QPointF> convertToQVectorWithQPointFs(const vector<vec2> &v);
 
 
 QPainterPath circlePath(real radius);
 
 QPainterPath pitchesPath(uint numberOfSections, vec2 startPoint, real sectionLength);
+
+void drawCircle(QPainter *painter, vec2 center, real radius = Preferences::PointRadius);
+
+void drawLine(QPainter *painter, vec2 start, vec2 end);
+
 
 
 ////////////////////////////////////

@@ -27,10 +27,10 @@ void ContactPointSortingList::createCoveringLists(uint numberOfTeeth, bool isDes
     if(!setExaminedPitch())
         return;
     copyPointsInSuitableLists();
-        //=> m_pointsWithPositionList, m_noneContactPointList, m_startPoint
+        //=> m_pointsWithPositionList, m_noneContactPointList, m_examinedPitchStartDirection, m_examinedPitchStopDirection
     reduceNumberOfNoneContactPoints(); //needs a filled m_noneContactPointList
     copyNoneContactPointsInRelevantPitches();
-    rotatePointsWithPositionToOnePitch();
+    // rotatePointsWithPositionToOnePitch();
     findAllCoveredPoints();
         //=> m_gearPoints, m_gearCPs
 }
@@ -83,8 +83,12 @@ vector<vec2> ContactPointSortingList::gearPoints() const {
     return m_gearPoints;
 }
 
-const ContactPoint& ContactPointSortingList::startPoint() const {
-    return *m_startPoint;
+vec2 ContactPointSortingList::startOfExaminedPitch() const {
+    return m_examinedPitchStartDirection;
+}
+
+vec2 ContactPointSortingList::endOfExaminedPitch() const {
+    return m_examinedPitchStopDirection;
 }
 
 real ContactPointSortingList::usedAngularPitch() const {
@@ -120,42 +124,48 @@ bool ContactPointSortingList::setExaminedPitch() {
 }
 
 void ContactPointSortingList::copyPointsInSuitableLists() {
-    //Every point has to be inside one angular pitch of the gear!
-    //Create lists with ContactPoints which lay either out of the angular pitch region or in it.
-    //Lists with points that lay outside are rotated to the start or respectively to the end
-    //of the angular pitch region so that they lay inside the region, too.
-    m_startPoint = getFirstNoneErrorContactPoint();
-    vec2 startPitch = glm::normalize(m_startPoint->point);
-    vec2 stopPitch = glm::rotate(startPitch, m_angularPitchRotation);
-    m2x2 betweenStartStop = glm::inverse(m2x2(startPitch, stopPitch));
+    //Examine the position of each point relative to the examined pitch
+    //The points, which have a cut with the reference circle, are inserted in the first
+    //list of m_pointsWithPositionList
+    //Afterwards this list is copied and each point rotated, when one of the points do
+    //not lie in the examined pitch
 
-    PointsWithPosition *pointsWithPosition = new PointsWithPosition();
-    pointsWithPosition->position = 0; // in examined angular pitch
+    PointsWithPosition *firstPositionList = new PointsWithPosition();
+    firstPositionList->position = 0; // in examined angular pitch
+    vector<int> foundPositions; //every position besides "0" is inserted here
 
     for(ContactPoint *cp : (*this)) {
         if(cp->error != ErrorCode::NO_CUT_WITH_REFERENCE_RADIUS) {
-            vec2 baryz = betweenStartStop * cp->point;
-
-            if(glm::all(glm::greaterThanEqual(baryz, vec2(0,0)))) {
-                copyInCorrectList(*cp, 0, pointsWithPosition);
-
-            } else if (baryz.x > 0.0f && baryz.y < 0.0f) {
-                //startPitch still positive, stopPitch negative => point lies infront of start of tooth
-                int position = whichPositionBeforeAngularPitch(cp, startPitch);
-                copyInCorrectList(*cp, position, pointsWithPosition);
-
-            } else if (baryz.x < 0.0f && baryz.y > 0.0f) {
-                //startPitch negative, stopPitch still positive => point lies behind end of tooth
-                int position = whichPositionBehindAngularPitch(cp, stopPitch);
-                copyInCorrectList(*cp, position, pointsWithPosition);
-
-            }  //else: point lies nearly opposite tooth
+            int pitchNumber = pitchNumberOfPoint(cp->point);
+            if(pitchNumber != 0) {
+                bool alreadyFound = false;
+                for(uint i = 0; i < foundPositions.size() && !alreadyFound; ++i) {
+                    if(pitchNumber == foundPositions[i])
+                        alreadyFound = true;
+                }
+                if(!alreadyFound)
+                    foundPositions.push_back(pitchNumber);
+            }
+            firstPositionList->points.push_back(new ContactPoint(*cp));
 
         } else { // point on original gear has no equivalent on mating gear => examine the whole path of the point later
             m_noneContactPointList.push_back(new NoneContactPoint(*(static_cast<NoneContactPoint*>(cp))));
         }
     }
-    m_pointsWithPositionList.push_back(pointsWithPosition); //insert last list, too. Otherwise will be lost
+    m_pointsWithPositionList.push_back(firstPositionList); //insert last list, too. Otherwise will be lost
+
+    std::cout << "copyPointsInSuitableLists had found the positions: " << foundPositions << std::endl;
+
+    for(uint i = 0; i < foundPositions.size(); ++i) {
+        PointsWithPosition *pointsWithPosition = new PointsWithPosition();
+        pointsWithPosition->position = foundPositions[i];
+        for(ContactPoint *cp : firstPositionList->points) {
+            ContactPoint *copy = new ContactPoint(*cp);
+            copy->rotate(m_angularPitchRotation * foundPositions[i]);
+            pointsWithPosition->points.push_back(copy);
+        }
+        m_pointsWithPositionList.push_back(pointsWithPosition);
+    }
 }
 
 void ContactPointSortingList::reduceNumberOfNoneContactPoints() {
@@ -168,10 +178,8 @@ void ContactPointSortingList::reduceNumberOfNoneContactPoints() {
     uint middle = static_cast<uint>((*itAhead)->points.size() / 2);
 
     ++itAhead;
-    uint formercount = m_noneContactPointList.size();
     while(itAhead != itEnd ) {
         vec2 distance = ((*itAhead)->points[middle] - (*itBehind)->points[middle]);
-        std::cout << "dist: " << glm::length(distance) << std::endl;
         if(glm::length(distance) < epsilon) {
             delete *itAhead;
             *itAhead = nullptr;
@@ -181,19 +189,18 @@ void ContactPointSortingList::reduceNumberOfNoneContactPoints() {
             ++itAhead;
         }
     }
-    std::cout << "reduceNumberOfNoneContactPoints: from " << formercount << " to " << m_noneContactPointList.size() << std::endl;
 }
 
 void ContactPointSortingList::copyNoneContactPointsInRelevantPitches() {
     if(m_noneContactPointList.empty())
         return;
-    std::list<NoneContactPoint*>::iterator it = m_noneContactPointList.begin(),
-                                           lastOne = --(m_noneContactPointList.end());
+    std::list<NoneContactPoint*>::iterator it = m_noneContactPointList.begin();
+    uint currentSize = m_noneContactPointList.size();
     uint middle = static_cast<uint>((*it)->points.size() / 2);
     if(middle < 2)
         return;
 
-    do {
+    for(uint i = 0; i < currentSize; ++i) {
         vec2 nearestPointToCenter = (*it)->points[middle];
 
         int pitch = pitchNumberOfPoint(nearestPointToCenter);
@@ -204,7 +211,7 @@ void ContactPointSortingList::copyNoneContactPointsInRelevantPitches() {
             m_noneContactPointList.push_back(copy);
         }
         ++it;
-    } while(it != lastOne);
+    }
 }
 
 void ContactPointSortingList::rotatePointsWithPositionToOnePitch() {

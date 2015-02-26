@@ -11,6 +11,49 @@ bool GraphicsGearPair::isGraphicsGearPair(QGraphicsItem *item) {
     return false;
 }
 
+struct Coloring {
+    uint r, g, b;
+    uint red, green, blue;
+
+    Coloring() {
+        setBack();
+    }
+
+    void setBack() {
+        r = 10;
+        g = 0;
+        b = 50;
+        red = r;
+        green = g;
+        blue = b;
+    }
+
+    QColor nextColor() {
+        b = (b + 8) & 0x1FF;
+        if((b & 0x100) > 0)//count downwards
+            blue = 0x100 - ((b & 0xFF) + 1);
+        else
+            blue = b;
+
+        if((b & 0x180) > 0) {
+            r = (r + 8) & 0x1FF;
+            if((r & 0x100) > 0)//count downwards
+                red = 0x100 - ((r & 0xFF) + 1);
+            else
+                red = r;
+        }
+
+        if((r & 0x180) > 0) {
+            g = (g + 8) & 0x1FF;
+            if((g & 0x100) > 0)//count downwards
+                green = 0x100 - ((g & 0xFF) + 1);
+            else
+                green = g;
+        }
+        return QColor(red, green, blue);
+    }
+};
+
 GraphicsGearPair::GraphicsGearPair(GearPair *gearPair) :
     m_gearPair(gearPair),
     m_drivingGear(nullptr),
@@ -210,20 +253,18 @@ void GraphicsGearPair::paint(QPainter *painter, const QStyleOptionGraphicsItem *
             paintSampledGearTooth(painter);
 
     if(m_pathOfContactIsVisible)
-        paintSampledContactPoints(painter, false, false, true);
+        paintPathOfContact(painter);
 
     // painter->drawRect(boundingRect());
 }
 
 void GraphicsGearPair::paintAdditionals(QPainter *painter, GraphicsMatingSplineGear *gear) const {
     if(gear == m_drivingGear) {
-        if(m_pitchesAreVisible)
-            painter->drawPath(pitchesPath(m_drivingGear->numberOfTeeth(), m_gearPair->startPoint().originPoint, 250));
         if(m_pitchCirclesAreVisible)
             painter->drawPath(circlePath(m_gearPair->drivingGearPitchRadius()));
         if(m_noneContactPointsAreVisible)
             paintNoneContactPoints(painter, true, false);
-        paintSampledContactPoints(painter, true, false, false);
+        paintSampledContactPointsDrivingGear(painter);
         if(m_sampledGearToothSamplingIsVisible)
             paintSampledGearToothSamplingPoints(painter);
 
@@ -232,10 +273,10 @@ void GraphicsGearPair::paintAdditionals(QPainter *painter, GraphicsMatingSplineG
         // pen.setWidth(0);
         // painter->setPen(pen);
         if(m_pitchesAreVisible) {
-            painter->drawPath(pitchesPath(m_drivenGear->numberOfTeeth(), m_gearPair->startPoint().point, 250));
+            painter->drawPath(pitchesPath(m_drivenGear->numberOfTeeth(), m_gearPair->startOfExaminedPitch(), 250));
 
-            vec2 start = m_gearPair->startPoint().point;
-            vec2 end = glm::rotate(start, m_gearPair->usedAngularPitch());
+            vec2 start = m_gearPair->startOfExaminedPitch();
+            vec2 end = m_gearPair->endOfExaminedPitch();
             painter->save();
             QPen pen = painter->pen();
             pen.setWidth(2);
@@ -250,7 +291,7 @@ void GraphicsGearPair::paintAdditionals(QPainter *painter, GraphicsMatingSplineG
             painter->drawPath(circlePath(m_gearPair->drivenGearPitchRadius()));
         if(m_noneContactPointsAreVisible)
             paintNoneContactPoints(painter, false, true);
-        paintSampledContactPoints(painter, false, true, false);
+        paintSampledContactPointsDrivenGear(painter);
         if(m_filledForbiddenAreaIsVisible)
             paintFilledForbiddenArea(painter);
 
@@ -276,98 +317,101 @@ void GraphicsGearPair::paintSampledGearToothSamplingPoints(QPainter *painter) co
     }
 }
 
-void GraphicsGearPair::paintSampledContactPoints(QPainter *painter, bool paintOriginPoints, bool paintTargetPoints, bool paintPathOfContact) const {
-    std::list< PointsWithPosition* > pointsWithPositions = m_gearPair->pointsInSortedLists();
+void GraphicsGearPair::paintSampledContactPointsDrivingGear(QPainter *painter) const {
+    std::list<PointsWithPosition*> pointsWithPositions = m_gearPair->pointsInSortedLists();
 
-    uint r = 10;
-    uint g = 0;
-    uint b = 50;
-    uint red = r;
-    uint green = g;
-    uint blue = b;
+    painter->save();
+    Coloring coloring;
+
+    PointsWithPosition *firstList = pointsWithPositions.front();
+    coloring.setBack();
+
+    for(ContactPoint *cp : firstList->points) {
+
+        QColor c = coloring.nextColor();
+        if(cp->error != ErrorCode::NO_ERROR) {
+            c = QColor(220, 0, 20); //red
+        }
+        QPen pen = painter->pen();
+        pen.setColor(c);
+        painter->setPen(pen);
+
+        // originPoint, originNormal
+        drawCircle(painter, cp->originPoint);
+        if(m_samplingWidthInDrivingGearIsVisible) {
+            vec2 endNormal = cp->originPoint - cp->originNormal * cp->forbiddenAreaLength;
+            drawLine(painter, cp->originPoint, endNormal);
+        }
+    }
+    painter->restore();
+}
+
+void GraphicsGearPair::paintSampledContactPointsDrivenGear(QPainter *painter) const {
+    std::list<PointsWithPosition*> pointsWithPositions = m_gearPair->pointsInSortedLists();
+
+    painter->save();
+    Coloring coloring;
+    real lightUp = 1.0 / pointsWithPositions.size();
 
     for(PointsWithPosition *list : pointsWithPositions) {
         ContactPoint *lastCP = list->points.front();
+        coloring.setBack();
+
         for(ContactPoint *cp : list->points) {
-            if(list->position != 0) {
-                red = green = blue = 0;
-                if(list->position > 0)
-                    red = 20 * list->position;
-                if(list->position < 0)
-                    green = 20 * -(list->position);
 
-                // QColor fillColor = QColor(128 + list->position * 10, 0, 0);
-                // painter->setBrush(QBrush(fillColor));
+            QColor c = coloring.nextColor();
+            if(list->position > 0)
+                c = lightUpColor(c, list->position * lightUp);
+            else if(list->position < 0)
+                c = lightUpColor(c, -(list->position * lightUp));
+            if(cp->error != ErrorCode::NO_ERROR) {
+                c = QColor(220, 0, 20); //red
             }
-            paintContactPoint(*cp, painter, QColor(red, green, blue), paintOriginPoints, paintTargetPoints, paintPathOfContact);
+            QPen pen = painter->pen();
+            pen.setColor(c);
+            painter->setPen(pen);
 
-            b = (b + 8) & 0x1FF;
-            if((b & 0x100) > 0)//count downwards
-                blue = 0x100 - ((b & 0xFF) + 1);
-            else
-                blue = b;
-
-            if((b & 0x180) > 0) {
-                r = (r + 8) & 0x1FF;
-                if((r & 0x100) > 0)//count downwards
-                    red = 0x100 - ((r & 0xFF) + 1);
-                else
-                    red = r;
+            // point (and forbidden area)
+            drawCircle(painter, cp->point);
+            // drawCircle(painter, cp->point, 0.15);
+            if(m_forbiddenAreaIsVisible) {
+                vec2 endNormal = cp->point + cp->normal * cp->forbiddenAreaLength;
+                drawLine(painter, cp->point, endNormal);
             }
-
-            if((r & 0x180) > 0) {
-                g = (g + 8) & 0x1FF;
-                if((g & 0x100) > 0)//count downwards
-                    green = 0x100 - ((g & 0xFF) + 1);
-                else
-                    green = g;
-            }
-            if(paintTargetPoints && lastCP != cp) { //both elements are in normal range, or both somewhere else
-                painter->drawLine(QPointF(lastCP->point.x, lastCP->point.y), QPointF(cp->point.x, cp->point.y));
+            // merge following list points by a line:
+            if(lastCP != cp) { //not on first point on list
+                drawLine(painter, lastCP->point, cp->point);
                 if(m_forbiddenAreaIsVisible)
-                    painter->drawLine(QPointF(lastCP->forbiddenAreaEndPoint.x, lastCP->forbiddenAreaEndPoint.y), QPointF(cp->forbiddenAreaEndPoint.x, cp->forbiddenAreaEndPoint.y));
+                    drawLine(painter, lastCP->forbiddenAreaEndPoint, cp->forbiddenAreaEndPoint);
                 lastCP = cp;
             }
         }
     }
+    painter->restore();
 }
 
-void GraphicsGearPair::paintContactPoint(const ContactPoint &point, QPainter *painter, QColor color, bool paintOriginPoints, bool paintTargetPoints, bool paintPathOfContact) const {
+void GraphicsGearPair::paintPathOfContact(QPainter *painter) const {
+    std::list<PointsWithPosition*> pointsWithPositions = m_gearPair->pointsInSortedLists();
+
     painter->save();
-    QPen pen = painter->pen();
-    pen.setColor(color);
-    if(point.error != ErrorCode::NO_ERROR) {
-        pen.setColor(QColor(220, 0, 20)); //red
-    }
-    painter->setPen(pen);
+    Coloring coloring;
 
-    //point, normal, originPoint, originNormal
-    if(paintTargetPoints) {
-        if(point.isRotated)
-            painter->drawEllipse(QPointF(point.point.x, point.point.y), Preferences::PointRadius + 0.2, Preferences::PointRadius + 0.2);
-        painter->drawEllipse(QPointF(point.point.x, point.point.y), Preferences::PointRadius, Preferences::PointRadius);
-        // painter->drawEllipse(QPointF(point.point.x, point.point.y), 0.15, 0.15);
-        if(m_forbiddenAreaIsVisible) {
-            vec2 endNormal = point.point + point.normal * point.forbiddenAreaLength;
-            painter->drawLine(QPointF(point.point.x, point.point.y), QPointF(endNormal.x, endNormal.y));
+    PointsWithPosition *firstList = pointsWithPositions.front();
+    coloring.setBack();
+
+    for(ContactPoint *cp : firstList->points) {
+        QColor c = coloring.nextColor();
+        if(cp->error != ErrorCode::NO_ERROR) {
+            c = QColor(220, 0, 20); //red
         }
+        QPen pen = painter->pen();
+        pen.setColor(c);
+        pen.setBrush(c);
+        painter->setPen(pen);
+        drawCircle(painter, cp->contactPosition);
+        vec2 endNormal = cp->contactPosition + cp->normalInContact * 20.0;
+        drawLine(painter, cp->contactPosition, endNormal);
     }
-
-    if(paintOriginPoints) {
-        painter->drawEllipse(QPointF(point.originPoint.x, point.originPoint.y), Preferences::PointRadius, Preferences::PointRadius);
-        if(m_samplingWidthInDrivingGearIsVisible) {
-            vec2 endNormal = point.originPoint - point.originNormal * point.forbiddenAreaLength;
-            painter->drawLine(QPointF(point.originPoint.x, point.originPoint.y), QPointF(endNormal.x, endNormal.y));
-        }
-    }
-
-    if(paintPathOfContact) {
-        painter->setBrush(QBrush(color));
-        painter->drawEllipse(QPointF(point.contactPosition.x, point.contactPosition.y), Preferences::PointRadius, Preferences::PointRadius);
-        vec2 endNormal = point.contactPosition + point.normalInContact * 20.0;
-        painter->drawLine(QPointF(point.contactPosition.x, point.contactPosition.y), QPointF(endNormal.x, endNormal.y));
-    }
-
     painter->restore();
 }
 

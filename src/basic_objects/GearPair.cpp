@@ -72,8 +72,12 @@ const std::list<Triangle>& GearPair::triangles() {
 }
 
 //TODO: remove this!!!!
-const ContactPoint& GearPair::startPoint() const {
-    return m_allContactPoints.startPoint();
+vec2 GearPair::startOfExaminedPitch() const {
+    return m_allContactPoints.startOfExaminedPitch();
+}
+
+vec2 GearPair::endOfExaminedPitch() const {
+    return m_allContactPoints.endOfExaminedPitch();
 }
 
 real GearPair::usedAngularPitch() const {
@@ -272,16 +276,16 @@ NoneContactPoint* GearPair::convertToNoneContactPoint(ContactPoint *cp) const {
     // of the gear. In each case those values around the pitch point will be taken
     // For all of these x > 0.
 
-    real startAngle; // startAngle is measured starting from y-axis
-    real endAngle;
-    if(m_drivenGear->numberOfTeeth() > 6) { // enough teeth, so 'only' examine 3 pitches
-        real angle = 3.0 * M_PI / m_drivenGear->numberOfTeeth(); // 3.0 <== 1.5 * 2.0 * M_PI
-        startAngle = M_PI / 2.0 - angle;
-        endAngle = M_PI / 2.0 + angle;
-    } else {
-        startAngle = 0.0;
-        endAngle = M_PI;
-    }
+    real startAngle = M_PI / 6.0; // startAngle is measured starting from y-axis
+    real endAngle = M_PI - startAngle;
+    // if(m_drivenGear->numberOfTeeth() > 6) { // enough teeth, so 'only' examine 3 pitches
+    //     real angle = 3.0 * M_PI / m_drivenGear->numberOfTeeth(); // 3.0 <== 1.5 * 2.0 * M_PI
+    //     startAngle = M_PI / 2.0 - angle;
+    //     endAngle = M_PI / 2.0 + angle;
+    // } else {
+    //     startAngle = 0.0;
+    //     endAngle = M_PI;
+    // }
 
     while(startAngle < endAngle) {
 

@@ -71,6 +71,10 @@ public:
     void paintSampledGearToothSamplingPoints(QPainter *painter) const;
     void paintSampledContactPoints(QPainter *painter, bool, bool, bool) const;
     void paintContactPoint(const ContactPoint &point, QPainter *painter, QColor color, bool, bool, bool) const;
+
+    void paintSampledContactPointsDrivingGear(QPainter *painter) const;
+    void paintSampledContactPointsDrivenGear(QPainter *painter) const;
+    void paintPathOfContact(QPainter *painter) const;
     void paintNoneContactPoints(QPainter *painter, bool, bool) const;
     void paintFilledForbiddenArea(QPainter *painter) const;
     void paintGearPoints(QPainter *painter) const;

@@ -43,6 +43,16 @@ std::ostream& operator <<(std::ostream &os, const vector<vec2> v) {
     return os;
 }
 
+std::ostream& operator <<(std::ostream &os, const vector<int> v) {
+    os << "[";
+    uint i;
+    for(i = 0; i < v.size() - 1; ++i) {
+        os << v[i] << ",\t";
+    }
+    os << v[i] << "]";
+    return os;
+}
+
 std::ostream& operator <<(std::ostream &os, const QVector<real> vector) {
     for(int i = 0; i < vector.size(); ++i) {
         os << vector.at(i);
@@ -163,6 +173,16 @@ QColor darkenColor(const QColor &color, int degree) {
     return darkenedColor;
 }
 
+QColor lightUpColor(const QColor &color, real degree) {
+    return QColor(  color.red() + (255 - color.red()) * degree,
+                    color.green() + (255 - color.green()) * degree,
+                    color.blue() + (255 - color.blue()) * degree);
+}
+
+int max(int a, int b) {
+    return (a > b) ? a : b;
+}
+
 real dot(const vec2 &a, const vec2 &b) {
     return a.x * b.x + a.y * b.y;
 }
@@ -235,4 +255,12 @@ QPainterPath pitchesPath(uint numberOfSections, vec2 startPoint, real sectionLen
         path.moveTo(0,0);
     }
     return path;
+}
+
+void drawCircle(QPainter *painter, vec2 center, real radius) {
+    painter->drawEllipse(QPointF(center.x, center.y), radius, radius);
+}
+
+void drawLine(QPainter *painter, vec2 start, vec2 end) {
+    painter->drawLine(QPointF(start.x, start.y), QPointF(end.x, end.y));
 }
