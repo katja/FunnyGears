@@ -16,11 +16,13 @@ public:
 
     bool reachedEnd() const;
 
-    void startWith(vector<ContactPoint*>::iterator firstPoint, vector<ContactPoint*> *firstList);
+    void startWith(CPcutting cutting, int standardNormalDirection);
+    void startWith(NCPcutting cutting, int standardNormalDirection);
 
     vec2 currentPoint() const;
     vec2 previousPoint() const;
     ContactPoint* currentCP() const;
+    ContactPoint* currentCorrectInContactPoint() const;
 
     void continueWith(CPcutting cutting);
     void continueWith(NCPcutting cutting);

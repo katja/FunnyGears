@@ -3,30 +3,52 @@
 GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *parent) :
     GraphicsItemAttributesWidget(parent)
 {
+    m_isLiveUpdating = false;
+    m_liveUpdatingCheckBox = new QCheckBox(tr("Update on changes"), this);
+    connect(m_liveUpdatingCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleLiveUpdating(bool)));
 
-    m_sampledGearToothCheckBox = new QCheckBox(tr("Show sampled gear tooth"), this);
-    connect(m_sampledGearToothCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleSampledGearToothVisibility(bool)));
+    m_drivingGearSamplingCheckBox = new QCheckBox(tr("...driving gear sampling"), this);
+    connect(m_drivingGearSamplingCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleDrivingGearSamplingVisibility(bool)));
 
-    m_noneContactPointsCheckBox = new QCheckBox(tr("Show paths of points without contact"), this);
-    connect(m_noneContactPointsCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleNoneContactPointsVisibility(bool)));
+    m_drivenGearSamplingCheckBox = new QCheckBox(tr("...driven gear sampling"), this);
+    connect(m_drivenGearSamplingCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleDrivenGearSamplingVisibility(bool)));
 
-    m_drivingGearWidthSamplingCheckBox = new QCheckBox(tr("Show sampling of width in driving gear"), this);
-    connect(m_drivingGearWidthSamplingCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleSamplingWidthVisibilityInDrivingGear(bool)));
+    m_drivingGearForbiddenAreaCheckBox = new QCheckBox(tr("...forbidden area (driving gear)"), this);
+    connect(m_drivingGearForbiddenAreaCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleForbiddenAreaInDrivingGear(bool)));
 
-    m_drivenGearForbiddenAreaCheckBox = new QCheckBox(tr("Show normals for forbidden area"), this);
+    m_drivenGearForbiddenAreaCheckBox = new QCheckBox(tr("...forbidden area (driven gear)"), this);
     connect(m_drivenGearForbiddenAreaCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleForbiddenAreaInDrivenGear(bool)));
 
-    m_filledForbiddenAreaCheckBox = new QCheckBox(tr("Show created filled forbidden area"), this);
-    connect(m_filledForbiddenAreaCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleFilledForbiddenAreaVisibility(bool)));
+    m_noneContactPointsCheckBox = new QCheckBox(tr("...paths of points without contact"), this);
+    connect(m_noneContactPointsCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleNoneContactPointsVisibility(bool)));
 
-    m_pathOfContactCheckBox = new QCheckBox(tr("Show path of contact"), this);
-    connect(m_pathOfContactCheckBox, SIGNAL(toggled(bool)), this, SLOT(togglePathOfContactVisibility(bool)));
+    m_selectedGearPointsCheckBox = new QCheckBox(tr("...selected points"), this);
+    connect(m_selectedGearPointsCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleSelectedGearPointsVisibility(bool)));
 
-    m_pitchesCheckBox = new QCheckBox(tr("Show pitches"), this);
+    m_pathOfPossibleContactCheckBox = new QCheckBox(tr("...path of possible contact"), this);
+    connect(m_pathOfPossibleContactCheckBox, SIGNAL(toggled(bool)), this, SLOT(togglePathOfPossibleContactVisibility(bool)));
+
+    m_pathOfRealContactCheckBox = new QCheckBox(tr("...path of real contact"), this);
+    connect(m_pathOfRealContactCheckBox, SIGNAL(toggled(bool)), this, SLOT(togglePathOfRealContactVisibility(bool)));
+
+    m_pitchesCheckBox = new QCheckBox(tr("...pitches"), this);
     connect(m_pitchesCheckBox, SIGNAL(toggled(bool)), this, SLOT(togglePitchesVisibility(bool)));
 
-    m_pitchCirclesCheckBox = new QCheckBox(tr("Show pitch circles"), this);
+    m_pitchCirclesCheckBox = new QCheckBox(tr("...pitch circles"), this);
     connect(m_pitchCirclesCheckBox, SIGNAL(toggled(bool)), this, SLOT(togglePitchCirclesVisibility(bool)));
+
+    QGroupBox *showBox = new QGroupBox(tr("Show..."), this);
+    QVBoxLayout *showBoxLayout = new QVBoxLayout(showBox);
+    showBoxLayout->addWidget(m_drivingGearSamplingCheckBox);
+    showBoxLayout->addWidget(m_drivenGearSamplingCheckBox);
+    showBoxLayout->addWidget(m_drivingGearForbiddenAreaCheckBox);
+    showBoxLayout->addWidget(m_drivenGearForbiddenAreaCheckBox);
+    showBoxLayout->addWidget(m_noneContactPointsCheckBox);
+    showBoxLayout->addWidget(m_selectedGearPointsCheckBox);
+    showBoxLayout->addWidget(m_pathOfPossibleContactCheckBox);
+    showBoxLayout->addWidget(m_pathOfRealContactCheckBox);
+    showBoxLayout->addWidget(m_pitchesCheckBox);
+    showBoxLayout->addWidget(m_pitchCirclesCheckBox);
 
     m_rotationCheckBox = new QCheckBox(tr("Rotate the gears?"), this);
     connect(m_rotationCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleRotationOfGears(bool)));
@@ -48,40 +70,31 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     QLabel *maxDriftAngleLabel = new QLabel(tr("Max. drift angle"), this);
     maxDriftAngleLabel->setBuddy(m_maxDriftAngleSpinBox);
 
-    m_isLiveUpdating = false;
-    m_liveUpdatingCheckBox = new QCheckBox(tr("Update gear pair on changes"), this);
-    connect(m_liveUpdatingCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleLiveUpdating(bool)));
+    QGridLayout *layout = new QGridLayout(this);
+    layout->addWidget(m_liveUpdatingCheckBox,   0, 0, 1, 1);
+    layout->addWidget(showBox,                  1, 0, 1, 2);
+    layout->addWidget(m_rotationCheckBox,       2, 0, 1, 2);
+    layout->addWidget(m_rotationVelocitySlider, 3, 0, 1, 2);
+    layout->addWidget(samplingRateLabel,        4, 0);
+    layout->addWidget(m_samplingRateSpinBox,    4, 1);
+    layout->addWidget(maxDriftAngleLabel,       5, 0);
+    layout->addWidget(m_maxDriftAngleSpinBox,   5, 1);
 
-    QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->addWidget(m_sampledGearToothCheckBox);
-    layout->addWidget(m_noneContactPointsCheckBox);
-    layout->addWidget(m_drivingGearWidthSamplingCheckBox);
-    layout->addWidget(m_drivenGearForbiddenAreaCheckBox);
-    layout->addWidget(m_filledForbiddenAreaCheckBox);
-    layout->addWidget(m_pathOfContactCheckBox);
-    layout->addWidget(m_pitchesCheckBox);
-    layout->addWidget(m_pitchCirclesCheckBox);
-    layout->addWidget(m_rotationCheckBox);
-    layout->addWidget(m_rotationVelocitySlider);
-    layout->addWidget(samplingRateLabel);
-    layout->addWidget(m_samplingRateSpinBox);
-    layout->addWidget(maxDriftAngleLabel);
-    layout->addWidget(m_maxDriftAngleSpinBox);
-    layout->addWidget(m_liveUpdatingCheckBox);
-
-    layout->addStretch(1); //stretch the empty space at bottom and not _between_ the objects
+    layout->setRowStretch(6, 1); //stretch the empty space at bottom and not _between_ the objects
 }
 
 GraphicsGearPairAttributesWidget::~GraphicsGearPairAttributesWidget() {
 }
 
 void GraphicsGearPairAttributesWidget::updateAttributes() {
-    m_sampledGearToothCheckBox->setChecked(m_currentGearPair->visibilityOfSampledGearTooth());
+    m_drivingGearSamplingCheckBox->setChecked(m_currentGearPair->visibilityOfDrivingGearSampling());
+    m_drivenGearSamplingCheckBox->setChecked(m_currentGearPair->visibilityOfDrivenGearSampling());
+    m_drivingGearForbiddenAreaCheckBox->setChecked(m_currentGearPair->visibilityOfForbiddenAreaInDrivingGear());
+    m_drivenGearForbiddenAreaCheckBox->setChecked(m_currentGearPair->visibilityOfForbiddenAreaInDrivenGear());
     m_noneContactPointsCheckBox->setChecked(m_currentGearPair->visibilityOfNoneContactPoints());
-    m_drivingGearWidthSamplingCheckBox->setChecked(m_currentGearPair->visibilityOfSamplingWidthInDrivingGear());
-    m_drivenGearForbiddenAreaCheckBox->setChecked(m_currentGearPair->visibilityOfForbiddenArea());
-    m_filledForbiddenAreaCheckBox->setChecked(m_currentGearPair->visibilityOfFilledForbiddenArea());
-    m_pathOfContactCheckBox->setChecked(m_currentGearPair->visibilityOfPathOfContact());
+    m_selectedGearPointsCheckBox->setChecked(m_currentGearPair->visibilityOfSelectedGearPoints());
+    m_pathOfPossibleContactCheckBox->setChecked(m_currentGearPair->visibilityOfPathOfPossibleContact());
+    m_pathOfRealContactCheckBox->setChecked(m_currentGearPair->visibilityOfPathOfRealContact());
     m_pitchesCheckBox->setChecked(m_currentGearPair->visibilityOfPitches());
     m_pitchCirclesCheckBox->setChecked(m_currentGearPair->visibilityOfPitchCircles());
     m_rotationCheckBox->setChecked(m_currentGearPair->isRotating());
@@ -117,30 +130,37 @@ bool GraphicsGearPairAttributesWidget::worksOnItem(QGraphicsItem *graphicsItem) 
     return false;
 }
 
-void GraphicsGearPairAttributesWidget::toggleSampledGearToothVisibility(bool checked) {
-    m_currentGearPair->setVisibilityOfSampledGearTooth(checked);
+void GraphicsGearPairAttributesWidget::toggleDrivingGearSamplingVisibility(bool checked) {
+    m_currentGearPair->setVisibilityOfDrivingGearSampling(checked);
+}
+
+void GraphicsGearPairAttributesWidget::toggleDrivenGearSamplingVisibility(bool checked) {
+    m_currentGearPair->setVisibilityOfDrivenGearSampling(checked);
+}
+
+void GraphicsGearPairAttributesWidget::toggleForbiddenAreaInDrivingGear(bool checked) {
+    m_currentGearPair->setVisibilityOfForbiddenAreaInDrivingGear(checked);
+}
+
+void GraphicsGearPairAttributesWidget::toggleForbiddenAreaInDrivenGear(bool checked) {
+    m_currentGearPair->setVisibilityOfForbiddenAreaInDrivenGear(checked);
 }
 
 void GraphicsGearPairAttributesWidget::toggleNoneContactPointsVisibility(bool checked) {
     m_currentGearPair->setVisibilityOfNoneContactPoints(checked);
 }
 
-void GraphicsGearPairAttributesWidget::toggleSamplingWidthVisibilityInDrivingGear(bool checked) {
-    m_currentGearPair->setVisibilityOfSamplingWidthInDrivingGear(checked);
+void GraphicsGearPairAttributesWidget::toggleSelectedGearPointsVisibility(bool checked) {
+    m_currentGearPair->setVisibilityOfSelectedGearPoints(checked);
 }
 
-void GraphicsGearPairAttributesWidget::toggleForbiddenAreaInDrivenGear(bool checked) {
-    m_currentGearPair->setVisibilityOfForbiddenArea(checked);
+void GraphicsGearPairAttributesWidget::togglePathOfPossibleContactVisibility(bool checked) {
+    m_currentGearPair->setVisibilityOfPathOfPossibleContact(checked);
 }
 
-void GraphicsGearPairAttributesWidget::toggleFilledForbiddenAreaVisibility(bool checked) {
-    m_currentGearPair->setVisibilityOfFilledForbiddenArea(checked);
+void GraphicsGearPairAttributesWidget::togglePathOfRealContactVisibility(bool checked) {
+    m_currentGearPair->setVisibilityOfPathOfRealContact(checked);
 }
-
-void GraphicsGearPairAttributesWidget::togglePathOfContactVisibility(bool checked) {
-    m_currentGearPair->setVisibilityOfPathOfContact(checked);
-}
-
 
 void GraphicsGearPairAttributesWidget::togglePitchesVisibility(bool checked) {
     m_currentGearPair->setVisibilityOfPitches(checked);

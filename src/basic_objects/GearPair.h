@@ -19,14 +19,6 @@ public:
     void doCalculation();
 
     const ContactPointSortingList& foundPoints();
-    Spline* completeToothProfile();
-    const std::list<PointsWithPosition*>& pointsInSortedLists();
-    const std::list<Triangle>& triangles();
-    vec2 startOfExaminedPitch() const;
-    vec2 endOfExaminedPitch() const;
-    real usedAngularPitch() const;
-    const std::list<NoneContactPoint*>& noneContactPoints() const;
-    vector<vec2> gearPoints() const;
 
     SplineGear* drivingGear() const;
     SplineGear* drivenGear() const;

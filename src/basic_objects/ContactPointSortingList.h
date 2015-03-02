@@ -28,23 +28,28 @@ public:
     void sort();
     void clear();
 
-    //TODO: delete following few lines!!!!
-    const std::list<PointsWithPosition*>& pointsWithPositions() const;
+    const std::list<ContactPointsWithPosition*>& contactPointsWithPositions() const;
     const std::list<NoneContactPoint*>& noneContactPoints() const;
-    const std::list<Triangle>& triangles(); //TODO: is not filled at the moment!!!
-    vector<vec2> gearPoints() const;
-    vec2 startOfExaminedPitch() const;
-    vec2 endOfExaminedPitch() const;
+    const vector<vec2>& gearPoints() const;
+    const vector<ContactPoint*>& gearContactPoints() const;
+    vec2 startOfExaminedPitchInDrivenGear() const;
+    vec2 endOfExaminedPitchInDrivenGear() const;
+    real lengthOfPitchesInDrivenGear() const;
+
+    vec2 startOfExaminedPitchInDrivingGear () const;
+    real lengthOfPitchesInDrivingGear() const;
+
     real usedAngularPitch() const;
-    //until here???
 
 private:
-    real                            m_angularPitchRotation;
-    std::list<PointsWithPosition*>  m_pointsWithPositionList;
+    real                            m_angularPitchRotation; //is negative, if driven gear tooth is described counter clockwise (in screen representation), and positive otherwise
+    std::list<ContactPointsWithPosition*>  m_contactPointsWithPositionList;
     std::list<NoneContactPoint*>    m_noneContactPointList;
-    std::list<Triangle>             m_triangles; //TODO: is not filled at the moment!!!
     vec2                            m_examinedPitchStartDirection;
     vec2                            m_examinedPitchStopDirection;
+    vec2                            m_examinedPitchStartDirectionInDrivingGear;
+    real                            m_examinedPitchLengthInDrivenGear;
+    real                            m_examinedPitchLengthInDrivingGear;
     vector<vec2>                    m_gearPoints;
     vector<ContactPoint*>           m_gearCPs;
 
@@ -71,16 +76,16 @@ private:
      */
     ContactPoint* getFirstNoneErrorContactPoint() const;
 
-    bool getFirstNoneErrorCPIterator(vector<ContactPoint*>::iterator &it, vector<ContactPoint*> *&points);
+    uint findStartPointForGearPoints(CPcutting &cpCutting, NCPcutting &ncpCutting);
 
     uint howManyContactPointsCoverPoint(const ContactPointIterator &it, std::vector<CPcutting> &cpCuttingsList) const;
     uint howManyNoneContactPointsCoverPoint(const ContactPointIterator &it, std::vector<NCPcutting> &ncpCuttingsList) const;
 
     // merely inserts the ContactPoint in the list, but if it has another position
-    // than the list is used for, the @p list is pushed to m_pointsWithPositionList and a new list
+    // than the list is used for, the @p list is pushed to m_contactPointsWithPositionList and a new list
     // is created to which @p list now points to
     // the point is inserted there as first object, too.
-    void copyInCorrectList(const ContactPoint &point, int position, PointsWithPosition *&list);
+    void copyInCorrectList(const ContactPoint &point, int position, ContactPointsWithPosition *&list);
 
     int pitchNumberOfPoint(vec2 point) const;
     int whichPositionBehindAngularPitch(ContactPoint *contactPoint, const vec2 &stopPitch) const;
@@ -92,18 +97,9 @@ private:
     bool intersectLines(vec2& intersection, vec2 lineAStart, vec2 lineAEnd, vec2 lineBStart, vec2 lineBEnd) const;
     bool isPointInTriangle(vec2 point, vec2 a, vec2 b, vec2 c) const;
 
-    void setBackLists(); //deletes the ContactPoints, NoneContactPoints and PointsWithPositions of m_pointsWithPositionList and m_noneContactPointList;
-    void deleteSortingLists(); // deletes the lists saved in m_pointsWithPositionList
+    void setBackLists(); //deletes the ContactPoints, NoneContactPoints and ContactPointsWithPositions of m_contactPointsWithPositionList and m_noneContactPointList;
+    void deleteSortingLists(); // deletes the lists saved in m_contactPointsWithPositionList
     void deleteNoneContactPoints(); // deletes the NoneContactPoints saved in m_noneContactPointList
-
-
-    // bool intersectLines(hpvec2& intersection, hpvec2 lineAStart, hpvec2 lineAEnd, hpvec2 lineBStart, hpvec2 lineBEnd);
-
-    // bool isPointInTriangle(hpvec2 point, hpvec2 a, hpvec2 b, hpvec2 c);
-
-    // bool ContactPointIsCovered(ContactPoint point, ContactPoint a, ContactPoint b);
-
-    // void turnPointsOfList(vector<ContactPoint>* list, PointPosition positionOfListPoints);
 
 };
 

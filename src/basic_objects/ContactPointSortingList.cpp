@@ -1,10 +1,9 @@
-#include "ContactPointSortingList.h"
+#include "basic_objects/ContactPointSortingList.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtx/rotate_vector.hpp"
 #include "helpers.h"
-
-#include <iostream>
+#include "basic_objects/Ray.h"
 
 ContactPointSortingList::ContactPointSortingList() {}
 
@@ -27,7 +26,9 @@ void ContactPointSortingList::createCoveringLists(uint numberOfTeeth, bool isDes
     if(!setExaminedPitch())
         return;
     copyPointsInSuitableLists();
-        //=> m_pointsWithPositionList, m_noneContactPointList, m_examinedPitchStartDirection, m_examinedPitchStopDirection
+        //=> m_contactPointsWithPositionList, m_noneContactPointList,
+        //=> m_examinedPitchStartDirection, m_examinedPitchStopDirection, m_examinedPitchStartDirectionInDrivingGear
+        //=> m_examinedPitchLengthInDrivenGear, m_examinedPitchLengthInDrivingGear
     reduceNumberOfNoneContactPoints(); //needs a filled m_noneContactPointList
     copyNoneContactPointsInRelevantPitches();
     findAllCoveredPoints();
@@ -57,6 +58,7 @@ void ContactPointSortingList::sort() {
                 ++itCurr;
             }
         }
+        (*itPrev)->evaluationStep = number; //last ContactPoint needs number, too
     } while(!sorted);
 }
 
@@ -66,28 +68,40 @@ void ContactPointSortingList::clear() {
     std::list<ContactPoint*>::clear();
 }
 
-const std::list<PointsWithPosition*>& ContactPointSortingList::pointsWithPositions() const {
-    return m_pointsWithPositionList;
+const std::list<ContactPointsWithPosition*>& ContactPointSortingList::contactPointsWithPositions() const {
+    return m_contactPointsWithPositionList;
 }
 
 const std::list<NoneContactPoint*>& ContactPointSortingList::noneContactPoints() const {
     return m_noneContactPointList;
 }
 
-const std::list<Triangle>& ContactPointSortingList::triangles() {
-    return m_triangles;
-}
-
-vector<vec2> ContactPointSortingList::gearPoints() const {
+const vector<vec2>& ContactPointSortingList::gearPoints() const {
     return m_gearPoints;
 }
 
-vec2 ContactPointSortingList::startOfExaminedPitch() const {
+const vector<ContactPoint*>& ContactPointSortingList::gearContactPoints() const {
+    return m_gearCPs;
+}
+
+vec2 ContactPointSortingList::startOfExaminedPitchInDrivenGear() const {
     return m_examinedPitchStartDirection;
 }
 
-vec2 ContactPointSortingList::endOfExaminedPitch() const {
+vec2 ContactPointSortingList::endOfExaminedPitchInDrivenGear() const {
     return m_examinedPitchStopDirection;
+}
+
+vec2 ContactPointSortingList::startOfExaminedPitchInDrivingGear () const {
+    return m_examinedPitchStartDirectionInDrivingGear;
+}
+
+real ContactPointSortingList::lengthOfPitchesInDrivenGear() const {
+    return m_examinedPitchLengthInDrivenGear;
+}
+
+real ContactPointSortingList::lengthOfPitchesInDrivingGear() const {
+    return m_examinedPitchLengthInDrivingGear;
 }
 
 real ContactPointSortingList::usedAngularPitch() const {
@@ -118,6 +132,9 @@ bool ContactPointSortingList::setExaminedPitch() {
     if(errorProne)
         return false;
     m_examinedPitchStartDirection = normalize(((*a)->point + (*b)->point) * 0.5);
+    m_examinedPitchLengthInDrivenGear = glm::length(((*a)->point + (*b)->point) * 0.5);
+    m_examinedPitchStartDirectionInDrivingGear = normalize(((*a)->originPoint + (*b)->originPoint) * 0.5);
+    m_examinedPitchLengthInDrivingGear = glm::length(((*a)->originPoint + (*b)->originPoint) * 0.5);
     m_examinedPitchStopDirection = glm::rotate(m_examinedPitchStartDirection, m_angularPitchRotation);
     return true;
 }
@@ -125,11 +142,11 @@ bool ContactPointSortingList::setExaminedPitch() {
 void ContactPointSortingList::copyPointsInSuitableLists() {
     //Examine the position of each point relative to the examined pitch
     //The points, which have a cut with the reference circle, are inserted in the first
-    //list of m_pointsWithPositionList
+    //list of m_contactPointsWithPositionList
     //Afterwards this list is copied and each point rotated, when one of the points do
     //not lie in the examined pitch
 
-    PointsWithPosition *firstPositionList = new PointsWithPosition();
+    ContactPointsWithPosition *firstPositionList = new ContactPointsWithPosition();
     firstPositionList->position = 0; // in examined angular pitch
     vector<int> foundPositions; //every position besides "0" is inserted here
 
@@ -151,17 +168,17 @@ void ContactPointSortingList::copyPointsInSuitableLists() {
             m_noneContactPointList.push_back(new NoneContactPoint(*(static_cast<NoneContactPoint*>(cp))));
         }
     }
-    m_pointsWithPositionList.push_back(firstPositionList); //insert last list, too. Otherwise will be lost
+    m_contactPointsWithPositionList.push_back(firstPositionList); //insert last list, too. Otherwise will be lost
 
     for(uint i = 0; i < foundPositions.size(); ++i) {
-        PointsWithPosition *pointsWithPosition = new PointsWithPosition();
-        pointsWithPosition->position = foundPositions[i];
+        ContactPointsWithPosition *contactPointsWithPosition = new ContactPointsWithPosition();
+        contactPointsWithPosition->position = foundPositions[i];
         for(ContactPoint *cp : firstPositionList->points) {
             ContactPoint *copy = new ContactPoint(*cp);
             copy->rotate(m_angularPitchRotation * foundPositions[i]);
-            pointsWithPosition->points.push_back(copy);
+            contactPointsWithPosition->points.push_back(copy);
         }
-        m_pointsWithPositionList.push_back(pointsWithPosition);
+        m_contactPointsWithPositionList.push_back(contactPointsWithPosition);
     }
 }
 
@@ -211,30 +228,22 @@ void ContactPointSortingList::copyNoneContactPointsInRelevantPitches() {
     }
 }
 
-// void ContactPointSortingList::findStartPointForGearPoints() {
-
-// }
-
 void ContactPointSortingList::findAllCoveredPoints() {
-
     m_gearPoints.clear();
     m_gearCPs.clear();
 
-    vector<ContactPoint*>::iterator firstIterator;
-    vector<ContactPoint*> *firstPoints = nullptr;
-    if(!getFirstNoneErrorCPIterator(firstIterator, firstPoints))
-        return;
-
-    vec2 startPitch = glm::normalize((*firstIterator)->point);
-    vec2 stopPitch = glm::rotate(startPitch, m_angularPitchRotation);
-    m2x2 betweenStartStop = glm::inverse(m2x2(startPitch, stopPitch));
-
     ContactPointIterator it;
-    it.startWith(firstIterator, firstPoints);
-    //TODO: this may be rubbish, if first point is covered!!!
-    m_gearPoints.push_back((*firstIterator)->point);
-    m_gearCPs.push_back(*firstIterator);
-    ++it;
+
+    CPcutting cpCutting; NCPcutting ncpCutting;
+    int cutting = findStartPointForGearPoints(cpCutting, ncpCutting);
+    int normalDirection = (m_angularPitchRotation > 0.0) ? -1 : 1;
+    if(cutting == 0) {
+        it.startWith(cpCutting, normalDirection);
+        m_gearPoints.push_back(cpCutting.cuttingPoint);
+    } else {
+        it.startWith(ncpCutting, normalDirection);
+        m_gearPoints.push_back(ncpCutting.cuttingPoint);
+    }
 
     // Do while loop preparations, the conditions for the termination
     bool notYetAtOriginCondition;
@@ -244,9 +253,10 @@ void ContactPointSortingList::findAllCoveredPoints() {
     uint securityBreakTreshold = 0;
     if(!m_noneContactPointList.empty())
         securityBreakTreshold += m_noneContactPointList.size() * m_noneContactPointList.front()->points.size(); //every NoneContactPoint has same amound of points
-    for(PointsWithPosition *pointsWithPosition : m_pointsWithPositionList) {
-        securityBreakTreshold += 2 * pointsWithPosition->points.size();
+    for(ContactPointsWithPosition *contactPointsWithPosition : m_contactPointsWithPositionList) {
+        securityBreakTreshold += 2 * contactPointsWithPosition->points.size();
     }
+    m2x2 betweenStartStop = glm::inverse(m2x2(m_examinedPitchStartDirection, m_examinedPitchStopDirection));
 
     do {
         std::vector<CPcutting> cpCuttingsList;
@@ -260,7 +270,9 @@ void ContactPointSortingList::findAllCoveredPoints() {
         if(occurencesCP + occurencesNCP == 0) {
             //point is not covered => it is a gear point
             m_gearPoints.push_back(it.currentPoint());
-            m_gearCPs.push_back(it.currentCP());
+            ContactPoint *current = it.currentCorrectInContactPoint();
+            if(current != nullptr)
+                m_gearCPs.push_back(current);
             ++it;
 
         } else {
@@ -277,7 +289,7 @@ void ContactPointSortingList::findAllCoveredPoints() {
             }
 
             if(occurencesNCP == 0 || (occurencesCP > 0 && cpCuttingsList[firstCP].t < ncpCuttingsList[firstNCP].t)) {
-                //nearest cutting point is one of m_pointsWithPositionList
+                //nearest cutting point is one of m_contactPointsWithPositionList
                 m_gearPoints.push_back(cpCuttingsList[firstCP].cuttingPoint);
                 it.continueWith(cpCuttingsList[firstCP]);
 
@@ -327,33 +339,77 @@ ContactPoint* ContactPointSortingList::getFirstNoneErrorContactPoint() const {
     return *it;
 }
 
-bool ContactPointSortingList::getFirstNoneErrorCPIterator(vector<ContactPoint*>::iterator &it, vector<ContactPoint*> *&points) {
-    std::list<PointsWithPosition*>::iterator listIt = m_pointsWithPositionList.begin();
+uint ContactPointSortingList::findStartPointForGearPoints(CPcutting &cpCutting, NCPcutting &ncpCutting) {
+    Ray ray(vec2(0, 0), m_examinedPitchStartDirection);
 
-    while(listIt != m_pointsWithPositionList.end()) {
-
-        vector<ContactPoint*>::iterator cpIt = (*listIt)->points.begin();
-        while((*cpIt)->error != ErrorCode::NO_ERROR && cpIt != (*listIt)->points.end()) {
-            ++cpIt;
-        }
-
-        if(cpIt != (*listIt)->points.end()) {
-            it = cpIt;
-            points = &((*listIt)->points);
-            return true;
+    std::vector<CPcutting> cpCuttingsList;
+    for(ContactPointsWithPosition* contactPointsWithPosition : m_contactPointsWithPositionList) {
+        for(vector<ContactPoint*>::iterator previous = contactPointsWithPosition->points.begin(),
+                                            current = ++(contactPointsWithPosition->points.begin()),
+                                            end = contactPointsWithPosition->points.end();
+            current != end;
+            ++previous, ++current)
+        {
+            vec2 intersection;
+            //test ground:
+            if(ray.intersect((*previous)->point, (*current)->point, intersection, 0.0001)) {
+                cpCuttingsList.push_back(CPcutting{glm::length(intersection), intersection, previous, &(contactPointsWithPosition->points), IterationLocation::Ground});
+            }
+            //test top:
+            if(ray.intersect((*previous)->originPoint, (*current)->originPoint, intersection, 0.0001)) {
+                cpCuttingsList.push_back(CPcutting{glm::length(intersection), intersection, previous, &(contactPointsWithPosition->points), IterationLocation::Top});
+            }
         }
     }
-    //to reach this line is normally not possible!
-    return false;
+    uint firstCP = 0;
+    for(uint i = 1; i < cpCuttingsList.size(); ++i) {
+        if(cpCuttingsList[i].t < cpCuttingsList[firstCP].t)
+            firstCP = i;
+    }
+
+    std::vector<NCPcutting> ncpCuttingsList;
+    for(NoneContactPoint *ncp : m_noneContactPointList) {
+        for(uint i = 1; i < ncp->points.size(); ++i) {
+            vec2 previous = ncp->points[i - 1];
+            vec2 current = ncp->points[i];
+            vec2 previousEndPoint = previous + ncp->forbiddenAreaLength * ncp->normals[i - 1];
+            vec2 currentEndPoint = current + ncp->forbiddenAreaLength * ncp->normals[i];
+
+            vec2 intersection;
+            //test ground:
+            if(ray.intersect(previous, current, intersection, 0.0001)) {
+                ncpCuttingsList.push_back(NCPcutting{glm::length(intersection), intersection, ncp, i - 1, IterationLocation::Ground});
+            }
+            //test top:
+            if(ray.intersect(previousEndPoint, currentEndPoint, intersection, 0.0001)) {
+                ncpCuttingsList.push_back(NCPcutting{glm::length(intersection), intersection, ncp, i - 1, IterationLocation::Top});
+            }
+        }
+    }
+    uint firstNCP = 0;
+    for(uint i = 1; i < ncpCuttingsList.size(); ++i) {
+        if(ncpCuttingsList[i].t < ncpCuttingsList[firstNCP].t)
+            firstNCP = i;
+    }
+
+    if(ncpCuttingsList.size() == 0 || cpCuttingsList[firstCP].t < ncpCuttingsList[firstNCP].t) {
+        //correct first point is of CP
+        cpCutting = cpCuttingsList[firstCP];
+        return 0;
+    } else {
+        //correct first point is of NCP
+        ncpCutting = ncpCuttingsList[firstNCP];
+        return 1;
+    }
 }
 
 uint ContactPointSortingList::howManyContactPointsCoverPoint(const ContactPointIterator &it, std::vector<CPcutting> &cpCuttingsList) const {
     uint foundCoverings = 0;
 
-    for(PointsWithPosition* pointsWithPosition : m_pointsWithPositionList) {
-        for(vector<ContactPoint*>::iterator previous = pointsWithPosition->points.begin(),
-                                            current = ++(pointsWithPosition->points.begin()),
-                                            end = pointsWithPosition->points.end();
+    for(ContactPointsWithPosition* contactPointsWithPosition : m_contactPointsWithPositionList) {
+        for(vector<ContactPoint*>::iterator previous = contactPointsWithPosition->points.begin(),
+                                            current = ++(contactPointsWithPosition->points.begin()),
+                                            end = contactPointsWithPosition->points.end();
             current != end;
             ++previous, ++current)
         {
@@ -363,12 +419,12 @@ uint ContactPointSortingList::howManyContactPointsCoverPoint(const ContactPointI
                 vec2 intersection;
                 //test ground:
                 if(intersectLines(t, intersection, it.previousPoint(), it.currentPoint(), (*previous)->point, (*current)->point)) {
-                    cpCuttingsList.push_back(CPcutting{t, intersection, previous, &(pointsWithPosition->points), IterationLocation::Ground});
+                    cpCuttingsList.push_back(CPcutting{t, intersection, previous, &(contactPointsWithPosition->points), IterationLocation::Ground});
                     ++foundCoverings;
                 }
                 //test top:
                 if(intersectLines(t, intersection, it.previousPoint(), it.currentPoint(), (*previous)->forbiddenAreaEndPoint, (*current)->forbiddenAreaEndPoint)) {
-                    cpCuttingsList.push_back(CPcutting{t, intersection, previous, &(pointsWithPosition->points), IterationLocation::Top});
+                    cpCuttingsList.push_back(CPcutting{t, intersection, previous, &(contactPointsWithPosition->points), IterationLocation::Top});
                     ++foundCoverings;
                 }
             }
@@ -406,13 +462,13 @@ uint ContactPointSortingList::howManyNoneContactPointsCoverPoint(const ContactPo
     return foundCoverings;
 }
 
-void ContactPointSortingList::copyInCorrectList(const ContactPoint &cp, int position, PointsWithPosition *&list) {
+void ContactPointSortingList::copyInCorrectList(const ContactPoint &cp, int position, ContactPointsWithPosition *&list) {
     //TODO: at the moment every point is inserted also in the first list, this is not correct!
     //      it is only here for testing reasons.
 
-    bool isFirstList = m_pointsWithPositionList.empty();
+    bool isFirstList = m_contactPointsWithPositionList.empty();
     if(!isFirstList)
-            m_pointsWithPositionList.front()->points.push_back(new ContactPoint(cp)); //insert every cp in first list, undo that!
+            m_contactPointsWithPositionList.front()->points.push_back(new ContactPoint(cp)); //insert every cp in first list, undo that!
 
     list->points.push_back(new ContactPoint(cp));
 
@@ -423,8 +479,8 @@ void ContactPointSortingList::copyInCorrectList(const ContactPoint &cp, int posi
         if(hasPredecessor) {
             predecessor = new ContactPoint(**(list->points.end() - 2)); // second to last contact point, as we have already inserted the current one
         }
-        m_pointsWithPositionList.push_back(list);
-        list = new PointsWithPosition();
+        m_contactPointsWithPositionList.push_back(list);
+        list = new ContactPointsWithPosition();
         list->position = position;
         if(hasPredecessor)
             list->points.push_back(predecessor);
@@ -563,25 +619,23 @@ bool ContactPointSortingList::isPointInTriangle(vec2 point, vec2 a, vec2 b, vec2
     } else {
         isInTriangle = false;
     }
-    // m_triangles.push_back(Triangle({a, b, c, point, isInTriangle}));
     return isInTriangle;
 }
 
 void ContactPointSortingList::setBackLists() {
     deleteSortingLists();
     deleteNoneContactPoints();
-    m_triangles.clear();
 }
 
 void ContactPointSortingList::deleteSortingLists() {
-    for(PointsWithPosition *list : m_pointsWithPositionList) {
+    for(ContactPointsWithPosition *list : m_contactPointsWithPositionList) {
         for(ContactPoint *point : list->points) {
             delete point;
         }
         list->points.clear();
         delete list;
     }
-    m_pointsWithPositionList.clear();
+    m_contactPointsWithPositionList.clear();
 }
 
 void ContactPointSortingList::deleteNoneContactPoints() {

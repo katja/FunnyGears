@@ -51,46 +51,8 @@ void GearPair::doCalculation() {
     chooseCorrectPoints();
 }
 
-//TODO: remove this!!!!
 const ContactPointSortingList& GearPair::foundPoints() {
     return m_allContactPoints;
-}
-
-//TODO: remove this!!!!
-Spline* GearPair::completeToothProfile() {
-    return m_completeToothProfile;
-}
-
-//TODO: remove this!!!!
-const std::list<PointsWithPosition*>& GearPair::pointsInSortedLists() {
-    return m_allContactPoints.pointsWithPositions();
-}
-
-//TODO: remove this!!!!
-const std::list<Triangle>& GearPair::triangles() {
-    return m_allContactPoints.triangles();
-}
-
-//TODO: remove this!!!!
-vec2 GearPair::startOfExaminedPitch() const {
-    return m_allContactPoints.startOfExaminedPitch();
-}
-
-vec2 GearPair::endOfExaminedPitch() const {
-    return m_allContactPoints.endOfExaminedPitch();
-}
-
-real GearPair::usedAngularPitch() const {
-    return m_allContactPoints.usedAngularPitch();
-}
-
-//TODO: remove this!!!!
-const std::list<NoneContactPoint*>& GearPair::noneContactPoints() const {
-    return m_allContactPoints.noneContactPoints();
-}
-
-vector<vec2> GearPair::gearPoints() const {
-    return m_allContactPoints.gearPoints();
 }
 
 SplineGear* GearPair::drivingGear() const {
@@ -210,7 +172,6 @@ void GearPair::chooseCorrectPoints() {
         !(m_drivingGear->toothDescribedInClockDirection())
     );
     vector<vec2> gearPoints = m_allContactPoints.gearPoints();
-    // vector<ContactPoint*> gearCPs = m_allContactPoints.gearCPs();
     m_drivenGear->setDegree(1);
     m_drivenGear->setControlPointsForTooth(gearPoints);
 }

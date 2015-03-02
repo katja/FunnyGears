@@ -24,33 +24,37 @@ public:
     void objectChanged(ChangingObject *object) override; // from ChangingObjectListener
 
 private slots:
-    void toggleSampledGearToothVisibility(bool);
+    void toggleLiveUpdating(bool);
+    void toggleDrivingGearSamplingVisibility(bool);
+    void toggleDrivenGearSamplingVisibility(bool);
     void toggleNoneContactPointsVisibility(bool);
-    void toggleSamplingWidthVisibilityInDrivingGear(bool);
+    void toggleSelectedGearPointsVisibility(bool);
+    void toggleForbiddenAreaInDrivingGear(bool);
     void toggleForbiddenAreaInDrivenGear(bool);
-    void toggleFilledForbiddenAreaVisibility(bool);
-    void togglePathOfContactVisibility(bool);
+    void togglePathOfPossibleContactVisibility(bool);
+    void togglePathOfRealContactVisibility(bool);
     void togglePitchesVisibility(bool);
     void togglePitchCirclesVisibility(bool);
     void toggleRotationOfGears(bool);
     void changeRotationVelocity(real);
     void changeSamplingRate(int);
     void changeMaxDriftAngle(int);
-    void toggleLiveUpdating(bool);
 
 private:
     GraphicsGearPair *m_currentGearPair;
 
-    QCheckBox   *m_sampledGearToothCheckBox,
+    QCheckBox   *m_liveUpdatingCheckBox,
+                *m_drivingGearSamplingCheckBox,
+                *m_drivenGearSamplingCheckBox,
                 *m_noneContactPointsCheckBox,
-                *m_drivingGearWidthSamplingCheckBox,
+                *m_selectedGearPointsCheckBox,
+                *m_drivingGearForbiddenAreaCheckBox,
                 *m_drivenGearForbiddenAreaCheckBox,
-                *m_filledForbiddenAreaCheckBox,
-                *m_pathOfContactCheckBox,
+                *m_pathOfPossibleContactCheckBox,
+                *m_pathOfRealContactCheckBox,
                 *m_pitchesCheckBox,
                 *m_pitchCirclesCheckBox,
-                *m_rotationCheckBox,
-                *m_liveUpdatingCheckBox;
+                *m_rotationCheckBox;
 
     RealValuedSlider *m_rotationVelocitySlider;
 

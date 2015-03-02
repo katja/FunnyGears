@@ -5,7 +5,7 @@
 
 #include "ContactPointHelpers.h"
 
-struct PointsWithPosition {
+struct ContactPointsWithPosition {
     int position;
     //  ...
     //  2 => 2 angular pitches before the examined one

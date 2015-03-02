@@ -28,23 +28,29 @@ public:
 
     void update();
 
-    void setVisibilityOfSampledGearTooth(bool visible);
-    bool visibilityOfSampledGearTooth() const;
+    void setVisibilityOfDrivingGearSampling(bool visible);
+    bool visibilityOfDrivingGearSampling() const;
+
+    void setVisibilityOfDrivenGearSampling(bool visible);
+    bool visibilityOfDrivenGearSampling() const;
+
+    void setVisibilityOfForbiddenAreaInDrivingGear(bool visible);
+    bool visibilityOfForbiddenAreaInDrivingGear() const;
+
+    void setVisibilityOfForbiddenAreaInDrivenGear(bool visible);
+    bool visibilityOfForbiddenAreaInDrivenGear() const;
 
     void setVisibilityOfNoneContactPoints(bool visible);
     bool visibilityOfNoneContactPoints() const;
 
-    void setVisibilityOfSamplingWidthInDrivingGear(bool visible);
-    bool visibilityOfSamplingWidthInDrivingGear() const;
+    void setVisibilityOfSelectedGearPoints(bool visible);
+    bool visibilityOfSelectedGearPoints() const;
 
-    void setVisibilityOfForbiddenArea(bool visible);
-    bool visibilityOfForbiddenArea() const;
+    void setVisibilityOfPathOfPossibleContact(bool visible);
+    bool visibilityOfPathOfPossibleContact() const;
 
-    void setVisibilityOfFilledForbiddenArea(bool visible);
-    bool visibilityOfFilledForbiddenArea() const;
-
-    void setVisibilityOfPathOfContact(bool visible);
-    bool visibilityOfPathOfContact() const;
+    void setVisibilityOfPathOfRealContact(bool visible);
+    bool visibilityOfPathOfRealContact() const;
 
     void setVisibilityOfPitches(bool visible);
     bool visibilityOfPitches() const;
@@ -67,30 +73,25 @@ public:
     QRectF boundingRect() const override; // from QGraphicsItem
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override; // from QGraphicsItem
     void paintAdditionals(QPainter *painter, GraphicsMatingSplineGear *gear) const;
-    void paintSampledGearTooth(QPainter *painter) const;
-    void paintSampledGearToothSamplingPoints(QPainter *painter) const;
-    void paintSampledContactPoints(QPainter *painter, bool, bool, bool) const;
-    void paintContactPoint(const ContactPoint &point, QPainter *painter, QColor color, bool, bool, bool) const;
-
     void paintSampledContactPointsDrivingGear(QPainter *painter) const;
     void paintSampledContactPointsDrivenGear(QPainter *painter) const;
     void paintPathOfContact(QPainter *painter) const;
     void paintNoneContactPoints(QPainter *painter, bool, bool) const;
-    void paintFilledForbiddenArea(QPainter *painter) const;
-    void paintGearPoints(QPainter *painter) const;
+    void paintSelectedGearPoints(QPainter *painter) const;
 
 private:
     GearPair *m_gearPair;
     GraphicsMatingSplineGear *m_drivingGear;
     GraphicsMatingSplineGear *m_drivenGear;
 
-    bool m_sampledGearToothIsVisible;
-    bool m_sampledGearToothSamplingIsVisible;
+    bool m_drivingGearSamplingIsVisible;
+    bool m_drivenGearSamplingIsVisible;
+    bool m_forbiddenAreaInDrivingGearIsVisible;
+    bool m_forbiddenAreaInDrivenGearIsVisible;
     bool m_noneContactPointsAreVisible;
-    bool m_samplingWidthInDrivingGearIsVisible;
-    bool m_forbiddenAreaIsVisible;
-    bool m_filledForbiddenAreaIsVisible;
-    bool m_pathOfContactIsVisible;
+    bool m_selectionOfGearPointsIsVisible;
+    bool m_pathOfPossibleContactIsVisible;
+    bool m_pathOfRealContactIsVisible;
     bool m_pitchesAreVisible;
     bool m_pitchCirclesAreVisible;
     bool m_isRotating;
