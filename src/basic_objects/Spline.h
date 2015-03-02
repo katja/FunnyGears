@@ -117,6 +117,13 @@ public:
      */
     virtual void addControlPoint(real x, real y);
 
+    /** @brief Uses the given control points instead of the currently used ones
+     *
+     *  Removes the currently used control points and replaces them with the ones
+     *  specified in @param newControlPoints. Adapts the knots respectively.
+     */
+    virtual void setControlPoints(const vector<vec2> &newControlPoints);
+
     /** @brief Removes control point at given index.
      *
      *  The knot vector then has to be reduced by one value, too.
@@ -128,6 +135,12 @@ public:
      *  @param index index of the control point to be removed
      */
     virtual void removeControlPoint(uint index);
+
+    /** @brief Removes all control points and adapts the knot vector
+     *
+     *  The first (degree - 1) knots remain, all others are removed, too.
+     */
+    virtual void removeAllControlPoints();
 
     /** @brief Sets the position of the control point at index @p index to @newPosition.
      *

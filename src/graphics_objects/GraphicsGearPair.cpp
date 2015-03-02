@@ -295,7 +295,7 @@ void GraphicsGearPair::paintAdditionals(QPainter *painter, GraphicsMatingSplineG
         if(m_filledForbiddenAreaIsVisible)
             paintFilledForbiddenArea(painter);
 
-        // paintGearPoints(painter);
+        paintGearPoints(painter);
 
     } // other things should not happen ^^
 }

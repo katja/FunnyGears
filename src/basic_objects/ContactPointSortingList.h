@@ -53,7 +53,6 @@ private:
     void copyPointsInSuitableLists();
     void reduceNumberOfNoneContactPoints();
     void copyNoneContactPointsInRelevantPitches();
-    void rotatePointsWithPositionToOnePitch();
     void findAllCoveredPoints();
 
     /** @brief Returns the currenctly available number of ContactPoints which do not have an Error

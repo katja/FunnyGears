@@ -203,11 +203,42 @@ void Spline::addControlPoint(real x, real y) {
     addControlPoint(vec2(x, y));
 }
 
+void Spline::setControlPoints(const vector<vec2> &newControlPoints) {
+    m_controlPoints.clear();
+    for(uint i = 0; i < newControlPoints.size(); ++i) {
+        m_controlPoints.push_back(newControlPoints[i]);
+    }
+    int knotDifference = (m_degree + m_controlPoints.size() - 1) - m_knots.size(); // (new knot size) - (old knot size)
+    if(knotDifference < 0) {
+        //old knot vector was larger => make shorter
+        m_knots.erase(m_knots.end() + knotDifference, m_knots.end());
+    } else if(knotDifference > 0) {
+        //old knot vector was smaller => enlarge it
+        for(int i = 0; i < knotDifference; ++i) {
+            m_knots.push_back(m_knots.back() + 1);
+        }
+    }
+
+    if(knotDifference != 0 && isValid())
+        adjustKnots();
+}
+
 void Spline::removeControlPoint(uint index) {
     if(index >= m_controlPoints.size())
         return;
     m_controlPoints.erase(m_controlPoints.begin() + index);
     m_knots.pop_back();
+
+    if(m_tornToEdges && isValid())
+        equalizeLastKnots();
+
+    updateClosedCurve();
+}
+
+void Spline::removeAllControlPoints() {
+    m_controlPoints.clear();
+    uint leftKnots = m_degree - 1;
+    m_knots.erase(m_knots.begin() + leftKnots, m_knots.end());
 
     if(m_tornToEdges && isValid())
         equalizeLastKnots();

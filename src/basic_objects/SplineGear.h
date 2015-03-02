@@ -200,6 +200,14 @@ public:
      */
     void addControlPoint(real x, real y) override; // from Spline
 
+    /** @brief Replaces the control points of the toothProfile by the given newControlPoints
+     *
+     *  Control Points and knots are updated once after the insertion of the new points.
+     *
+     *  @param newControlPoints new control points for the toothProfile
+     */
+    void setControlPointsForTooth(const vector<vec2> &newControlPoints);
+
     /** @brief Removes control point at given index and all related control points.
      *
      *  The corresponding control point of @p m_toothProfile is removed and then
@@ -208,6 +216,10 @@ public:
      *  @param index index of the control point to be removed
      */
     void removeControlPoint(uint index) override; // from Spline
+
+    /** @brief Removes all control points and adapts the knot vector
+     */
+    void removeAllControlPoints() override; // from Spline
 
     /** @brief Sets the position of the control point at index @p index to @newPosition
      *
@@ -371,6 +383,15 @@ private:
 
     real m_minimumDistanceToCenter;
     real m_maximumDistanceToCenter;
+
+    /** @brief Overwrite of Spline::setControlPoints(...)
+     *
+     *  As the gear should use equal teeth, setControlPoints sets the control points
+     *  for the tooth profile. But as the name of the method is then misleading,
+     *  this method is made private and the setControlPointsForTooth(...) should be
+     *  used instead. Calls @see setControlPointsForTooth(const vector<vec2>&)
+     */
+    void setControlPoints(const vector<vec2> &newControlPoints) override;
 
     uint relatedIndexInFirstTooth(uint controlPointIndex) const;
     uint toothIndex(uint controlPointIndex) const;

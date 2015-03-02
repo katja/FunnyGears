@@ -30,7 +30,6 @@ void ContactPointSortingList::createCoveringLists(uint numberOfTeeth, bool isDes
         //=> m_pointsWithPositionList, m_noneContactPointList, m_examinedPitchStartDirection, m_examinedPitchStopDirection
     reduceNumberOfNoneContactPoints(); //needs a filled m_noneContactPointList
     copyNoneContactPointsInRelevantPitches();
-    // rotatePointsWithPositionToOnePitch();
     findAllCoveredPoints();
         //=> m_gearPoints, m_gearCPs
 }
@@ -154,8 +153,6 @@ void ContactPointSortingList::copyPointsInSuitableLists() {
     }
     m_pointsWithPositionList.push_back(firstPositionList); //insert last list, too. Otherwise will be lost
 
-    std::cout << "copyPointsInSuitableLists had found the positions: " << foundPositions << std::endl;
-
     for(uint i = 0; i < foundPositions.size(); ++i) {
         PointsWithPosition *pointsWithPosition = new PointsWithPosition();
         pointsWithPosition->position = foundPositions[i];
@@ -214,18 +211,9 @@ void ContactPointSortingList::copyNoneContactPointsInRelevantPitches() {
     }
 }
 
-void ContactPointSortingList::rotatePointsWithPositionToOnePitch() {
-    // Turn the points of the lists infront and behind of the examined angular pitch
-    // Afterwards all lists are mainly in the angular pitch
-    for(PointsWithPosition *pointsWithPosition : m_pointsWithPositionList) {
-        if(pointsWithPosition->position != 0) {
-            real rotationAngle = m_angularPitchRotation * (real)pointsWithPosition->position;
-            for(vector<ContactPoint*>::iterator it = pointsWithPosition->points.begin(), end = pointsWithPosition->points.end(); it != end; ++it) {
-                (*it)->rotate(rotationAngle);
-            }
-        }
-    }
-}
+// void ContactPointSortingList::findStartPointForGearPoints() {
+
+// }
 
 void ContactPointSortingList::findAllCoveredPoints() {
 
@@ -261,8 +249,6 @@ void ContactPointSortingList::findAllCoveredPoints() {
     }
 
     do {
-        std::cout << "in do-while-loop with securityBreak = " << securityBreak << std::endl;
-        std::cout << "Current Iterator State: " << it << std::endl;
         std::vector<CPcutting> cpCuttingsList;
         std::vector<NCPcutting> ncpCuttingsList;
         cpCuttingsList.reserve(this->size()); //only an estimation
@@ -276,7 +262,6 @@ void ContactPointSortingList::findAllCoveredPoints() {
             m_gearPoints.push_back(it.currentPoint());
             m_gearCPs.push_back(it.currentCP());
             ++it;
-            std::cout << "          did NOT find any cutting points ++it called" << std::endl;
 
         } else {
             //find first cutting
@@ -284,26 +269,20 @@ void ContactPointSortingList::findAllCoveredPoints() {
             for(uint i = 1; i < cpCuttingsList.size(); ++i) {
                 if(cpCuttingsList[i].t < cpCuttingsList[firstCP].t)
                     firstCP = i;
-                std::cout << "first = " << firstCP << std::endl;
             }
             uint firstNCP = 0;
             for(uint i = 1; i < ncpCuttingsList.size(); ++i) {
                 if(ncpCuttingsList[i].t < ncpCuttingsList[firstNCP].t)
                     firstNCP = i;
-                std::cout << "firstNCP = " << firstNCP << std::endl;
             }
 
             if(occurencesNCP == 0 || (occurencesCP > 0 && cpCuttingsList[firstCP].t < ncpCuttingsList[firstNCP].t)) {
                 //nearest cutting point is one of m_pointsWithPositionList
-                std::cout << "          DID find cutting points with first one one of CP (number of CP cuttings: " << occurencesCP << ", NCP cuttings: " << occurencesNCP << ")" << std::endl;
                 m_gearPoints.push_back(cpCuttingsList[firstCP].cuttingPoint);
-                std::cout << " CP Cutting continue with  : " << cpCuttingsList[firstCP] << std::endl;
                 it.continueWith(cpCuttingsList[firstCP]);
 
             } else { // nearest cutting point is one of m_noneContactPointList
-                std::cout << "          DID find cutting points with first one one of NCP (number of CP cuttings: " << occurencesCP << ", NCP cuttings: " << occurencesNCP << ")" << std::endl;
                 m_gearPoints.push_back(ncpCuttingsList[firstNCP].cuttingPoint);
-                std::cout << "NCP Cutting continue with  : " << ncpCuttingsList[firstNCP] << std::endl;
                 it.continueWith(ncpCuttingsList[firstNCP]);
             }
         }
@@ -325,6 +304,7 @@ void ContactPointSortingList::findAllCoveredPoints() {
     std::cout << "After while loop and securityBreakCondition:  " << securityBreakCondition << "   securityBreak = " << securityBreak << " of treshold: " << securityBreakTreshold << std::endl;
     std::cout << "                 and notYetAtOriginCondition: " << notYetAtOriginCondition << std::endl;
     std::cout << "                 and notAtListEndCondition:   " << notAtListEndCondition << std::endl;
+    std::cout << "        distance from first to last point if rotated: " << glm::length(m_gearPoints[0] - glm::rotate(m_gearPoints[m_gearPoints.size() - 1], -m_angularPitchRotation));
     std::cout << "GearPoints have a size of: " << m_gearPoints.size() << std::endl;
 
 }
@@ -385,13 +365,11 @@ uint ContactPointSortingList::howManyContactPointsCoverPoint(const ContactPointI
                 if(intersectLines(t, intersection, it.previousPoint(), it.currentPoint(), (*previous)->point, (*current)->point)) {
                     cpCuttingsList.push_back(CPcutting{t, intersection, previous, &(pointsWithPosition->points), IterationLocation::Ground});
                     ++foundCoverings;
-                    std::cout << " CP Cutting on Ground found: " << cpCuttingsList.back() << std::endl;
                 }
                 //test top:
                 if(intersectLines(t, intersection, it.previousPoint(), it.currentPoint(), (*previous)->forbiddenAreaEndPoint, (*current)->forbiddenAreaEndPoint)) {
                     cpCuttingsList.push_back(CPcutting{t, intersection, previous, &(pointsWithPosition->points), IterationLocation::Top});
                     ++foundCoverings;
-                    std::cout << " CP Cutting on Top found: " << cpCuttingsList.back() << std::endl;
                 }
             }
         }
@@ -416,12 +394,10 @@ uint ContactPointSortingList::howManyNoneContactPointsCoverPoint(const ContactPo
                 if(intersectLines(t, intersection, it.previousPoint(), it.currentPoint(), previous, current)) {
                     ncpCuttingsList.push_back(NCPcutting{t, intersection, ncp, i - 1, IterationLocation::Ground});
                     ++foundCoverings;
-                    std::cout << "NCP Cutting on Ground found: " << ncpCuttingsList.back() << std::endl;
                 }
                 if(intersectLines(t, intersection, it.previousPoint(), it.currentPoint(), previousEndPoint, currentEndPoint)) {
                     ncpCuttingsList.push_back(NCPcutting{t, intersection, ncp, i - 1, IterationLocation::Top});
                     ++foundCoverings;
-                    std::cout << "NCP Cutting on Top found: " << ncpCuttingsList.back() << std::endl;
                 }
 
             }
@@ -476,7 +452,6 @@ int ContactPointSortingList::pitchNumberOfPoint(vec2 point) const {
     if(alpha < angularPitch && beta < angularPitch)
         return 0;
     if(alpha < beta) { // before angular pitch
-        std::cout << "in pitchNumberOfPoint calculated: " << (beta / angularPitch) << " and returned " << (int)(beta / angularPitch) << std::endl;
         return (int)(beta / angularPitch);
     } else { // after angular pitch
         return -((int)(alpha / angularPitch));

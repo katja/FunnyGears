@@ -209,6 +209,10 @@ void GearPair::chooseCorrectPoints() {
         m_drivenGear->numberOfTeeth(),
         !(m_drivingGear->toothDescribedInClockDirection())
     );
+    vector<vec2> gearPoints = m_allContactPoints.gearPoints();
+    // vector<ContactPoint*> gearCPs = m_allContactPoints.gearCPs();
+    m_drivenGear->setDegree(1);
+    m_drivenGear->setControlPointsForTooth(gearPoints);
 }
 
 ContactPoint* GearPair::contactPointOf(const vec2 &point, const vec2 &normal, real stepValue) {

@@ -377,8 +377,22 @@ void SplineGear::addControlPoint(real x, real y) {
     addControlPoint(vec2(x, y));
 }
 
+void SplineGear::setControlPointsForTooth(const vector<vec2> &newControlPoints) {
+    m_toothProfile->setControlPoints(newControlPoints);
+    m_rotationDirection = 0; //set back the rotation direction as it may have changed
+    update();
+}
+
 void SplineGear::removeControlPoint(uint index) {
     m_toothProfile->removeControlPoint(relatedIndexInFirstTooth(index));
+    m_rotationDirection = 0;
+    update();
+}
+
+void SplineGear::removeAllControlPoints() {
+    m_toothProfile->removeAllControlPoints();
+    setBackKnotsAndControlPoints();
+    m_rotationDirection = 0;
     update();
 }
 
@@ -457,6 +471,10 @@ vec2 SplineGear::relatedPositionInTooth(uint toothIndex, vec2 positionInFirstToo
         return positionInFirstTooth;
     real rotationInRad = (real)m_rotationDirection * (real)toothIndex * angularPitch();
     return glm::rotate(positionInFirstTooth, rotationInRad);
+}
+
+void SplineGear::setControlPoints(const vector<vec2> &newControlPoints) {
+    setControlPointsForTooth(newControlPoints);
 }
 
 uint SplineGear::relatedIndexInFirstTooth(uint controlPointIndex) const {
