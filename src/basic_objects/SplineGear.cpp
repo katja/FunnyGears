@@ -34,7 +34,6 @@ void SplineGear::update() {
     m_degree = m_toothProfile->degree();
 
     if(isValid()) {
-        // if no radius given, set a default one
         if(m_rotationDirection == 0)
             m_rotationDirection = toothDescribedInClockDirection() ? 1 : -1;
         if(m_numberOfTeeth == 0) {
@@ -43,6 +42,7 @@ void SplineGear::update() {
         }
         updateKnotsAndControlPoints();
         updateDistancesToCenter();
+        // if no radius given or form of the gear has changed, set the reference radius to new value
         if(absolute(m_referenceRadius - defaultReferenceRadius()) > 0.0001) {
             m_referenceRadius = defaultReferenceRadius();
         }
@@ -208,8 +208,14 @@ New knots:   0---0---0---1---2---5---6---8---9
             20--20--20--21--22--25--26--28--29
             30--30--30--31--32--35--36--38--39
             40--40--40                        --41--42
-The last 3 knots are needed to close the gear curve. As it is a connection with 3 times
-the same knot, only one connecting control point is needed and not 'degree' control points.
+The second line can not continue with the value "9" as otherwise the spline would
+have four times the same knot with value "9"! Therefore another higher value is necessary
+on this connection. In such a case there are two possible increasing solutions taken
+into account. If a higher value further behind in the m_toothProfile is found, this
+one is taken. If there isn't one, simply "1" is added to the last found value to continue
+in the next line. This is the case in this example.
+The first three knots of the last line are necessary to close the gear curve and the last
+two knots for the spline of degree 3.
 
 Example 2 (5 control points, degree = 3, numberOfTeeth = 4, tornToEdges = false):
 
@@ -219,8 +225,8 @@ New knots:   1---3---4---5---8
             20--23--24--25--28
             30--33--34--35--38
             40--43--44        --45--48
-The three knots of the last line are necessary for the smooth connection of the curve
-to form a circular curve.
+The first three knots of the last line are necessary for the smooth connection of the curve
+to form a circular curve. The last two knots are required for the degree of 3.
 
 Example 3 (5 control points, degree = 4, numberOfTeeth = 4, tornToEdges = false):
 
@@ -230,21 +236,33 @@ New knots:   1---3---4---5---8
             20--23--24--25--28
             30--33--34--35--38
             40--43--44--45    --48--50--53
-The three knots of the last line are necessary for the smooth connection of the curve
-to form a circular curve. */
+The first four knots of the last line are necessary for the smooth connection of the curve
+to form a circular curve. The last three knots are required for the degree of 4.
+*/
 void SplineGear::updateKnotsAndControlPoints() {
 // UPDATE CONTROL POINTS:
     updateControlPoints();
 
 // UPDATE KNOTS
     uint ppt = m_toothProfile->numberOfControlPoints(); // ppt = points per tooth
-    // Fill a temporary knotInterspaces vector
+    // Store the toothProfile knots here for better access, as they are accessed very often
     const vector<real> givenKnots = m_toothProfile->knots();
-    // Create a temporary vector, in which the spacing between following knots is saved.
+
+    // Create a temporary vector, in which the spacing between two following knots is saved.
     // This simplifies the extension of the knots
     vector<real> knotInterspaces(ppt);
     for(uint i = 0; i < ppt; ++i) {
-        knotInterspaces[i] = givenKnots[1 + i] - givenKnots[i];
+        // When degree is 1, there are not enough knots to define a continuation of the knot vector for the gear
+        // Therefore another knot value must be added
+        if(i >= givenKnots.size() - 1) {
+            assert(m_degree == 1 && i == (ppt - 1));
+            if(i == 0)
+                knotInterspaces[i] = 1.0;
+            else
+                knotInterspaces[i] = knotInterspaces.at(i - 1);
+        } else {
+            knotInterspaces[i] = givenKnots[1 + i] - givenKnots[i];
+        }
     }
 
     // control problematic multiple similar knots:
@@ -302,8 +320,8 @@ void SplineGear::updateKnotsAndControlPoints() {
             m_knots[position] = m_knots[position - 1] + knotInterspaces[j - 1];
         }
     }
-    uint lastFilledPosition = m_numberOfTeeth * ppt;
-    for(uint i = 1; i < 2 * m_degree; ++i) {
+    uint lastFilledPosition = m_numberOfTeeth * ppt;    // there's already one knot inserted of the last "line"!
+    for(uint i = 1; i < 2 * m_degree - 1; ++i) {        // so only add (2 * degree - 2) knots
         m_knots[lastFilledPosition + i] = m_knots[lastFilledPosition + i - 1] + knotInterspaces[(i - 1) % ppt]; //as 2 * m_degree may be greater than ppt, which is the size of the knotInterspaces vector, the modulo is necessary here
     }
 }

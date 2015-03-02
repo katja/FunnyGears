@@ -64,7 +64,7 @@ Spline& Spline::operator=(const Spline &other) {
 vec2 Spline::evaluate(real value) const {
     uint n = lowerNextKnot(value); // value is element of range [knot[n], knot[n+1])
     vector<vec2> controlPointsCopy(m_degree + 1);
-    for(uint i = 0; i < m_degree + 1; ++i) {
+    for(uint i = 0; i <= m_degree; ++i) {
         controlPointsCopy[i] = m_controlPoints.at(n - m_degree + 1 + i);
     }
     deBoor(controlPointsCopy, value, n);
@@ -180,12 +180,18 @@ vec2 Spline::controlPoint(uint i) const {
 void Spline::addControlPoint(vec2 point) {
     if(m_tornToEdges && isValid()) {
         makeDifferentLastKnots();
-        m_knots.push_back((m_knots.at(m_knots.size() - 1) + 1));
+        if(m_knots.empty())
+            m_knots.push_back(0.0);
+        else
+            m_knots.push_back((m_knots.back() + 1));
         m_controlPoints.push_back(point);
         equalizeLastKnots();
     } else {
         m_controlPoints.push_back(point);
-        m_knots.push_back((m_knots.at(m_knots.size() - 1) + 1));
+        if(m_knots.empty())
+            m_knots.push_back(0.0);
+        else
+            m_knots.push_back((m_knots.back() + 1));
 
         // If it is valid now, adjust (check and adapt) all knots, as the may be bumfuzzled.
         if(isValid())
