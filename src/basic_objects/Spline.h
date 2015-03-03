@@ -193,8 +193,10 @@ public:
      */
     virtual void knotRefinement(real maxDist);
 
-    /** TODO!! description!!
+    /** @brief Sets the first and last control points to the start of the curve
      *
+     *  This is done by increasing the multiplicity at the appropriate places.
+     *  Afterwards the Spline is torn to the edges.
      */
     virtual void cutOffEdges();
 
@@ -365,7 +367,15 @@ public:
      */
     virtual void getIntersectionPointsWithRay(const Ray &ray, vector<vec2> &intersectionPoints) const;
 
-    /*///////////////TODO !!!!!!!!!!!
+    /** @brief scales the control points by given @scaling value
+     *
+     *  Each control point is changed, so the spline curve will converge in the direction
+     *  of given @p origin, if @p scaling is between 0.0 and 1.0 and for bigger values
+     *  it will diverge from @p origin.
+     *  Keep in mind that scaling with 0.0 will set all points to @p origin and can not
+     *  be restored!
+     *  @param scaling scaling factor
+     *  @param origin center of scaling
      */
     virtual void scale(real scaling, vec2 origin = vec2(0, 0));
 
