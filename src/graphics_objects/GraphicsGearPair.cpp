@@ -70,7 +70,8 @@ GraphicsGearPair::GraphicsGearPair(GearPair *gearPair) :
     m_pitchCirclesAreVisible(false),
     m_isRotating(false),
     m_rotationVelocity(0.0),
-    m_rotationDegree(0.0)
+    m_rotationDegree(0.0),
+    m_finePencilUsed(false)
 {
     std::cout << "GraphicsGearPair is created" << std::endl;
     m_drivingGear = new GraphicsMatingSplineGear(m_gearPair->drivingGear(), this); // driving gear inserted as child
@@ -113,6 +114,18 @@ void GraphicsGearPair::objectChanged(ChangingObject *object) {
 void GraphicsGearPair::update() {
     prepareGeometryChange();
     m_gearPair->updateDrivingGearChange();
+}
+
+void GraphicsGearPair::setDrivingGearEnabled(bool enabled) {
+    prepareGeometryChange();
+    if(enabled)
+        m_drivingGear->enableUserInteraction();
+    else
+        m_drivingGear->disableUserInteraction();
+}
+
+bool GraphicsGearPair::isDrivingGearEnabled() {
+    return m_drivingGear->isUserInteractionEnabled();
 }
 
 void GraphicsGearPair::setVisibilityOfDrivingGearSampling(bool visible) {
@@ -247,6 +260,15 @@ int GraphicsGearPair::maxDriftAngleInDegree() const {
     return static_cast<int>(m_gearPair->maxDriftAngleInDegree());
 }
 
+void GraphicsGearPair::setFinePencil(bool isFinePencil) {
+    prepareGeometryChange();
+    m_finePencilUsed = isFinePencil;
+}
+
+bool GraphicsGearPair::finePencilUsed() const {
+    return m_finePencilUsed;
+}
+
 QRectF GraphicsGearPair::boundingRect() const {
     return QRectF(QPointF(-300, -500), QPointF(1000, 500));
     // std::list<ContactPoint> *points = m_gearPair->foundPoints();
@@ -270,6 +292,12 @@ void GraphicsGearPair::paint(QPainter *painter, const QStyleOptionGraphicsItem *
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
+    if(m_finePencilUsed) {
+        QPen pen = painter->pen();
+        pen.setWidth(0);
+        painter->setPen(pen);
+    }
+
     if(m_isRotating) {
         m_rotationDegree += m_rotationVelocity;
         m_drivingGear->setRotation(m_rotationDegree);
@@ -283,6 +311,11 @@ void GraphicsGearPair::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 }
 
 void GraphicsGearPair::paintAdditionals(QPainter *painter, GraphicsMatingSplineGear *gear) const {
+    if(m_finePencilUsed) {
+        QPen pen = painter->pen();
+        pen.setWidth(0);
+        painter->setPen(pen);
+    }
     if(gear == m_drivingGear) {
         if(m_pitchCirclesAreVisible)
             painter->drawPath(circlePath(m_gearPair->drivingGearPitchRadius()));
@@ -388,30 +421,16 @@ void GraphicsGearPair::paintSampledContactPointsDrivenGear(QPainter *painter) co
 void GraphicsGearPair::paintPathOfContact(QPainter *painter) const {
     std::list<ContactPointsWithPosition*> contactPointsWithPositions = m_gearPair->foundPoints().contactPointsWithPositions();
     vector<ContactPoint*> selectedContactPoints = m_gearPair->foundPoints().gearContactPoints();
-    std::cout << "gearContactPoints.size = " << selectedContactPoints.size() << std::endl;
-    std::cout << "contactPointsWithPositions.front().size = " << contactPointsWithPositions.front()->points.size() << std::endl;
-
-    painter->save();
-    Coloring coloring;
-    coloring.setBack();
 
     ContactPointsWithPosition *firstList = contactPointsWithPositions.front();
     vector<ContactPoint*>::iterator cpIt = selectedContactPoints.begin();
 
-    for(;cpIt != selectedContactPoints.end(); ++cpIt) {
-        std::cout << (*cpIt)->evaluationStep << ", ";
-    }
-    std::cout << std::endl;
-
-    for(ContactPoint *cp : firstList->points) {
-        std::cout << cp->evaluationStep << ", ";
-    }
-    std::cout << std::endl;
-
-    cpIt = selectedContactPoints.begin();
-
     bool cpItReachedEnd = (cpIt == selectedContactPoints.end());
     bool drawSomething = true;
+
+    painter->save();
+    Coloring coloring;
+    coloring.setBack();
 
     for(ContactPoint *cp : firstList->points) {
         QColor c = coloring.nextColor();
@@ -423,21 +442,20 @@ void GraphicsGearPair::paintPathOfContact(QPainter *painter) const {
         pen.setBrush(QBrush(c));
 
         if(m_pathOfRealContactIsVisible && !cpItReachedEnd && (*cpIt)->evaluationStep == cp->evaluationStep) {
-            std::cout << "same ev step: " << (*cpIt)->evaluationStep;
             pen.setBrush(QBrush(c));
             ++cpIt;
             cpItReachedEnd = (cpIt == selectedContactPoints.end());
             drawSomething = true;
 
         } else if(m_pathOfPossibleContactIsVisible) {
-            if(!cpItReachedEnd)
-                std::cout << "     it step: " << (*cpIt)->evaluationStep << ", cp step: " << cp->evaluationStep;;
-            pen.setWidth(0);
+            if(m_finePencilUsed)
+                pen.setColor(Qt::black);
+            else
+                pen.setWidth(0);
             drawSomething = true;
         } else {
             drawSomething = false;
         }
-        std::cout << std::endl;
 
         if(drawSomething) {
             painter->save();

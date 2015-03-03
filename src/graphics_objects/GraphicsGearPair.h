@@ -28,6 +28,9 @@ public:
 
     void update();
 
+    void setDrivingGearEnabled(bool enabled);
+    bool isDrivingGearEnabled();
+
     void setVisibilityOfDrivingGearSampling(bool visible);
     bool visibilityOfDrivingGearSampling() const;
 
@@ -70,6 +73,9 @@ public:
     void setMaxDriftAngleInDegree(int maxDriftAngle);
     int maxDriftAngleInDegree() const;
 
+    void setFinePencil(bool isFinePencil);
+    bool finePencilUsed() const;
+
     QRectF boundingRect() const override; // from QGraphicsItem
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override; // from QGraphicsItem
     void paintAdditionals(QPainter *painter, GraphicsMatingSplineGear *gear) const;
@@ -97,6 +103,7 @@ private:
     bool m_isRotating;
     real m_rotationVelocity;
     real m_rotationDegree;
+    bool m_finePencilUsed;
 
 };
 #endif // GRAPHICS_GEAR_PAIR

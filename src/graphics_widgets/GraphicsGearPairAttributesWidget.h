@@ -24,7 +24,7 @@ public:
     void objectChanged(ChangingObject *object) override; // from ChangingObjectListener
 
 private slots:
-    void toggleLiveUpdating(bool);
+    void toggleDrivingGearEnabled(bool);
     void toggleDrivingGearSamplingVisibility(bool);
     void toggleDrivenGearSamplingVisibility(bool);
     void toggleNoneContactPointsVisibility(bool);
@@ -39,11 +39,12 @@ private slots:
     void changeRotationVelocity(real);
     void changeSamplingRate(int);
     void changeMaxDriftAngle(int);
+    void togglePencilWidth(bool);
 
 private:
     GraphicsGearPair *m_currentGearPair;
 
-    QCheckBox   *m_liveUpdatingCheckBox,
+    QCheckBox   *m_drivingGearEnabledCheckBox,
                 *m_drivingGearSamplingCheckBox,
                 *m_drivenGearSamplingCheckBox,
                 *m_noneContactPointsCheckBox,
@@ -54,17 +55,16 @@ private:
                 *m_pathOfRealContactCheckBox,
                 *m_pitchesCheckBox,
                 *m_pitchCirclesCheckBox,
-                *m_rotationCheckBox;
+                *m_rotationCheckBox,
+                *m_smallPencilWidthCheckBox;
 
     RealValuedSlider *m_rotationVelocitySlider;
 
     QSpinBox *m_samplingRateSpinBox,
              *m_maxDriftAngleSpinBox;
 
-    bool m_isLiveUpdating;
     int m_samplingRate;
     int m_maxDriftAngle; //in degree
-
 };
 
 #endif // GRAPHICS_GEAR_PAIR_ATTRIBUTES_WIDGET

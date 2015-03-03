@@ -3,18 +3,17 @@
 GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *parent) :
     GraphicsItemAttributesWidget(parent)
 {
-    m_isLiveUpdating = false;
-    m_liveUpdatingCheckBox = new QCheckBox(tr("Update on changes"), this);
-    connect(m_liveUpdatingCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleLiveUpdating(bool)));
+    m_drivingGearEnabledCheckBox = new QCheckBox(tr("Enable editing (driving gear)"), this);
+    connect(m_drivingGearEnabledCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleDrivingGearEnabled(bool)));
 
     m_drivingGearSamplingCheckBox = new QCheckBox(tr("...driving gear sampling"), this);
     connect(m_drivingGearSamplingCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleDrivingGearSamplingVisibility(bool)));
 
-    m_drivenGearSamplingCheckBox = new QCheckBox(tr("...driven gear sampling"), this);
-    connect(m_drivenGearSamplingCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleDrivenGearSamplingVisibility(bool)));
-
     m_drivingGearForbiddenAreaCheckBox = new QCheckBox(tr("...forbidden area (driving gear)"), this);
     connect(m_drivingGearForbiddenAreaCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleForbiddenAreaInDrivingGear(bool)));
+
+    m_drivenGearSamplingCheckBox = new QCheckBox(tr("...driven gear sampling"), this);
+    connect(m_drivenGearSamplingCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleDrivenGearSamplingVisibility(bool)));
 
     m_drivenGearForbiddenAreaCheckBox = new QCheckBox(tr("...forbidden area (driven gear)"), this);
     connect(m_drivenGearForbiddenAreaCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleForbiddenAreaInDrivenGear(bool)));
@@ -70,50 +69,68 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     QLabel *maxDriftAngleLabel = new QLabel(tr("Max. drift angle"), this);
     maxDriftAngleLabel->setBuddy(m_maxDriftAngleSpinBox);
 
-    QGridLayout *layout = new QGridLayout(this);
-    layout->addWidget(m_liveUpdatingCheckBox,   0, 0, 1, 1);
-    layout->addWidget(showBox,                  1, 0, 1, 2);
-    layout->addWidget(m_rotationCheckBox,       2, 0, 1, 2);
-    layout->addWidget(m_rotationVelocitySlider, 3, 0, 1, 2);
-    layout->addWidget(samplingRateLabel,        4, 0);
-    layout->addWidget(m_samplingRateSpinBox,    4, 1);
-    layout->addWidget(maxDriftAngleLabel,       5, 0);
-    layout->addWidget(m_maxDriftAngleSpinBox,   5, 1);
+    m_smallPencilWidthCheckBox = new QCheckBox(tr("Use fine pencil for drawing"), this);
+    connect(m_smallPencilWidthCheckBox, SIGNAL(toggled(bool)), this, SLOT(togglePencilWidth(bool)));
 
-    layout->setRowStretch(6, 1); //stretch the empty space at bottom and not _between_ the objects
+    QGridLayout *layout = new QGridLayout(this);
+    layout->addWidget(m_drivingGearEnabledCheckBox,     0, 0, 1, 1);
+    layout->addWidget(showBox,                    1, 0, 1, 2);
+    layout->addWidget(m_rotationCheckBox,         2, 0, 1, 2);
+    layout->addWidget(m_rotationVelocitySlider,   3, 0, 1, 2);
+    layout->addWidget(samplingRateLabel,          4, 0);
+    layout->addWidget(m_samplingRateSpinBox,      4, 1);
+    layout->addWidget(maxDriftAngleLabel,         5, 0);
+    layout->addWidget(m_maxDriftAngleSpinBox,     5, 1);
+    layout->addWidget(m_smallPencilWidthCheckBox, 6, 0, 1, 2);
+
+    layout->setRowStretch(7, 1); //stretch the empty space at bottom and not _between_ the objects
 }
 
 GraphicsGearPairAttributesWidget::~GraphicsGearPairAttributesWidget() {
 }
 
 void GraphicsGearPairAttributesWidget::updateAttributes() {
+    m_drivingGearEnabledCheckBox->setChecked(m_currentGearPair->isDrivingGearEnabled());
+
     m_drivingGearSamplingCheckBox->setChecked(m_currentGearPair->visibilityOfDrivingGearSampling());
-    m_drivenGearSamplingCheckBox->setChecked(m_currentGearPair->visibilityOfDrivenGearSampling());
     m_drivingGearForbiddenAreaCheckBox->setChecked(m_currentGearPair->visibilityOfForbiddenAreaInDrivingGear());
+    if(m_drivingGearSamplingCheckBox->isChecked())
+        m_drivingGearForbiddenAreaCheckBox->setEnabled(true);
+    else
+        m_drivingGearForbiddenAreaCheckBox->setEnabled(false);
+
+    m_drivenGearSamplingCheckBox->setChecked(m_currentGearPair->visibilityOfDrivenGearSampling());
     m_drivenGearForbiddenAreaCheckBox->setChecked(m_currentGearPair->visibilityOfForbiddenAreaInDrivenGear());
+    if(m_drivenGearSamplingCheckBox->isChecked())
+        m_drivenGearForbiddenAreaCheckBox->setEnabled(true);
+    else
+        m_drivenGearForbiddenAreaCheckBox->setEnabled(false);
+
     m_noneContactPointsCheckBox->setChecked(m_currentGearPair->visibilityOfNoneContactPoints());
     m_selectedGearPointsCheckBox->setChecked(m_currentGearPair->visibilityOfSelectedGearPoints());
     m_pathOfPossibleContactCheckBox->setChecked(m_currentGearPair->visibilityOfPathOfPossibleContact());
     m_pathOfRealContactCheckBox->setChecked(m_currentGearPair->visibilityOfPathOfRealContact());
     m_pitchesCheckBox->setChecked(m_currentGearPair->visibilityOfPitches());
     m_pitchCirclesCheckBox->setChecked(m_currentGearPair->visibilityOfPitchCircles());
+
     m_rotationCheckBox->setChecked(m_currentGearPair->isRotating());
     m_rotationVelocitySlider->setValue(m_currentGearPair->rotationVelocity());
     if(m_rotationCheckBox->isChecked())
         m_rotationVelocitySlider->setEnabled(true);
     else
         m_rotationVelocitySlider->setEnabled(false);
+
     m_samplingRate = m_currentGearPair->samplingRate();
     m_samplingRateSpinBox->setValue(m_samplingRate);
     m_maxDriftAngle = m_currentGearPair->maxDriftAngleInDegree();
     m_maxDriftAngleSpinBox->setValue(m_maxDriftAngle);
-    m_liveUpdatingCheckBox->setChecked(m_isLiveUpdating);
+
+    m_smallPencilWidthCheckBox->setChecked(m_currentGearPair->finePencilUsed());
 }
 
 void GraphicsGearPairAttributesWidget::objectChanged(ChangingObject *object) {
     if(m_currentGearPair == object) {
-        if(m_isLiveUpdating)
-            m_currentGearPair->update();
+        m_currentGearPair->update();
         updateAttributes();
     }
 }
@@ -130,16 +147,22 @@ bool GraphicsGearPairAttributesWidget::worksOnItem(QGraphicsItem *graphicsItem) 
     return false;
 }
 
-void GraphicsGearPairAttributesWidget::toggleDrivingGearSamplingVisibility(bool checked) {
-    m_currentGearPair->setVisibilityOfDrivingGearSampling(checked);
+void GraphicsGearPairAttributesWidget::toggleDrivingGearEnabled(bool checked) {
+    m_currentGearPair->setDrivingGearEnabled(checked);
 }
 
-void GraphicsGearPairAttributesWidget::toggleDrivenGearSamplingVisibility(bool checked) {
-    m_currentGearPair->setVisibilityOfDrivenGearSampling(checked);
+void GraphicsGearPairAttributesWidget::toggleDrivingGearSamplingVisibility(bool checked) {
+    m_currentGearPair->setVisibilityOfDrivingGearSampling(checked);
+    updateAttributes();
 }
 
 void GraphicsGearPairAttributesWidget::toggleForbiddenAreaInDrivingGear(bool checked) {
     m_currentGearPair->setVisibilityOfForbiddenAreaInDrivingGear(checked);
+}
+
+void GraphicsGearPairAttributesWidget::toggleDrivenGearSamplingVisibility(bool checked) {
+    m_currentGearPair->setVisibilityOfDrivenGearSampling(checked);
+    updateAttributes();
 }
 
 void GraphicsGearPairAttributesWidget::toggleForbiddenAreaInDrivenGear(bool checked) {
@@ -193,6 +216,6 @@ void GraphicsGearPairAttributesWidget::changeMaxDriftAngle(int maxDriftAngle) {
     m_currentGearPair->setMaxDriftAngleInDegree(m_maxDriftAngle);
 }
 
-void GraphicsGearPairAttributesWidget::toggleLiveUpdating(bool checked) {
-    m_isLiveUpdating = checked;
+void GraphicsGearPairAttributesWidget::togglePencilWidth(bool isFinePencil) {
+    m_currentGearPair->setFinePencil(isFinePencil);
 }
