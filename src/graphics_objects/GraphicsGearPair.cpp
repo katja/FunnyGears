@@ -11,48 +11,29 @@ bool GraphicsGearPair::isGraphicsGearPair(QGraphicsItem *item) {
     return false;
 }
 
-struct Coloring {
+uint cutOutColorValue(uint c) {
+    if(c < 0x100)
+        return 0;
+    else if(c >= 0x200)
+        return 0xFF;
+    else
+        return c - 0x100;
+}
+
+QColor getColorFor(uint step) {
+    uint x = (step << 3);
     uint r, g, b;
-    uint red, green, blue;
-
-    Coloring() {
-        setBack();
-    }
-
-    void setBack() {
-        r = 10;
-        g = 0;
-        b = 50;
-        red = r;
-        green = g;
-        blue = b;
-    }
-
-    QColor nextColor() {
-        b = (b + 8) & 0x1FF;
-        if((b & 0x100) > 0)//count downwards
-            blue = 0x100 - ((b & 0xFF) + 1);
-        else
-            blue = b;
-
-        if((b & 0x180) > 0) {
-            r = (r + 8) & 0x1FF;
-            if((r & 0x100) > 0)//count downwards
-                red = 0x100 - ((r & 0xFF) + 1);
-            else
-                red = r;
-        }
-
-        if((r & 0x180) > 0) {
-            g = (g + 8) & 0x1FF;
-            if((g & 0x100) > 0)//count downwards
-                green = 0x100 - ((g & 0xFF) + 1);
-            else
-                green = g;
-        }
-        return QColor(red, green, blue);
-    }
-};
+    b = (x + 0x300) % 0x600;
+    g = (x + 0x100) % 0x600;
+    r = (x + 0x500) % 0x600;
+    if(b > 0x300)
+        b = 0x600 - (b + 1);
+    if(g > 0x300)
+        g = 0x600 - (g + 1);
+    if(r > 0x300)
+        r = 0x600 - (r + 1);
+    return QColor(cutOutColorValue(r), cutOutColorValue(g), cutOutColorValue(b));
+}
 
 GraphicsGearPair::GraphicsGearPair(GearPair *gearPair) :
     m_gearPair(gearPair),
@@ -353,10 +334,10 @@ void GraphicsGearPair::paint(QPainter *painter, const QStyleOptionGraphicsItem *
         m_drivenGear->setRotation(-m_rotationDegree * m_gearPair->transmissionRatio());
     }
 
-    if(m_pathOfPossibleContactIsVisible || m_pathOfRealContactIsVisible)
-        paintPathOfContact(painter);
-
-    // painter->drawRect(boundingRect());
+    if(m_pathOfPossibleContactIsVisible)
+        paintPathOfPossibleContact(painter);
+    if(m_pathOfRealContactIsVisible)
+        paintPathOfRealContact(painter);
 }
 
 void GraphicsGearPair::paintAdditionals(QPainter *painter, GraphicsMatingSplineGear *gear) const {
@@ -396,18 +377,15 @@ void GraphicsGearPair::paintAdditionals(QPainter *painter, GraphicsMatingSplineG
 
 void GraphicsGearPair::paintSampledContactPointsDrivingGear(QPainter *painter) const {
     std::list<ContactPointsWithPosition*> contactPointsWithPositions = m_gearPair->foundPoints().contactPointsWithPositions();
+    ContactPointsWithPosition *firstList = contactPointsWithPositions.front();
 
     painter->save();
-    Coloring coloring;
-
-    ContactPointsWithPosition *firstList = contactPointsWithPositions.front();
-    coloring.setBack();
 
     for(ContactPoint *cp : firstList->points) {
 
-        QColor c = coloring.nextColor();
+        QColor c = getColorFor(cp->evaluationStep);
         if(cp->error != ErrorCode::NO_ERROR) {
-            c = QColor(220, 0, 20); //red
+            c = Preferences::AttentionColor; //red
         }
         QPen pen = painter->pen();
         pen.setColor(c);
@@ -427,22 +405,20 @@ void GraphicsGearPair::paintSampledContactPointsDrivenGear(QPainter *painter) co
     std::list<ContactPointsWithPosition*> contactPointsWithPositions = m_gearPair->foundPoints().contactPointsWithPositions();
 
     painter->save();
-    Coloring coloring;
     real lightUp = 1.0 / contactPointsWithPositions.size();
 
     for(ContactPointsWithPosition *list : contactPointsWithPositions) {
         ContactPoint *lastCP = list->points.front();
-        coloring.setBack();
 
         for(ContactPoint *cp : list->points) {
 
-            QColor c = coloring.nextColor();
+            QColor c = getColorFor(cp->evaluationStep);
             if(list->position > 0)
                 c = lightUpColor(c, list->position * lightUp);
             else if(list->position < 0)
                 c = lightUpColor(c, -(list->position * lightUp));
             if(cp->error != ErrorCode::NO_ERROR) {
-                c = QColor(220, 0, 20); //red
+                c = Preferences::AttentionColor; //red
             }
             QPen pen = painter->pen();
             pen.setColor(c);
@@ -467,55 +443,58 @@ void GraphicsGearPair::paintSampledContactPointsDrivenGear(QPainter *painter) co
     painter->restore();
 }
 
-void GraphicsGearPair::paintPathOfContact(QPainter *painter) const {
+void GraphicsGearPair::paintPathOfPossibleContact(QPainter *painter) const {
     std::list<ContactPointsWithPosition*> contactPointsWithPositions = m_gearPair->foundPoints().contactPointsWithPositions();
-    vector<ContactPoint*> selectedContactPoints = m_gearPair->foundPoints().gearContactPoints();
-
     ContactPointsWithPosition *firstList = contactPointsWithPositions.front();
-    vector<ContactPoint*>::iterator cpIt = selectedContactPoints.begin();
-
-    bool cpItReachedEnd = (cpIt == selectedContactPoints.end());
-    bool drawSomething = true;
 
     painter->save();
-    Coloring coloring;
-    coloring.setBack();
+
+    QPen pen = painter->pen();
+    if(m_finePencilUsed)
+        pen.setColor(Qt::black);
+    else
+        pen.setWidth(0);
+    painter->setPen(pen);
 
     for(ContactPoint *cp : firstList->points) {
-        QColor c = coloring.nextColor();
+
+        QPen pen = painter->pen();
+        QColor c = pen.color();
+
+        if(cp->error != ErrorCode::NO_ERROR)
+            c = Preferences::AttentionColor; //red
+        else if(!m_finePencilUsed)
+            c = getColorFor(cp->evaluationStep);
+
+        pen.setColor(c);
+        pen.setBrush(QBrush(c));
+        painter->setPen(pen);
+
+        drawCircle(painter, cp->contactPosition);
+        vec2 endNormal = cp->contactPosition + cp->normalInContact * 20.0;
+        drawLine(painter, cp->contactPosition, endNormal);
+    }
+    painter->restore();
+}
+
+void GraphicsGearPair::paintPathOfRealContact(QPainter *painter) const {
+    vector<ContactPoint*> selectedContactPoints = m_gearPair->foundPoints().gearContactPoints();
+
+    painter->save();
+
+    for(ContactPoint *cp : selectedContactPoints) {
+        QColor c = getColorFor(cp->evaluationStep);
         if(cp->error != ErrorCode::NO_ERROR) {
             c = QColor(220, 0, 20); //red
         }
         QPen pen = painter->pen();
         pen.setColor(c);
         pen.setBrush(QBrush(c));
+        painter->setPen(pen);
 
-        if(m_pathOfRealContactIsVisible && !cpItReachedEnd && (*cpIt)->evaluationStep == cp->evaluationStep) {
-            pen.setBrush(QBrush(c));
-            ++cpIt;
-            cpItReachedEnd = (cpIt == selectedContactPoints.end());
-            drawSomething = true;
-
-        } else if(m_pathOfPossibleContactIsVisible) {
-            if(m_finePencilUsed)
-                pen.setColor(Qt::black);
-            else
-                pen.setWidth(0);
-            drawSomething = true;
-        } else {
-            drawSomething = false;
-        }
-
-        if(drawSomething) {
-            painter->save();
-            painter->setPen(pen);
-
-            drawCircle(painter, cp->contactPosition);
-            vec2 endNormal = cp->contactPosition + cp->normalInContact * 20.0;
-            drawLine(painter, cp->contactPosition, endNormal);
-
-            painter->restore();
-        }
+        drawCircle(painter, cp->contactPosition);
+        vec2 endNormal = cp->contactPosition + cp->normalInContact * 20.0;
+        drawLine(painter, cp->contactPosition, endNormal);
     }
     painter->restore();
 }

@@ -83,7 +83,8 @@ public:
     void paintAdditionals(QPainter *painter, GraphicsMatingSplineGear *gear) const;
     void paintSampledContactPointsDrivingGear(QPainter *painter) const;
     void paintSampledContactPointsDrivenGear(QPainter *painter) const;
-    void paintPathOfContact(QPainter *painter) const;
+    void paintPathOfPossibleContact(QPainter *painter) const;
+    void paintPathOfRealContact(QPainter *painter) const;
     void paintNoneContactPoints(QPainter *painter, bool, bool) const;
     void paintSelectedGearPoints(QPainter *painter) const;
 
