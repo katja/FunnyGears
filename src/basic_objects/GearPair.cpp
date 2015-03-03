@@ -15,33 +15,28 @@ GearPair::GearPair(const SplineGear &drivingGear) :
 {
 
     m_drivenGear->setNumberOfTeeth(m_drivingGear->numberOfTeeth());
-    m_drivenGearPitchRadius = m_drivingGear->referenceRadius();
-
-    m_drivingGearPitchRadius = m_drivingGear->referenceRadius();
-
-    m_module = 2.0 * m_drivingGear->referenceRadius() / m_drivingGear->numberOfTeeth();
-
-    // m_drivenGearIndependentReferenceRadius = m_module * m_drivenGear->numberOfTeeth() / 2.0;
-
-    m_distanceOfCenters = m_drivingGearPitchRadius + m_drivenGearPitchRadius;
-
-    // m_completeToothProfile = m_drivingGear->completeToothProfile();
-
-    //TODO: refactor following and whole class
-    doCalculation();
+    calculateAgainWithAllAttributes();
 }
 
 GearPair::~GearPair() {
 }
 
-void GearPair::updateDrivingGearChange() {
+void GearPair::calculateAgainWithAllAttributes() {
+    m_drivingGearPitchRadius = m_drivingGear->referenceRadius();
+    m_module = 2.0 * m_drivingGear->referenceRadius() / m_drivingGear->numberOfTeeth();
+    m_drivenGearPitchRadius = m_module * m_drivenGear->numberOfTeeth() / 2.0;
+    m_distanceOfCenters = m_drivingGearPitchRadius + m_drivenGearPitchRadius;
+    calculateAgainWithNewToothProfile();
+}
+
+void GearPair::calculateAgainWithNewToothProfile() {
     if(m_completeToothProfile != nullptr)
         delete m_completeToothProfile;
     m_completeToothProfile = m_drivingGear->completeToothProfile();
-    doCalculation();
+    calculateAgainWithUnchangedAttributes();
 }
 
-void GearPair::doCalculation() {
+void GearPair::calculateAgainWithUnchangedAttributes() {
     m_allContactPoints.clear(); //deletes all ContactPoint* of the list and when again sort(...) is called, the other saved lists are deleted, too
 
     m_stepSize = (m_completeToothProfile->upperDomainLimit() - m_completeToothProfile->lowerDomainLimit())
@@ -72,7 +67,7 @@ uint GearPair::numberOfTeethOfDrivenGear() const {
 }
 
 real GearPair::transmissionRatio() const {
-    return m_drivenGear->numberOfTeeth() / m_drivingGear->numberOfTeeth();
+    return -(static_cast<real>(m_drivenGear->numberOfTeeth()) / static_cast<real>(m_drivingGear->numberOfTeeth()));
 }
 
 real GearPair::drivingGearPitchRadius() const {

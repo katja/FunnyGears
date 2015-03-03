@@ -14,9 +14,9 @@ public:
     GearPair(const SplineGear &drivingGear); //Driving gear = treibendes Rad
     ~GearPair();
 
-    void updateDrivingGearChange();
-
-    void doCalculation();
+    void calculateAgainWithAllAttributes();
+    void calculateAgainWithNewToothProfile();
+    void calculateAgainWithUnchangedAttributes();
 
     const ContactPointSortingList& foundPoints();
 

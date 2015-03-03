@@ -51,11 +51,13 @@ real GraphicsSplineGear::module() const {
 void GraphicsSplineGear::setModule(real module) {
     prepareGeometryChange();
     m_splineGear->setModule(module);
+    changed();
 }
 
 void GraphicsSplineGear::setNumberOfTeeth(uint toothCount) {
     prepareGeometryChange();
     m_splineGear->setNumberOfTeeth(toothCount);
+    changed();
 }
 
 uint GraphicsSplineGear::numberOfTeeth() const {
@@ -65,6 +67,7 @@ uint GraphicsSplineGear::numberOfTeeth() const {
 void GraphicsSplineGear::setReferenceRadius(real radius) {
     prepareGeometryChange();
     m_splineGear->setReferenceRadius(radius);
+    changed();
 }
 
 real GraphicsSplineGear::referenceRadius() const {

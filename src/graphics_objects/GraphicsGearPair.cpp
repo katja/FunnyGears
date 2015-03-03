@@ -51,13 +51,13 @@ GraphicsGearPair::GraphicsGearPair(GearPair *gearPair) :
     m_pitchCirclesAreVisible(false),
     m_isRotating(false),
     m_rotationVelocity(0.0),
-    m_rotationDegree(0.0),
+    m_rotationDegreeDrivingGear(0.0),
+    m_rotationDegreeDrivenGear(0.0),
     m_finePencilUsed(false)
 {
     std::cout << "GraphicsGearPair is created" << std::endl;
     m_drivingGear = new GraphicsMatingSplineGear(m_gearPair->drivingGear(), this); // driving gear inserted as child
     m_drivenGear = new GraphicsMatingSplineGear(m_gearPair->drivenGear(), this); // driven gear inserted as child
-    m_drivenGear->setTransform(QTransform().translate(gearPair->getDistanceOfCenters(), 0));
 
     m_drivingGear->setReferenceCircleVisibility(false);
     m_drivenGear->setReferenceCircleVisibility(false);
@@ -68,6 +68,7 @@ GraphicsGearPair::GraphicsGearPair(GearPair *gearPair) :
 
     m_drivingGear->informAboutChange(this);
 
+    m_drivenGear->setTransform(QTransform().translate(m_gearPair->getDistanceOfCenters(), 0));
     updateBoundingRect();
 }
 
@@ -95,7 +96,8 @@ void GraphicsGearPair::objectChanged(ChangingObject *object) {
 
 void GraphicsGearPair::update() {
     prepareGeometryChange();
-    m_gearPair->updateDrivingGearChange();
+    m_gearPair->calculateAgainWithAllAttributes();
+    m_drivenGear->setTransform(QTransform().translate(m_gearPair->getDistanceOfCenters(), 0));
     updateBoundingRect();
 }
 
@@ -224,7 +226,7 @@ void GraphicsGearPair::setSamplingRate(int samplingRate) {
         return;
     prepareGeometryChange();
     m_gearPair->setSamplingRate((uint)samplingRate);
-    m_gearPair->doCalculation();
+    m_gearPair->calculateAgainWithUnchangedAttributes();
 }
 
 int GraphicsGearPair::samplingRate() const {
@@ -236,7 +238,7 @@ void GraphicsGearPair::setMaxDriftAngleInDegree(int maxDriftAngle) {
         return;
     prepareGeometryChange();
     m_gearPair->setMaxDriftAngleInDegree(maxDriftAngle);
-    m_gearPair->doCalculation();
+    m_gearPair->calculateAgainWithUnchangedAttributes();
 }
 
 int GraphicsGearPair::maxDriftAngleInDegree() const {
@@ -329,9 +331,15 @@ void GraphicsGearPair::paint(QPainter *painter, const QStyleOptionGraphicsItem *
     }
 
     if(m_isRotating) {
-        m_rotationDegree += m_rotationVelocity;
-        m_drivingGear->setRotation(m_rotationDegree);
-        m_drivenGear->setRotation(-m_rotationDegree * m_gearPair->transmissionRatio());
+        m_rotationDegreeDrivingGear += m_rotationVelocity;
+        m_rotationDegreeDrivenGear += m_rotationVelocity / m_gearPair->transmissionRatio();
+        m_drivingGear->setRotation(m_rotationDegreeDrivingGear);
+        m_drivenGear->setRotation(m_rotationDegreeDrivenGear);
+    } else if(m_rotationDegreeDrivingGear != 0.0) {
+        m_rotationDegreeDrivingGear = 0.0;
+        m_rotationDegreeDrivenGear = 0.0;
+        m_drivingGear->setRotation(m_rotationDegreeDrivingGear);
+        m_drivenGear->setRotation(m_rotationDegreeDrivenGear);
     }
 
     if(m_pathOfPossibleContactIsVisible)

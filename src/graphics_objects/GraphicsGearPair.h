@@ -105,7 +105,8 @@ private:
     bool m_pitchCirclesAreVisible;
     bool m_isRotating;
     real m_rotationVelocity;
-    real m_rotationDegree;
+    real m_rotationDegreeDrivingGear;
+    real m_rotationDegreeDrivenGear;
     bool m_finePencilUsed;
 
     real m_largestDistanceToPoint;
