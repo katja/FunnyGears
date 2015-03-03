@@ -85,8 +85,9 @@ GraphicsGearPair::GraphicsGearPair(GearPair *gearPair) :
     m_drivingGear->setVisibleControlPolygon(false);
     m_drivenGear->setVisibleControlPolygon(false);
 
-
     m_drivingGear->informAboutChange(this);
+
+    updateBoundingRect();
 }
 
 GraphicsGearPair::~GraphicsGearPair() {
@@ -114,6 +115,7 @@ void GraphicsGearPair::objectChanged(ChangingObject *object) {
 void GraphicsGearPair::update() {
     prepareGeometryChange();
     m_gearPair->updateDrivingGearChange();
+    updateBoundingRect();
 }
 
 void GraphicsGearPair::setDrivingGearEnabled(bool enabled) {
@@ -269,23 +271,70 @@ bool GraphicsGearPair::finePencilUsed() const {
     return m_finePencilUsed;
 }
 
-QRectF GraphicsGearPair::boundingRect() const {
-    return QRectF(QPointF(-300, -500), QPointF(1000, 500));
-    // std::list<ContactPoint> *points = m_gearPair->foundPoints();
-    // vec2 topLeft = points->front().point;
-    // vec2 bottomRight = topLeft;
+void GraphicsGearPair::updateBoundingRect() {
+    std::list<ContactPoint*> foundPoints = m_gearPair->foundPoints();
+    m_largestDistanceToPoint = 0;
+    m_largestNormalOfPoint = 0;
+    vec2 pathOfContactBottomLeft, pathOfContactTopRight;
+    pathOfContactBottomLeft = pathOfContactTopRight = foundPoints.front()->contactPosition;
+    for(ContactPoint *cp : foundPoints) {
+        if(cp->error == ErrorCode::NO_ERROR) {
+            real distToPoint = glm::length(cp->point);
+            if(distToPoint > m_largestDistanceToPoint)
+                m_largestDistanceToPoint = distToPoint;
 
-    // for(ContactPoint point : (*points)) {
-    //     if(topLeft.x > point.point.x)
-    //         topLeft = vec2(point.point.x, topLeft.y);
-    //     if(topLeft.y > point.point.y)
-    //         topLeft = vec2(topLeft.x, point.point.y);
-    //     if(bottomRight.x < point.point.x)
-    //         bottomRight = vec2(point.point.x, bottomRight.y);
-    //     if(bottomRight.y < point.point.y)
-    //         bottomRight = vec2(bottomRight.x, point.point.y);
-    // }
-    // return QRectF(QPointF(topLeft.x - 20.0, topLeft.y - 20.0), QPointF(bottomRight.x + 20.0, bottomRight.y + 20.0)); //20.0 is the normal Length at the moment
+            if(cp->forbiddenAreaLength > m_largestNormalOfPoint)
+                m_largestNormalOfPoint = cp->forbiddenAreaLength;
+            if(cp->contactPosition.x < pathOfContactTopRight.x)
+                pathOfContactTopRight.x = cp->contactPosition.x;
+            if(cp->contactPosition.y < pathOfContactTopRight.y)
+                pathOfContactTopRight.y = cp->contactPosition.y;
+            if(cp->contactPosition.x > pathOfContactBottomLeft.x)
+                pathOfContactBottomLeft.x = cp->contactPosition.x;
+            if(cp->contactPosition.y > pathOfContactBottomLeft.y)
+                pathOfContactBottomLeft.y = cp->contactPosition.y;
+        }
+    }
+    QPointF topRight = QPointF(pathOfContactTopRight.x - 20, pathOfContactTopRight.y - 20);
+    QPointF bottomLeft = QPointF(pathOfContactBottomLeft.x + 20, pathOfContactBottomLeft.y + 20);
+    m_boundingRect = QRectF(topRight, bottomLeft); // normals of path of contact should be in area, too
+    m_largestDistanceToNCP = 0;
+    m_largestNormalOfNCP = 0;
+    std::list<NoneContactPoint*> ncps = m_gearPair->foundPoints().noneContactPoints();
+    if(!ncps.empty()) {
+        NoneContactPoint *ncp = ncps.front();
+        for(uint i = 0; i < ncp->points.size(); ++i) {
+            real distToPoint = glm::length(ncp->points[i]);
+            if(distToPoint > m_largestDistanceToNCP)
+                m_largestDistanceToNCP = distToPoint;
+            real normalLength = glm::length(ncp->normals[i]);
+            if(normalLength > m_largestNormalOfNCP)
+                m_largestNormalOfNCP = normalLength;
+        }
+    }
+}
+
+QRectF GraphicsGearPair::boundingRect(const GraphicsMatingSplineGear *gear) const {
+    if(gear == m_drivingGear) {
+        return gear->GraphicsSplineGear::normalBoundingRect(5);
+    } else { // gear == m_drivenGear
+        real max = m_largestDistanceToPoint;
+        if(m_forbiddenAreaInDrivenGearIsVisible)
+            max += m_largestNormalOfPoint;
+        if(m_noneContactPointsAreVisible) {
+            real maxNCP = m_largestDistanceToNCP;
+            if(m_forbiddenAreaInDrivenGearIsVisible)
+                maxNCP += m_largestNormalOfNCP;
+            if(maxNCP > max)
+                max = maxNCP;
+        }
+        max += 5; //extra space for thick lines, point radii etc.
+        return QRectF(-max, -max, 2 * max, 2 * max);
+    }
+}
+
+QRectF GraphicsGearPair::boundingRect() const {
+    return m_boundingRect;
 }
 
 void GraphicsGearPair::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {

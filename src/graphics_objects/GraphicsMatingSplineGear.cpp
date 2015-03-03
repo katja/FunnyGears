@@ -41,15 +41,7 @@ bool GraphicsMatingSplineGear::isUserInteractionEnabled() const {
 QRectF GraphicsMatingSplineGear::normalBoundingRect(qreal controlPointRadius) const {
     if(m_isUserInteractionEnabled)
         return GraphicsSplineGear::normalBoundingRect(controlPointRadius);
-    return QRectF();
-    // real maxRadius = Preferences::AngularPitchStrokesLength;
-    // if(m_splineGear != 0 && m_splineGear->isValid()) {
-    //     real distanceToFurthestPoint = m_splineGear->maximumDistanceOfControlPointToCenter()
-    //                                                 + controlPointRadius;
-    //     if(distanceToFurthestPoint > maxRadius)
-    //         maxRadius = distanceToFurthestPoint;
-    // }
-    // return QRectF(-maxRadius, -maxRadius, 2 * maxRadius, 2 * maxRadius);
+    return m_graphicsGearPair->boundingRect(this);
 }
 
 QPainterPath GraphicsMatingSplineGear::normalShape() const {

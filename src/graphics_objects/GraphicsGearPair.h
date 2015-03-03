@@ -76,6 +76,8 @@ public:
     void setFinePencil(bool isFinePencil);
     bool finePencilUsed() const;
 
+    void updateBoundingRect();
+    QRectF boundingRect(const GraphicsMatingSplineGear *gear) const;
     QRectF boundingRect() const override; // from QGraphicsItem
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override; // from QGraphicsItem
     void paintAdditionals(QPainter *painter, GraphicsMatingSplineGear *gear) const;
@@ -104,6 +106,13 @@ private:
     real m_rotationVelocity;
     real m_rotationDegree;
     bool m_finePencilUsed;
+
+    real m_largestDistanceToPoint;
+    real m_largestNormalOfPoint;
+    real m_largestDistanceToNCP;
+    real m_largestNormalOfNCP;
+    QRectF m_boundingRect;
+
 
 };
 #endif // GRAPHICS_GEAR_PAIR
