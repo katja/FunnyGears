@@ -16,6 +16,8 @@ qreal Preferences::HighlightedLineWidth(3);
 
 qreal Preferences::PointRadius(2.0);
 
+qreal Preferences::SmallPointRadius(0.1);
+
 qreal Preferences::TangentLength(80.0);
 
 qreal Preferences::AngularPitchStrokesLength(300.0);

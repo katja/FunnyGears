@@ -24,6 +24,7 @@ public:
     void objectChanged(ChangingObject *object) override; // from ChangingObjectListener
 
 private slots:
+    void changeNumberOfTeethOfDrivenGear(int);
     void toggleDrivingGearEnabled(bool);
     void toggleDrivingGearSamplingVisibility(bool);
     void toggleDrivenGearSamplingVisibility(bool);
@@ -60,8 +61,11 @@ private:
 
     RealValuedSlider *m_rotationVelocitySlider;
 
-    QSpinBox *m_samplingRateSpinBox,
+    QSpinBox *m_toothCountDrivenGearSpinBox,
+             *m_samplingRateSpinBox,
              *m_maxDriftAngleSpinBox;
+
+    QLabel *m_moduleLabel;
 
     int m_samplingRate;
     int m_maxDriftAngle; //in degree

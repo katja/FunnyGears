@@ -90,15 +90,32 @@ void GraphicsGearPair::receivedClickOn(QPointF scenePos) {
 }
 
 void GraphicsGearPair::objectChanged(ChangingObject *object) {
-    if(m_drivingGear == object)
-        GraphicsItem::changed();
+    if(m_drivingGear == object) {
+        prepareGeometryChange();
+        m_gearPair->calculateAgainWithAllAttributes();
+        changed(); //informs all ChangingObjectListeners, so f. ex. GraphicsGearPairAttributesWidget, which will call update() here
+    }
 }
 
 void GraphicsGearPair::update() {
     prepareGeometryChange();
-    m_gearPair->calculateAgainWithAllAttributes();
     m_drivenGear->setTransform(QTransform().translate(m_gearPair->getDistanceOfCenters(), 0));
     updateBoundingRect();
+}
+
+real GraphicsGearPair::module() const {
+    return m_gearPair->module();
+}
+
+void GraphicsGearPair::setNumberOfTeethOfDrivenGear(uint toothCount) {
+    prepareGeometryChange();
+    m_gearPair->setNumberOfTeethOfDrivenGear(toothCount);
+    m_gearPair->calculateAgainWithAllAttributes();
+    changed(); //informs all ChangingObjectListeners, so f. ex. GraphicsGearPairAttributesWidget, which will call update() here
+}
+
+uint GraphicsGearPair::numberOfTeethOfDrivenGear() const {
+    return m_gearPair->numberOfTeethOfDrivenGear();
 }
 
 void GraphicsGearPair::setDrivingGearEnabled(bool enabled) {
@@ -107,6 +124,7 @@ void GraphicsGearPair::setDrivingGearEnabled(bool enabled) {
         m_drivingGear->enableUserInteraction();
     else
         m_drivingGear->disableUserInteraction();
+    m_drivingGear->setVisibleControlPolygon(enabled);
 }
 
 bool GraphicsGearPair::isDrivingGearEnabled() {
@@ -434,7 +452,8 @@ void GraphicsGearPair::paintSampledContactPointsDrivenGear(QPainter *painter) co
 
             // point (and forbidden area)
             drawCircle(painter, cp->point);
-            // drawCircle(painter, cp->point, 0.15);
+            if(m_finePencilUsed)
+                drawCircle(painter, cp->point, Preferences::SmallPointRadius);
             if(m_forbiddenAreaInDrivenGearIsVisible) {
                 vec2 endNormal = cp->point + cp->normal * cp->forbiddenAreaLength;
                 drawLine(painter, cp->point, endNormal);
@@ -479,6 +498,8 @@ void GraphicsGearPair::paintPathOfPossibleContact(QPainter *painter) const {
         painter->setPen(pen);
 
         drawCircle(painter, cp->contactPosition);
+        if(m_finePencilUsed)
+            drawCircle(painter, cp->contactPosition, Preferences::SmallPointRadius);
         vec2 endNormal = cp->contactPosition + cp->normalInContact * 20.0;
         drawLine(painter, cp->contactPosition, endNormal);
     }
@@ -501,6 +522,8 @@ void GraphicsGearPair::paintPathOfRealContact(QPainter *painter) const {
         painter->setPen(pen);
 
         drawCircle(painter, cp->contactPosition);
+        if(m_finePencilUsed)
+            drawCircle(painter, cp->contactPosition, Preferences::SmallPointRadius);
         vec2 endNormal = cp->contactPosition + cp->normalInContact * 20.0;
         drawLine(painter, cp->contactPosition, endNormal);
     }
@@ -525,10 +548,10 @@ void GraphicsGearPair::paintNoneContactPoints(QPainter *painter, bool paintOrigi
 
         //OriginPoint
         if(paintOriginPoints) {
-            painter->drawEllipse(QPointF(ncp->originPoint.x, ncp->originPoint.y), Preferences::PointRadius, Preferences::PointRadius);
+            drawCircle(painter, ncp->originPoint);
             if(m_forbiddenAreaInDrivingGearIsVisible) {
                 vec2 endNormal = ncp->originPoint - ncp->originNormal * ncp->forbiddenAreaLength;
-                painter->drawLine(QPointF(ncp->originPoint.x, ncp->originPoint.y), QPointF(endNormal.x, endNormal.y));
+                drawLine(painter, ncp->originPoint, endNormal);
             }
         }
 
@@ -542,19 +565,19 @@ void GraphicsGearPair::paintNoneContactPoints(QPainter *painter, bool paintOrigi
 
                 //connect the points
                 if(i > 0)
-                    painter->drawLine(QPointF(previousPoint.x, previousPoint.y), QPointF(p.x, p.y));
-
-                // painter->drawEllipse(QPointF(p.x, p.y), Preferences::PointRadius, Preferences::PointRadius);
+                    drawLine(painter, previousPoint, p);
+                if(m_finePencilUsed)
+                    drawCircle(painter, p, Preferences::SmallPointRadius);
 
                 if(m_forbiddenAreaInDrivenGearIsVisible) {
                     vec2 endPoint = p + n * ncp->forbiddenAreaLength;
                     if(i > 0)
-                        painter->drawLine(QPointF(previousEndPoint.x, previousEndPoint.y), QPointF(endPoint.x, endPoint.y));
-                    // painter->drawLine(QPointF(p.x, p.y), QPointF(endPoint.x, endPoint.y));
-                    painter->drawEllipse(QPointF(endPoint.x, endPoint.y), 0.1, 0.1);
+                        drawLine(painter, previousEndPoint, endPoint);
+                    drawLine(painter, p, endPoint);
+                    if(m_finePencilUsed)
+                        drawCircle(painter, endPoint, Preferences::SmallPointRadius);
                     previousEndPoint = endPoint;
                 }
-
                 previousPoint = p;
             }
         }
@@ -572,10 +595,11 @@ void GraphicsGearPair::paintSelectedGearPoints(QPainter *painter) const {
     pen.setColor(QColor(220, 0, 20)); //red
     painter->setPen(pen);
     for(uint i = 0; i < gearPoints.size(); ++i) {
-        painter->drawEllipse(QPointF(gearPoints[i].x, gearPoints[i].y), 2.2, 2.2);
-        painter->drawEllipse(QPointF(gearPoints[i].x, gearPoints[i].y), 0.1, 0.1);
+        drawCircle(painter, gearPoints[i], Preferences::PointRadius + 0.3);
+        if(m_finePencilUsed)
+            drawCircle(painter, gearPoints[i], Preferences::SmallPointRadius);
         if(i > 0)
-            painter->drawLine(QPointF(gearPoints[i - 1].x, gearPoints[i - 1].y), QPointF(gearPoints[i].x, gearPoints[i].y));
+            drawLine(painter, gearPoints[i - 1], gearPoints[i]);
     }
     painter->restore();
 }

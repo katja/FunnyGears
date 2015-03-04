@@ -66,6 +66,9 @@ uint GearPair::numberOfTeethOfDrivenGear() const {
     return m_drivenGear->numberOfTeeth();
 }
 
+real GearPair::module() const {
+    return m_module;
+}
 real GearPair::transmissionRatio() const {
     return -(static_cast<real>(m_drivenGear->numberOfTeeth()) / static_cast<real>(m_drivingGear->numberOfTeeth()));
 }

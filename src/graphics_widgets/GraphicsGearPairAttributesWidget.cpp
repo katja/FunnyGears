@@ -3,6 +3,16 @@
 GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *parent) :
     GraphicsItemAttributesWidget(parent)
 {
+    m_moduleLabel = new QLabel(this);
+    QLabel *moduleLabelText = new QLabel(tr("Module"), this);
+    moduleLabelText->setBuddy(m_moduleLabel);
+
+    m_toothCountDrivenGearSpinBox = new QSpinBox(this);
+    m_toothCountDrivenGearSpinBox->setMinimum(2);
+    connect(m_toothCountDrivenGearSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeNumberOfTeethOfDrivenGear(int)));
+    QLabel *toothCountLabel = new QLabel(tr("Number of teeth of driven gear"), this);
+    toothCountLabel->setBuddy(m_toothCountDrivenGearSpinBox);
+
     m_drivingGearEnabledCheckBox = new QCheckBox(tr("Enable editing (driving gear)"), this);
     connect(m_drivingGearEnabledCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleDrivingGearEnabled(bool)));
 
@@ -73,23 +83,29 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     connect(m_smallPencilWidthCheckBox, SIGNAL(toggled(bool)), this, SLOT(togglePencilWidth(bool)));
 
     QGridLayout *layout = new QGridLayout(this);
-    layout->addWidget(m_drivingGearEnabledCheckBox,     0, 0, 1, 1);
-    layout->addWidget(showBox,                    1, 0, 1, 2);
-    layout->addWidget(m_rotationCheckBox,         2, 0, 1, 2);
-    layout->addWidget(m_rotationVelocitySlider,   3, 0, 1, 2);
-    layout->addWidget(samplingRateLabel,          4, 0);
-    layout->addWidget(m_samplingRateSpinBox,      4, 1);
-    layout->addWidget(maxDriftAngleLabel,         5, 0);
-    layout->addWidget(m_maxDriftAngleSpinBox,     5, 1);
-    layout->addWidget(m_smallPencilWidthCheckBox, 6, 0, 1, 2);
+    layout->addWidget(moduleLabelText,               0, 0);
+    layout->addWidget(m_moduleLabel,                 0, 1);
+    layout->addWidget(toothCountLabel,               1, 0);
+    layout->addWidget(m_toothCountDrivenGearSpinBox, 1, 1);
+    layout->addWidget(m_drivingGearEnabledCheckBox,  2, 0, 1, 1);
+    layout->addWidget(showBox,                       3, 0, 1, 2);
+    layout->addWidget(m_rotationCheckBox,            4, 0, 1, 2);
+    layout->addWidget(m_rotationVelocitySlider,      5, 0, 1, 2);
+    layout->addWidget(samplingRateLabel,             6, 0);
+    layout->addWidget(m_samplingRateSpinBox,         6, 1);
+    layout->addWidget(maxDriftAngleLabel,            7, 0);
+    layout->addWidget(m_maxDriftAngleSpinBox,        7, 1);
+    layout->addWidget(m_smallPencilWidthCheckBox,    8, 0, 1, 2);
 
-    layout->setRowStretch(7, 1); //stretch the empty space at bottom and not _between_ the objects
+    layout->setRowStretch(9, 1); //stretch the empty space at bottom and not _between_ the objects
 }
 
 GraphicsGearPairAttributesWidget::~GraphicsGearPairAttributesWidget() {
 }
 
 void GraphicsGearPairAttributesWidget::updateAttributes() {
+    m_moduleLabel->setText(QString::number(m_currentGearPair->module(), 'f', 3));
+    m_toothCountDrivenGearSpinBox->setValue(m_currentGearPair->numberOfTeethOfDrivenGear());
     m_drivingGearEnabledCheckBox->setChecked(m_currentGearPair->isDrivingGearEnabled());
 
     m_drivingGearSamplingCheckBox->setChecked(m_currentGearPair->visibilityOfDrivingGearSampling());
@@ -149,6 +165,11 @@ bool GraphicsGearPairAttributesWidget::worksOnItem(QGraphicsItem *graphicsItem) 
 
 void GraphicsGearPairAttributesWidget::toggleDrivingGearEnabled(bool checked) {
     m_currentGearPair->setDrivingGearEnabled(checked);
+}
+
+void GraphicsGearPairAttributesWidget::changeNumberOfTeethOfDrivenGear(int newToothCount) {
+    if(newToothCount > 0 && m_currentGearPair->numberOfTeethOfDrivenGear() != (uint)newToothCount)
+        m_currentGearPair->setNumberOfTeethOfDrivenGear(static_cast<uint>(newToothCount));
 }
 
 void GraphicsGearPairAttributesWidget::toggleDrivingGearSamplingVisibility(bool checked) {

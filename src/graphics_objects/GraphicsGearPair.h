@@ -28,6 +28,11 @@ public:
 
     void update();
 
+    real module() const;
+
+    void setNumberOfTeethOfDrivenGear(uint toothCount);
+    uint numberOfTeethOfDrivenGear() const;
+
     void setDrivingGearEnabled(bool enabled);
     bool isDrivingGearEnabled();
 

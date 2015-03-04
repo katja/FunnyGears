@@ -26,6 +26,7 @@ public:
     void setNumberOfTeethOfDrivenGear(uint numberOfTeeth);
     uint numberOfTeethOfDrivenGear() const;
 
+    real module() const;
     real transmissionRatio() const;  //German: Übersetzung(sverhältnis)
 
     real drivingGearPitchRadius() const;
