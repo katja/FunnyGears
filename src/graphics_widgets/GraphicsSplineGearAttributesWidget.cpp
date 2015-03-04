@@ -13,6 +13,7 @@ GraphicsSplineGearAttributesWidget(QWidget *parent) : GraphicsItemAttributesWidg
     m_moduleSpinBox->setMinimum(0.005);
     m_moduleSpinBox->setMaximum(1000.0);
     m_moduleSpinBox->setSingleStep(0.005);
+    m_moduleSpinBox->setSuffix(" mm");
     m_moduleLabel = new QLabel(tr("Module"), this);
     m_moduleLabel->setBuddy(m_moduleSpinBox);
     connect(m_moduleSpinBox, SIGNAL(editingFinished()), this, SLOT(updateModule()));
@@ -22,6 +23,7 @@ GraphicsSplineGearAttributesWidget(QWidget *parent) : GraphicsItemAttributesWidg
     m_referenceRadiusSpinBox->setMinimum(5.0);
     m_referenceRadiusSpinBox->setMaximum(500.0);
     m_referenceRadiusSpinBox->setSingleStep(1.0);
+    m_referenceRadiusSpinBox->setSuffix(" mm");
     m_referenceRadiusLabel = new QLabel(tr("Reference radius"), this);
     m_referenceRadiusLabel->setBuddy(m_referenceRadiusSpinBox);
     connect(m_referenceRadiusSpinBox, SIGNAL(editingFinished()), this, SLOT(updateRadius()));

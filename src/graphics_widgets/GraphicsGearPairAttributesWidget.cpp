@@ -82,6 +82,14 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     m_smallPencilWidthCheckBox = new QCheckBox(tr("Use fine pencil for drawing"), this);
     connect(m_smallPencilWidthCheckBox, SIGNAL(toggled(bool)), this, SLOT(togglePencilWidth(bool)));
 
+    QGroupBox *renderingSetup = new QGroupBox(tr("Rendering setup"), this);
+    QGridLayout *renderingSetupLayout = new QGridLayout(renderingSetup);
+    renderingSetupLayout->addWidget(samplingRateLabel,             0, 0);
+    renderingSetupLayout->addWidget(m_samplingRateSpinBox,         0, 1);
+    renderingSetupLayout->addWidget(maxDriftAngleLabel,            1, 0);
+    renderingSetupLayout->addWidget(m_maxDriftAngleSpinBox,        1, 1);
+    renderingSetupLayout->addWidget(m_smallPencilWidthCheckBox,    2, 0, 1, 2);
+
     QGridLayout *layout = new QGridLayout(this);
     layout->addWidget(moduleLabelText,               0, 0);
     layout->addWidget(m_moduleLabel,                 0, 1);
@@ -91,20 +99,16 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     layout->addWidget(showBox,                       3, 0, 1, 2);
     layout->addWidget(m_rotationCheckBox,            4, 0, 1, 2);
     layout->addWidget(m_rotationVelocitySlider,      5, 0, 1, 2);
-    layout->addWidget(samplingRateLabel,             6, 0);
-    layout->addWidget(m_samplingRateSpinBox,         6, 1);
-    layout->addWidget(maxDriftAngleLabel,            7, 0);
-    layout->addWidget(m_maxDriftAngleSpinBox,        7, 1);
-    layout->addWidget(m_smallPencilWidthCheckBox,    8, 0, 1, 2);
+    layout->addWidget(renderingSetup,                6, 0, 1, 2);
 
-    layout->setRowStretch(9, 1); //stretch the empty space at bottom and not _between_ the objects
+    layout->setRowStretch(7, 1); //stretch the empty space at bottom and not _between_ the objects
 }
 
 GraphicsGearPairAttributesWidget::~GraphicsGearPairAttributesWidget() {
 }
 
 void GraphicsGearPairAttributesWidget::updateAttributes() {
-    m_moduleLabel->setText(QString::number(m_currentGearPair->module(), 'f', 3));
+    m_moduleLabel->setText(QString::number(m_currentGearPair->module(), 'f', 3) + " mm");
     m_toothCountDrivenGearSpinBox->setValue(m_currentGearPair->numberOfTeethOfDrivenGear());
     m_drivingGearEnabledCheckBox->setChecked(m_currentGearPair->isDrivingGearEnabled());
 
