@@ -14,9 +14,17 @@ public:
 
 protected:
     Model *m_model;
-    // QPixmap m_rightArrow, m_downArrow, m_spline;
 
-    virtual void drawBranches(QPainter *painter, const QRect &rect, const QModelIndex &index) const;
+    QPixmap *m_rightArrow,
+            *m_downArrow,
+            *m_spline,
+            *m_gear,
+            *m_gearingClosed,
+            *m_gearingOpened,
+            *m_circle;
+
+    void drawBranches(QPainter *painter, const QRect &rect, const QModelIndex &index) const override; // from QTreeView
+    void resizeEvent(QResizeEvent *event) override; // from QWidget
 
 };
 

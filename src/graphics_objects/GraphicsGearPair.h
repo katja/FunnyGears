@@ -14,7 +14,7 @@ class GraphicsGearPair : public GraphicsScheduleItem, public ChangingObjectListe
 
 public:
     static const int Type; // = GraphicsItem::UserType + Type::GraphicsGearPairType;
-    static bool isGraphicsGearPair(QGraphicsItem *item);
+    static bool isGraphicsGearPairItem(QGraphicsItem *item);
 
     GraphicsGearPair(GearPair *gearPair);
     virtual ~GraphicsGearPair();

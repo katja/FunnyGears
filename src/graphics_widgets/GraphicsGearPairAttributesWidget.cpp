@@ -162,7 +162,7 @@ void GraphicsGearPairAttributesWidget::setItem(QGraphicsItem *graphicsItem) {
 }
 
 bool GraphicsGearPairAttributesWidget::worksOnItem(QGraphicsItem *graphicsItem) {
-    if(GraphicsGearPair::isGraphicsGearPair(graphicsItem))
+    if(GraphicsGearPair::isGraphicsGearPairItem(graphicsItem))
         return true;
     return false;
 }

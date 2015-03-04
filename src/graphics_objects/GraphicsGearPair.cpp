@@ -5,7 +5,7 @@
 
 const int GraphicsGearPair::Type = GraphicsItem::UserType + Type::GraphicsGearPairType;
 
-bool GraphicsGearPair::isGraphicsGearPair(QGraphicsItem *item) {
+bool GraphicsGearPair::isGraphicsGearPairItem(QGraphicsItem *item) {
     if(item && item->type() == Type)
         return true;
     return false;

@@ -19,11 +19,6 @@ Model::Model(QGraphicsScene *scene, QObject *parent) : QAbstractItemModel(parent
     dataHash->insert(Qt::ToolTipRole, "The item can be visible or not, which is shown here.");
     m_headHash.insert(VISIBILITY, *dataHash);
 
-    dataHash = new QHash<Qt::ItemDataRole, QString>();
-    dataHash->insert(Qt::DisplayRole, "Type");
-    dataHash->insert(Qt::ToolTipRole, "Holds information about the whole graphicsItem.");
-    m_headHash.insert(TYPE, *dataHash);
-
     emit dataChanged(QModelIndex(), QModelIndex());
 }
 
@@ -86,8 +81,6 @@ QVariant Model::data(const QModelIndex &index, int role) const {
             switch(index.column()) {
                 case NAME:
                     return item->name();
-                case TYPE:
-                    return item->type();
                 default:
                     return QVariant();
             }
@@ -145,8 +138,6 @@ Qt::ItemFlags Model::flags(const QModelIndex &index) const {
             return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
         if(index.column() == VISIBILITY)
             return Qt::ItemIsUserCheckable | QAbstractItemModel::flags(index);
-        if(index.column() == TYPE)
-            return Qt::ItemIsSelectable | QAbstractItemModel::flags(index);
         return Qt::NoItemFlags;
     } else {
         return Qt::NoItemFlags;

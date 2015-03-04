@@ -14,7 +14,7 @@ public:
 EditingToolBarListener* EditingToolBarListener::listener = 0;
 
 ToolBarListener* EditingToolBarListener::toolBarClassType() {
-    if(listener == 0) {
+    if(listener == 0) {
         listener = new EditingToolBarNullListener();
     }
     return listener;

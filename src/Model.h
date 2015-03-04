@@ -20,7 +20,7 @@ public:
     /** Describes the different columns available in this model
      */
     enum Data {
-        NAME, VISIBILITY, TYPE
+        NAME, VISIBILITY
     };
 
     /** Returns the index of the item in the model
