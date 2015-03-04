@@ -64,8 +64,15 @@ Spline& Spline::operator=(const Spline &other) {
 vec2 Spline::evaluate(real value) const {
     uint n = lowerNextKnot(value); // value is element of range [knot[n], knot[n+1])
     vector<vec2> controlPointsCopy(m_degree + 1);
+    //TODO: find bug and delete following lines!
+    if((n - m_degree + 1) < 0 || (n - m_degree + 1) >= m_controlPoints.size() || n + 1 >= m_controlPoints.size()) {
+        std::cerr << "ATTENTION! PROGRAM WILL QUIT UNEXPECTEDLY IN A MOMENT!!!" << std::endl;
+        std::cerr << "Spline has following state:" << std::endl;
+        std::cerr << (*this) << std::endl;
+        std::cerr << "IF PROGRAM DOES NOT QUIT NOW, BUG WAS FOUND!!!" << std::endl;
+    }
     for(uint i = 0; i <= m_degree; ++i) {
-        controlPointsCopy[i] = m_controlPoints.at(n - m_degree + 1 + i);
+        controlPointsCopy[i] = m_controlPoints.at((n + 1 + i) - m_degree); //Attention: do NOT change the order in braces, as uint is used!
     }
     deBoor(controlPointsCopy, value, n);
     return controlPointsCopy.at(m_degree);
@@ -87,7 +94,7 @@ vec2 Spline::derivative(real value) const {
     uint n = lowerNextKnot(value); // value is element of [knot[n], knot[n+1])
     vector<vec2> controlPointsCopy(m_degree + 1);
     for(uint i = 0; i < m_degree + 1; ++i) {
-        controlPointsCopy[i] = m_controlPoints.at(n - m_degree + 1 + i);
+        controlPointsCopy[i] = m_controlPoints.at((n + 1 + i) - m_degree); //Attention: do NOT change the order in braces, as uint is used!
     }
 
     //Stop de Boor algorithm one step earlier than when evaluating a curve point
