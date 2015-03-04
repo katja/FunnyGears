@@ -16,6 +16,8 @@ public:
 
     bool reachedEnd() const;
 
+    bool tryToContinueWithOtherList(std::list<ContactPointsWithPosition*> &possibleLists);
+
     void startWith(CPcutting cutting, int standardNormalDirection);
     void startWith(NCPcutting cutting, int standardNormalDirection);
 

@@ -152,15 +152,19 @@ void ContactPointSortingList::copyPointsInSuitableLists() {
 
     for(ContactPoint *cp : (*this)) {
         if(cp->error != ErrorCode::NO_CUT_WITH_REFERENCE_RADIUS) {
-            int pitchNumber = pitchNumberOfPoint(cp->point);
-            if(pitchNumber != 0) {
-                bool alreadyFound = false;
-                for(uint i = 0; i < foundPositions.size() && !alreadyFound; ++i) {
-                    if(pitchNumber == foundPositions[i])
-                        alreadyFound = true;
+            for(uint i = 0; i < 2; ++i) { //once for each: point and forbiddenAreaEndPoint
+                vec2 examinedPoint = (i == 0) ? cp->point : cp->forbiddenAreaEndPoint;
+                int pitchNumber = pitchNumberOfPoint(examinedPoint);
+
+                if(pitchNumber != 0) {
+                    bool alreadyFound = false;
+                    for(uint i = 0; i < foundPositions.size() && !alreadyFound; ++i) {
+                        if(pitchNumber == foundPositions[i])
+                            alreadyFound = true;
+                    }
+                    if(!alreadyFound)
+                        foundPositions.push_back(pitchNumber);
                 }
-                if(!alreadyFound)
-                    foundPositions.push_back(pitchNumber);
             }
             firstPositionList->points.push_back(new ContactPoint(*cp));
 
@@ -256,7 +260,7 @@ void ContactPointSortingList::findAllCoveredPoints() {
     for(ContactPointsWithPosition *contactPointsWithPosition : m_contactPointsWithPositionList) {
         securityBreakTreshold += 2 * contactPointsWithPosition->points.size();
     }
-    m2x2 betweenStartStop = glm::inverse(m2x2(m_examinedPitchStartDirection, m_examinedPitchStopDirection));
+    Ray rayOfPitchEnd(vec2(0, 0), glm::rotate(m_examinedPitchStartDirection, m_angularPitchRotation));
 
     do {
         std::vector<CPcutting> cpCuttingsList;
@@ -299,21 +303,27 @@ void ContactPointSortingList::findAllCoveredPoints() {
             }
         }
 
+        if(it.reachedEnd())
+            it.tryToContinueWithOtherList(m_contactPointsWithPositionList);
+
         ++securityBreak;
         securityBreakCondition = (securityBreak <= securityBreakTreshold);
         notAtListEndCondition = !it.reachedEnd();
+
+        real epsilon = glm::length(m_gearPoints[0] - glm::rotate(it.previousPoint(), -m_angularPitchRotation));
         if(notAtListEndCondition) {
-            vec2 baryz = betweenStartStop * it.currentPoint();
-            bool isStillBetween = (baryz.x > 0) && (baryz.y > 0);
-            real epsilon = glm::length(m_gearPoints[0] - glm::rotate(it.currentPoint(), -m_angularPitchRotation));
-            notYetAtOriginCondition = (isStillBetween || epsilon > 1);
-        } else {
-            notYetAtOriginCondition = true;
+            vec2 intersection;
+            if(rayOfPitchEnd.intersect(it.previousPoint(), it.currentPoint(), intersection, 0.0001)) {
+                real intersectionEpsilon = glm::length(m_gearPoints[0] - glm::rotate(intersection, -m_angularPitchRotation));
+                if(intersectionEpsilon < epsilon)
+                    epsilon = intersectionEpsilon;
+            }
         }
+        notYetAtOriginCondition = (epsilon > 1.5);
 
     } while(securityBreakCondition && notYetAtOriginCondition && notAtListEndCondition);
 
-    std::cout << "After while loop and securityBreakCondition:  " << securityBreakCondition << "   securityBreak = " << securityBreak << " of treshold: " << securityBreakTreshold << std::endl;
+    std::cout << "\n\nAfter while loop and securityBreakCondition:  " << securityBreakCondition << "   securityBreak = " << securityBreak << " of treshold: " << securityBreakTreshold << std::endl;
     std::cout << "                 and notYetAtOriginCondition: " << notYetAtOriginCondition << std::endl;
     std::cout << "                 and notAtListEndCondition:   " << notAtListEndCondition << std::endl;
     std::cout << "        distance from first to last point if rotated: " << glm::length(m_gearPoints[0] - glm::rotate(m_gearPoints[m_gearPoints.size() - 1], -m_angularPitchRotation));
@@ -356,7 +366,7 @@ uint ContactPointSortingList::findStartPointForGearPoints(CPcutting &cpCutting, 
                 cpCuttingsList.push_back(CPcutting{glm::length(intersection), intersection, previous, &(contactPointsWithPosition->points), IterationLocation::Ground});
             }
             //test top:
-            if(ray.intersect((*previous)->originPoint, (*current)->originPoint, intersection, 0.0001)) {
+            if(ray.intersect((*previous)->forbiddenAreaEndPoint, (*current)->forbiddenAreaEndPoint, intersection, 0.0001)) {
                 cpCuttingsList.push_back(CPcutting{glm::length(intersection), intersection, previous, &(contactPointsWithPosition->points), IterationLocation::Top});
             }
         }

@@ -11,12 +11,12 @@ ContactPointIterator& ContactPointIterator::operator++() {
     m_previousPoint = currentPoint();
 
     if(m_iterationState == IterationState::CP) {
-        if(m_iterationDirection == IterationDirection::Normal)
-            ++m_cpIterator; else --m_cpIterator;
+        if(m_iterationDirection == IterationDirection::Normal) ++m_cpIterator;
+        else --m_cpIterator;
 
-    } else {
-        if(m_iterationDirection == IterationDirection::Normal)
-            ++m_ncpPosition; else --m_ncpPosition;
+    } else { //IterationState::NCP
+        if(m_iterationDirection == IterationDirection::Normal) ++m_ncpPosition;
+        else --m_ncpPosition;
     }
     return (*this);
 }
@@ -34,6 +34,32 @@ bool ContactPointIterator::reachedEnd() const {
         else
             return (m_ncpPosition <= -1);
     }
+}
+
+bool ContactPointIterator::tryToContinueWithOtherList(std::list<ContactPointsWithPosition*> &possibleLists) {
+    //Normally one should not get cases, where the end of a list is reached, when in NCP state.
+    //Therefore it is not regarded as important to switch to another list
+    if(m_iterationState == IterationState::NCP)
+        return false;
+
+    //Up to now, there is only the case regarded with IterationLocation::Ground and IterationDirection::Normal
+    //as this will be the most probable
+    if(m_iterationLocation != IterationLocation::Ground || m_iterationDirection != IterationDirection::Normal)
+        return false; //only yet implemented Case uses: IterationLocation::Ground and IterationDirection::Normal
+
+    for(ContactPointsWithPosition *contactPointsWithPosition : possibleLists) {
+        vector<ContactPoint*> *cpList = &(contactPointsWithPosition->points);
+        if(cpList != m_cpList) {
+            vec2 pointDistance = cpList->front()->point - (*(m_cpIterator - 1))->point;
+            vec2 forbiddenEndDistance = cpList->front()->forbiddenAreaEndPoint - (*(m_cpIterator - 1))->forbiddenAreaEndPoint;
+            if(glm::length(pointDistance) < 0.5 && glm::length(forbiddenEndDistance) < 0.5) {
+                m_cpList = cpList;
+                m_cpIterator = cpList->begin();
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void ContactPointIterator::startWith(CPcutting cutting, int standardNormalDirection) {
@@ -107,7 +133,8 @@ vec2 ContactPointIterator::currentPoint() const {
             return (*m_cpIterator)->point;
         else
             return (*m_cpIterator)->forbiddenAreaEndPoint;
-    } else {
+
+    } else { //IterationState::NCP
         if(m_iterationLocation == IterationLocation::Ground)
             return m_ncp->points[m_ncpPosition];
         else
@@ -274,7 +301,6 @@ void ContactPointIterator::setNormalDirection() {
 }
 
 bool ContactPointIterator::isOnNormalsSide(vec2 point) const {
-    assert(m_normalDirection != 0);
     vec2 toCurrentPoint = currentPoint() - m_previousPoint;
     vec2 toPoint = point - m_previousPoint;
     real side = cross(normalize(toCurrentPoint), normalize(toPoint));
