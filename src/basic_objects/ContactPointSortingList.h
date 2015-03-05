@@ -32,6 +32,7 @@ public:
     const std::list<NoneContactPoint*>& noneContactPoints() const;
     const vector<vec2>& gearPoints() const;
     const vector<ContactPoint*>& gearContactPoints() const;
+    uint numberOfNotCorrectContactPoints() const;
     vec2 startOfExaminedPitchInDrivenGear() const;
     vec2 endOfExaminedPitchInDrivenGear() const;
     real lengthOfPitchesInDrivenGear() const;
@@ -52,6 +53,7 @@ private:
     real                            m_examinedPitchLengthInDrivingGear;
     vector<vec2>                    m_gearPoints;
     vector<ContactPoint*>           m_gearCPs;
+    uint                            m_gearNotCorrectCPCounter;
 
     void setAngularPitch(uint numberOfTeeth, bool isDescribedClockwise);
     bool setExaminedPitch();

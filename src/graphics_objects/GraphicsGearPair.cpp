@@ -39,6 +39,7 @@ GraphicsGearPair::GraphicsGearPair(GearPair *gearPair) :
     m_gearPair(gearPair),
     m_drivingGear(nullptr),
     m_drivenGear(nullptr),
+    m_gearPairInformationWidget(new GearPairInformationWidget(gearPair)),
     m_drivingGearSamplingIsVisible(true),
     m_drivenGearSamplingIsVisible(true),
     m_forbiddenAreaInDrivingGearIsVisible(false),
@@ -67,12 +68,14 @@ GraphicsGearPair::GraphicsGearPair(GearPair *gearPair) :
     m_drivenGear->setVisibleControlPolygon(false);
 
     m_drivingGear->informAboutChange(this);
+    informAboutChange(m_gearPairInformationWidget);
 
     m_drivenGear->setTransform(QTransform().translate(m_gearPair->getDistanceOfCenters(), 0));
     updateBoundingRect();
 }
 
 GraphicsGearPair::~GraphicsGearPair() {
+    delete m_gearPairInformationWidget;
     delete m_drivingGear;
     delete m_drivenGear;
     std::cout << "GraphicsGearPair is deleted" << std::endl;
@@ -101,6 +104,12 @@ void GraphicsGearPair::update() {
     prepareGeometryChange();
     m_drivenGear->setTransform(QTransform().translate(m_gearPair->getDistanceOfCenters(), 0));
     updateBoundingRect();
+}
+
+void GraphicsGearPair::showGearPairInformationWidget() {
+    m_gearPairInformationWidget->activateWindow();
+    m_gearPairInformationWidget->show();
+    m_gearPairInformationWidget->raise();
 }
 
 real GraphicsGearPair::module() const {

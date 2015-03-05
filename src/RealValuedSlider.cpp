@@ -2,6 +2,8 @@
 
 RealValuedSlider::RealValuedSlider(const QString &title, QWidget *parent) : QGroupBox(title, parent) {
 
+    m_precision = 3; //default
+
     m_minLabel = new QLabel(this);
     m_minLabel->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 
@@ -27,18 +29,28 @@ RealValuedSlider::RealValuedSlider(const QString &title, QWidget *parent) : QGro
     m_valueLabel->setBuddy(m_slider);
 
     QGridLayout *gridLayout = new QGridLayout(this);
+    gridLayout->setContentsMargins(4, 0, 4, 4);
     gridLayout->setHorizontalSpacing(0);
-    gridLayout->setVerticalSpacing(0);
+    gridLayout->setVerticalSpacing(3);
     gridLayout->addWidget(m_slider,     0, 0, 1, 3);
-    gridLayout->addWidget(m_minLabel,   1, 0);
-    gridLayout->addWidget(m_maxLabel,   1, 2);
-    gridLayout->addWidget(m_valueLabel, 2, 1, Qt::AlignTop);
+    gridLayout->addWidget(m_minLabel,   1, 0, Qt::AlignTop);
+    gridLayout->addWidget(m_valueLabel, 1, 1, Qt::AlignBottom);
+    gridLayout->addWidget(m_maxLabel,   1, 2, Qt::AlignTop);
 
     connect(m_slider, SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged(int)));
 }
 
 real RealValuedSlider::value() const {
     return m_value;
+}
+
+int RealValuedSlider::precision() const {
+    return m_precision;
+}
+
+void RealValuedSlider::setPrecision(int precision) {
+    m_precision = precision;
+    updateLabels();
 }
 
 void RealValuedSlider::setValue(real value) {
@@ -69,9 +81,9 @@ void RealValuedSlider::setRange(real min, real max) {
 
 void RealValuedSlider::updateLabels() {
     QString str;
-    m_minLabel->setText(str.setNum(m_minValue));
-    m_maxLabel->setText(str.setNum(m_maxValue));
-    m_valueLabel->setText(str.setNum(m_value));
+    m_minLabel->setText(str.setNum(m_minValue, 'g', m_precision));
+    m_maxLabel->setText(str.setNum(m_maxValue, 'g', m_precision));
+    m_valueLabel->setText(str.setNum(m_value, 'g', m_precision));
 }
 
 void RealValuedSlider::sliderValueChanged(int value) {
@@ -81,7 +93,7 @@ void RealValuedSlider::sliderValueChanged(int value) {
        m_intValue = value;
        m_value = toValueFromSlidersInteger(value);
        QString str;
-       m_valueLabel->setText(str.setNum(m_value));
+       m_valueLabel->setText(str.setNum(m_value, 'g', m_precision));
        emit valueChanged(m_value);
     }
 }

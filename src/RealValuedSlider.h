@@ -14,6 +14,9 @@ public:
 
     real value() const; //current value
 
+    int precision() const;
+    void setPrecision(int precision);
+
 public slots:
     void setRange(real min, real max);
     void setValue(real value);
@@ -30,7 +33,8 @@ protected:
     real    m_minValue,
             m_maxValue,
             m_value;
-    int     m_intValue;
+    int     m_intValue,
+            m_precision;
 
     void updateLabels();
 

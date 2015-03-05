@@ -24,6 +24,7 @@
 #include <QDockWidget>
 #include <QDrag>
 #include <QFileDialog>
+#include <QFormLayout>
 #include <QGraphicsColorizeEffect>
 #include <QGraphicsItem>
 #include <QGraphicsScene>

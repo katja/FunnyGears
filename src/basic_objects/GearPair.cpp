@@ -11,7 +11,8 @@ GearPair::GearPair(const SplineGear &drivingGear) :
     m_drivenGear(new SplineGear(Spline())),
     m_completeToothProfile(m_drivingGear->completeToothProfile()),
     m_maxDriftAngle(DefaultMaxDrift),
-    m_samplingRate(DefaultSamplingRate)
+    m_samplingRate(DefaultSamplingRate),
+    m_gearPairInformation(new GearPairInformation(this))
 {
 
     m_drivenGear->setNumberOfTeeth(m_drivingGear->numberOfTeeth());
@@ -19,6 +20,7 @@ GearPair::GearPair(const SplineGear &drivingGear) :
 }
 
 GearPair::~GearPair() {
+    delete m_gearPairInformation;
 }
 
 void GearPair::calculateAgainWithAllAttributes() {
@@ -37,6 +39,7 @@ void GearPair::calculateAgainWithNewToothProfile() {
 }
 
 void GearPair::calculateAgainWithUnchangedAttributes() {
+    m_gearPairInformation->setBackAttributes();
     m_allContactPoints.clear(); //deletes all ContactPoint* of the list and when again sort(...) is called, the other saved lists are deleted, too
 
     m_stepSize = (m_completeToothProfile->upperDomainLimit() - m_completeToothProfile->lowerDomainLimit())
@@ -44,6 +47,10 @@ void GearPair::calculateAgainWithUnchangedAttributes() {
 
     constructListOfPossiblePairingPoints();
     chooseCorrectPoints();
+}
+
+GearPairInformation* GearPair::gearPairInformation() {
+    return m_gearPairInformation;
 }
 
 const ContactPointSortingList& GearPair::foundPoints() {
@@ -275,7 +282,10 @@ void GearPair::insertThicknessInContactPoint(ContactPoint& contactPoint) const {
     vector<vec2> intersectionPoints;
     m_drivingGear->getIntersectionPointsWithRay(ray, intersectionPoints);
     if(intersectionPoints.empty()) {
+        //As Gear is closed Curve without crossings, every normal should find a cutting!
         std::cerr << "CURIOS THINGS HAPPENED! A ray of the gear hadn't found a cutting!" << std::endl;
+        //If no cutting is found, curve has not a form of a gear!
+        m_gearPairInformation->notValidGearShapeFound();
         contactPoint.error = ErrorCode::NO_THICKNESS;
     } else {
         real epsilon = 1.0; //prevent finding the point itself as intersection point

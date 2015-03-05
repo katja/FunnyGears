@@ -64,14 +64,13 @@ GraphicsSplineGearAttributesWidget(QWidget *parent) : GraphicsItemAttributesWidg
     gearLayout->addWidget(m_referenceCircleVisibleCheckBox, 3, 1);
     gearLayout->addWidget(m_animateCheckbox,            4, 0);
     gearLayout->addWidget(m_rotationVelocitySlider,     4, 1);
-    gearLayout->setRowStretch(5, 1); // As row 5 is not filled with a widget, the layout fills with empty space, if it is larger than needed
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(4, 0, 4, 4); //use small margins at left, right and bottom
     // layout->setSpacing(0); //uses no space between widgets in layout (not border)
-
     layout->addWidget(m_splineAttributesWidget);
     layout->addWidget(gearWidget);
+    layout->addStretch(); // layout fills with empty space, if it is larger than needed
 }
 
 GraphicsSplineGearAttributesWidget::

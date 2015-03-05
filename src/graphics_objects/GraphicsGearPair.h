@@ -9,6 +9,7 @@
 #include "basic_objects/GearPair.h"
 #include "basic_objects/ContactPoint.h"
 #include "ChangingObjectListener.h"
+#include "GearPairInformationWidget.h"
 
 class GraphicsGearPair : public GraphicsScheduleItem, public ChangingObjectListener {
 
@@ -27,6 +28,8 @@ public:
     void objectChanged(ChangingObject *object) override; // from ChangingObjectListener
 
     void update();
+
+    void showGearPairInformationWidget();
 
     real module() const;
 
@@ -97,6 +100,8 @@ private:
     GearPair *m_gearPair;
     GraphicsMatingSplineGear *m_drivingGear;
     GraphicsMatingSplineGear *m_drivenGear;
+
+    GearPairInformationWidget *m_gearPairInformationWidget;
 
     bool m_drivingGearSamplingIsVisible;
     bool m_drivenGearSamplingIsVisible;

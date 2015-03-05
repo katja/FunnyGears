@@ -3,9 +3,28 @@
 GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *parent) :
     GraphicsItemAttributesWidget(parent)
 {
+
+    //////////////////
+    //Information:
+
     m_moduleLabel = new QLabel(this);
-    QLabel *moduleLabelText = new QLabel(tr("Module"), this);
+    QLabel *moduleLabelText = new QLabel(tr("Module:"), this);
     moduleLabelText->setBuddy(m_moduleLabel);
+
+    QPushButton *gearPairInformationButton = new QPushButton(tr("More ..."), this);
+    connect(gearPairInformationButton, SIGNAL(clicked()), this, SLOT(showGearPairInformation()));
+
+    QGroupBox *informationBox = new QGroupBox(tr("Information"), this);
+    QHBoxLayout *informationLayout = new QHBoxLayout(informationBox);
+    informationLayout->setContentsMargins(4, 0, 4, 4);
+    informationLayout->setSpacing(3);
+    informationLayout->addWidget(moduleLabelText);
+    informationLayout->addWidget(m_moduleLabel);
+    informationLayout->addStretch();
+    informationLayout->addWidget(gearPairInformationButton);
+
+    //////////////////
+    //Gearing Adaption:
 
     m_toothCountDrivenGearSpinBox = new QSpinBox(this);
     m_toothCountDrivenGearSpinBox->setMinimum(2);
@@ -15,6 +34,21 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
 
     m_drivingGearEnabledCheckBox = new QCheckBox(tr("Enable editing (driving gear)"), this);
     connect(m_drivingGearEnabledCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleDrivingGearEnabled(bool)));
+
+
+    ///HERE GOES THE ADAPTION OF THE NORMAL THINGS!!! TODO
+
+    QGroupBox *gearingAdaptionBox = new QGroupBox(tr("Adaption of the gearing"), this);
+    QGridLayout *gearingAdaptionLayout = new QGridLayout(gearingAdaptionBox);
+    gearingAdaptionLayout->setContentsMargins(4, 0, 4, 4);
+    gearingAdaptionLayout->setHorizontalSpacing(6);
+    gearingAdaptionLayout->setVerticalSpacing(3);
+    gearingAdaptionLayout->addWidget(toothCountLabel,               0, 0, Qt::AlignLeft);
+    gearingAdaptionLayout->addWidget(m_toothCountDrivenGearSpinBox, 0, 1, Qt::AlignRight);
+    gearingAdaptionLayout->addWidget(m_drivingGearEnabledCheckBox,  1, 0, 1, 2);
+
+    //////////////////
+    //Show...:
 
     m_drivingGearSamplingCheckBox = new QCheckBox(tr("...driving gear sampling"), this);
     connect(m_drivingGearSamplingCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleDrivingGearSamplingVisibility(bool)));
@@ -48,6 +82,8 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
 
     QGroupBox *showBox = new QGroupBox(tr("Show..."), this);
     QVBoxLayout *showBoxLayout = new QVBoxLayout(showBox);
+    showBoxLayout->setContentsMargins(4, 0, 4, 4);
+    showBoxLayout->setSpacing(3);
     showBoxLayout->addWidget(m_drivingGearSamplingCheckBox);
     showBoxLayout->addWidget(m_drivenGearSamplingCheckBox);
     showBoxLayout->addWidget(m_drivingGearForbiddenAreaCheckBox);
@@ -59,12 +95,26 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     showBoxLayout->addWidget(m_pitchesCheckBox);
     showBoxLayout->addWidget(m_pitchCirclesCheckBox);
 
+    //////////////////
+    //Rotation:
+
     m_rotationCheckBox = new QCheckBox(tr("Rotate the gears?"), this);
     connect(m_rotationCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleRotationOfGears(bool)));
     m_rotationVelocitySlider = new RealValuedSlider("Rotation velocity", this);
     m_rotationVelocitySlider->setRange(-2.0, 2.0);
     m_rotationVelocitySlider->setEnabled(false);
     connect(m_rotationVelocitySlider, SIGNAL(valueChanged(real)), this, SLOT(changeRotationVelocity(real)));
+
+    QGroupBox *rotationBox = new QGroupBox(tr("Rotation"), this);
+    QVBoxLayout *rotationLayout = new QVBoxLayout(rotationBox);
+    rotationLayout->setContentsMargins(4, 0, 4, 4);
+    rotationLayout->setSpacing(3);
+    rotationLayout->addWidget(m_rotationCheckBox);
+    rotationLayout->addWidget(m_rotationVelocitySlider);
+
+
+    //////////////////
+    //Rendering Setup:
 
     m_samplingRateSpinBox = new QSpinBox(this);
     m_samplingRateSpinBox->setRange(10, 150);
@@ -82,26 +132,35 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     m_smallPencilWidthCheckBox = new QCheckBox(tr("Use fine pencil for drawing"), this);
     connect(m_smallPencilWidthCheckBox, SIGNAL(toggled(bool)), this, SLOT(togglePencilWidth(bool)));
 
-    QGroupBox *renderingSetup = new QGroupBox(tr("Rendering setup"), this);
-    QGridLayout *renderingSetupLayout = new QGridLayout(renderingSetup);
+    QGroupBox *renderingSetupBox = new QGroupBox(tr("Rendering setup"), this);
+    QGridLayout *renderingSetupLayout = new QGridLayout(renderingSetupBox);
+    renderingSetupLayout->setContentsMargins(0, 0, 0, 0);
+    renderingSetupLayout->setHorizontalSpacing(3);
+    renderingSetupLayout->setVerticalSpacing(3);
     renderingSetupLayout->addWidget(samplingRateLabel,             0, 0);
     renderingSetupLayout->addWidget(m_samplingRateSpinBox,         0, 1);
     renderingSetupLayout->addWidget(maxDriftAngleLabel,            1, 0);
     renderingSetupLayout->addWidget(m_maxDriftAngleSpinBox,        1, 1);
     renderingSetupLayout->addWidget(m_smallPencilWidthCheckBox,    2, 0, 1, 2);
 
-    QGridLayout *layout = new QGridLayout(this);
-    layout->addWidget(moduleLabelText,               0, 0);
-    layout->addWidget(m_moduleLabel,                 0, 1);
-    layout->addWidget(toothCountLabel,               1, 0);
-    layout->addWidget(m_toothCountDrivenGearSpinBox, 1, 1);
-    layout->addWidget(m_drivingGearEnabledCheckBox,  2, 0, 1, 1);
-    layout->addWidget(showBox,                       3, 0, 1, 2);
-    layout->addWidget(m_rotationCheckBox,            4, 0, 1, 2);
-    layout->addWidget(m_rotationVelocitySlider,      5, 0, 1, 2);
-    layout->addWidget(renderingSetup,                6, 0, 1, 2);
+    ////////////////////////////////
+    //... SET ALL TOGETHER...
 
-    layout->setRowStretch(7, 1); //stretch the empty space at bottom and not _between_ the objects
+    QGroupBox *gearPairWidget = new QGroupBox(tr("Gear Pairing Attributes"), this);
+    QVBoxLayout *gearPairLayout = new QVBoxLayout(gearPairWidget);
+    gearPairLayout->setContentsMargins(4, 0, 4, 4);
+    gearPairLayout->setSpacing(15);
+    gearPairLayout->addWidget(informationBox);
+    gearPairLayout->addWidget(gearingAdaptionBox);
+    gearPairLayout->addWidget(showBox);
+    gearPairLayout->addWidget(rotationBox);
+    gearPairLayout->addWidget(renderingSetupBox);
+
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->setContentsMargins(4, 0, 4, 4); //use small margins at left, right and bottom (left, top, right, bottom)
+    layout->setSpacing(0);
+    layout->addWidget(gearPairWidget);
+    layout->addStretch(); //stretch the empty space at bottom and not _between_ the objects
 }
 
 GraphicsGearPairAttributesWidget::~GraphicsGearPairAttributesWidget() {
@@ -225,6 +284,10 @@ void GraphicsGearPairAttributesWidget::toggleRotationOfGears(bool checked) {
 
 void GraphicsGearPairAttributesWidget::changeRotationVelocity(real velocity) {
     m_currentGearPair->setRotationVelocity(velocity);
+}
+
+void GraphicsGearPairAttributesWidget::showGearPairInformation() {
+    m_currentGearPair->showGearPairInformationWidget();
 }
 
 void GraphicsGearPairAttributesWidget::changeSamplingRate(int samplingRate) {

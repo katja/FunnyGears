@@ -37,11 +37,11 @@ GraphicsSplineAttributesWidget::GraphicsSplineAttributesWidget(QWidget *parent) 
     splineLayout->addWidget(m_drawTangentCheckBox,3, 0);
     splineLayout->addWidget(m_tangentValueSlider, 3, 1);
     splineLayout->addWidget(m_refineButton,       4, 0, 1, 2);
-    splineLayout->setRowStretch(5, 1); // As row 5 is not filled with a widget, the layout fills with empty space, if it is larger than needed
 
     QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(4, 0, 4, 4); //use small margins at left, right and bottom
+    layout->setContentsMargins(4, 0, 4, 4); // use small margins at left, right and bottom
     layout->addWidget(splineWidget);
+    layout->addStretch(); // layout fills with empty space, if it is larger than needed
 }
 
 GraphicsSplineAttributesWidget::~GraphicsSplineAttributesWidget() {

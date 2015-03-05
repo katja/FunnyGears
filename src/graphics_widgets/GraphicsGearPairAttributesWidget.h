@@ -6,6 +6,7 @@
 #include "graphics_widgets/GraphicsItemAttributesWidget.h"
 #include "ChangingObjectListener.h"
 #include "graphics_objects/GraphicsGearPair.h"
+#include "GearPairInformationWidget.h"
 #include "RealValuedSlider.h"
 
 class GraphicsGearPairAttributesWidget : public GraphicsItemAttributesWidget, public ChangingObjectListener {
@@ -38,6 +39,7 @@ private slots:
     void togglePitchCirclesVisibility(bool);
     void toggleRotationOfGears(bool);
     void changeRotationVelocity(real);
+    void showGearPairInformation();
     void changeSamplingRate(int);
     void changeMaxDriftAngle(int);
     void togglePencilWidth(bool);
@@ -66,6 +68,8 @@ private:
              *m_maxDriftAngleSpinBox;
 
     QLabel *m_moduleLabel;
+
+    GearPairInformationWidget *m_gearPairInformationWidget;
 
     int m_samplingRate;
     int m_maxDriftAngle; //in degree

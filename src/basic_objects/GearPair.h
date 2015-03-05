@@ -3,6 +3,7 @@
 
 #include "definitions.h"
 #include "helpers.h"
+#include "basic_objects/GearPairInformation.h"
 #include "basic_objects/ContactPoint.h"
 #include "basic_objects/ContactPointSortingList.h"
 class SplineGear;
@@ -18,6 +19,7 @@ public:
     void calculateAgainWithNewToothProfile();
     void calculateAgainWithUnchangedAttributes();
 
+    GearPairInformation* gearPairInformation();
     const ContactPointSortingList& foundPoints();
 
     SplineGear* drivingGear() const;
@@ -59,6 +61,7 @@ private:
     uint m_samplingRate;
     real m_stepSize;
 
+    GearPairInformation     *m_gearPairInformation;
     ContactPointSortingList m_allContactPoints;
 
     void constructListOfPossiblePairingPoints();

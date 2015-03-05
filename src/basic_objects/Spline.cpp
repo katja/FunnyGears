@@ -67,6 +67,12 @@ vec2 Spline::evaluate(real value) const {
     //TODO: find bug and delete following lines!
     if((n - m_degree + 1) < 0 || (n - m_degree + 1) >= m_controlPoints.size() || n + 1 >= m_controlPoints.size()) {
         std::cerr << "ATTENTION! PROGRAM WILL QUIT UNEXPECTEDLY IN A MOMENT!!!" << std::endl;
+        if((n - m_degree + 1) < 0)
+            std::cerr << "First Condition (< 0)" << std::endl;
+        if((n - m_degree + 1) >= m_controlPoints.size())
+            std::cerr << "Seco. Condition (>= size)" << std::endl;
+        if(n + 1 >= m_controlPoints.size())
+            std::cerr << "Third Condition (>= size)" << std::endl;
         std::cerr << "Spline has following state:" << std::endl;
         std::cerr << (*this) << std::endl;
         std::cerr << "IF PROGRAM DOES NOT QUIT NOW, BUG WAS FOUND!!!" << std::endl;
@@ -215,7 +221,7 @@ void Spline::setControlPoints(const vector<vec2> &newControlPoints) {
     for(uint i = 0; i < newControlPoints.size(); ++i) {
         m_controlPoints.push_back(newControlPoints[i]);
     }
-    int knotDifference = (m_degree + m_controlPoints.size() - 1) - m_knots.size(); // (new knot size) - (old knot size)
+    int knotDifference = static_cast<int>(m_degree + m_controlPoints.size() - 1) - m_knots.size(); // (new knot size) - (old knot size)
     if(knotDifference < 0) {
         //old knot vector was larger => make shorter
         m_knots.erase(m_knots.end() + knotDifference, m_knots.end());
@@ -225,9 +231,10 @@ void Spline::setControlPoints(const vector<vec2> &newControlPoints) {
             m_knots.push_back(m_knots.back() + 1);
         }
     }
-
+    std::cout << "Spline::setControlPoints() before ADJUST KNOTS and is: " << (*this) << std::endl;
     if(knotDifference != 0 && isValid())
         adjustKnots();
+    std::cout << "                           after  ADJUST KNOTS       : " << (*this) << std::endl;
 }
 
 void Spline::removeControlPoint(uint index) {
@@ -689,9 +696,11 @@ void Spline::adjustKnots() {
         } else
 
         //assure that there are not more than n = m_degree same knot values
-        if(m_knots.at(i) == lastKnotValue) {
+        if(absolute(m_knots.at(i) - lastKnotValue) < 0.00000001) {
+            if(m_knots.at(i) - lastKnotValue != 0)
+                std::cout << "ATTENTION!!!!!!! adjustKnots behaves other than in previous states!!!" << std::endl;
             ++occurences;
-            if(occurences > m_degree + 1) {
+            if(occurences > m_degree) {
                 m_knots[i] = lastKnotValue + 1;
                 occurences = 1;
             }

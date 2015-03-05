@@ -32,7 +32,7 @@ void ContactPointSortingList::createCoveringLists(uint numberOfTeeth, bool isDes
     reduceNumberOfNoneContactPoints(); //needs a filled m_noneContactPointList
     copyNoneContactPointsInRelevantPitches();
     findAllCoveredPoints();
-        //=> m_gearPoints, m_gearCPs
+        //=> m_gearPoints, m_gearCPs, m_gearNotCorrectCPCounter
 }
 
 void ContactPointSortingList::sort() {
@@ -82,6 +82,10 @@ const vector<vec2>& ContactPointSortingList::gearPoints() const {
 
 const vector<ContactPoint*>& ContactPointSortingList::gearContactPoints() const {
     return m_gearCPs;
+}
+
+uint ContactPointSortingList::numberOfNotCorrectContactPoints() const {
+    return m_gearNotCorrectCPCounter;
 }
 
 vec2 ContactPointSortingList::startOfExaminedPitchInDrivenGear() const {
@@ -235,6 +239,7 @@ void ContactPointSortingList::copyNoneContactPointsInRelevantPitches() {
 void ContactPointSortingList::findAllCoveredPoints() {
     m_gearPoints.clear();
     m_gearCPs.clear();
+    m_gearNotCorrectCPCounter = 0;
 
     ContactPointIterator it;
 
@@ -277,6 +282,8 @@ void ContactPointSortingList::findAllCoveredPoints() {
             ContactPoint *current = it.currentCorrectInContactPoint();
             if(current != nullptr)
                 m_gearCPs.push_back(current);
+            else
+                ++m_gearNotCorrectCPCounter; //current point is a NCP or a forbiddenAreaEndPoint
             ++it;
 
         } else {
