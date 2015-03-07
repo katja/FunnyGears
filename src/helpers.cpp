@@ -111,18 +111,49 @@ std::ostream& operator <<(std::ostream &os, const ErrorCode &error) {
     }
 }
 
+    real evaluationValue; //Spline curve of driving gear was evaluated at this value to get this ContactPoint
+    uint evaluationStep; //Evaluation number of ContactPoint
+    vec2 point; //Point on driven gear
+    vec2 normal; //Must be normalized! normal on driven gear
+    vec2 originPoint; //Point on driving gear
+    vec2 originNormal; //Must be normalized! Normal on driving gear
+    vec2 contactPosition; //Position where contact took place
+    vec2 normalInContact; //Must be normalized! Normal of driving gear in contact point
+    real forbiddenAreaLength; //Thickness of the driving gear
+    vec2 forbiddenAreaEndPoint; //Opposite point of driving gear transferred to driven gear
+    bool usedLargerValue; // In most cases the normal of the driving gear has two cuts with reference radius => originPoint + t * originNormal => if maximum possible value is taken, this attribute is set to true
+    bool isCovered; //is set to true, when this point can't become a contact point
+    bool isRotated;
+    ErrorCode error;
+
+
 std::ostream& operator <<(std::ostream &os, const ContactPoint &cp) {
     os << "CONTACT POINT with properties...\n";
+    os << "Evaluation value:        " << cp.evaluationValue << "\n";
+    os << "Evaluation step:         " << cp.evaluationStep << "\n";
+    os << "Driven gear point:      " << cp.point << "\n";
+    os << "Driven gear normal:     " << cp.normal << "\n";
     os << "Driving gear point:      " << cp.originPoint << "\n";
     os << "Driving gear normal:     " << cp.originNormal << "\n";
-    os << "Driven gear  point:      " << cp.point << "\n";
-    os << "Driven gear  normal:     " << cp.normal << "\n";
     os << "Contact position point:  " << cp.contactPosition << "\n";
     os << "Contact position normal: " << cp.normalInContact << "\n";
     os << "Forbidden area length:   " << cp.forbiddenAreaLength << "\n";
     os << "Forbidden area end point:" << cp.forbiddenAreaEndPoint << "\n";
+    os << "Used larger t value: "     << (cp.usedLargerValue ? "yes" : "no") << "\n";
     os << "This is a contact point: " << (cp.isCovered ? "no" : "yes") << "\n";
     os << "Error: " << cp.error << "\n";
+    return os;
+}
+
+std::ostream& operator <<(std::ostream &os, const list< list<ContactPoint*> *> &listsOfContactPoints) {
+    std::cout << "list of lists of ContactPoints – " << listsOfContactPoints.size() << " lists included." << std::endl;
+    for(list<ContactPoint*> *l : listsOfContactPoints) {
+        std::cout << "-------------------------------\nLIST with " << l->size() << " ContactPoints:" << std::endl;
+        for(ContactPoint *cp : *l) {
+            std::cout << *cp << std::endl;
+        }
+        std::cout << "-------------------------------" << std::endl;
+    }
     return os;
 }
 

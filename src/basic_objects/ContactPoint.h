@@ -25,6 +25,7 @@ struct ContactPoint {
         normalInContact(other.normalInContact),
         forbiddenAreaLength(other.forbiddenAreaLength),
         forbiddenAreaEndPoint(other.forbiddenAreaEndPoint),
+        usedLargerValue(other.usedLargerValue),
         isCovered(other.isCovered),
         isRotated(other.isRotated),
         error(other.error)
@@ -40,6 +41,7 @@ struct ContactPoint {
     vec2 normalInContact; //Must be normalized! Normal of driving gear in contact point
     real forbiddenAreaLength; //Thickness of the driving gear
     vec2 forbiddenAreaEndPoint; //Opposite point of driving gear transferred to driven gear
+    bool usedLargerValue; // In most cases the normal of the driving gear has two cuts with reference radius => originPoint + t * originNormal => if maximum possible value is taken, this attribute is set to true
     bool isCovered; //is set to true, when this point can't become a contact point
     bool isRotated;
     ErrorCode error;
@@ -71,6 +73,7 @@ struct NoneContactPoint : public ContactPoint {
         normalInContact = vec2(0, 0);
         forbiddenAreaLength = cp.forbiddenAreaLength;
         forbiddenAreaEndPoint = vec2(0, 0);
+        usedLargerValue = true; //is not possible, when no cut with reference radius is available
         isCovered = cp.isCovered;
         isRotated = cp.isRotated;
         error = ErrorCode::NO_CUT_WITH_REFERENCE_RADIUS;

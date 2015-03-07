@@ -40,7 +40,7 @@ void GearPair::calculateAgainWithNewToothProfile() {
 
 void GearPair::calculateAgainWithUnchangedAttributes() {
     m_gearPairInformation->setBackAttributes();
-    m_allContactPoints.clear(); //deletes all ContactPoint* of the list and when again sort(...) is called, the other saved lists are deleted, too
+    m_contactPointManager.clear(); //deletes all ContactPoint* of the list
 
     m_stepSize = (m_completeToothProfile->upperDomainLimit() - m_completeToothProfile->lowerDomainLimit())
                     / (m_samplingRate - 1);
@@ -53,8 +53,8 @@ GearPairInformation* GearPair::gearPairInformation() {
     return m_gearPairInformation;
 }
 
-const ContactPointSortingList& GearPair::foundPoints() {
-    return m_allContactPoints;
+const ContactPointManager& GearPair::contactPointManager() {
+    return m_contactPointManager;
 }
 
 SplineGear* GearPair::drivingGear() const {
@@ -121,12 +121,11 @@ void GearPair::constructListOfPossiblePairingPoints() {
     vec2 nextNormal = normalAt(startValue);
     real nextStepValue = startValue;
 
-    ContactPoint *contactPoint = contactPointOf(startPoint, nextNormal, startValue);
-    m_allContactPoints.push_back(contactPoint);
+    createAndInsertContactPoint(startPoint, nextNormal, startValue);
 
     for(uint step = 1; step < m_samplingRate; ++step) {
         vec2 normal = nextNormal;
-        real stepValue = nextStepValue;
+        real evalValue = nextStepValue;
 
         nextStepValue = startValue + m_stepSize * (real)step;
         if(nextStepValue > m_completeToothProfile->upperDomainLimit()) {
@@ -141,68 +140,98 @@ void GearPair::constructListOfPossiblePairingPoints() {
 
         // for small enough angle between normals => partition = 1 => will walk only once
         // through insertRefinedContactPoints and insert a ContactPoint at nextStepValue
-        insertRefinedContactPoints(stepValue, nextStepValue, partition);
+        insertRefinedContactPoints(evalValue, nextStepValue, partition);
     }
+    m_contactPointManager.finishInsertion();
 }
 
-void GearPair::insertRefinedContactPoints(real stepValue, real nextStepValue, uint partition) {
-    vec2 normal = normalAt(stepValue);
+//It is really important, that the points with smaller evaluationValues are inserted first!!!
+void GearPair::insertRefinedContactPoints(real evalValue, real nextStepValue, uint partition) {
+    vec2 normal = normalAt(evalValue);
     vec2 nextNormal = normalAt(nextStepValue);
 
     if(partition > 0 && angleBetweenN(normal, nextNormal) > m_maxDriftAngle) {
-        real refineAt = 0.5 * (stepValue + nextStepValue);
-        insertRefinedContactPoints(stepValue, refineAt, partition - 1);
+        real refineAt = 0.5 * (evalValue + nextStepValue);
+        insertRefinedContactPoints(evalValue, refineAt, partition - 1);
         insertRefinedContactPoints(refineAt, nextStepValue, partition - 1);
 
     } else if (partition > 0) {
-        stepValue = nextStepValue;
+        evalValue = nextStepValue;
         normal = nextNormal;
-        vec2 point = m_completeToothProfile->evaluate(stepValue);
-        ContactPoint *contactPoint = contactPointOf(point, normal, stepValue);
-        m_allContactPoints.push_back(contactPoint);
+        vec2 point = m_completeToothProfile->evaluate(evalValue);
+        createAndInsertContactPoint(point, normal, evalValue);
 
     } else { //partition == 0
-        vec2 point = m_completeToothProfile->evaluate(stepValue);
+        vec2 point = m_completeToothProfile->evaluate(evalValue);
         vec2 nextPoint = m_completeToothProfile->evaluate(nextStepValue);
-        ContactPoint *contactPoint = contactPointOf(0.5 * (point + nextPoint),
-                                                    0.5 * (normal + nextNormal),
-                                                    0.5 * (stepValue + nextStepValue));
-        m_allContactPoints.push_back(contactPoint);
+        createAndInsertContactPoint(0.5 * (point + nextPoint),
+                                    0.5 * (normal + nextNormal),
+                                    0.5 * (evalValue + nextStepValue));
     }
 }
 
 void GearPair::chooseCorrectPoints() {
-    m_allContactPoints.createCoveringLists(
-        m_drivenGear->numberOfTeeth(),
-        !(m_drivingGear->toothDescribedInClockDirection())
-    );
-    vector<vec2> gearPoints = m_allContactPoints.gearPoints();
+    m_contactPointManager.processPointsToGear(m_drivenGear->numberOfTeeth(), !(m_drivingGear->toothDescribedInClockDirection()));
+    vector<vec2> gearPoints = m_contactPointManager.gearPoints();
     m_drivenGear->setDegree(1);
     m_drivenGear->setControlPointsForTooth(gearPoints);
 }
 
-ContactPoint* GearPair::contactPointOf(const vec2 &point, const vec2 &normal, real stepValue) {
-    ContactPoint *cp = new ContactPoint();
-    cp->evaluationValue = stepValue;
-    cp->originPoint = point;
-    cp->originNormal = normal;
-    cp->error = ErrorCode::NO_ERROR;
+void GearPair::createAndInsertContactPoint(const vec2 &point, const vec2 &normal, real evalValue) {
 
     //find cut of normal in originPoint with reference radius
     real valueUnderRoot = square(dot(normal, point))
                             - dot(point, point)
                             + square(m_drivingGearPitchRadius);
     if(valueUnderRoot < 0) {
-        //No cut with reference radius, so this point should not have a contact with the mating gear
-        //Nevertheless it may be very important on special forms to follow these points!
-        return convertToNoneContactPoint(cp);
+        // No cut with reference radius, so this point should not have a contact with the mating gear
+        // Nevertheless it may be very important on special forms to follow these points!
+        m_contactPointManager.insert(noneContactPointOf(point, normal, evalValue));
+        return;
     }
-    real t;
-    if(dot(normalize(point), normal) >= 0.0) {
-        t = -dot(normal, point) + sqrt(valueUnderRoot); // normal points away of the pitch circle so take the larger value for t
+    if(glm::length(point) >= m_drivingGearPitchRadius) {
+        // point lies outside pitch circle
+        if(dot(normalize(point), normal) >= 0.0) { // normal points away from circle, so take larger value for t
+            real t = -dot(normal, point) + sqrt(valueUnderRoot);
+            m_contactPointManager.insert(contactPointOf(point, normal, evalValue, t, true));
+        } else { // normal points to center => two cutting points with pitch circle in normal direction => take nearer one
+            real t = -dot(normal, point) - sqrt(valueUnderRoot);
+            m_contactPointManager.insert(contactPointOf(point, normal, evalValue, t, false));
+        }
     } else {
-        t = -dot(normal, point) - sqrt(valueUnderRoot); // normal points to center of pitch circle so take the smaller value for t
+        if(dot(normalize(point), normal) >= 0.0) { // normal points away from circle, so take larger value for t
+            real t = -dot(normal, point) + sqrt(valueUnderRoot);
+            m_contactPointManager.insert(contactPointOf(point, normal, evalValue, t, true));
+        } else { // normal points to center => two cutting points with pitch circle in normal direction => take nearer one
+            real t = -dot(normal, point) - sqrt(valueUnderRoot);
+            m_contactPointManager.insert(contactPointOf(point, normal, evalValue, t, false));
+        }
+
+        // // point lies inside pitch circle
+        // // Examine both possibilities for cut with pitch circle, as long as the distance
+        // // to the cutting point is not larger than the pitch radius. As the value t
+        // // corresponds to the distance to the cutting, observe t
+        // real tBehind = -dot(normal, point) - sqrt(valueUnderRoot);
+        // real tAhead = -dot(normal, point) + sqrt(valueUnderRoot);
+        // if(tBehind < m_drivingGearPitchRadius && tAhead < m_drivingGearPitchRadius) {
+        //     m_contactPointManager.insert(contactPointOf(point, normal, evalValue, tBehind, false),
+        //                                  contactPointOf(point, normal, evalValue, tAhead, true));
+        // } else if(tBehind < m_drivingGearPitchRadius) {
+        //     m_contactPointManager.insert(contactPointOf(point, normal, evalValue, tBehind, false));
+        // } else {
+        //     m_contactPointManager.insert(contactPointOf(point, normal, evalValue, tAhead, true));
+        // }
     }
+}
+
+ContactPoint* GearPair::contactPointOf(const vec2 &point, const vec2 &normal, real evalValue, real t, bool usedLargerValue) const {
+    ContactPoint *cp = new ContactPoint();
+    cp->evaluationValue = evalValue;
+    cp->originPoint = point;
+    cp->originNormal = normal;
+    cp->usedLargerValue = usedLargerValue;
+    cp->error = ErrorCode::NO_ERROR;
+
     vec2 directionToCutOnPitchRadius = normalize(point + t * normal);
 
     // as arcsin is only defined on [-pi/2, pi/2] we have to get the correct values for the left side of the circle, if the point is there
@@ -233,9 +262,12 @@ ContactPoint* GearPair::contactPointOf(const vec2 &point, const vec2 &normal, re
     return cp;
 }
 
-NoneContactPoint* GearPair::convertToNoneContactPoint(ContactPoint *cp) const {
-    NoneContactPoint *ncp = new NoneContactPoint(*cp);
-    delete cp;
+
+NoneContactPoint* GearPair::noneContactPointOf(const vec2 &point, const vec2 &normal, real evalValue) const {
+    NoneContactPoint *ncp = new NoneContactPoint();
+    ncp->evaluationValue = evalValue;
+    ncp->originPoint = point;
+    ncp->originNormal = normal;
 
     real angleToY = angleBetweenN(normalize(ncp->originPoint), vec2(0, -1));
     real direction = (ncp->originPoint.x > 0) ? -1.0 : 1.0;
@@ -243,19 +275,11 @@ NoneContactPoint* GearPair::convertToNoneContactPoint(ContactPoint *cp) const {
     // Inspect the ContactPoint cp when the gear turns
     // The exciting points are somewhere near the pitch point.
     // Therefore examine the angle covered by about 3 pitches, or a maximum of a half
-    // of the gear. In each case those values around the pitch point will be taken
-    // For all of these x > 0.
+    // of the gear. In each case those values around the pitch point will be taken.
+    // For all of these: x > 0.
 
     real startAngle = M_PI / 6.0; // startAngle is measured starting from y-axis
     real endAngle = M_PI - startAngle;
-    // if(m_drivenGear->numberOfTeeth() > 6) { // enough teeth, so 'only' examine 3 pitches
-    //     real angle = 3.0 * M_PI / m_drivenGear->numberOfTeeth(); // 3.0 <== 1.5 * 2.0 * M_PI
-    //     startAngle = M_PI / 2.0 - angle;
-    //     endAngle = M_PI / 2.0 + angle;
-    // } else {
-    //     startAngle = 0.0;
-    //     endAngle = M_PI;
-    // }
 
     while(startAngle < endAngle) {
 

@@ -36,7 +36,7 @@ bool ContactPointIterator::reachedEnd() const {
     }
 }
 
-bool ContactPointIterator::tryToContinueWithOtherList(std::list<ContactPointsWithPosition*> &possibleLists) {
+bool ContactPointIterator::tryToContinueWithOtherList(list<ContactPointsWithPosition*> &possibleLists) {
     //Normally one should not get cases, where the end of a list is reached, when in NCP state.
     //Therefore it is not regarded as important to switch to another list
     if(m_iterationState == IterationState::NCP)

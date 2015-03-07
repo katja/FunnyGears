@@ -18,6 +18,9 @@ typedef glm::dmat2x2    m2x2;
 template <typename T>
 using vector = typename std::vector<T>;
 
+template <typename T>
+using list = typename std::list<T>;
+
 enum Type {
     QGraphicsItemType,
     GraphicsItemType,

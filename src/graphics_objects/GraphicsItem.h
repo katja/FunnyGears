@@ -31,7 +31,7 @@ public:
     void changed();
 
 private:
-    std::list<ChangingObjectListener*> m_changingListeners;
+    list<ChangingObjectListener*> m_changingListeners;
 };
 
 #endif // GRAPHICS_ITEM

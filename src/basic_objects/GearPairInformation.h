@@ -29,7 +29,7 @@ public:
 private:
     GearPair *m_gearPair;
     bool m_gearShapeValid;
-    std::list<ChangingObjectListener*> m_listeners;
+    list<ChangingObjectListener*> m_listeners;
 };
 
 #endif //GEAR_PAIR_INFORMATION

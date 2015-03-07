@@ -5,7 +5,7 @@
 #include "helpers.h"
 #include "basic_objects/GearPairInformation.h"
 #include "basic_objects/ContactPoint.h"
-#include "basic_objects/ContactPointSortingList.h"
+#include "basic_objects/ContactPointManager.h"
 class SplineGear;
 
 
@@ -20,7 +20,7 @@ public:
     void calculateAgainWithUnchangedAttributes();
 
     GearPairInformation* gearPairInformation();
-    const ContactPointSortingList& foundPoints();
+    const ContactPointManager& contactPointManager();
 
     SplineGear* drivingGear() const;
     SplineGear* drivenGear() const;
@@ -62,14 +62,15 @@ private:
     real m_stepSize;
 
     GearPairInformation     *m_gearPairInformation;
-    ContactPointSortingList m_allContactPoints;
+    ContactPointManager m_contactPointManager;
 
     void constructListOfPossiblePairingPoints();
     void insertRefinedContactPoints(real stepValue, real nextStepValue, uint partition);
     void chooseCorrectPoints();
 
-    ContactPoint* contactPointOf(const vec2 &point, const vec2 &normal, real stepValue);
-    NoneContactPoint* convertToNoneContactPoint(ContactPoint *contactPoint) const;
+    void createAndInsertContactPoint(const vec2 &point, const vec2 &normal, real evalValue);
+    ContactPoint* contactPointOf(const vec2 &point, const vec2 &normal, real evalValue, real t, bool usedLargerValue) const;
+    NoneContactPoint* noneContactPointOf(const vec2 &point, const vec2 &normal, real stepValue) const;
     void insertThicknessInContactPoint(ContactPoint& contactPoint) const;
     vec2 normalAt(real value) const;
 };

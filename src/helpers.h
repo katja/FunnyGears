@@ -37,6 +37,8 @@ std::ostream& operator <<(std::ostream &os, const ErrorCode &error);
 
 std::ostream& operator <<(std::ostream &os, const ContactPoint &contactPoint);
 
+std::ostream& operator <<(std::ostream &os, const list< list<ContactPoint*> *> &listsOfContactPoints);
+
 std::ostream& operator <<(std::ostream &os, const CPcutting &cutting);
 
 std::ostream& operator <<(std::ostream &os, const NCPcutting &cutting);

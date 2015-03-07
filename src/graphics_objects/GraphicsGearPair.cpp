@@ -282,27 +282,29 @@ bool GraphicsGearPair::finePencilUsed() const {
 }
 
 void GraphicsGearPair::updateBoundingRect() {
-    std::list<ContactPoint*> foundPoints = m_gearPair->foundPoints();
+    list< list<ContactPoint*> *> foundPoints = m_gearPair->contactPointManager().foundPoints();
     m_largestDistanceToPoint = 0;
     m_largestNormalOfPoint = 0;
     vec2 pathOfContactBottomLeft, pathOfContactTopRight;
-    pathOfContactBottomLeft = pathOfContactTopRight = foundPoints.front()->contactPosition;
-    for(ContactPoint *cp : foundPoints) {
-        if(cp->error == ErrorCode::NO_ERROR) {
-            real distToPoint = glm::length(cp->point);
-            if(distToPoint > m_largestDistanceToPoint)
-                m_largestDistanceToPoint = distToPoint;
+    pathOfContactBottomLeft = pathOfContactTopRight = foundPoints.front()->front()->contactPosition;
+    for(list<ContactPoint*> *l : foundPoints) {
+        for(ContactPoint *cp : *l) {
+            if(cp->error == ErrorCode::NO_ERROR) { // prevent a NO_THICKNESS
+                real distToPoint = glm::length(cp->point);
+                if(distToPoint > m_largestDistanceToPoint)
+                    m_largestDistanceToPoint = distToPoint;
 
-            if(cp->forbiddenAreaLength > m_largestNormalOfPoint)
-                m_largestNormalOfPoint = cp->forbiddenAreaLength;
-            if(cp->contactPosition.x < pathOfContactTopRight.x)
-                pathOfContactTopRight.x = cp->contactPosition.x;
-            if(cp->contactPosition.y < pathOfContactTopRight.y)
-                pathOfContactTopRight.y = cp->contactPosition.y;
-            if(cp->contactPosition.x > pathOfContactBottomLeft.x)
-                pathOfContactBottomLeft.x = cp->contactPosition.x;
-            if(cp->contactPosition.y > pathOfContactBottomLeft.y)
-                pathOfContactBottomLeft.y = cp->contactPosition.y;
+                if(cp->forbiddenAreaLength > m_largestNormalOfPoint)
+                    m_largestNormalOfPoint = cp->forbiddenAreaLength;
+                if(cp->contactPosition.x < pathOfContactTopRight.x)
+                    pathOfContactTopRight.x = cp->contactPosition.x;
+                if(cp->contactPosition.y < pathOfContactTopRight.y)
+                    pathOfContactTopRight.y = cp->contactPosition.y;
+                if(cp->contactPosition.x > pathOfContactBottomLeft.x)
+                    pathOfContactBottomLeft.x = cp->contactPosition.x;
+                if(cp->contactPosition.y > pathOfContactBottomLeft.y)
+                    pathOfContactBottomLeft.y = cp->contactPosition.y;
+            }
         }
     }
     QPointF topRight = QPointF(pathOfContactTopRight.x - 20, pathOfContactTopRight.y - 20);
@@ -310,7 +312,7 @@ void GraphicsGearPair::updateBoundingRect() {
     m_boundingRect = QRectF(topRight, bottomLeft); // normals of path of contact should be in area, too
     m_largestDistanceToNCP = 0;
     m_largestNormalOfNCP = 0;
-    std::list<NoneContactPoint*> ncps = m_gearPair->foundPoints().noneContactPoints();
+    list<NoneContactPoint*> ncps = m_gearPair->contactPointManager().noneContactPoints();
     if(!ncps.empty()) {
         NoneContactPoint *ncp = ncps.front();
         for(uint i = 0; i < ncp->points.size(); ++i) {
@@ -386,8 +388,8 @@ void GraphicsGearPair::paintAdditionals(QPainter *painter, GraphicsMatingSplineG
             painter->drawPath(circlePath(m_gearPair->drivingGearPitchRadius()));
         if(m_pitchesAreVisible)
             painter->drawPath(pitchesPath(m_drivingGear->numberOfTeeth(),
-                                            m_gearPair->foundPoints().startOfExaminedPitchInDrivingGear(),
-                                            m_gearPair->foundPoints().lengthOfPitchesInDrivingGear()));
+                                            m_gearPair->contactPointManager().startOfExaminedPitchInDrivingGear(),
+                                            m_gearPair->contactPointManager().lengthOfPitchesInDrivingGear()));
         if(m_noneContactPointsAreVisible)
             paintNoneContactPoints(painter, true, false);
         if(m_drivingGearSamplingIsVisible)
@@ -398,8 +400,8 @@ void GraphicsGearPair::paintAdditionals(QPainter *painter, GraphicsMatingSplineG
             painter->drawPath(circlePath(m_gearPair->drivenGearPitchRadius()));
         if(m_pitchesAreVisible)
             painter->drawPath(pitchesPath(m_drivenGear->numberOfTeeth(),
-                                            m_gearPair->foundPoints().startOfExaminedPitchInDrivenGear(),
-                                            m_gearPair->foundPoints().lengthOfPitchesInDrivenGear()));
+                                            m_gearPair->contactPointManager().startOfExaminedPitchInDrivenGear(),
+                                            m_gearPair->contactPointManager().lengthOfPitchesInDrivenGear()));
         if(m_noneContactPointsAreVisible)
             paintNoneContactPoints(painter, false, true);
         if(m_drivenGearSamplingIsVisible)
@@ -411,36 +413,37 @@ void GraphicsGearPair::paintAdditionals(QPainter *painter, GraphicsMatingSplineG
 }
 
 void GraphicsGearPair::paintSampledContactPointsDrivingGear(QPainter *painter) const {
-    std::list<ContactPointsWithPosition*> contactPointsWithPositions = m_gearPair->foundPoints().contactPointsWithPositions();
-    ContactPointsWithPosition *firstList = contactPointsWithPositions.front();
+    list< list<ContactPoint*> *> contactPointsLists = m_gearPair->contactPointManager().foundPoints();
 
     painter->save();
 
-    for(ContactPoint *cp : firstList->points) {
+    for(list<ContactPoint*> *l : contactPointsLists) {
+        for(ContactPoint *cp : *l) {
 
-        QColor c = getColorFor(cp->evaluationStep);
-        if(cp->error != ErrorCode::NO_ERROR) {
-            c = Preferences::AttentionColor; //red
-        }
-        QPen pen = painter->pen();
-        pen.setColor(c);
-        painter->setPen(pen);
+            QColor c = getColorFor(cp->evaluationStep);
+            if(cp->error != ErrorCode::NO_ERROR) {
+                c = Preferences::AttentionColor; //red
+            }
+            QPen pen = painter->pen();
+            pen.setColor(c);
+            painter->setPen(pen);
 
-        // originPoint, originNormal
-        drawCircle(painter, cp->originPoint);
-        if(m_forbiddenAreaInDrivingGearIsVisible) {
-            vec2 endNormal = cp->originPoint - cp->originNormal * cp->forbiddenAreaLength;
-            drawLine(painter, cp->originPoint, endNormal);
+            // originPoint, originNormal
+            drawCircle(painter, cp->originPoint);
+            if(m_forbiddenAreaInDrivingGearIsVisible) {
+                vec2 endNormal = cp->originPoint - cp->originNormal * cp->forbiddenAreaLength;
+                drawLine(painter, cp->originPoint, endNormal);
+            }
         }
     }
     painter->restore();
 }
 
 void GraphicsGearPair::paintSampledContactPointsDrivenGear(QPainter *painter) const {
-    std::list<ContactPointsWithPosition*> contactPointsWithPositions = m_gearPair->foundPoints().contactPointsWithPositions();
+    list<ContactPointsWithPosition*> contactPointsWithPositions = m_gearPair->contactPointManager().contactPointsWithPositions();
 
     painter->save();
-    real lightUp = 1.0 / contactPointsWithPositions.size();
+    real lightUp = 1.0 / contactPointsWithPositions.size(); //TODO: find better possibility?!
 
     for(ContactPointsWithPosition *list : contactPointsWithPositions) {
         ContactPoint *lastCP = list->points.front();
@@ -480,8 +483,7 @@ void GraphicsGearPair::paintSampledContactPointsDrivenGear(QPainter *painter) co
 }
 
 void GraphicsGearPair::paintPathOfPossibleContact(QPainter *painter) const {
-    std::list<ContactPointsWithPosition*> contactPointsWithPositions = m_gearPair->foundPoints().contactPointsWithPositions();
-    ContactPointsWithPosition *firstList = contactPointsWithPositions.front();
+    list< list<ContactPoint*> *> contactPointsLists = m_gearPair->contactPointManager().foundPoints();
 
     painter->save();
 
@@ -492,31 +494,33 @@ void GraphicsGearPair::paintPathOfPossibleContact(QPainter *painter) const {
         pen.setWidth(0);
     painter->setPen(pen);
 
-    for(ContactPoint *cp : firstList->points) {
+    for(list<ContactPoint*> *l : contactPointsLists) {
+        for(ContactPoint *cp : *l) {
 
-        QPen pen = painter->pen();
-        QColor c = pen.color();
+            QPen pen = painter->pen();
+            QColor c = pen.color();
 
-        if(cp->error != ErrorCode::NO_ERROR)
-            c = Preferences::AttentionColor; //red
-        else if(!m_finePencilUsed)
-            c = getColorFor(cp->evaluationStep);
+            if(cp->error != ErrorCode::NO_ERROR)
+                c = Preferences::AttentionColor; //red
+            else if(!m_finePencilUsed)
+                c = getColorFor(cp->evaluationStep);
 
-        pen.setColor(c);
-        pen.setBrush(QBrush(c));
-        painter->setPen(pen);
+            pen.setColor(c);
+            pen.setBrush(QBrush(c));
+            painter->setPen(pen);
 
-        drawCircle(painter, cp->contactPosition);
-        if(m_finePencilUsed)
-            drawCircle(painter, cp->contactPosition, Preferences::SmallPointRadius);
-        vec2 endNormal = cp->contactPosition + cp->normalInContact * 20.0;
-        drawLine(painter, cp->contactPosition, endNormal);
+            drawCircle(painter, cp->contactPosition);
+            if(m_finePencilUsed)
+                drawCircle(painter, cp->contactPosition, Preferences::SmallPointRadius);
+            vec2 endNormal = cp->contactPosition + cp->normalInContact * 20.0;
+            drawLine(painter, cp->contactPosition, endNormal);
+        }
     }
     painter->restore();
 }
 
 void GraphicsGearPair::paintPathOfRealContact(QPainter *painter) const {
-    vector<ContactPoint*> selectedContactPoints = m_gearPair->foundPoints().gearContactPoints();
+    vector<ContactPoint*> selectedContactPoints = m_gearPair->contactPointManager().gearContactPoints();
 
     painter->save();
 
@@ -540,7 +544,7 @@ void GraphicsGearPair::paintPathOfRealContact(QPainter *painter) const {
 }
 
 void GraphicsGearPair::paintNoneContactPoints(QPainter *painter, bool paintOriginPoints, bool paintTargetPoints) const {
-    std::list<NoneContactPoint*> ncps = m_gearPair->foundPoints().noneContactPoints();
+    list<NoneContactPoint*> ncps = m_gearPair->contactPointManager().noneContactPoints();
 
     painter->save();
     QColor orange = QColor(210, 180, 0);
@@ -596,7 +600,7 @@ void GraphicsGearPair::paintNoneContactPoints(QPainter *painter, bool paintOrigi
 }
 
 void GraphicsGearPair::paintSelectedGearPoints(QPainter *painter) const {
-    vector<vec2> gearPoints = m_gearPair->foundPoints().gearPoints();
+    vector<vec2> gearPoints = m_gearPair->contactPointManager().gearPoints();
 
     painter->save();
     QPen pen = painter->pen();

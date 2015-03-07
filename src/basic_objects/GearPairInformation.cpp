@@ -26,9 +26,9 @@ void GearPairInformation::notValidGearShapeFound() {
 // }
 
 real GearPairInformation::approximatePercentageOfInContactPoints() const {
-    uint notCorrect = m_gearPair->foundPoints().numberOfNotCorrectContactPoints();
-    uint correct = m_gearPair->foundPoints().gearContactPoints().size();
-    return 100.0 * static_cast<real>(correct) / static_cast<real>(notCorrect + correct);
+    // uint notCorrect = m_gearPair->foundPoints().numberOfNotCorrectContactPoints();
+    // uint correct = m_gearPair->foundPoints().gearContactPoints().size();
+    // return 100.0 * static_cast<real>(correct) / static_cast<real>(notCorrect + correct);
 }
 
 bool GearPairInformation::validGearShapeOfDrivingGear() const {

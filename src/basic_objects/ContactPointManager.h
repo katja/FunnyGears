@@ -1,5 +1,5 @@
-#ifndef CONTACT_POINT_SORTING_LIST
-#define CONTACT_POINT_SORTING_LIST
+#ifndef CONTACT_POINT_MANAGER
+#define CONTACT_POINT_MANAGER
 
 #include "definitions.h"
 #include "basic_objects/ContactPoint.h"
@@ -7,12 +7,12 @@
 #include "basic_objects/ContactPointIterator.h"
 #include "stable.h"
 
-class ContactPointSortingList : public std::list<ContactPoint*> {
+class ContactPointManager {
 
 public:
-    ContactPointSortingList();
+    ContactPointManager();
 
-    // * @brief Initializes a ContactPointSortingList with given angular pitch
+    // * @brief Initializes a ContactPointManager with given angular pitch
     //  *  and turning direction
     //  *
     //  *  @param numberOfTeeth number of teeth of the driven gear (with this information
@@ -21,15 +21,20 @@ public:
     //  *                       driven gear is described in. This will be the other way
     //  *                       round than the driving gear is described in.
 
-    ~ContactPointSortingList();
+    ~ContactPointManager();
 
+    void insert(ContactPoint *cp); // only one direction important => list of not used direction is finished
+    void insert(ContactPoint *cpA, ContactPoint *cpB); // same originPoint, but ray in different directions
+    void insert(NoneContactPoint *ncp); // inserted in m_noneContactPointList
+    void finishInsertion(); // call when all needed points were inserted
+    void sortLists(); // sorts the lists of m_firstCPLists by their size in decreasing order. ContactPoints in each list must already be sorted!!!
     // Most important method:
-    void createCoveringLists(uint numberOfTeeth, bool isDescribedClockwise);
-    void sort();
-    void clear();
+    void processPointsToGear(uint numberOfTeeth, bool isDescribedClockwise);
+    void clear(); //deletes all ContactPoint* and list* of m_firstCPLists
 
-    const std::list<ContactPointsWithPosition*>& contactPointsWithPositions() const;
-    const std::list<NoneContactPoint*>& noneContactPoints() const;
+    const list< list<ContactPoint*>* >& foundPoints() const;
+    const list<ContactPointsWithPosition*>& contactPointsWithPositions() const;
+    const list<NoneContactPoint*>& noneContactPoints() const;
     const vector<vec2>& gearPoints() const;
     const vector<ContactPoint*>& gearContactPoints() const;
     uint numberOfNotCorrectContactPoints() const;
@@ -43,17 +48,32 @@ public:
     real usedAngularPitch() const;
 
 private:
+
+    // first collection
+    // (set back/deleted when clear() is called)
+    list< list<ContactPoint*>* >    m_insertedCPsLists;
+    list<NoneContactPoint*>         m_noneContactPointList; //also used for further collection
+    list<ContactPoint*>            *m_currentSmallerValueList; //is nullptr after finishInsertion()!
+    list<ContactPoint*>            *m_currentLargerValueList; //is nullptr after finishInsertion()!
+    uint                            m_numberOfFirstCPs;
+
+    // sorted, copied and in appropriate pitches
+    // (set back/deleted, when copyPointsInSuitableLists() called)
+    list<ContactPointsWithPosition*> m_contactPointsWithPositionList;
+
+    // chosen points for gear
+    // (set back, when findAllCoveredPoints() called)
+    vector<vec2>                    m_gearPoints;
+    vector<ContactPoint*>           m_gearCPs; // NOT newly created (copied)!
+    uint                            m_gearNotCorrectCPCounter;
+
+    // other (pitch and rotation) attributes:
     real                            m_angularPitchRotation; //is negative, if driven gear tooth is described counter clockwise (in screen representation), and positive otherwise
-    std::list<ContactPointsWithPosition*>  m_contactPointsWithPositionList;
-    std::list<NoneContactPoint*>    m_noneContactPointList;
     vec2                            m_examinedPitchStartDirection;
     vec2                            m_examinedPitchStopDirection;
     vec2                            m_examinedPitchStartDirectionInDrivingGear;
     real                            m_examinedPitchLengthInDrivenGear;
     real                            m_examinedPitchLengthInDrivingGear;
-    vector<vec2>                    m_gearPoints;
-    vector<ContactPoint*>           m_gearCPs;
-    uint                            m_gearNotCorrectCPCounter;
 
     void setAngularPitch(uint numberOfTeeth, bool isDescribedClockwise);
     bool setExaminedPitch();
@@ -62,32 +82,12 @@ private:
     void copyNoneContactPointsInRelevantPitches();
     void findAllCoveredPoints();
 
-    /** @brief Returns the currenctly available number of ContactPoints which do not have an Error
-     *
-     *  Iterates through all inserted ContactPoints and counts the points with
-     *  error = ErrorCode::NO_ERROR
-     *
-     *  @return number of contact points with no error
-     */
     uint numberOfNoneErrorContactPoints() const;
-
-    /** @brief Returns the first ContactPoint in list with no error
-     *
-     *  @warning: This methods requires at least one suitable ContactPoint in the list
-     *            otherwise it returns a stub.
-     */
-    ContactPoint* getFirstNoneErrorContactPoint() const;
 
     uint findStartPointForGearPoints(CPcutting &cpCutting, NCPcutting &ncpCutting);
 
     uint howManyContactPointsCoverPoint(const ContactPointIterator &it, std::vector<CPcutting> &cpCuttingsList) const;
     uint howManyNoneContactPointsCoverPoint(const ContactPointIterator &it, std::vector<NCPcutting> &ncpCuttingsList) const;
-
-    // merely inserts the ContactPoint in the list, but if it has another position
-    // than the list is used for, the @p list is pushed to m_contactPointsWithPositionList and a new list
-    // is created to which @p list now points to
-    // the point is inserted there as first object, too.
-    void copyInCorrectList(const ContactPoint &point, int position, ContactPointsWithPosition *&list);
 
     int pitchNumberOfPoint(vec2 point) const;
     int whichPositionBehindAngularPitch(ContactPoint *contactPoint, const vec2 &stopPitch) const;
@@ -99,10 +99,11 @@ private:
     bool intersectLines(vec2& intersection, vec2 lineAStart, vec2 lineAEnd, vec2 lineBStart, vec2 lineBEnd) const;
     bool isPointInTriangle(vec2 point, vec2 a, vec2 b, vec2 c) const;
 
-    void setBackLists(); //deletes the ContactPoints, NoneContactPoints and ContactPointsWithPositions of m_contactPointsWithPositionList and m_noneContactPointList;
+    void eraseEmptyAndOneEntryLists(); // deletes lists of m_insertedCPsLists with no entrys or with only one entry (which then is deleted, too)
     void deleteSortingLists(); // deletes the lists saved in m_contactPointsWithPositionList
     void deleteNoneContactPoints(); // deletes the NoneContactPoints saved in m_noneContactPointList
+    void deleteInsertedContactPoints(); //deletes the ContactPoints saved in m_insertedCPsLists
 
 };
 
-#endif //CONTACT_POINT_SORTING_LIST
+#endif //CONTACT_POINT_MANAGER
