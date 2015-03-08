@@ -23,21 +23,25 @@ public:
 
     ~ContactPointManager();
 
+    void clear(); //deletes all ContactPoint* and list* of m_firstCPLists
+
     void insert(ContactPoint *cp); // only one direction important => list of not used direction is finished
     void insert(ContactPoint *cpA, ContactPoint *cpB); // same originPoint, but ray in different directions
     void insert(NoneContactPoint *ncp); // inserted in m_noneContactPointList
     void finishInsertion(); // call when all needed points were inserted
+
     void sortLists(); // sorts the lists of m_firstCPLists by their size in decreasing order. ContactPoints in each list must already be sorted!!!
+
     // Most important method:
     void processPointsToGear(uint numberOfTeeth, bool isDescribedClockwise);
-    void clear(); //deletes all ContactPoint* and list* of m_firstCPLists
+    void translateForBottomClearance(real bottomClearance, real degree, real pitchRadiusDrivenGear); //translate gear points with less than angle alpha (in degree) between their normal and line of centers. Needs valid creation of all gear points etc. before (so call createCoveringLists() before!)
 
     const list< list<ContactPoint*>* >& foundPoints() const;
     const list<ContactPointsWithPosition*>& contactPointsWithPositions() const;
     const list<NoneContactPoint*>& noneContactPoints() const;
     const vector<vec2>& gearPoints() const;
     const vector<ContactPoint*>& gearContactPoints() const;
-    uint numberOfNotCorrectContactPoints() const;
+    const vector<WrongContactPoint*>& gearWrongContactPoints() const;
     vec2 startOfExaminedPitchInDrivenGear() const;
     vec2 endOfExaminedPitchInDrivenGear() const;
     real lengthOfPitchesInDrivenGear() const;
@@ -52,10 +56,10 @@ private:
     // first collection
     // (set back/deleted when clear() is called)
     list< list<ContactPoint*>* >    m_insertedCPsLists;
-    list<NoneContactPoint*>         m_noneContactPointList; //also used for further collection
-    list<ContactPoint*>            *m_currentSmallerValueList; //is nullptr after finishInsertion()!
-    list<ContactPoint*>            *m_currentLargerValueList; //is nullptr after finishInsertion()!
-    uint                            m_numberOfFirstCPs;
+    uint                            m_numberOfInsertedCPs; // is equal or less as all collected ContactPoints in m_insertedCPsLists (if all ContactPoints have different evaluationStep, should be equal, if not deleted some ContactPoints in eraseEmptyAndOneEntryLists())
+    list<NoneContactPoint*>         m_noneContactPointList; // also used for further collection
+    list<ContactPoint*>            *m_currentSmallerValueList; // is nullptr after finishInsertion()!
+    list<ContactPoint*>            *m_currentLargerValueList; // is nullptr after finishInsertion()!
 
     // sorted, copied and in appropriate pitches
     // (set back/deleted, when copyPointsInSuitableLists() called)
@@ -63,10 +67,16 @@ private:
 
     // chosen points for gear
     // (set back, when findAllCoveredPoints() called)
-    vector<vec2>                    m_gearPoints;
-    vector<ContactPoint*>           m_gearCPs; // NOT newly created (copied)!
-    uint                            m_gearNotCorrectCPCounter;
+    vector<vec2>                    m_gearPoints; // all points for shape of tooth of gear, includes cutting points, NoneContactPoints and forbiddenAreaEndPoints
+    vector<OriginInformation>       m_gearPointsInformation; // information about the origin of m_gearPoints (cutting, CP or WCP (from NCP))
+    vector<int>                     m_gearPointsInformationIndex; // information how m_gearPoints, m_gearCPs and m_gearWCPs are linked: positive number => is CP or WCP and number is index of m_gearCPs/m_gearWCPs, negative number => -1 <-> cutting , -2 <-> forbiddenAreaEndPoint
+    vector<ContactPoint*>           m_gearCPs; // really good ContactPoints for the gear (gear is best, if only such points exist)
+    vector<WrongContactPoint*>      m_gearWCPs; // is arisen from a NCP in special position, bad point for the gear, as it results in a violation of the basic requirement of a gear tooth system
 
+    // chosen points if already translated
+    vector<vec2>                    m_translatedGearPoints;
+    vector<ContactPoint*>           m_translatedGearCPs;
+    vector<WrongContactPoint*>      m_translatedGearWCPs;
     // other (pitch and rotation) attributes:
     real                            m_angularPitchRotation; //is negative, if driven gear tooth is described counter clockwise (in screen representation), and positive otherwise
     vec2                            m_examinedPitchStartDirection;
@@ -82,6 +92,7 @@ private:
     void copyNoneContactPointsInRelevantPitches();
     void findAllCoveredPoints();
 
+    // WrongContactPoint* wrongContactPointWhenTurnedBack(vec2 point, vec2 normal, real pitchRadiusDrivenGear);
     uint numberOfNoneErrorContactPoints() const;
 
     uint findStartPointForGearPoints(CPcutting &cpCutting, NCPcutting &ncpCutting);
@@ -100,10 +111,11 @@ private:
     bool isPointInTriangle(vec2 point, vec2 a, vec2 b, vec2 c) const;
 
     void eraseEmptyAndOneEntryLists(); // deletes lists of m_insertedCPsLists with no entrys or with only one entry (which then is deleted, too)
-    void deleteSortingLists(); // deletes the lists saved in m_contactPointsWithPositionList
-    void deleteNoneContactPoints(); // deletes the NoneContactPoints saved in m_noneContactPointList
     void deleteInsertedContactPoints(); //deletes the ContactPoints saved in m_insertedCPsLists
-
+    void deleteNoneContactPoints(); // deletes the NoneContactPoints saved in m_noneContactPointList
+    void deleteSortingLists(); // deletes the lists saved in m_contactPointsWithPositionList
+    void clearAllGearLists(); //deletes the m_gearWCPs and sets back all m_gear... things
+    void clearAllTranslatedGearLists();
 };
 
 #endif //CONTACT_POINT_MANAGER

@@ -8,8 +8,7 @@
 
 enum class ErrorCode {
     NO_ERROR,
-    NO_CUT_WITH_REFERENCE_RADIUS,
-    NO_THICKNESS
+    NO_CUT_WITH_REFERENCE_RADIUS
 };
 
 struct ContactPoint {
@@ -50,9 +49,7 @@ struct ContactPoint {
         if(error != ErrorCode::NO_CUT_WITH_REFERENCE_RADIUS) {
             point = glm::rotate(point, rotation);
             normal = glm::rotate(normal, rotation);
-            if(error != ErrorCode::NO_THICKNESS) {
-                forbiddenAreaEndPoint = glm::rotate(forbiddenAreaEndPoint, rotation);
-            }
+            forbiddenAreaEndPoint = glm::rotate(forbiddenAreaEndPoint, rotation);
             isRotated = true;
         }
     }
@@ -65,8 +62,8 @@ struct NoneContactPoint : public ContactPoint {
     NoneContactPoint(const ContactPoint &cp) {
         evaluationValue = cp.evaluationValue;
         evaluationStep = cp.evaluationStep;
-        point = vec2(0, 0); //is not possible, when no cut with reference radius is available
-        normal = vec2(0, 0); //is not possible, when no cut with reference radius is available
+        point = vec2(0, 0); //is possible, but results in a brake of the basic requirement of a gear tooth system (Verzahnungsgesetz) – keine winkeltreue Übersetzung!
+        normal = vec2(0, 0); //is possible, but results in a brake of the basic requirement of a gear tooth system (Verzahnungsgesetz) – keine winkeltreue Übersetzung!
         originPoint = cp.originPoint;
         originNormal = cp.originNormal;
         contactPosition = vec2(0, 0);
@@ -74,16 +71,23 @@ struct NoneContactPoint : public ContactPoint {
         forbiddenAreaLength = cp.forbiddenAreaLength;
         forbiddenAreaEndPoint = vec2(0, 0);
         usedLargerValue = true; //is not possible, when no cut with reference radius is available
+        examinedIndex = -1;
         isCovered = cp.isCovered;
         isRotated = cp.isRotated;
         error = ErrorCode::NO_CUT_WITH_REFERENCE_RADIUS;
     }
     NoneContactPoint(const NoneContactPoint &other) : ContactPoint(other),
         points(other.points),
-        normals(other.normals)
+        normals(other.normals),
+        contactPositions(other.contactPositions),
+        normalsInContact(other.normalsInContact),
+        examinedIndex(other.examinedIndex)
     {}
-    vector<vec2> points;
-    vector<vec2> normals;
+    vector<vec2> points; // points, which when chosen for the gear outline, do brake the basic requirement of a gear tooth system!
+    vector<vec2> normals; // normals to points above
+    vector<vec2> contactPositions; // would be the contact positions of points
+    vector<vec2> normalsInContact; // would be the normal in the contact – would NOT go through pitch point!
+    int examinedIndex; // is possibility to specify a specific position of the NoneContactPoint => points[examinedIndex], normals[examinedIndex], contactPositions[examinedIndex], normalsInContact[examinedIndex]
 
     void rotate(real rotation) {
         for(uint i = 0; i < points.size(); ++i) {
@@ -95,5 +99,14 @@ struct NoneContactPoint : public ContactPoint {
 
 };
 
+struct WrongContactPoint : public ContactPoint {
+    WrongContactPoint(const NoneContactPoint &ncp) : ContactPoint(ncp) {
+        point = ncp.points[ncp.examinedIndex];
+        normal = ncp.normals[ncp.examinedIndex];
+        contactPosition = ncp.contactPositions[ncp.examinedIndex];
+        normalInContact = ncp.normalsInContact[ncp.examinedIndex];
+        forbiddenAreaEndPoint = point + normal * ncp.forbiddenAreaLength;
+    }
+};
 
 #endif //CONTACT_POINT

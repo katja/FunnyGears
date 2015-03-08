@@ -104,8 +104,6 @@ std::ostream& operator <<(std::ostream &os, const ErrorCode &error) {
             return os << "no error";
         case ErrorCode::NO_CUT_WITH_REFERENCE_RADIUS:
             return os << "no cut with reference radius found";
-        case ErrorCode::NO_THICKNESS:
-            return os << "no cut with gear found and theirfore no thickness available";
         default:
             return os << "error case unknown";
     }
@@ -142,6 +140,42 @@ std::ostream& operator <<(std::ostream &os, const ContactPoint &cp) {
     os << "Used larger t value: "     << (cp.usedLargerValue ? "yes" : "no") << "\n";
     os << "This is a contact point: " << (cp.isCovered ? "no" : "yes") << "\n";
     os << "Error: " << cp.error << "\n";
+    return os;
+}
+
+std::ostream& operator <<(std::ostream &os, const NoneContactPoint &ncp) {
+    os << "NONE CONTACT POINT with properties...\n";
+    os << "Evaluation value:        " << ncp.evaluationValue << "\n";
+    os << "Evaluation step:         " << ncp.evaluationStep << "\n";
+    os << "Driving gear point:      " << ncp.originPoint << "\n";
+    os << "Driving gear normal:     " << ncp.originNormal << "\n";
+    os << "Forbidden area length:   " << ncp.forbiddenAreaLength << "\n";
+    os << "Forbidden area end point:" << ncp.forbiddenAreaEndPoint << "\n";
+    os << "Used larger t value: "     << (ncp.usedLargerValue ? "yes" : "no") << "\n";
+    os << "This is a contact point: " << (ncp.isCovered ? "no" : "yes") << "\n";
+    os << "Error: " << ncp.error << "\n";
+    os << "Driven gear points:\n" << ncp.points << "\n";
+    os << "Driven gear normal:\n" << ncp.normals << "\n";
+    os << "Contact position points:\n" << ncp.contactPositions << "\n";
+    os << "Contact position normals:\n" << ncp.normalsInContact << "\n";
+    return os;
+}
+
+std::ostream& operator <<(std::ostream &os, const WrongContactPoint &wcp) {
+    os << "WRONG CONTACT POINT with properties...\n";
+    os << "Evaluation value:        " << wcp.evaluationValue << "\n";
+    os << "Evaluation step:         " << wcp.evaluationStep << "\n";
+    os << "Driven gear point:      " << wcp.point << "\n";
+    os << "Driven gear normal:     " << wcp.normal << "\n";
+    os << "Driving gear point:      " << wcp.originPoint << "\n";
+    os << "Driving gear normal:     " << wcp.originNormal << "\n";
+    os << "Contact position point:  " << wcp.contactPosition << "\n";
+    os << "Contact position normal: " << wcp.normalInContact << "\n";
+    os << "Forbidden area length:   " << wcp.forbiddenAreaLength << "\n";
+    os << "Forbidden area end point:" << wcp.forbiddenAreaEndPoint << "\n";
+    os << "Used larger t value: "     << (wcp.usedLargerValue ? "yes" : "no") << "\n";
+    os << "This is a contact point: " << (wcp.isCovered ? "no" : "yes") << "\n";
+    os << "Error: " << wcp.error << "\n";
     return os;
 }
 

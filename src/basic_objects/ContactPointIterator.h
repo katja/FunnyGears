@@ -23,8 +23,10 @@ public:
 
     vec2 currentPoint() const;
     vec2 previousPoint() const;
-    ContactPoint* currentCP() const;
-    ContactPoint* currentCorrectInContactPoint() const;
+    bool isCurrentlyInCorrectCP() const;
+    bool isCurrentlyInCorrectNCP() const;
+    ContactPoint* currentCP() const; //Returns current pointer to CP, if in CP state, otherwise nullptr!
+    NoneContactPoint* currentNCP() const; //Returns current pointer to NCP, if in NCP state, otherwise nullptr!
 
     void continueWith(CPcutting cutting);
     void continueWith(NCPcutting cutting);

@@ -71,7 +71,7 @@ private:
     void createAndInsertContactPoint(const vec2 &point, const vec2 &normal, real evalValue);
     ContactPoint* contactPointOf(const vec2 &point, const vec2 &normal, real evalValue, real t, bool usedLargerValue) const;
     NoneContactPoint* noneContactPointOf(const vec2 &point, const vec2 &normal, real stepValue) const;
-    void insertThicknessInContactPoint(ContactPoint& contactPoint) const;
+    bool insertThicknessInContactPoint(ContactPoint& contactPoint) const;
     vec2 normalAt(real value) const;
 };
 #endif // GEAR_PAIR

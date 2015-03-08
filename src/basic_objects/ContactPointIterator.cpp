@@ -11,12 +11,17 @@ ContactPointIterator& ContactPointIterator::operator++() {
     m_previousPoint = currentPoint();
 
     if(m_iterationState == IterationState::CP) {
-        if(m_iterationDirection == IterationDirection::Normal) ++m_cpIterator;
-        else --m_cpIterator;
+        if(m_iterationDirection == IterationDirection::Normal)
+            ++m_cpIterator;
+        else
+            --m_cpIterator;
 
     } else { //IterationState::NCP
-        if(m_iterationDirection == IterationDirection::Normal) ++m_ncpPosition;
-        else --m_ncpPosition;
+        if(m_iterationDirection == IterationDirection::Normal)
+            ++m_ncpPosition;
+        else
+            --m_ncpPosition;
+        m_ncp->examinedIndex = m_ncpPosition;
     }
     return (*this);
 }
@@ -120,9 +125,11 @@ void ContactPointIterator::startWith(NCPcutting cutting, int standardNormalDirec
     if((direction > 0.0 && m_normalDirection == 1) ||
         (direction < 0.0 && m_normalDirection == -1)) {
         m_ncpPosition = cutting.placeBeforeCutting + 1;
+        m_ncp->examinedIndex = m_ncpPosition;
         m_iterationDirection = IterationDirection::Normal;
     } else {
         m_ncpPosition = cutting.placeBeforeCutting;
+        m_ncp->examinedIndex = m_ncpPosition;
         m_iterationDirection = IterationDirection::Reverse;
     }
 }
@@ -146,16 +153,26 @@ vec2 ContactPointIterator::previousPoint() const {
     return m_previousPoint;
 }
 
+bool ContactPointIterator::isCurrentlyInCorrectCP() const {
+    return (m_iterationState == IterationState::CP
+        && m_iterationLocation == IterationLocation::Ground);
+}
+
+bool ContactPointIterator::isCurrentlyInCorrectNCP() const {
+    return (m_iterationState == IterationState::NCP
+        && m_iterationLocation == IterationLocation::Ground);
+}
+
 ContactPoint* ContactPointIterator::currentCP() const {
     if(m_iterationState == IterationState::CP)
         return (*m_cpIterator);
     else
-        return m_ncp;
+        return nullptr;
 }
 
-ContactPoint* ContactPointIterator::currentCorrectInContactPoint() const {
-    if(m_iterationState == IterationState::CP && m_iterationLocation == IterationLocation::Ground)
-        return *m_cpIterator;
+NoneContactPoint* ContactPointIterator::currentNCP() const {
+    if(m_iterationState == IterationState::NCP)
+        return m_ncp;
     else
         return nullptr;
 }
@@ -205,6 +222,7 @@ void ContactPointIterator::continueWith(NCPcutting cutting) {
     m_iterationState = IterationState::NCP;
     m_iterationLocation = cutting.location;
     m_ncp = cutting.ncp;
+    m_ncp->examinedIndex = m_ncpPosition;
     m_previousPoint = cutting.cuttingPoint;
 }
 

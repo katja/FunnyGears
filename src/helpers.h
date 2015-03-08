@@ -7,6 +7,8 @@
 class Spline;
 enum class ErrorCode;
 struct ContactPoint;
+struct NoneContactPoint;
+struct WrongContactPoint;
 struct CPcutting;
 struct NCPcutting;
 class ContactPointIterator;
@@ -36,6 +38,10 @@ std::ostream& operator <<(std::ostream &os, const Spline &spline);
 std::ostream& operator <<(std::ostream &os, const ErrorCode &error);
 
 std::ostream& operator <<(std::ostream &os, const ContactPoint &contactPoint);
+
+std::ostream& operator <<(std::ostream &os, const NoneContactPoint &noneContactPoint);
+
+std::ostream& operator <<(std::ostream &os, const WrongContactPoint &WrongContactPoint);
 
 std::ostream& operator <<(std::ostream &os, const list< list<ContactPoint*> *> &listsOfContactPoints);
 

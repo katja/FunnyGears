@@ -172,6 +172,7 @@ void GearPair::insertRefinedContactPoints(real evalValue, real nextStepValue, ui
 
 void GearPair::chooseCorrectPoints() {
     m_contactPointManager.processPointsToGear(m_drivenGear->numberOfTeeth(), !(m_drivingGear->toothDescribedInClockDirection()));
+    // m_contactPointManager.translateForBottomClearance(real bottomClearance, real degree); //Kopfspiel
     vector<vec2> gearPoints = m_contactPointManager.gearPoints();
     m_drivenGear->setDegree(1);
     m_drivenGear->setControlPointsForTooth(gearPoints);
@@ -257,8 +258,11 @@ ContactPoint* GearPair::contactPointOf(const vec2 &point, const vec2 &normal, re
     cp->normalInContact = glm::rotate(normal, angleA);
     cp->normal = glm::rotate(vec2(-cp->normalInContact.x, -cp->normalInContact.y), angleB);
 
-    insertThicknessInContactPoint(*cp);
-
+    if(!insertThicknessInContactPoint(*cp)) {
+        delete cp;
+        cp = nullptr;
+        return nullptr;
+    }
     return cp;
 }
 
@@ -268,6 +272,12 @@ NoneContactPoint* GearPair::noneContactPointOf(const vec2 &point, const vec2 &no
     ncp->evaluationValue = evalValue;
     ncp->originPoint = point;
     ncp->originNormal = normal;
+
+    if(!insertThicknessInContactPoint(*ncp)) {
+        delete ncp;
+        ncp = nullptr;
+        return nullptr;
+    }
 
     real angleToY = angleBetweenN(normalize(ncp->originPoint), vec2(0, -1));
     real direction = (ncp->originPoint.x > 0) ? -1.0 : 1.0;
@@ -291,8 +301,8 @@ NoneContactPoint* GearPair::noneContactPointOf(const vec2 &point, const vec2 &no
 
         ncp->points.push_back(glm::rotate((pointOfContact - vec2(m_distanceOfCenters, 0.0)), angleB));
         ncp->normals.push_back(glm::rotate(vec2(-normalInContact.x, -normalInContact.y), angleB));
-
-        insertThicknessInContactPoint(*ncp);
+        ncp->contactPositions.push_back(pointOfContact);
+        ncp->normalsInContact.push_back(normalInContact);
 
         startAngle += m_maxDriftAngle;
     }
@@ -300,7 +310,7 @@ NoneContactPoint* GearPair::noneContactPointOf(const vec2 &point, const vec2 &no
 }
 
 //Given ContactPoint already needs its point, normal, originPoint and originNormal!
-void GearPair::insertThicknessInContactPoint(ContactPoint& contactPoint) const {
+bool GearPair::insertThicknessInContactPoint(ContactPoint& contactPoint) const {
     //send a ray in opposite direction of the gear normal to get the gear width in this direction
     Ray ray(vec2(contactPoint.originPoint), vec2(-contactPoint.originNormal));
     vector<vec2> intersectionPoints;
@@ -310,7 +320,7 @@ void GearPair::insertThicknessInContactPoint(ContactPoint& contactPoint) const {
         std::cerr << "CURIOS THINGS HAPPENED! A ray of the gear hadn't found a cutting!" << std::endl;
         //If no cutting is found, curve has not a form of a gear!
         m_gearPairInformation->notValidGearShapeFound();
-        contactPoint.error = ErrorCode::NO_THICKNESS;
+        return false;
     } else {
         real epsilon = 1.0; //prevent finding the point itself as intersection point
         real thickness = 3.0 * m_drivingGear->maximumDistanceToCenter(); //gear can only have a thickness of 2.0f * maximumDistanceToCenter()
@@ -324,6 +334,7 @@ void GearPair::insertThicknessInContactPoint(ContactPoint& contactPoint) const {
         contactPoint.forbiddenAreaLength = thickness;
         if(contactPoint.error != ErrorCode::NO_CUT_WITH_REFERENCE_RADIUS)
             contactPoint.forbiddenAreaEndPoint = contactPoint.point + contactPoint.normal * thickness;
+        return true;
     }
 }
 
