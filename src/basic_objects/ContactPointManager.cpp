@@ -454,8 +454,8 @@ void ContactPointManager::findAllCoveredPoints() {
     Ray rayOfPitchEnd(vec2(0, 0), glm::rotate(m_examinedPitchStartDirection, m_angularPitchRotation));
 
     do {
-        std::vector<CPcutting> cpCuttingsList;
-        std::vector<NCPcutting> ncpCuttingsList;
+        vector<CPcutting> cpCuttingsList;
+        vector<NCPcutting> ncpCuttingsList;
         cpCuttingsList.reserve(m_numberOfInsertedCPs); //only an estimation
         ncpCuttingsList.reserve(4 * m_noneContactPointList.size()); // each path for a NoneContactPoint may in an unfortunate event have four cuttings with a line (cause of the form of the path like a loop)
 
@@ -506,8 +506,11 @@ void ContactPointManager::findAllCoveredPoints() {
             m_gearPointsInformationIndex.push_back(-1); //cutting
         }
 
-        if(it.reachedEnd())
-            it.tryToContinueWithOtherList(m_contactPointsWithPositionList);
+        if(it.reachedEnd()) {
+            if(!it.tryToContinueWithOtherList(m_contactPointsWithPositionList) && it.isCurrentlyInCorrectCP()) {
+                tryToSwitchToOtherList(it);
+            }
+        }
 
         ++securityBreak;
         securityBreakCondition = (securityBreak <= securityBreakTreshold);
@@ -550,7 +553,7 @@ uint ContactPointManager::numberOfNoneErrorContactPoints() const {
 uint ContactPointManager::findStartPointForGearPoints(CPcutting &cpCutting, NCPcutting &ncpCutting) {
     Ray ray(vec2(0, 0), m_examinedPitchStartDirection);
 
-    std::vector<CPcutting> cpCuttingsList;
+    vector<CPcutting> cpCuttingsList;
     for(ContactPointsWithPosition* contactPointsWithPosition : m_contactPointsWithPositionList) {
         for(vector<ContactPoint*>::iterator previous = contactPointsWithPosition->points.begin(),
                                             current = ++(contactPointsWithPosition->points.begin()),
@@ -575,7 +578,7 @@ uint ContactPointManager::findStartPointForGearPoints(CPcutting &cpCutting, NCPc
             firstCP = i;
     }
 
-    std::vector<NCPcutting> ncpCuttingsList;
+    vector<NCPcutting> ncpCuttingsList;
     for(NoneContactPoint *ncp : m_noneContactPointList) {
         for(uint i = 1; i < ncp->points.size(); ++i) {
             vec2 previous = ncp->points[i - 1];
@@ -611,7 +614,72 @@ uint ContactPointManager::findStartPointForGearPoints(CPcutting &cpCutting, NCPc
     }
 }
 
-uint ContactPointManager::howManyContactPointsCoverPoint(const ContactPointIterator &it, std::vector<CPcutting> &cpCuttingsList) const {
+bool ContactPointManager::tryToSwitchToOtherList(ContactPointIterator &it) {
+    // Test the last possible CP in the list if its forbiddenArea has cuttings with a
+    // connection of two other consecutive CPs or with two other consecutive points of a NCP
+    // If so, take first cutting point and continue with that one.
+
+    ContactPoint *cp = it.previousCP();
+    //test with CPs:
+    vector<CPcutting> cpCuttingsList;
+    for(ContactPointsWithPosition *contactPointsWithPosition : m_contactPointsWithPositionList) {
+        for(vector<ContactPoint*>::iterator previous = contactPointsWithPosition->points.begin(),
+                                            current = ++(contactPointsWithPosition->points.begin()),
+                                            end = contactPointsWithPosition->points.end();
+            current != end;
+            ++previous, ++current)
+        {
+            if(cp != *previous && cp != *current) { // do not test with same point
+                real t;
+                vec2 intersection;
+                if(intersectLines(t, intersection, cp->point, cp->forbiddenAreaEndPoint, (*previous)->point, (*current)->point)) {
+                    cpCuttingsList.push_back(CPcutting{t, intersection, previous, &(contactPointsWithPosition->points), IterationLocation::Ground});
+                }
+            }
+        }
+    }
+    //test with NCPs:
+    vector<NCPcutting> ncpCuttingsList;
+    for(NoneContactPoint *ncp : m_noneContactPointList) {
+        for(uint i = 1; i < ncp->points.size(); ++i) {
+            real t;
+            vec2 intersection;
+            if(intersectLines(t, intersection, cp->point, cp->forbiddenAreaEndPoint, ncp->points[i - 1], ncp->points[i])) {
+                ncpCuttingsList.push_back(NCPcutting{t, intersection, ncp, i - 1, IterationLocation::Ground});
+            }
+        }
+    }
+    if(cpCuttingsList.empty() && ncpCuttingsList.empty())
+        return false;
+
+    //find first cutting
+    uint firstCP = 0;
+    for(uint i = 1; i < cpCuttingsList.size(); ++i) {
+        if(cpCuttingsList[i].t < cpCuttingsList[firstCP].t)
+            firstCP = i;
+    }
+    uint firstNCP = 0;
+    for(uint i = 1; i < ncpCuttingsList.size(); ++i) {
+        if(ncpCuttingsList[i].t < ncpCuttingsList[firstNCP].t)
+            firstNCP = i;
+    }
+
+    if(ncpCuttingsList.empty() || (!cpCuttingsList.empty() && cpCuttingsList[firstCP].t < ncpCuttingsList[firstNCP].t)) {
+        //nearest cutting point is one of m_contactPointsWithPositionList
+        m_gearPoints.push_back(cpCuttingsList[firstCP].cuttingPoint);
+        it.switchTo(cpCuttingsList[firstCP]);
+
+    } else { // nearest cutting point is one of m_noneContactPointList
+        m_gearPoints.push_back(ncpCuttingsList[firstNCP].cuttingPoint);
+        it.switchTo(ncpCuttingsList[firstNCP]);
+    }
+    m_gearPointsInformation.push_back(OriginInformation::CUT);
+    m_gearPointsInformationIndex.push_back(-1); //cutting
+    return true;
+}
+
+
+uint ContactPointManager::howManyContactPointsCoverPoint(const ContactPointIterator &it, vector<CPcutting> &cpCuttingsList) const {
     uint foundCoverings = 0;
 
     for(ContactPointsWithPosition* contactPointsWithPosition : m_contactPointsWithPositionList) {
@@ -641,7 +709,7 @@ uint ContactPointManager::howManyContactPointsCoverPoint(const ContactPointItera
     return foundCoverings;
 }
 
-uint ContactPointManager::howManyNoneContactPointsCoverPoint(const ContactPointIterator &it, std::vector<NCPcutting> &ncpCuttingsList) const {
+uint ContactPointManager::howManyNoneContactPointsCoverPoint(const ContactPointIterator &it, vector<NCPcutting> &ncpCuttingsList) const {
     uint foundCoverings = 0;
 
     for(NoneContactPoint *ncp : m_noneContactPointList) {

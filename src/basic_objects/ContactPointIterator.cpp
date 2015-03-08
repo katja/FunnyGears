@@ -165,9 +165,18 @@ bool ContactPointIterator::isCurrentlyInCorrectNCP() const {
 
 ContactPoint* ContactPointIterator::currentCP() const {
     if(m_iterationState == IterationState::CP)
-        return (*m_cpIterator);
+        return *m_cpIterator;
     else
         return nullptr;
+}
+
+ContactPoint* ContactPointIterator::previousCP() const {
+    if(m_iterationState != IterationState::CP)
+        return nullptr;
+    if(m_iterationDirection == IterationDirection::Normal)
+        return *(m_cpIterator - 1);
+    else
+        return *(m_cpIterator + 1);
 }
 
 NoneContactPoint* ContactPointIterator::currentNCP() const {
@@ -209,6 +218,79 @@ void ContactPointIterator::continueWith(NCPcutting cutting) {
         infrontOfCutting = forbiddenAreaEndPoint(cutting.ncp, cutting.placeBeforeCutting);
 
     if(isOnNormalsSide(infrontOfCutting)) {
+        //"normal" walking direction, set new current point to point after cutting
+        m_iterationDirection = IterationDirection::Normal;
+        m_ncpPosition = cutting.placeBeforeCutting + 1;
+
+    } else {
+        //"reverse" walking direction, set new current point to point before cutting
+        m_iterationDirection = IterationDirection::Reverse;
+        m_ncpPosition = cutting.placeBeforeCutting;
+    }
+
+    m_iterationState = IterationState::NCP;
+    m_iterationLocation = cutting.location;
+    m_ncp = cutting.ncp;
+    m_ncp->examinedIndex = m_ncpPosition;
+    m_previousPoint = cutting.cuttingPoint;
+}
+
+void ContactPointIterator::switchTo(CPcutting cutting) {
+    vec2 infrontOfCutting;
+    if(cutting.location == IterationLocation::Ground)
+        infrontOfCutting = (*(cutting.placeBeforeCutting))->point;
+    else
+        infrontOfCutting = (*(cutting.placeBeforeCutting))->forbiddenAreaEndPoint;
+
+    vec2 previousNormalEnd;
+    if(m_iterationState == IterationState::CP) {
+        previousNormalEnd = previousCP()->point;
+        if(m_iterationLocation == IterationLocation::Top)
+            previousNormalEnd = previousCP()->forbiddenAreaEndPoint;
+    } else { //IterationState::NCP
+        int toPreviousOffset = (m_iterationDirection == IterationDirection::Normal) ? -1 : +1;
+        previousNormalEnd = m_ncp->points[m_ncpPosition + toPreviousOffset];
+        if(m_iterationLocation == IterationLocation::Top)
+            previousNormalEnd = forbiddenAreaEndPoint(m_ncp, m_ncpPosition + toPreviousOffset);
+    }
+
+    if(isOnNormalsSideOf(m_previousPoint, previousNormalEnd, infrontOfCutting)) {
+        //"normal" walking direction, set new current point to point after cutting
+        m_iterationDirection = IterationDirection::Normal;
+        m_cpIterator = (cutting.placeBeforeCutting + 1);
+
+    } else {
+        //"reverse" walking direction, set new current point to point before cutting
+        m_iterationDirection = IterationDirection::Reverse;
+        m_cpIterator = cutting.placeBeforeCutting;
+    }
+
+    m_iterationState = IterationState::CP;
+    m_iterationLocation = cutting.location;
+    m_cpList = cutting.list;
+    m_previousPoint = cutting.cuttingPoint;
+}
+
+void ContactPointIterator::switchTo(NCPcutting cutting) {
+    vec2 infrontOfCutting;
+    if(cutting.location == IterationLocation::Ground)
+        infrontOfCutting = cutting.ncp->points[cutting.placeBeforeCutting];
+    else
+        infrontOfCutting = forbiddenAreaEndPoint(cutting.ncp, cutting.placeBeforeCutting);
+
+    vec2 previousNormalEnd;
+    if(m_iterationState == IterationState::CP) {
+        previousNormalEnd = previousCP()->point;
+        if(m_iterationLocation == IterationLocation::Top)
+            previousNormalEnd = previousCP()->forbiddenAreaEndPoint;
+    } else { //IterationState::NCP
+        int toPreviousOffset = (m_iterationDirection == IterationDirection::Normal) ? -1 : +1;
+        previousNormalEnd = m_ncp->points[m_ncpPosition + toPreviousOffset];
+        if(m_iterationLocation == IterationLocation::Top)
+            previousNormalEnd = forbiddenAreaEndPoint(m_ncp, m_ncpPosition + toPreviousOffset);
+    }
+
+    if(isOnNormalsSideOf(m_previousPoint, previousNormalEnd, infrontOfCutting)) {
         //"normal" walking direction, set new current point to point after cutting
         m_iterationDirection = IterationDirection::Normal;
         m_ncpPosition = cutting.placeBeforeCutting + 1;
@@ -323,6 +405,13 @@ bool ContactPointIterator::isOnNormalsSide(vec2 point) const {
     vec2 toPoint = point - m_previousPoint;
     real side = cross(normalize(toCurrentPoint), normalize(toPoint));
     return (m_normalDirection == 1 && side > 0.0) || (m_normalDirection == -1 && side < 0.0);
+}
+
+bool ContactPointIterator::isOnNormalsSideOf(vec2 lineStart, vec2 lineEnd, vec2 point) const {
+    vec2 toLineEnd = lineEnd - lineStart;
+    vec2 toPoint = point - lineStart;
+    real side = cross(normalize(toLineEnd), normalize(toPoint));
+    return (m_normalDirection == 1 && side > 0.0) || (m_normalDirection == -1 && side < 0.0);
 }
 
 vec2 ContactPointIterator::forbiddenAreaEndPoint(NoneContactPoint *ncp, uint position) const {

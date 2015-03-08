@@ -25,11 +25,15 @@ public:
     vec2 previousPoint() const;
     bool isCurrentlyInCorrectCP() const;
     bool isCurrentlyInCorrectNCP() const;
-    ContactPoint* currentCP() const; //Returns current pointer to CP, if in CP state, otherwise nullptr!
+    ContactPoint* currentCP() const; //Returns pointer to current CP, if in CP state, otherwise nullptr!
+    ContactPoint* previousCP() const; //Returns pointer to previous CP, if in CP state, otherwise nullptr!
     NoneContactPoint* currentNCP() const; //Returns current pointer to NCP, if in NCP state, otherwise nullptr!
 
     void continueWith(CPcutting cutting);
     void continueWith(NCPcutting cutting);
+
+    void switchTo(CPcutting cutting);
+    void switchTo(NCPcutting cutting);
 
     bool belongsToQuad(ContactPoint *a, ContactPoint *b) const;
     bool belongsToQuad(NoneContactPoint *ncp, uint a, uint b) const;
@@ -51,6 +55,7 @@ private:
 
     void setNormalDirection(); //may only be used after startWith(...) is called!
     bool isOnNormalsSide(vec2 point) const;
+    bool isOnNormalsSideOf(vec2 lineStart, vec2 lineEnd, vec2 point) const;
     vec2 forbiddenAreaEndPoint(NoneContactPoint *ncp, uint position) const;
 };
 

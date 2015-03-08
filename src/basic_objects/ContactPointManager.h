@@ -96,9 +96,10 @@ private:
     uint numberOfNoneErrorContactPoints() const;
 
     uint findStartPointForGearPoints(CPcutting &cpCutting, NCPcutting &ncpCutting);
+    bool tryToSwitchToOtherList(ContactPointIterator &it);
 
-    uint howManyContactPointsCoverPoint(const ContactPointIterator &it, std::vector<CPcutting> &cpCuttingsList) const;
-    uint howManyNoneContactPointsCoverPoint(const ContactPointIterator &it, std::vector<NCPcutting> &ncpCuttingsList) const;
+    uint howManyContactPointsCoverPoint(const ContactPointIterator &it, vector<CPcutting> &cpCuttingsList) const;
+    uint howManyNoneContactPointsCoverPoint(const ContactPointIterator &it, vector<NCPcutting> &ncpCuttingsList) const;
 
     int pitchNumberOfPoint(vec2 point) const;
     int whichPositionBehindAngularPitch(ContactPoint *contactPoint, const vec2 &stopPitch) const;
