@@ -554,7 +554,7 @@ uint ContactPointManager::findStartPointForGearPoints(CPcutting &cpCutting, NCPc
     Ray ray(vec2(0, 0), m_examinedPitchStartDirection);
 
     vector<CPcutting> cpCuttingsList;
-    for(ContactPointsWithPosition* contactPointsWithPosition : m_contactPointsWithPositionList) {
+    for(ContactPointsWithPosition *contactPointsWithPosition : m_contactPointsWithPositionList) {
         for(vector<ContactPoint*>::iterator previous = contactPointsWithPosition->points.begin(),
                                             current = ++(contactPointsWithPosition->points.begin()),
                                             end = contactPointsWithPosition->points.end();
@@ -667,11 +667,11 @@ bool ContactPointManager::tryToSwitchToOtherList(ContactPointIterator &it) {
     if(ncpCuttingsList.empty() || (!cpCuttingsList.empty() && cpCuttingsList[firstCP].t < ncpCuttingsList[firstNCP].t)) {
         //nearest cutting point is one of m_contactPointsWithPositionList
         m_gearPoints.push_back(cpCuttingsList[firstCP].cuttingPoint);
-        it.switchTo(cpCuttingsList[firstCP]);
+        it.continueWith(cpCuttingsList[firstCP], true);
 
     } else { // nearest cutting point is one of m_noneContactPointList
         m_gearPoints.push_back(ncpCuttingsList[firstNCP].cuttingPoint);
-        it.switchTo(ncpCuttingsList[firstNCP]);
+        it.continueWith(ncpCuttingsList[firstNCP], true);
     }
     m_gearPointsInformation.push_back(OriginInformation::CUT);
     m_gearPointsInformationIndex.push_back(-1); //cutting
@@ -682,7 +682,7 @@ bool ContactPointManager::tryToSwitchToOtherList(ContactPointIterator &it) {
 uint ContactPointManager::howManyContactPointsCoverPoint(const ContactPointIterator &it, vector<CPcutting> &cpCuttingsList) const {
     uint foundCoverings = 0;
 
-    for(ContactPointsWithPosition* contactPointsWithPosition : m_contactPointsWithPositionList) {
+    for(ContactPointsWithPosition *contactPointsWithPosition : m_contactPointsWithPositionList) {
         for(vector<ContactPoint*>::iterator previous = contactPointsWithPosition->points.begin(),
                                             current = ++(contactPointsWithPosition->points.begin()),
                                             end = contactPointsWithPosition->points.end();

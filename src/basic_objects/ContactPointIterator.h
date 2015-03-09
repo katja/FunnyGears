@@ -29,11 +29,8 @@ public:
     ContactPoint* previousCP() const; //Returns pointer to previous CP, if in CP state, otherwise nullptr!
     NoneContactPoint* currentNCP() const; //Returns current pointer to NCP, if in NCP state, otherwise nullptr!
 
-    void continueWith(CPcutting cutting);
-    void continueWith(NCPcutting cutting);
-
-    void switchTo(CPcutting cutting);
-    void switchTo(NCPcutting cutting);
+    void continueWith(CPcutting cutting, bool hopOn = false); //if !hopOn, takes as reference for normal and therefore stepping on direction the line between previous and current point, if hopOn takes instead the line between previous point and the previous normal end point
+    void continueWith(NCPcutting cutting, bool hopOn = false); //if !hopOn, takes as reference for normal and therefore stepping on direction the line between previous and current point, if hopOn takes instead the line between previous point and the previous normal end point
 
     bool belongsToQuad(ContactPoint *a, ContactPoint *b) const;
     bool belongsToQuad(NoneContactPoint *ncp, uint a, uint b) const;
@@ -52,10 +49,8 @@ private:
     IterationLocation               m_iterationLocation;
     IterationState                  m_iterationState;
 
-
-    void setNormalDirection(); //may only be used after startWith(...) is called!
-    bool isOnNormalsSide(vec2 point) const;
     bool isOnNormalsSideOf(vec2 lineStart, vec2 lineEnd, vec2 point) const;
+    vec2 previousNormalEnd() const;
     vec2 forbiddenAreaEndPoint(NoneContactPoint *ncp, uint position) const;
 };
 
