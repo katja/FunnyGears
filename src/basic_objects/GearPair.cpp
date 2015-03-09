@@ -200,28 +200,24 @@ void GearPair::createAndInsertContactPoint(const vec2 &point, const vec2 &normal
             m_contactPointManager.insert(contactPointOf(point, normal, evalValue, t, false));
         }
     } else {
-        if(dot(normalize(point), normal) >= 0.0) { // normal points away from circle, so take larger value for t
-            real t = -dot(normal, point) + sqrt(valueUnderRoot);
-            m_contactPointManager.insert(contactPointOf(point, normal, evalValue, t, true));
-        } else { // normal points to center => two cutting points with pitch circle in normal direction => take nearer one
-            real t = -dot(normal, point) - sqrt(valueUnderRoot);
-            m_contactPointManager.insert(contactPointOf(point, normal, evalValue, t, false));
+        // point lies inside pitch circle
+        // Examine both possibilities for cut with pitch circle, as long as the distance
+        // to the cutting point is not larger than the pitch radius. As the value t
+        // corresponds to the distance to the cutting, observe t
+        real tBehind = -dot(normal, point) - sqrt(valueUnderRoot);
+        real tAhead = -dot(normal, point) + sqrt(valueUnderRoot);
+        std::cout << "in the circle and tBehind = " << tBehind << ", tAhead = " << tAhead << " whereas radius = " << m_drivingGearPitchRadius << std::endl;
+        if((-tBehind) < m_drivingGearPitchRadius && tAhead < m_drivingGearPitchRadius) { // as tBehind is in contrary normal direction, it is negative
+            std::cout << "              goes in BOTH" << std::endl;
+            m_contactPointManager.insert(contactPointOf(point, normal, evalValue, tBehind, false),
+                                         contactPointOf(point, normal, evalValue, tAhead, true));
+        } else if(tAhead < m_drivingGearPitchRadius) {
+            std::cout << "              goes in ahead" << std::endl;
+            m_contactPointManager.insert(contactPointOf(point, normal, evalValue, tAhead, true));
+        } else {
+            std::cout << "              goes in behind" << std::endl;
+            m_contactPointManager.insert(contactPointOf(point, normal, evalValue, tBehind, false));
         }
-
-        // // point lies inside pitch circle
-        // // Examine both possibilities for cut with pitch circle, as long as the distance
-        // // to the cutting point is not larger than the pitch radius. As the value t
-        // // corresponds to the distance to the cutting, observe t
-        // real tBehind = -dot(normal, point) - sqrt(valueUnderRoot);
-        // real tAhead = -dot(normal, point) + sqrt(valueUnderRoot);
-        // if(tBehind < m_drivingGearPitchRadius && tAhead < m_drivingGearPitchRadius) {
-        //     m_contactPointManager.insert(contactPointOf(point, normal, evalValue, tBehind, false),
-        //                                  contactPointOf(point, normal, evalValue, tAhead, true));
-        // } else if(tBehind < m_drivingGearPitchRadius) {
-        //     m_contactPointManager.insert(contactPointOf(point, normal, evalValue, tBehind, false));
-        // } else {
-        //     m_contactPointManager.insert(contactPointOf(point, normal, evalValue, tAhead, true));
-        // }
     }
 }
 
