@@ -56,6 +56,12 @@ struct NCPcutting {
     IterationLocation location; //IterationLocation::Ground or IterationLocation::Top
 };
 
+enum class ContinuationType {
+    Default,
+    HopOn,
+    StartAgain
+};
+
 enum class OriginInformation {
     WCP = -1,
     CUT = 0,

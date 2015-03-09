@@ -29,8 +29,8 @@ public:
     ContactPoint* previousCP() const; //Returns pointer to previous CP, if in CP state, otherwise nullptr!
     NoneContactPoint* currentNCP() const; //Returns current pointer to NCP, if in NCP state, otherwise nullptr!
 
-    void continueWith(CPcutting cutting, bool hopOn = false); //if !hopOn, takes as reference for normal and therefore stepping on direction the line between previous and current point, if hopOn takes instead the line between previous point and the previous normal end point
-    void continueWith(NCPcutting cutting, bool hopOn = false); //if !hopOn, takes as reference for normal and therefore stepping on direction the line between previous and current point, if hopOn takes instead the line between previous point and the previous normal end point
+    void continueWith(CPcutting cutting, ContinuationType continueType = ContinuationType::Default); //if Default, takes as reference for normal and therefore stepping on direction the line between previous and current point, if HopOn takes instead the line between previous point and the previous normal end point, if StartAgain start or end of the list has to be given as placeBeforeCutting (if not appropriate placeBeforeCutting is found, nothing is done here) and it is walked in the only possible direction
+    void continueWith(NCPcutting cutting, ContinuationType continueType = ContinuationType::Default); //if Default, takes as reference for normal and therefore stepping on direction the line between previous and current point, if HopOn takes instead the line between previous point and the previous normal end point, if StartAgain start or end of the list has to be given as placeBeforeCutting (if not appropriate placeBeforeCutting is found, nothing is done here) and it is walked in the only possible direction
 
     bool belongsToQuad(ContactPoint *a, ContactPoint *b) const;
     bool belongsToQuad(NoneContactPoint *ncp, uint a, uint b) const;

@@ -98,8 +98,8 @@ private:
     uint findStartPointForGearPoints(CPcutting &cpCutting, NCPcutting &ncpCutting);
     bool tryToSwitchToOtherList(ContactPointIterator &it);
 
-    uint howManyContactPointsCoverPoint(const ContactPointIterator &it, vector<CPcutting> &cpCuttingsList) const;
-    uint howManyNoneContactPointsCoverPoint(const ContactPointIterator &it, vector<NCPcutting> &ncpCuttingsList) const;
+    uint howManyContactPointsCutPreviousLine(const ContactPointIterator &it, vector<CPcutting> &cpCuttingsList, vector<ContinuationType> &cpCuttingsTypes) const;
+    uint howManyNoneContactPointsCutPreviousLine(const ContactPointIterator &it, vector<NCPcutting> &ncpCuttingsList, vector<ContinuationType> &ncpCuttingsTypes) const;
 
     int pitchNumberOfPoint(vec2 point) const;
     int whichPositionBehindAngularPitch(ContactPoint *contactPoint, const vec2 &stopPitch) const;

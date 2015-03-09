@@ -455,12 +455,16 @@ void ContactPointManager::findAllCoveredPoints() {
 
     do {
         vector<CPcutting> cpCuttingsList;
+        vector<ContinuationType> cpCuttingsTypes;
         vector<NCPcutting> ncpCuttingsList;
+        vector<ContinuationType> ncpCuttingsTypes;
         cpCuttingsList.reserve(m_numberOfInsertedCPs); //only an estimation
+        cpCuttingsTypes.reserve(m_numberOfInsertedCPs);
         ncpCuttingsList.reserve(4 * m_noneContactPointList.size()); // each path for a NoneContactPoint may in an unfortunate event have four cuttings with a line (cause of the form of the path like a loop)
+        ncpCuttingsTypes.reserve(4 * m_noneContactPointList.size());
 
-        uint occurencesCP = howManyContactPointsCoverPoint(it, cpCuttingsList);
-        uint occurencesNCP = howManyNoneContactPointsCoverPoint(it, ncpCuttingsList);
+        uint occurencesCP = howManyContactPointsCutPreviousLine(it, cpCuttingsList, cpCuttingsTypes);
+        uint occurencesNCP = howManyNoneContactPointsCutPreviousLine(it, ncpCuttingsList, ncpCuttingsTypes);
 
         if(occurencesCP + occurencesNCP == 0) {
             //point is not covered => it is a gear point
@@ -496,11 +500,11 @@ void ContactPointManager::findAllCoveredPoints() {
             if(occurencesNCP == 0 || (occurencesCP > 0 && cpCuttingsList[firstCP].t < ncpCuttingsList[firstNCP].t)) {
                 //nearest cutting point is one of m_contactPointsWithPositionList
                 m_gearPoints.push_back(cpCuttingsList[firstCP].cuttingPoint);
-                it.continueWith(cpCuttingsList[firstCP]);
+                it.continueWith(cpCuttingsList[firstCP], cpCuttingsTypes[firstCP]);
 
             } else { // nearest cutting point is one of m_noneContactPointList
                 m_gearPoints.push_back(ncpCuttingsList[firstNCP].cuttingPoint);
-                it.continueWith(ncpCuttingsList[firstNCP]);
+                it.continueWith(ncpCuttingsList[firstNCP], ncpCuttingsTypes[firstNCP]);
             }
             m_gearPointsInformation.push_back(OriginInformation::CUT);
             m_gearPointsInformationIndex.push_back(-1); //cutting
@@ -566,10 +570,6 @@ uint ContactPointManager::findStartPointForGearPoints(CPcutting &cpCutting, NCPc
             if(ray.intersect((*previous)->point, (*current)->point, intersection, 0.0001)) {
                 cpCuttingsList.push_back(CPcutting{glm::length(intersection), intersection, previous, &(contactPointsWithPosition->points), IterationLocation::Ground});
             }
-            //test top:
-            if(ray.intersect((*previous)->forbiddenAreaEndPoint, (*current)->forbiddenAreaEndPoint, intersection, 0.0001)) {
-                cpCuttingsList.push_back(CPcutting{glm::length(intersection), intersection, previous, &(contactPointsWithPosition->points), IterationLocation::Top});
-            }
         }
     }
     uint firstCP = 0;
@@ -583,17 +583,11 @@ uint ContactPointManager::findStartPointForGearPoints(CPcutting &cpCutting, NCPc
         for(uint i = 1; i < ncp->points.size(); ++i) {
             vec2 previous = ncp->points[i - 1];
             vec2 current = ncp->points[i];
-            vec2 previousEndPoint = previous + ncp->forbiddenAreaLength * ncp->normals[i - 1];
-            vec2 currentEndPoint = current + ncp->forbiddenAreaLength * ncp->normals[i];
 
             vec2 intersection;
             //test ground:
             if(ray.intersect(previous, current, intersection, 0.0001)) {
                 ncpCuttingsList.push_back(NCPcutting{glm::length(intersection), intersection, ncp, i - 1, IterationLocation::Ground});
-            }
-            //test top:
-            if(ray.intersect(previousEndPoint, currentEndPoint, intersection, 0.0001)) {
-                ncpCuttingsList.push_back(NCPcutting{glm::length(intersection), intersection, ncp, i - 1, IterationLocation::Top});
             }
         }
     }
@@ -667,11 +661,11 @@ bool ContactPointManager::tryToSwitchToOtherList(ContactPointIterator &it) {
     if(ncpCuttingsList.empty() || (!cpCuttingsList.empty() && cpCuttingsList[firstCP].t < ncpCuttingsList[firstNCP].t)) {
         //nearest cutting point is one of m_contactPointsWithPositionList
         m_gearPoints.push_back(cpCuttingsList[firstCP].cuttingPoint);
-        it.continueWith(cpCuttingsList[firstCP], true);
+        it.continueWith(cpCuttingsList[firstCP], ContinuationType::HopOn);
 
     } else { // nearest cutting point is one of m_noneContactPointList
         m_gearPoints.push_back(ncpCuttingsList[firstNCP].cuttingPoint);
-        it.continueWith(ncpCuttingsList[firstNCP], true);
+        it.continueWith(ncpCuttingsList[firstNCP], ContinuationType::HopOn);
     }
     m_gearPointsInformation.push_back(OriginInformation::CUT);
     m_gearPointsInformationIndex.push_back(-1); //cutting
@@ -679,10 +673,31 @@ bool ContactPointManager::tryToSwitchToOtherList(ContactPointIterator &it) {
 }
 
 
-uint ContactPointManager::howManyContactPointsCoverPoint(const ContactPointIterator &it, vector<CPcutting> &cpCuttingsList) const {
+uint ContactPointManager::howManyContactPointsCutPreviousLine(const ContactPointIterator &it, vector<CPcutting> &cpCuttingsList, vector<ContinuationType> &cpCuttingsTypes) const {
     uint foundCoverings = 0;
 
     for(ContactPointsWithPosition *contactPointsWithPosition : m_contactPointsWithPositionList) {
+
+        real t;
+        vec2 intersection;
+        ContactPoint *outermost;
+        if(!it.belongsToQuad(*(contactPointsWithPosition->points.begin()), *(++(contactPointsWithPosition->points.begin())))) {
+             outermost = contactPointsWithPosition->points.front();
+            if(intersectLines(t, intersection, it.previousPoint(), it.currentPoint(), outermost->point, outermost->forbiddenAreaEndPoint)) {
+                cpCuttingsList.push_back(CPcutting{t, intersection, contactPointsWithPosition->points.begin(), &(contactPointsWithPosition->points), IterationLocation::Ground});
+                cpCuttingsTypes.push_back(ContinuationType::StartAgain);
+                ++foundCoverings;
+            }
+        }
+        if(!it.belongsToQuad(*(contactPointsWithPosition->points.end() - 1), *(contactPointsWithPosition->points.end() - 2))) {
+            outermost = contactPointsWithPosition->points.back();
+            if(intersectLines(t, intersection, it.previousPoint(), it.currentPoint(), outermost->point, outermost->forbiddenAreaEndPoint)) {
+                cpCuttingsList.push_back(CPcutting{t, intersection, --(contactPointsWithPosition->points.end()), &(contactPointsWithPosition->points), IterationLocation::Ground});
+                cpCuttingsTypes.push_back(ContinuationType::StartAgain);
+                ++foundCoverings;
+            }
+        }
+
         for(vector<ContactPoint*>::iterator previous = contactPointsWithPosition->points.begin(),
                                             current = ++(contactPointsWithPosition->points.begin()),
                                             end = contactPointsWithPosition->points.end();
@@ -696,11 +711,7 @@ uint ContactPointManager::howManyContactPointsCoverPoint(const ContactPointItera
                 //test ground:
                 if(intersectLines(t, intersection, it.previousPoint(), it.currentPoint(), (*previous)->point, (*current)->point)) {
                     cpCuttingsList.push_back(CPcutting{t, intersection, previous, &(contactPointsWithPosition->points), IterationLocation::Ground});
-                    ++foundCoverings;
-                }
-                //test top:
-                if(intersectLines(t, intersection, it.previousPoint(), it.currentPoint(), (*previous)->forbiddenAreaEndPoint, (*current)->forbiddenAreaEndPoint)) {
-                    cpCuttingsList.push_back(CPcutting{t, intersection, previous, &(contactPointsWithPosition->points), IterationLocation::Top});
+                    cpCuttingsTypes.push_back(ContinuationType::Default);
                     ++foundCoverings;
                 }
             }
@@ -709,10 +720,32 @@ uint ContactPointManager::howManyContactPointsCoverPoint(const ContactPointItera
     return foundCoverings;
 }
 
-uint ContactPointManager::howManyNoneContactPointsCoverPoint(const ContactPointIterator &it, vector<NCPcutting> &ncpCuttingsList) const {
+uint ContactPointManager::howManyNoneContactPointsCutPreviousLine(const ContactPointIterator &it, vector<NCPcutting> &ncpCuttingsList, vector<ContinuationType> &ncpCuttingsTypes) const {
     uint foundCoverings = 0;
 
     for(NoneContactPoint *ncp : m_noneContactPointList) {
+
+        real t;
+        vec2 intersection;
+        vec2 outerMostForbiddenEndPoint;
+        if(!it.belongsToQuad(ncp, 0, 1)) {
+            outerMostForbiddenEndPoint = ncp->points[0] + ncp->normals[0] * ncp->forbiddenAreaLength;
+            if(intersectLines(t, intersection, it.previousPoint(), it.currentPoint(), ncp->points[0], outerMostForbiddenEndPoint)) {
+                ncpCuttingsList.push_back(NCPcutting{t, intersection, ncp, 0, IterationLocation::Ground});
+                ncpCuttingsTypes.push_back(ContinuationType::StartAgain);
+                ++foundCoverings;
+            }
+        }
+        uint lastIndex = ncp->points.size() - 1;
+        if(!it.belongsToQuad(ncp, lastIndex - 1, lastIndex)) {
+            outerMostForbiddenEndPoint = ncp->points[lastIndex] + ncp->normals[lastIndex] * ncp->forbiddenAreaLength;
+            if(intersectLines(t, intersection, it.previousPoint(), it.currentPoint(), ncp->points[lastIndex], outerMostForbiddenEndPoint)) {
+                ncpCuttingsList.push_back(NCPcutting{t, intersection, ncp, lastIndex, IterationLocation::Ground});
+                ncpCuttingsTypes.push_back(ContinuationType::StartAgain);
+                ++foundCoverings;
+            }
+        }
+
         for(uint i = 1; i < ncp->points.size(); ++i) {
             if(!it.belongsToQuad(ncp, i - 1, i)) { // do not test the point with its own quad!
 
@@ -723,12 +756,10 @@ uint ContactPointManager::howManyNoneContactPointsCoverPoint(const ContactPointI
 
                 real t;
                 vec2 intersection;
+                //test ground
                 if(intersectLines(t, intersection, it.previousPoint(), it.currentPoint(), previous, current)) {
                     ncpCuttingsList.push_back(NCPcutting{t, intersection, ncp, i - 1, IterationLocation::Ground});
-                    ++foundCoverings;
-                }
-                if(intersectLines(t, intersection, it.previousPoint(), it.currentPoint(), previousEndPoint, currentEndPoint)) {
-                    ncpCuttingsList.push_back(NCPcutting{t, intersection, ncp, i - 1, IterationLocation::Top});
+                    ncpCuttingsTypes.push_back(ContinuationType::Default);
                     ++foundCoverings;
                 }
 
