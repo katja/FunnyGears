@@ -64,9 +64,9 @@ enum class ContinuationType {
 
 enum class OriginInformation {
     WCP = -1,
-    CUT = 0,
+    Cut = 0,
     CP = 1,
-    SOME_THING_ELSE = 999
+    SomethingElse = 999
 };
 
 #endif // CONTACT_POINT_HELPERS

@@ -34,7 +34,7 @@ public:
 
     // Most important method:
     void processPointsToGear(uint numberOfTeeth, bool isDescribedClockwise);
-    void translateForBottomClearance(real bottomClearance, real degree, real pitchRadiusDrivenGear); //translate gear points with less than angle alpha (in degree) between their normal and line of centers. Needs valid creation of all gear points etc. before (so call createCoveringLists() before!)
+    void translateForBottomClearance(real bottomClearance, real angleInDegree); //translate gear points with less than angle angleInDegree between their normal and line of centers. Needs valid creation of all gear points etc. before (so call createCoveringLists() before!)
 
     const list< list<ContactPoint*>* >& foundPoints() const;
     const list<ContactPointsWithPosition*>& contactPointsWithPositions() const;
@@ -74,9 +74,9 @@ private:
     vector<WrongContactPoint*>      m_gearWCPs; // is arisen from a NCP in special position, bad point for the gear, as it results in a violation of the basic requirement of a gear tooth system
 
     // chosen points if already translated
-    vector<vec2>                    m_translatedGearPoints;
-    vector<ContactPoint*>           m_translatedGearCPs;
-    vector<WrongContactPoint*>      m_translatedGearWCPs;
+    vector<vec2>                    m_translatedGearPoints; // all gear points after translation
+    vector<ContactPoint*>           m_notTranslatedGearCPs; // not translated and therefore still in contact, only references! No Copies!
+    vector<WrongContactPoint*>      m_notTranslatedGearWCPs; // not translated and therefore still in contact, only references! No Copies!
     // other (pitch and rotation) attributes:
     real                            m_angularPitchRotation; //is negative, if driven gear tooth is described counter clockwise (in screen representation), and positive otherwise
     vec2                            m_examinedPitchStartDirection;
@@ -104,6 +104,8 @@ private:
     int pitchNumberOfPoint(vec2 point) const;
     int whichPositionBehindAngularPitch(ContactPoint *contactPoint, const vec2 &stopPitch) const;
     int whichPositionBeforeAngularPitch(ContactPoint *contactPoint, const vec2 &startPitch) const;
+
+    void fillLastCuttingPoints(uint foundCuttings, uint currentIndex, ContactPoint *lastContactPoint, ContactPoint *currentContactPoint, real bottomClearance, real maxAngle);
 
     bool pointIsCovered(const vec2 &candidate, const ContactPoint &a, const ContactPoint &b) const;
     bool contactPointIsCovered(const ContactPoint &candidate, const ContactPoint &a, const ContactPoint &b) const;

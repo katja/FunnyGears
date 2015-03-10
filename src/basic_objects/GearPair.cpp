@@ -172,7 +172,7 @@ void GearPair::insertRefinedContactPoints(real evalValue, real nextStepValue, ui
 
 void GearPair::chooseCorrectPoints() {
     m_contactPointManager.processPointsToGear(m_drivenGear->numberOfTeeth(), !(m_drivingGear->toothDescribedInClockDirection()));
-    // m_contactPointManager.translateForBottomClearance(real bottomClearance, real degree); //Kopfspiel
+    m_contactPointManager.translateForBottomClearance(3.0, 15); //bottomClearance, angleInDegree //Kopfspiel
     vector<vec2> gearPoints = m_contactPointManager.gearPoints();
     m_drivenGear->setDegree(1);
     m_drivenGear->setControlPointsForTooth(gearPoints);

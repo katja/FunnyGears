@@ -138,112 +138,129 @@ void ContactPointManager::processPointsToGear(uint numberOfTeeth, bool isDescrib
         //=> m_gearPoints, m_gearCPs, m_gearWCPs, m_gearPointsInformation, m_gearPointsInformationIndex
 }
 
-//translate gear points with less than angle alpha (in degree) between their normal and line of centers
-void ContactPointManager::translateForBottomClearance(real bottomClearance, real degree, real pitchRadiusDrivenGear) {
+//translate gear points with less than angle angleInDegree between their normal and line of centers
+void ContactPointManager::translateForBottomClearance(real bottomClearance, real angleInDegree) {
     if(m_gearPoints.empty())
         return;
+    clearAllTranslatedGearLists();
 
-    real alphaRad = degree * M_PI / 180.0;
-    int normalDir = 1;
+    real maxAngle = absolute(angleInDegree * M_PI / 180.0);
+    int normalDir = 1; //normals on the right side of point described direction
     if(m_angularPitchRotation > 0)
-        normalDir = -1;
+        normalDir = -1; //normals on the left side
 
-    //first point is always a cutting point!!!
-    //Three possible situations, best would be A:
-    // A >> second point of m_gearPoints is a contactPoint with evaluationStep 'q' and
-    //      last point of m_gearPoints is a contactPoint, too, with evaluationStep 'q-1'
-    //      In this case, do not care about first point!
-    //      => simply start with second one: i = 1 ... size() - 1
-    //
-    // B >> first and last points of m_gearPoints are (nearly) the same. So calculate
-    //      with second and second to last
-    //      => start with second one: i = 1 ... size() - 1  at last position take second point as following one
-    //
-    // C >> iterate over all: i = 0 ... size() - 1
-    //      for first point: take as previous point glm::rotate(last point, -m_angularPitchRotation)
-    //      for last point: take as next point glm::rotate(first point, m_angularPitchRotation);
+    ContactPoint *lastContactPoint = nullptr;
+    uint foundCuttings = 0;
+    uint i = 0;
+    uint firstContactPoint = m_gearPoints.size() - 1;
 
-    int secondIndex = m_gearPointsInformationIndex[1];
-    int lastIndex = m_gearPointsInformationIndex[m_gearPoints.size() - 1];
-    vec2 rotatedLastPoint = glm::rotate(m_gearPoints.back(), -m_angularPitchRotation);
-    vec2 rotatedFirstPoint = glm::rotate(m_gearPoints.front(), m_angularPitchRotation);
-    uint startWithIndex;
-    uint stopWithIndex = m_gearPoints.size() - 1; //last possible gear point
-
-    if(secondIndex >= 0 && lastIndex >= 0 &&
-        m_gearCPs[lastIndex]->evaluationStep + 1 == m_gearCPs[secondIndex]->evaluationStep) {
-        // Case A
-        startWithIndex = 1;
-
-    } else {
-        if(glm::length(m_gearPoints.front() - rotatedLastPoint) < 0.0001)
-            // Case B
-            startWithIndex = 1;
-        else
-            //Case C
-            startWithIndex = 0;
-    }
-
-    //TODO: take a similar like contactPointOf(...) in GearPair to implement wrongContactPointWhenTurnedBack(...)
-    //      add all new lists and clear them correctly (delete the WrongContactPoints!!!)
-    for(uint i = startWithIndex; i <= stopWithIndex; ++i) {
-
+    while(i <= firstContactPoint) {
         OriginInformation origin = m_gearPointsInformation[i];
-        int index = m_gearPointsInformationIndex[i];
-        vec2 point = m_gearPoints[i];
+        if(origin == OriginInformation::Cut || origin == OriginInformation::SomethingElse) {
+            ++foundCuttings;
 
-        if(origin == OriginInformation::CP) {
-            //was created by correct contact in ContactPoint
-            vec2 normalInContact = m_gearCPs[index]->normalInContact;
-            if(absolute(normalInContact.y) <= asin(alphaRad)) {
+        } else {
+            int index = m_gearPointsInformationIndex[i];
+            ContactPoint *currentContactPoint =
+                (origin == OriginInformation::CP) ? m_gearCPs[index] : m_gearWCPs[index];
+            if(lastContactPoint == nullptr)
+                firstContactPoint = i;
+            else
+                fillLastCuttingPoints(foundCuttings, i, lastContactPoint, currentContactPoint, bottomClearance, maxAngle);
+
+            vec2 normalInContact = currentContactPoint->normalInContact;
+
+            if(i == firstContactPoint && lastContactPoint != nullptr) {
+                //do nothing, as this point was already examined as first point in first iteration
+
+            } else if(absolute(normalInContact.y) < sin(maxAngle)) {
                 //translate point
-                real t = 1.0 - (absolute(normalInContact.y) / asin(alphaRad));
-                m_translatedGearPoints.push_back(point - t * bottomClearance * m_gearCPs[index]->normal); // walk in opposite direction of the normal
+                real t = 1.0 - (asin(absolute(normalInContact.y)) / maxAngle);
+                m_translatedGearPoints.push_back(currentContactPoint->point - t * bottomClearance * currentContactPoint->normal); // walk in opposite direction of the normal
+
             } else {
                 //do not translate
-                m_translatedGearPoints.push_back(point);
-                m_translatedGearCPs.push_back(m_gearCPs[index]);
+                m_translatedGearPoints.push_back(currentContactPoint->point);
+                if(origin == OriginInformation::CP)
+                    m_notTranslatedGearCPs.push_back(m_gearCPs[index]);
+                else
+                    m_notTranslatedGearWCPs.push_back(m_gearWCPs[index]);
             }
 
-        } else if(origin == OriginInformation::WCP) {
-            //was created by an NCP, this contact is bad for the gear
-            vec2 normalInContact = m_gearWCPs[index]->normalInContact;
-            if(absolute(normalInContact.y) <= asin(alphaRad)) {
+            foundCuttings = 0;
+            lastContactPoint = currentContactPoint;
+        }
+        ++i;
+        if(i >= m_gearPoints.size() && i != firstContactPoint) { // if reached m_gearPoints end and firstContactPoint was set
+            // start once again until firstContactPoint
+            i = 0;
+        }
+    }
+}
+
+void ContactPointManager::fillLastCuttingPoints(
+    uint foundCuttings,
+    uint currentIndex,
+    ContactPoint *lastContactPoint,
+    ContactPoint *currentContactPoint,
+    real bottomClearance,
+    real maxAngle)
+{
+    if(foundCuttings == 0 || lastContactPoint == nullptr || currentIndex < foundCuttings)
+        return;
+
+    bool lastWasTranslated = absolute(lastContactPoint->normalInContact.y) < sin(maxAngle);
+    bool currentWasTranslated = absolute(currentContactPoint->normalInContact.y) < sin(maxAngle);
+
+    if(!lastWasTranslated && !currentWasTranslated) {
+        //all cutting points between stay the same as before (will not be translated)
+        int startIndex = (int)currentIndex - (int)foundCuttings;
+        for(uint i = 0; i < foundCuttings; ++i) {
+            uint index;
+            if(startIndex + (int)i >= 0)
+                index = startIndex + i;
+            else
+                index = m_gearPoints.size() - (startIndex + i);
+            m_translatedGearPoints.push_back(m_gearPoints[index]);
+        }
+    } else {
+        //at least some of the cutting points will be translated
+        real angleOfLast = asin(absolute(lastContactPoint->normalInContact.y));
+        real angleOfCurrent = asin(absolute(currentContactPoint->normalInContact.y));
+
+        vector<real> length(foundCuttings);
+        real completeLength = 0.0;
+        int startIndex = (int)currentIndex - (int)foundCuttings - 1;
+        for(uint i = 0; i <= foundCuttings; ++i) {
+            uint index;
+            if(startIndex + (int)i >= 0)
+                index = startIndex + i;
+            else
+                index = m_gearPoints.size() - (startIndex + i);
+            completeLength += glm::length(m_gearPoints[index + 1] - m_gearPoints[index]);
+            if(i < foundCuttings)
+                length.push_back(completeLength);
+        }
+
+        real angleCoefficient = (angleOfCurrent - angleOfLast) / completeLength;
+        vec2 normalCoefficient = (currentContactPoint->normal - lastContactPoint->normal) * (1.0 / completeLength);
+        startIndex = (int)currentIndex - (int)foundCuttings;
+        for(uint i = 0; i < foundCuttings; ++i) {
+            uint index;
+            if(startIndex + (int)i >= 0)
+                index = startIndex + i;
+            else
+                index = m_gearPoints.size() - (startIndex + i);
+            real angle = angleOfLast + angleCoefficient * length[i];
+            if(absolute(angle) < maxAngle) {
                 //translate point
-                real t = 1.0 - (absolute(normalInContact.y) / asin(alphaRad));
-                m_translatedGearPoints.push_back(point - t * bottomClearance * m_gearWCPs[index]->normal); // walk in opposite direction of the normal
+                real t = 1.0 - (absolute(angle) / maxAngle);
+                vec2 normal = lastContactPoint->normal + normalCoefficient * length[i];
+                m_translatedGearPoints.push_back(m_gearPoints[index] - t * bottomClearance * normal); // walk in opposite direction of the normal
             } else {
                 //do not translate
-                m_translatedGearPoints.push_back(point);
-                m_translatedGearWCPs.push_back(m_gearWCPs[index]);
+                m_translatedGearPoints.push_back(m_gearPoints[index]);
             }
-
-        } else { //index < 0
-            //was created by cutting (index = -1) oder forbiddenAreaEndPoint or NoneContactPoint (index = -2)
-            vec2 point = m_gearPoints[i];
-            vec2 previousPoint = (i == 0) ? rotatedLastPoint : m_gearPoints[i - 1];
-            vec2 nextPoint = (i == stopWithIndex) ? rotatedFirstPoint : m_gearPoints[i + 1];
-            vec2 toPoint = normalize(m_gearPoints[i] - previousPoint);
-            vec2 pointTo = normalize(nextPoint - m_gearPoints[i]);
-            vec2 normalA = vec2(-toPoint.y, toPoint.x) * static_cast<real>(normalDir);
-            vec2 normalB = vec2(-pointTo.y, pointTo.x) * static_cast<real>(normalDir);
-            vec2 normal = 0.5 * (normalA + normalB);
-
-            // WrongContactPoint *wrongContactPoint = new WrongContawrongContactPointWhenTurnedBack(point, normal, pitchRadiusDrivenGear);
-            // //error when no cut with pitchradius maybe vec2(0,0)????
-            // //must be deleted again everywhere!!!
-
-            // if(absolute(wrongContactPoint->normalInContact.y) <= asin(alphaRad)) {
-            //     //translate point
-            //     real t = 1.0 - (absolute(wrongContactPoint->normalInContact.y) / asin(alphaRad));
-            //     m_translatedGearPoints.push_back(point - t * bottomClearance * normal);
-            //     delete wrongContactPoint; //is not in contact => not a wrong contact
-            // } else {
-            //     //do not translate
-            //     m_translatedGearPoints.push_back(point);
-            //     m_translatedWrongContacts.push_back(wrongContactPoint);
-            // }
-
         }
     }
 }
@@ -436,7 +453,7 @@ void ContactPointManager::findAllCoveredPoints() {
         it.startWith(ncpCutting, normalDirection);
         m_gearPoints.push_back(ncpCutting.cuttingPoint);
     }
-    m_gearPointsInformation.push_back(OriginInformation::CUT);
+    m_gearPointsInformation.push_back(OriginInformation::Cut);
     m_gearPointsInformationIndex.push_back(-1);
 
 
@@ -479,7 +496,7 @@ void ContactPointManager::findAllCoveredPoints() {
                 m_gearWCPs.push_back(new WrongContactPoint(*(it.currentNCP())));
             } else {
                 std::cout << "ATTENTION: found point with NOT CORRECT NCP AND NOT CORRECT CP!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-                m_gearPointsInformation.push_back(OriginInformation::SOME_THING_ELSE);
+                m_gearPointsInformation.push_back(OriginInformation::SomethingElse);
                 m_gearPointsInformationIndex.push_back(-2); //cutting
             }
             ++it;
@@ -506,7 +523,7 @@ void ContactPointManager::findAllCoveredPoints() {
                 m_gearPoints.push_back(ncpCuttingsList[firstNCP].cuttingPoint);
                 it.continueWith(ncpCuttingsList[firstNCP], ncpCuttingsTypes[firstNCP]);
             }
-            m_gearPointsInformation.push_back(OriginInformation::CUT);
+            m_gearPointsInformation.push_back(OriginInformation::Cut);
             m_gearPointsInformationIndex.push_back(-1); //cutting
         }
 
@@ -667,7 +684,7 @@ bool ContactPointManager::tryToSwitchToOtherList(ContactPointIterator &it) {
         m_gearPoints.push_back(ncpCuttingsList[firstNCP].cuttingPoint);
         it.continueWith(ncpCuttingsList[firstNCP], ContinuationType::HopOn);
     }
-    m_gearPointsInformation.push_back(OriginInformation::CUT);
+    m_gearPointsInformation.push_back(OriginInformation::Cut);
     m_gearPointsInformationIndex.push_back(-1); //cutting
     return true;
 }
@@ -963,6 +980,6 @@ void ContactPointManager::clearAllGearLists() {
 
 void ContactPointManager::clearAllTranslatedGearLists() {
     m_translatedGearPoints.clear();
-    m_translatedGearCPs.clear(); //TODO: are they copied => necessary to delete the CPs?
-    m_translatedGearWCPs.clear(); //TODO: are they copied => necessary to delete the WCPs?
+    m_notTranslatedGearCPs.clear(); //TODO: are they copied => necessary to delete the CPs?
+    m_notTranslatedGearWCPs.clear(); //TODO: are they copied => necessary to delete the WCPs?
 }
