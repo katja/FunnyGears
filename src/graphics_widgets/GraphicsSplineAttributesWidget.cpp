@@ -8,7 +8,6 @@ GraphicsSplineAttributesWidget::GraphicsSplineAttributesWidget(QWidget *parent) 
     m_degreeLabel   = new QLabel(tr("Degree"));
     m_degreeSpinBox = new QSpinBox(this);
     m_degreeSpinBox->setMinimum(1);
-    m_degreeSpinBox->setSuffix("°");
     m_degreeLabel->setBuddy(m_degreeSpinBox);
     m_degree = m_degreeSpinBox->value();
     connect(m_degreeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeDegree(int)));

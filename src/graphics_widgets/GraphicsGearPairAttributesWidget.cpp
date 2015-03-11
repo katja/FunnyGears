@@ -63,7 +63,7 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     bottomClearanceLayout->addWidget(bottomClearanceStartAngleLabel,        2, 0);
     bottomClearanceLayout->addWidget(m_bottomClearanceStartAngleSpinBox,    2, 1);
 
-    QGroupBox *gearingAdaptionBox = new QGroupBox(tr("Adaption of the gearing"), this);
+    QGroupBox *gearingAdaptionBox = new QGroupBox(tr("Adaption of the gearing"));
     QGridLayout *gearingAdaptionLayout = new QGridLayout(gearingAdaptionBox);
     gearingAdaptionLayout->setContentsMargins(4, 0, 4, 4);
     gearingAdaptionLayout->setHorizontalSpacing(6);
@@ -72,6 +72,7 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     gearingAdaptionLayout->addWidget(m_toothCountDrivenGearSpinBox, 0, 1, Qt::AlignRight);
     gearingAdaptionLayout->addWidget(m_drivingGearEnabledCheckBox,  1, 0, 1, 2);
     gearingAdaptionLayout->addWidget(bottomClearanceBox,            2, 0, 1, 2);
+    gearingAdaptionLayout->setRowStretch(3, 1);
 
     //////////////////
     //Show...:
@@ -137,7 +138,7 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     rotationLayout->setSpacing(3);
     rotationLayout->addWidget(m_rotationCheckBox);
     rotationLayout->addWidget(m_rotationVelocitySlider);
-
+    rotationLayout->addStretch(1);
 
     //////////////////
     //Rendering Setup:
@@ -158,7 +159,7 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     m_smallPencilWidthCheckBox = new QCheckBox(tr("Use fine pencil for drawing"), this);
     connect(m_smallPencilWidthCheckBox, SIGNAL(toggled(bool)), this, SLOT(togglePencilWidth(bool)));
 
-    QGroupBox *renderingSetupBox = new QGroupBox(tr("Rendering setup"), this);
+    QGroupBox *renderingSetupBox = new QGroupBox(tr("Rendering setup"));
     QGridLayout *renderingSetupLayout = new QGridLayout(renderingSetupBox);
     renderingSetupLayout->setContentsMargins(0, 0, 0, 0);
     renderingSetupLayout->setHorizontalSpacing(3);
@@ -168,19 +169,23 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     renderingSetupLayout->addWidget(maxDriftAngleLabel,            1, 0);
     renderingSetupLayout->addWidget(m_maxDriftAngleSpinBox,        1, 1);
     renderingSetupLayout->addWidget(m_smallPencilWidthCheckBox,    2, 0, 1, 2);
+    renderingSetupLayout->setRowStretch(3, 1);
 
     ////////////////////////////////
     //... SET ALL TOGETHER...
+
+    QTabWidget *tab = new QTabWidget(this);
+    tab->addTab(gearingAdaptionBox, tr("Adaption"));
+    tab->addTab(rotationBox, tr("Rotation"));
+    tab->addTab(renderingSetupBox, tr("Rendering setup"));
 
     QGroupBox *gearPairWidget = new QGroupBox(tr("Gear Pairing Attributes"), this);
     QVBoxLayout *gearPairLayout = new QVBoxLayout(gearPairWidget);
     gearPairLayout->setContentsMargins(4, 0, 4, 4);
     gearPairLayout->setSpacing(15);
     gearPairLayout->addWidget(informationBox);
-    gearPairLayout->addWidget(gearingAdaptionBox);
+    gearPairLayout->addWidget(tab);
     gearPairLayout->addWidget(showBox);
-    gearPairLayout->addWidget(rotationBox);
-    gearPairLayout->addWidget(renderingSetupBox);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(4, 0, 4, 4); //use small margins at left, right and bottom (left, top, right, bottom)
@@ -198,9 +203,11 @@ void GraphicsGearPairAttributesWidget::updateAttributes() {
     m_drivingGearEnabledCheckBox->setChecked(m_currentGearPair->isDrivingGearEnabled());
 
     m_useBottomClearanceCheckBox->setChecked(m_currentGearPair->isBottomClearanceUsed());
-    m_bottomClearanceSpinBox->setValue(m_currentGearPair->bottomClearance());
+    m_bottomClearance = m_currentGearPair->bottomClearance();
+    m_bottomClearanceStartAngle = m_currentGearPair->bottomClearanceStartAngle();
+    m_bottomClearanceSpinBox->setValue(m_bottomClearance);
     m_bottomClearanceSpinBox->setEnabled(m_useBottomClearanceCheckBox->isChecked());
-    m_bottomClearanceStartAngleSpinBox->setValue(m_currentGearPair->bottomClearanceStartAngle());
+    m_bottomClearanceStartAngleSpinBox->setValue(m_bottomClearanceStartAngle);
     m_bottomClearanceStartAngleSpinBox->setEnabled(m_useBottomClearanceCheckBox->isChecked());
 
     m_drivingGearSamplingCheckBox->setChecked(m_currentGearPair->visibilityOfDrivingGearSampling());
@@ -262,11 +269,17 @@ void GraphicsGearPairAttributesWidget::toggleUseBottomClearance(bool checked) {
 }
 
 void GraphicsGearPairAttributesWidget::changeBottomClearance(int bottomClearance) {
-    m_currentGearPair->setBottomClearance(bottomClearance, m_bottomClearanceStartAngleSpinBox->value());
+    if(m_bottomClearance == bottomClearance)
+        return;
+    m_bottomClearance = bottomClearance;
+    m_currentGearPair->setBottomClearance(m_bottomClearance, m_bottomClearanceStartAngle);
 }
 
 void GraphicsGearPairAttributesWidget::changeBottomClearanceStartAngle(int startAngle) {
-    m_currentGearPair->setBottomClearance(m_bottomClearanceSpinBox->value(), startAngle);
+    if(m_bottomClearanceStartAngle == startAngle)
+        return;
+    m_bottomClearanceStartAngle = startAngle;
+    m_currentGearPair->setBottomClearance(m_bottomClearance, m_bottomClearanceStartAngle);
 }
 
 void GraphicsGearPairAttributesWidget::changeNumberOfTeethOfDrivenGear(int newToothCount) {

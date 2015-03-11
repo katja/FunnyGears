@@ -77,6 +77,8 @@ private:
 
     GearPairInformationWidget *m_gearPairInformationWidget;
 
+    int m_bottomClearance;
+    int m_bottomClearanceStartAngle;
     int m_samplingRate;
     int m_maxDriftAngle; //in degree
 };
