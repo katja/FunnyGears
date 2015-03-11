@@ -27,6 +27,9 @@ public:
 private slots:
     void changeNumberOfTeethOfDrivenGear(int);
     void toggleDrivingGearEnabled(bool);
+    void toggleUseBottomClearance(bool);
+    void changeBottomClearance(int);
+    void changeBottomClearanceStartAngle(int);
     void toggleDrivingGearSamplingVisibility(bool);
     void toggleDrivenGearSamplingVisibility(bool);
     void toggleNoneContactPointsVisibility(bool);
@@ -48,6 +51,7 @@ private:
     GraphicsGearPair *m_currentGearPair;
 
     QCheckBox   *m_drivingGearEnabledCheckBox,
+                *m_useBottomClearanceCheckBox,
                 *m_drivingGearSamplingCheckBox,
                 *m_drivenGearSamplingCheckBox,
                 *m_noneContactPointsCheckBox,
@@ -64,6 +68,8 @@ private:
     RealValuedSlider *m_rotationVelocitySlider;
 
     QSpinBox *m_toothCountDrivenGearSpinBox,
+             *m_bottomClearanceSpinBox,
+             *m_bottomClearanceStartAngleSpinBox,
              *m_samplingRateSpinBox,
              *m_maxDriftAngleSpinBox;
 

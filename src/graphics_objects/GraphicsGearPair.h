@@ -39,6 +39,15 @@ public:
     void setDrivingGearEnabled(bool enabled);
     bool isDrivingGearEnabled();
 
+    void useBottomClearance(bool useIt);
+    bool isBottomClearanceUsed() const;
+
+    void setBottomClearance(int bottomClearance, int startAngle);
+    int bottomClearance() const;
+
+    void setBottomClearanceStartAngle(int angleInDegree);
+    int bottomClearanceStartAngle() const;
+
     void setVisibilityOfDrivingGearSampling(bool visible);
     bool visibilityOfDrivingGearSampling() const;
 

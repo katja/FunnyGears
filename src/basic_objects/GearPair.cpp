@@ -2,6 +2,8 @@
 #include "basic_objects/SplineGear.h"
 #include "basic_objects/Ray.h"
 
+const real GearPair::DefaultBottomClearance = 4; //in mm
+const real GearPair::DefaultBottomClearanceStartAngle = 15; //in degree
 const real GearPair::DefaultMaxDrift = 0.26; // ~ 15° //0.05; // ~ 3°
 const uint GearPair::DefaultSamplingRate = 60;//80;
 
@@ -10,6 +12,9 @@ GearPair::GearPair(const SplineGear &drivingGear) :
     //Set the default values, assume that a mostly similar mating gear
     m_drivenGear(new SplineGear(Spline())),
     m_completeToothProfile(m_drivingGear->completeToothProfile()),
+    m_useBottomClearance(false),
+    m_bottomClearance(DefaultBottomClearance),
+    m_bottomClearanceStartAngle(DefaultBottomClearanceStartAngle),
     m_maxDriftAngle(DefaultMaxDrift),
     m_samplingRate(DefaultSamplingRate),
     m_gearPairInformation(new GearPairInformation(this))
@@ -45,8 +50,10 @@ void GearPair::calculateAgainWithUnchangedAttributes() {
     m_stepSize = (m_completeToothProfile->upperDomainLimit() - m_completeToothProfile->lowerDomainLimit())
                     / (m_samplingRate - 1);
 
-    constructListOfPossiblePairingPoints();
-    chooseCorrectPoints();
+    insertPossiblePairingPointsInPointManager();
+    m_contactPointManager.processPointsToGear(m_drivenGear->numberOfTeeth(), !(m_drivingGear->toothDescribedInClockDirection()));
+    m_contactPointManager.translateForBottomClearance(m_bottomClearance, m_bottomClearanceStartAngle); //Kopfspiel
+    fillDrivenGearWithGearPoints();
 }
 
 GearPairInformation* GearPair::gearPairInformation() {
@@ -92,6 +99,34 @@ real GearPair::getDistanceOfCenters() const {
     return m_distanceOfCenters;
 }
 
+void GearPair::setBottomClearance(real bottomClearance, real angleInDegree) {
+    if(angleInDegree < 0.0 ||
+        (bottomClearance == m_bottomClearance && angleInDegree == m_bottomClearanceStartAngle))
+        return;
+    m_bottomClearance = bottomClearance;
+    m_bottomClearanceStartAngle = angleInDegree;
+    updateBottomClearanceTranslation();
+}
+
+real GearPair::bottomClearance() const {
+    return m_bottomClearance;
+}
+
+real GearPair::bottomClearanceStartAngle() const {
+    return m_bottomClearanceStartAngle;
+}
+
+void GearPair::useBottomClearance(bool useIt) {
+    if(m_useBottomClearance == useIt)
+        return;
+    m_useBottomClearance = useIt;
+    fillDrivenGearWithGearPoints();
+}
+
+bool GearPair::isBottomClearanceUsed() const {
+    return m_useBottomClearance;
+}
+
 void GearPair::setMaxDriftAngleInDegree(real degree) {
     m_maxDriftAngle = toRad(degree);
 }
@@ -115,7 +150,7 @@ uint GearPair::samplingRate() const {
     return m_samplingRate;
 }
 
-void GearPair::constructListOfPossiblePairingPoints() {
+void GearPair::insertPossiblePairingPointsInPointManager() {
     real startValue = m_completeToothProfile->lowerDomainLimit();
     vec2 startPoint = m_completeToothProfile->evaluate(startValue);
     vec2 nextNormal = normalAt(startValue);
@@ -170,14 +205,6 @@ void GearPair::insertRefinedContactPoints(real evalValue, real nextStepValue, ui
     }
 }
 
-void GearPair::chooseCorrectPoints() {
-    m_contactPointManager.processPointsToGear(m_drivenGear->numberOfTeeth(), !(m_drivingGear->toothDescribedInClockDirection()));
-    m_contactPointManager.translateForBottomClearance(3.0, 15); //bottomClearance, angleInDegree //Kopfspiel
-    vector<vec2> gearPoints = m_contactPointManager.gearPoints();
-    m_drivenGear->setDegree(1);
-    m_drivenGear->setControlPointsForTooth(gearPoints);
-}
-
 void GearPair::createAndInsertContactPoint(const vec2 &point, const vec2 &normal, real evalValue) {
 
     //find cut of normal in originPoint with reference radius
@@ -206,16 +233,12 @@ void GearPair::createAndInsertContactPoint(const vec2 &point, const vec2 &normal
         // corresponds to the distance to the cutting, observe t
         real tBehind = -dot(normal, point) - sqrt(valueUnderRoot);
         real tAhead = -dot(normal, point) + sqrt(valueUnderRoot);
-        std::cout << "in the circle and tBehind = " << tBehind << ", tAhead = " << tAhead << " whereas radius = " << m_drivingGearPitchRadius << std::endl;
         if((-tBehind) < m_drivingGearPitchRadius && tAhead < m_drivingGearPitchRadius) { // as tBehind is in contrary normal direction, it is negative
-            std::cout << "              goes in BOTH" << std::endl;
             m_contactPointManager.insert(contactPointOf(point, normal, evalValue, tBehind, false),
                                          contactPointOf(point, normal, evalValue, tAhead, true));
         } else if(tAhead < m_drivingGearPitchRadius) {
-            std::cout << "              goes in ahead" << std::endl;
             m_contactPointManager.insert(contactPointOf(point, normal, evalValue, tAhead, true));
         } else {
-            std::cout << "              goes in behind" << std::endl;
             m_contactPointManager.insert(contactPointOf(point, normal, evalValue, tBehind, false));
         }
     }
@@ -332,6 +355,21 @@ bool GearPair::insertThicknessInContactPoint(ContactPoint& contactPoint) const {
             contactPoint.forbiddenAreaEndPoint = contactPoint.point + contactPoint.normal * thickness;
         return true;
     }
+}
+
+void GearPair::fillDrivenGearWithGearPoints() {
+    m_drivenGear->setDegree(1);
+
+    if(m_useBottomClearance) {
+        m_drivenGear->setControlPointsForTooth(m_contactPointManager.translatedGearPoints());
+    } else {
+        m_drivenGear->setControlPointsForTooth(m_contactPointManager.gearPoints());
+    }
+}
+
+void GearPair::updateBottomClearanceTranslation() {
+    m_contactPointManager.translateForBottomClearance(m_bottomClearance, m_bottomClearanceStartAngle);
+    fillDrivenGearWithGearPoints();
 }
 
 vec2 GearPair::normalAt(real t) const {

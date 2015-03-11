@@ -231,10 +231,8 @@ void Spline::setControlPoints(const vector<vec2> &newControlPoints) {
             m_knots.push_back(m_knots.back() + 1);
         }
     }
-    std::cout << "Spline::setControlPoints() before ADJUST KNOTS and is: " << (*this) << std::endl;
     if(knotDifference != 0 && isValid())
         adjustKnots();
-    std::cout << "                           after  ADJUST KNOTS       : " << (*this) << std::endl;
 }
 
 void Spline::removeControlPoint(uint index) {

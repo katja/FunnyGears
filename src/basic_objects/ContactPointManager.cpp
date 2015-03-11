@@ -154,7 +154,7 @@ void ContactPointManager::translateForBottomClearance(real bottomClearance, real
     uint i = 0;
     uint firstContactPoint = m_gearPoints.size() - 1;
 
-    while(i <= firstContactPoint) {
+    while(i != firstContactPoint) {
         OriginInformation origin = m_gearPointsInformation[i];
         if(origin == OriginInformation::Cut || origin == OriginInformation::SomethingElse) {
             ++foundCuttings;
@@ -287,6 +287,11 @@ const vector<ContactPoint*>& ContactPointManager::gearContactPoints() const {
 
 const vector<WrongContactPoint*>& ContactPointManager::gearWrongContactPoints() const {
     return m_gearWCPs;
+}
+
+const vector<vec2>& ContactPointManager::translatedGearPoints() const {
+    std::cout << "translatedGearPoints: " << m_translatedGearPoints << std::endl;
+    return m_translatedGearPoints;
 }
 
 vec2 ContactPointManager::startOfExaminedPitchInDrivenGear() const {
@@ -765,16 +770,10 @@ uint ContactPointManager::howManyNoneContactPointsCutPreviousLine(const ContactP
 
         for(uint i = 1; i < ncp->points.size(); ++i) {
             if(!it.belongsToQuad(ncp, i - 1, i)) { // do not test the point with its own quad!
-
-                vec2 previous = ncp->points[i - 1];
-                vec2 current = ncp->points[i];
-                vec2 previousEndPoint = previous + ncp->forbiddenAreaLength * ncp->normals[i - 1];
-                vec2 currentEndPoint = current + ncp->forbiddenAreaLength * ncp->normals[i];
-
                 real t;
                 vec2 intersection;
                 //test ground
-                if(intersectLines(t, intersection, it.previousPoint(), it.currentPoint(), previous, current)) {
+                if(intersectLines(t, intersection, it.previousPoint(), it.currentPoint(), ncp->points[i - 1], ncp->points[i])) {
                     ncpCuttingsList.push_back(NCPcutting{t, intersection, ncp, i - 1, IterationLocation::Ground});
                     ncpCuttingsTypes.push_back(ContinuationType::Default);
                     ++foundCoverings;

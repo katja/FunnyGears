@@ -36,6 +36,13 @@ public:
 
     real getDistanceOfCenters() const;
 
+    void setBottomClearance(real bottomClearance, real startAngleInDegree);
+    real bottomClearance() const;
+    real bottomClearanceStartAngle() const;
+
+    void useBottomClearance(bool useIt);
+    bool isBottomClearanceUsed() const;
+
     void setMaxDriftAngleInDegree(real degree);
     void setMaxDriftAngle(real rad);
     real maxDriftAngleInDegree() const;
@@ -45,8 +52,11 @@ public:
     uint samplingRate() const;
 
 private:
+    static const real DefaultBottomClearance;
+    static const real DefaultBottomClearanceStartAngle;
     static const real DefaultMaxDrift;
     static const uint DefaultSamplingRate;
+
 
     SplineGear *m_drivingGear;
     SplineGear *m_drivenGear;
@@ -57,6 +67,10 @@ private:
     real m_module;
     Spline *m_completeToothProfile;
 
+    bool m_useBottomClearance;
+    real m_bottomClearance;
+    real m_bottomClearanceStartAngle;
+
     real m_maxDriftAngle;
     uint m_samplingRate;
     real m_stepSize;
@@ -64,14 +78,16 @@ private:
     GearPairInformation     *m_gearPairInformation;
     ContactPointManager m_contactPointManager;
 
-    void constructListOfPossiblePairingPoints();
+    void insertPossiblePairingPointsInPointManager();
     void insertRefinedContactPoints(real stepValue, real nextStepValue, uint partition);
-    void chooseCorrectPoints();
-
     void createAndInsertContactPoint(const vec2 &point, const vec2 &normal, real evalValue);
     ContactPoint* contactPointOf(const vec2 &point, const vec2 &normal, real evalValue, real t, bool usedLargerValue) const;
     NoneContactPoint* noneContactPointOf(const vec2 &point, const vec2 &normal, real stepValue) const;
     bool insertThicknessInContactPoint(ContactPoint& contactPoint) const;
+
+    void fillDrivenGearWithGearPoints();
+    void updateBottomClearanceTranslation();
+
     vec2 normalAt(real value) const;
 };
 #endif // GEAR_PAIR

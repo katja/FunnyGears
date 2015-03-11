@@ -35,8 +35,33 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     m_drivingGearEnabledCheckBox = new QCheckBox(tr("Enable editing (driving gear)"), this);
     connect(m_drivingGearEnabledCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleDrivingGearEnabled(bool)));
 
+    m_useBottomClearanceCheckBox = new QCheckBox(tr("Use bottom clearance"), this);
+    connect(m_useBottomClearanceCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleUseBottomClearance(bool)));
 
-    ///HERE GOES THE ADAPTION OF THE NORMAL THINGS!!! TODO
+    m_bottomClearanceSpinBox = new QSpinBox(this);
+    m_bottomClearanceSpinBox->setMinimum(0);
+    m_bottomClearanceSpinBox->setSuffix(" mm");
+    connect(m_bottomClearanceSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeBottomClearance(int)));
+    QLabel *bottomClearanceLabel = new QLabel(tr("Bottom clearance"), this);
+    bottomClearanceLabel->setBuddy(m_bottomClearanceSpinBox);
+
+    m_bottomClearanceStartAngleSpinBox = new QSpinBox(this);
+    m_bottomClearanceStartAngleSpinBox->setRange(2, 45);
+    m_bottomClearanceStartAngleSpinBox->setSuffix("°");
+    connect(m_bottomClearanceStartAngleSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeBottomClearanceStartAngle(int)));
+    QLabel *bottomClearanceStartAngleLabel = new QLabel(tr("Start angle"), this);
+    bottomClearanceStartAngleLabel->setBuddy(m_bottomClearanceStartAngleSpinBox);
+
+    QGroupBox *bottomClearanceBox = new QGroupBox(tr("Bottom clearance"), this);
+    QGridLayout *bottomClearanceLayout = new QGridLayout(bottomClearanceBox);
+    bottomClearanceLayout->setContentsMargins(4, 0, 4, 4);
+    bottomClearanceLayout->setHorizontalSpacing(6);
+    bottomClearanceLayout->setVerticalSpacing(3);
+    bottomClearanceLayout->addWidget(m_useBottomClearanceCheckBox,          0, 0, 1, 2);
+    bottomClearanceLayout->addWidget(bottomClearanceLabel,                  1, 0);
+    bottomClearanceLayout->addWidget(m_bottomClearanceSpinBox,              1, 1);
+    bottomClearanceLayout->addWidget(bottomClearanceStartAngleLabel,        2, 0);
+    bottomClearanceLayout->addWidget(m_bottomClearanceStartAngleSpinBox,    2, 1);
 
     QGroupBox *gearingAdaptionBox = new QGroupBox(tr("Adaption of the gearing"), this);
     QGridLayout *gearingAdaptionLayout = new QGridLayout(gearingAdaptionBox);
@@ -46,6 +71,7 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     gearingAdaptionLayout->addWidget(toothCountLabel,               0, 0, Qt::AlignLeft);
     gearingAdaptionLayout->addWidget(m_toothCountDrivenGearSpinBox, 0, 1, Qt::AlignRight);
     gearingAdaptionLayout->addWidget(m_drivingGearEnabledCheckBox,  1, 0, 1, 2);
+    gearingAdaptionLayout->addWidget(bottomClearanceBox,            2, 0, 1, 2);
 
     //////////////////
     //Show...:
@@ -171,19 +197,19 @@ void GraphicsGearPairAttributesWidget::updateAttributes() {
     m_toothCountDrivenGearSpinBox->setValue(m_currentGearPair->numberOfTeethOfDrivenGear());
     m_drivingGearEnabledCheckBox->setChecked(m_currentGearPair->isDrivingGearEnabled());
 
+    m_useBottomClearanceCheckBox->setChecked(m_currentGearPair->isBottomClearanceUsed());
+    m_bottomClearanceSpinBox->setValue(m_currentGearPair->bottomClearance());
+    m_bottomClearanceSpinBox->setEnabled(m_useBottomClearanceCheckBox->isChecked());
+    m_bottomClearanceStartAngleSpinBox->setValue(m_currentGearPair->bottomClearanceStartAngle());
+    m_bottomClearanceStartAngleSpinBox->setEnabled(m_useBottomClearanceCheckBox->isChecked());
+
     m_drivingGearSamplingCheckBox->setChecked(m_currentGearPair->visibilityOfDrivingGearSampling());
     m_drivingGearForbiddenAreaCheckBox->setChecked(m_currentGearPair->visibilityOfForbiddenAreaInDrivingGear());
-    if(m_drivingGearSamplingCheckBox->isChecked())
-        m_drivingGearForbiddenAreaCheckBox->setEnabled(true);
-    else
-        m_drivingGearForbiddenAreaCheckBox->setEnabled(false);
+    m_drivingGearForbiddenAreaCheckBox->setEnabled(m_drivingGearSamplingCheckBox->isChecked());
 
     m_drivenGearSamplingCheckBox->setChecked(m_currentGearPair->visibilityOfDrivenGearSampling());
     m_drivenGearForbiddenAreaCheckBox->setChecked(m_currentGearPair->visibilityOfForbiddenAreaInDrivenGear());
-    if(m_drivenGearSamplingCheckBox->isChecked())
-        m_drivenGearForbiddenAreaCheckBox->setEnabled(true);
-    else
-        m_drivenGearForbiddenAreaCheckBox->setEnabled(false);
+    m_drivenGearForbiddenAreaCheckBox->setEnabled(m_drivenGearSamplingCheckBox->isChecked());
 
     m_noneContactPointsCheckBox->setChecked(m_currentGearPair->visibilityOfNoneContactPoints());
     m_selectedGearPointsCheckBox->setChecked(m_currentGearPair->visibilityOfSelectedGearPoints());
@@ -228,6 +254,19 @@ bool GraphicsGearPairAttributesWidget::worksOnItem(QGraphicsItem *graphicsItem) 
 
 void GraphicsGearPairAttributesWidget::toggleDrivingGearEnabled(bool checked) {
     m_currentGearPair->setDrivingGearEnabled(checked);
+}
+
+void GraphicsGearPairAttributesWidget::toggleUseBottomClearance(bool checked) {
+    m_currentGearPair->useBottomClearance(checked);
+    updateAttributes();
+}
+
+void GraphicsGearPairAttributesWidget::changeBottomClearance(int bottomClearance) {
+    m_currentGearPair->setBottomClearance(bottomClearance, m_bottomClearanceStartAngleSpinBox->value());
+}
+
+void GraphicsGearPairAttributesWidget::changeBottomClearanceStartAngle(int startAngle) {
+    m_currentGearPair->setBottomClearance(m_bottomClearanceSpinBox->value(), startAngle);
 }
 
 void GraphicsGearPairAttributesWidget::changeNumberOfTeethOfDrivenGear(int newToothCount) {

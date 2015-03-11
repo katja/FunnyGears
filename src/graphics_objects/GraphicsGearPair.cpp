@@ -140,6 +140,28 @@ bool GraphicsGearPair::isDrivingGearEnabled() {
     return m_drivingGear->isUserInteractionEnabled();
 }
 
+void GraphicsGearPair::useBottomClearance(bool useIt) {
+    prepareGeometryChange();
+    m_gearPair->useBottomClearance(useIt);
+}
+
+bool GraphicsGearPair::isBottomClearanceUsed() const {
+    return m_gearPair->isBottomClearanceUsed();
+}
+
+void GraphicsGearPair::setBottomClearance(int bottomClearance, int startAngle) {
+    prepareGeometryChange();
+    m_gearPair->setBottomClearance((real)bottomClearance, (real)startAngle);
+}
+
+int GraphicsGearPair::bottomClearance() const {
+    return (int)m_gearPair->bottomClearance();
+}
+
+int GraphicsGearPair::bottomClearanceStartAngle() const {
+    return (int)m_gearPair->bottomClearanceStartAngle();
+}
+
 void GraphicsGearPair::setVisibilityOfDrivingGearSampling(bool visible) {
     prepareGeometryChange();
     m_drivingGearSamplingIsVisible = visible;
