@@ -43,6 +43,8 @@ public:
     const vector<ContactPoint*>& gearContactPoints() const;
     const vector<WrongContactPoint*>& gearWrongContactPoints() const;
     const vector<vec2>& translatedGearPoints() const;
+    const vector<ContactPoint*>& translatedStillContactPoints() const;
+    const vector<WrongContactPoint*>& translatedStillWrongContactPoints() const;
 
     vec2 startOfExaminedPitchInDrivenGear() const;
     vec2 endOfExaminedPitchInDrivenGear() const;

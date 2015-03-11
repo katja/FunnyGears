@@ -2,8 +2,8 @@
 #include "basic_objects/SplineGear.h"
 #include "basic_objects/Ray.h"
 
-const real GearPair::DefaultBottomClearance = 4; //in mm
-const real GearPair::DefaultBottomClearanceStartAngle = 15; //in degree
+const real GearPair::DefaultBottomClearance = 3; //in mm
+const real GearPair::DefaultBottomClearanceStartAngle = 60; //in degree
 const real GearPair::DefaultMaxDrift = 0.26; // ~ 15° //0.05; // ~ 3°
 const uint GearPair::DefaultSamplingRate = 60;//80;
 

@@ -206,7 +206,7 @@ void ContactPointManager::fillLastCuttingPoints(
     real bottomClearance,
     real maxAngle)
 {
-    if(foundCuttings == 0 || lastContactPoint == nullptr || currentIndex < foundCuttings)
+    if(foundCuttings == 0 || lastContactPoint == nullptr)
         return;
 
     bool lastWasTranslated = absolute(lastContactPoint->normalInContact.y) < sin(maxAngle);
@@ -290,8 +290,15 @@ const vector<WrongContactPoint*>& ContactPointManager::gearWrongContactPoints() 
 }
 
 const vector<vec2>& ContactPointManager::translatedGearPoints() const {
-    std::cout << "translatedGearPoints: " << m_translatedGearPoints << std::endl;
     return m_translatedGearPoints;
+}
+
+const vector<ContactPoint*>& ContactPointManager::translatedStillContactPoints() const {
+    return m_notTranslatedGearCPs;
+
+}
+const vector<WrongContactPoint*>& ContactPointManager::translatedStillWrongContactPoints() const {
+    return m_notTranslatedGearWCPs;
 }
 
 vec2 ContactPointManager::startOfExaminedPitchInDrivenGear() const {

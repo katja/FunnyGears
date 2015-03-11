@@ -102,6 +102,10 @@ void GraphicsGearPair::objectChanged(ChangingObject *object) {
 
 void GraphicsGearPair::update() {
     prepareGeometryChange();
+    m_rotationDegreeDrivingGear = 0.0;
+    m_rotationDegreeDrivenGear = 0.0;
+    m_drivingGear->setRotation(m_rotationDegreeDrivingGear);
+    m_drivenGear->setRotation(m_rotationDegreeDrivenGear);
     m_drivenGear->setTransform(QTransform().translate(m_gearPair->getDistanceOfCenters(), 0));
     updateBoundingRect();
 }
@@ -384,12 +388,13 @@ void GraphicsGearPair::paint(QPainter *painter, const QStyleOptionGraphicsItem *
         m_rotationDegreeDrivenGear += m_rotationVelocity / m_gearPair->transmissionRatio();
         m_drivingGear->setRotation(m_rotationDegreeDrivingGear);
         m_drivenGear->setRotation(m_rotationDegreeDrivenGear);
-    } else if(m_rotationDegreeDrivingGear != 0.0) {
-        m_rotationDegreeDrivingGear = 0.0;
-        m_rotationDegreeDrivenGear = 0.0;
-        m_drivingGear->setRotation(m_rotationDegreeDrivingGear);
-        m_drivenGear->setRotation(m_rotationDegreeDrivenGear);
     }
+    // if(m_rotationDegreeDrivingGear != 0.0) {
+    //     m_rotationDegreeDrivingGear = 0.0;
+    //     m_rotationDegreeDrivenGear = 0.0;
+    //     m_drivingGear->setRotation(m_rotationDegreeDrivingGear);
+    //     m_drivenGear->setRotation(m_rotationDegreeDrivenGear);
+    // }
 
     if(m_pathOfPossibleContactIsVisible)
         paintPathOfPossibleContact(painter);
@@ -532,10 +537,18 @@ void GraphicsGearPair::paintPathOfPossibleContact(QPainter *painter) const {
 }
 
 void GraphicsGearPair::paintPathOfRealContact(QPainter *painter) const {
-    vector<ContactPoint*> selectedContactPoints = m_gearPair->contactPointManager().gearContactPoints();
+    vector<ContactPoint*> selectedContactPoints;
+    vector<WrongContactPoint*> selectedWrongContactPoints;
+    if(m_gearPair->isBottomClearanceUsed()) {
+        selectedContactPoints = m_gearPair->contactPointManager().translatedStillContactPoints();
+        selectedWrongContactPoints = m_gearPair->contactPointManager().translatedStillWrongContactPoints();
+    } else {
+        selectedContactPoints = m_gearPair->contactPointManager().gearContactPoints();
+        selectedWrongContactPoints = m_gearPair->contactPointManager().gearWrongContactPoints();
+    }
+
 
     painter->save();
-
     for(ContactPoint *cp : selectedContactPoints) {
         QColor c = getColorFor(cp->evaluationStep);
         QPen pen = painter->pen();
@@ -543,6 +556,21 @@ void GraphicsGearPair::paintPathOfRealContact(QPainter *painter) const {
         pen.setBrush(QBrush(c));
         painter->setPen(pen);
 
+        drawCircle(painter, cp->contactPosition);
+        if(m_finePencilUsed)
+            drawCircle(painter, cp->contactPosition, Preferences::SmallPointRadius);
+        vec2 endNormal = cp->contactPosition + cp->normalInContact * 20.0;
+        drawLine(painter, cp->contactPosition, endNormal);
+    }
+    painter->restore();
+    painter->save();
+    QColor c = Preferences::AttentionColor;
+    QPen pen = painter->pen();
+    pen.setColor(c);
+    pen.setBrush(QBrush(c));
+    painter->setPen(pen);
+
+    for(ContactPoint *cp : selectedWrongContactPoints) {
         drawCircle(painter, cp->contactPosition);
         if(m_finePencilUsed)
             drawCircle(painter, cp->contactPosition, Preferences::SmallPointRadius);

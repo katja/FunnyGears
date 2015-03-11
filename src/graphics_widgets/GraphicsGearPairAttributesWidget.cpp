@@ -46,7 +46,7 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     bottomClearanceLabel->setBuddy(m_bottomClearanceSpinBox);
 
     m_bottomClearanceStartAngleSpinBox = new QSpinBox(this);
-    m_bottomClearanceStartAngleSpinBox->setRange(2, 45);
+    m_bottomClearanceStartAngleSpinBox->setRange(2, 89);
     m_bottomClearanceStartAngleSpinBox->setSuffix("°");
     connect(m_bottomClearanceStartAngleSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeBottomClearanceStartAngle(int)));
     QLabel *bottomClearanceStartAngleLabel = new QLabel(tr("Start angle"), this);
@@ -144,7 +144,7 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     //Rendering Setup:
 
     m_samplingRateSpinBox = new QSpinBox(this);
-    m_samplingRateSpinBox->setRange(10, 150);
+    m_samplingRateSpinBox->setRange(10, 300);
     connect(m_samplingRateSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeSamplingRate(int)));
     QLabel *samplingRateLabel = new QLabel(tr("Sampling Rate"), this);
     samplingRateLabel->setBuddy(m_samplingRateSpinBox);
