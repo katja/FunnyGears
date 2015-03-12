@@ -40,6 +40,7 @@ GraphicsGearPair::GraphicsGearPair(GearPair *gearPair) :
     m_drivingGear(nullptr),
     m_drivenGear(nullptr),
     m_gearPairInformationWidget(new GearPairInformationWidget(gearPair)),
+    m_pitchPointIsVisible(false),
     m_drivingGearSamplingIsVisible(true),
     m_drivenGearSamplingIsVisible(true),
     m_forbiddenAreaInDrivingGearIsVisible(false),
@@ -164,6 +165,15 @@ int GraphicsGearPair::bottomClearance() const {
 
 int GraphicsGearPair::bottomClearanceStartAngle() const {
     return (int)m_gearPair->bottomClearanceStartAngle();
+}
+
+void GraphicsGearPair::setVisibilityOfPitchPoint(bool visible) {
+    prepareGeometryChange();
+    m_pitchPointIsVisible = visible;
+}
+
+bool GraphicsGearPair::visibilityOfPitchPoint() const {
+    return m_pitchPointIsVisible;
 }
 
 void GraphicsGearPair::setVisibilityOfDrivingGearSampling(bool visible) {
@@ -389,13 +399,9 @@ void GraphicsGearPair::paint(QPainter *painter, const QStyleOptionGraphicsItem *
         m_drivingGear->setRotation(m_rotationDegreeDrivingGear);
         m_drivenGear->setRotation(m_rotationDegreeDrivenGear);
     }
-    // if(m_rotationDegreeDrivingGear != 0.0) {
-    //     m_rotationDegreeDrivingGear = 0.0;
-    //     m_rotationDegreeDrivenGear = 0.0;
-    //     m_drivingGear->setRotation(m_rotationDegreeDrivingGear);
-    //     m_drivenGear->setRotation(m_rotationDegreeDrivenGear);
-    // }
 
+    if(m_pitchPointIsVisible)
+        paintPitchPoint(painter);
     if(m_pathOfPossibleContactIsVisible)
         paintPathOfPossibleContact(painter);
     if(m_pathOfRealContactIsVisible)
@@ -498,6 +504,15 @@ void GraphicsGearPair::paintSampledContactPointsDrivenGear(QPainter *painter) co
             }
         }
     }
+    painter->restore();
+}
+
+void GraphicsGearPair::paintPitchPoint(QPainter *painter) const {
+    painter->save();
+    QPen pen = painter->pen();
+    pen.setColor(Qt::black);
+    painter->setPen(pen);
+    drawCircle(painter, vec2(m_gearPair->drivingGearPitchRadius(), 0), Preferences::PointRadius * 2);
     painter->restore();
 }
 

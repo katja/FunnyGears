@@ -48,6 +48,9 @@ public:
     void setBottomClearanceStartAngle(int angleInDegree);
     int bottomClearanceStartAngle() const;
 
+    void setVisibilityOfPitchPoint(bool visible);
+    bool visibilityOfPitchPoint() const;
+
     void setVisibilityOfDrivingGearSampling(bool visible);
     bool visibilityOfDrivingGearSampling() const;
 
@@ -100,6 +103,7 @@ public:
     void paintAdditionals(QPainter *painter, GraphicsMatingSplineGear *gear) const;
     void paintSampledContactPointsDrivingGear(QPainter *painter) const;
     void paintSampledContactPointsDrivenGear(QPainter *painter) const;
+    void paintPitchPoint(QPainter *painter) const;
     void paintPathOfPossibleContact(QPainter *painter) const;
     void paintPathOfRealContact(QPainter *painter) const;
     void paintNoneContactPoints(QPainter *painter, bool, bool) const;
@@ -112,6 +116,7 @@ private:
 
     GearPairInformationWidget *m_gearPairInformationWidget;
 
+    bool m_pitchPointIsVisible;
     bool m_drivingGearSamplingIsVisible;
     bool m_drivenGearSamplingIsVisible;
     bool m_forbiddenAreaInDrivingGearIsVisible;

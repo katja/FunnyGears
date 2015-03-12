@@ -77,6 +77,9 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     //////////////////
     //Show...:
 
+    m_pitchPointCheckBox = new QCheckBox(tr("...pitch point"), this);
+    connect(m_pitchPointCheckBox, SIGNAL(toggled(bool)), this, SLOT(togglePitchPointVisibility(bool)));
+
     m_drivingGearSamplingCheckBox = new QCheckBox(tr("...driving gear sampling"), this);
     connect(m_drivingGearSamplingCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleDrivingGearSamplingVisibility(bool)));
 
@@ -111,6 +114,7 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     QVBoxLayout *showBoxLayout = new QVBoxLayout(showBox);
     showBoxLayout->setContentsMargins(4, 0, 4, 4);
     showBoxLayout->setSpacing(3);
+    showBoxLayout->addWidget(m_pitchPointCheckBox);
     showBoxLayout->addWidget(m_drivingGearSamplingCheckBox);
     showBoxLayout->addWidget(m_drivenGearSamplingCheckBox);
     showBoxLayout->addWidget(m_drivingGearForbiddenAreaCheckBox);
@@ -285,6 +289,10 @@ void GraphicsGearPairAttributesWidget::changeBottomClearanceStartAngle(int start
 void GraphicsGearPairAttributesWidget::changeNumberOfTeethOfDrivenGear(int newToothCount) {
     if(newToothCount > 0 && m_currentGearPair->numberOfTeethOfDrivenGear() != (uint)newToothCount)
         m_currentGearPair->setNumberOfTeethOfDrivenGear(static_cast<uint>(newToothCount));
+}
+
+void GraphicsGearPairAttributesWidget::togglePitchPointVisibility(bool checked) {
+    m_currentGearPair->setVisibilityOfPitchPoint(checked);
 }
 
 void GraphicsGearPairAttributesWidget::toggleDrivingGearSamplingVisibility(bool checked) {

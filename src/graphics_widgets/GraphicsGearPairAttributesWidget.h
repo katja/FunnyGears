@@ -30,6 +30,7 @@ private slots:
     void toggleUseBottomClearance(bool);
     void changeBottomClearance(int);
     void changeBottomClearanceStartAngle(int);
+    void togglePitchPointVisibility(bool);
     void toggleDrivingGearSamplingVisibility(bool);
     void toggleDrivenGearSamplingVisibility(bool);
     void toggleNoneContactPointsVisibility(bool);
@@ -50,7 +51,8 @@ private slots:
 private:
     GraphicsGearPair *m_currentGearPair;
 
-    QCheckBox   *m_drivingGearEnabledCheckBox,
+    QCheckBox   *m_pitchPointCheckBox,
+                *m_drivingGearEnabledCheckBox,
                 *m_useBottomClearanceCheckBox,
                 *m_drivingGearSamplingCheckBox,
                 *m_drivenGearSamplingCheckBox,
