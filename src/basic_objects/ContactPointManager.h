@@ -44,11 +44,19 @@ public:
     const vector<WrongContactPoint*>& gearWrongContactPoints() const;
     vector<ContactPoint*>* gearConsecutivelyContactPointsInClockDirection() const;
     vector<ContactPoint*>* gearConsecutivelyContactPointsCounterClockDirection() const;
+    vec2 gearConsecutivelyContactPointsInClockStart() const;
+    vec2 gearConsecutivelyContactPointsInClockStop() const;
+    vec2 gearConsecutivelyContactPointsCounterClockStart() const;
+    vec2 gearConsecutivelyContactPointsCounterClockStop() const;
     const vector<vec2>& translatedGearPoints() const;
     const vector<ContactPoint*>& translatedStillContactPoints() const;
     const vector<WrongContactPoint*>& translatedStillWrongContactPoints() const;
     vector<ContactPoint*>* translatedConsecutivelyContactPointsInClockDirection() const;
     vector<ContactPoint*>* translatedConsecutivelyContactPointsCounterClockDirection() const;
+    vec2 translatedConsecutivelyContactPointsInClockStart() const;
+    vec2 translatedConsecutivelyContactPointsInClockStop() const;
+    vec2 translatedConsecutivelyContactPointsCounterClockStart() const;
+    vec2 translatedConsecutivelyContactPointsCounterClockStop() const;
 
     vec2 startOfExaminedPitchInDrivenGear() const;
     vec2 endOfExaminedPitchInDrivenGear() const;
@@ -82,6 +90,11 @@ private:
     vector<WrongContactPoint*>      m_gearWCPs; // is arisen from a NCP in special position, bad point for the gear, as it results in a violation of the basic requirement of a gear tooth system
     vector<ContactPoint*>          *m_gearBestContactInClockDirection;
     vector<ContactPoint*>          *m_gearBestContactCounterClockDirection;
+    vec2                            m_gearBestContactInClockStart,
+                                    m_gearBestContactInClockEnd,
+                                    m_gearBestContactCounterClockStart,
+                                    m_gearBestContactCounterClockEnd;
+
 
     // chosen points if already translated
     vector<vec2>                    m_translatedGearPoints; // all gear points after translation
@@ -89,6 +102,11 @@ private:
     vector<WrongContactPoint*>      m_notTranslatedGearWCPs; // not translated and therefore still in contact, only references! No Copies!
     vector<ContactPoint*>          *m_notTranslatedBestContactInClockDirection; // best sequence of m_notTranslatedGearCPs, only references!
     vector<ContactPoint*>          *m_notTranslatedBestContactCounterClockDirection; // best sequence of m_notTranslatedGearCPs, only references!
+    vec2                            m_translatedGearBestContactInClockStart,
+                                    m_translatedGearBestContactInClockEnd,
+                                    m_translatedGearBestContactCounterClockStart,
+                                    m_translatedGearBestContactCounterClockEnd;
+
 
     // other (pitch and rotation) attributes:
     real                            m_angularPitchRotation; //is negative, if driven gear tooth is described counter clockwise (in screen representation), and positive otherwise
@@ -104,7 +122,12 @@ private:
     void reduceNumberOfNoneContactPoints();
     void copyNoneContactPointsInRelevantPitches();
     void findAllCoveredPoints();
-    void findBestPathOfContact(vector<ContactPoint*> &contactPoints, vector<ContactPoint*> *&bestInClockContactPoints, vector<ContactPoint*> *&bestCounterClockContactPoints); //TODO!!!
+    void findBestPathOfContact(
+        vector<ContactPoint*> &contactPoints,
+        vector<ContactPoint*> *&bestInClockContactPoints,
+        vector<ContactPoint*> *&bestCounterClockContactPoints,
+        vec2 &startInClock, vec2 &endInClock,
+        vec2 &startCounterClock, vec2 &endCounterClock); //TODO!!!
 
     // WrongContactPoint* wrongContactPointWhenTurnedBack(vec2 point, vec2 normal, real pitchRadiusDrivenGear);
     uint numberOfNoneErrorContactPoints() const;
@@ -121,6 +144,7 @@ private:
 
     void fillLastCuttingPoints(uint foundCuttings, uint currentIndex, ContactPoint *lastContactPoint, ContactPoint *currentContactPoint, real bottomClearance, real maxAngle);
 
+    real contactPositionCoverageAngle(vector<ContactPoint*> &contactPoints, vec2 &start, vec2 &end) const;
     bool pointIsCovered(const vec2 &candidate, const ContactPoint &a, const ContactPoint &b) const;
     bool contactPointIsCovered(const ContactPoint &candidate, const ContactPoint &a, const ContactPoint &b) const;
     bool intersectLines(real &intersectionValue, vec2 &intersection, vec2 startLine, vec2 stopLine, vec2 startTestLine, vec2 stopTestLine) const;

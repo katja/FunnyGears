@@ -532,23 +532,35 @@ void GraphicsGearPair::paintBestConsecutivePathOfContact(QPainter *painter) cons
     painter->save();
 
     vector<ContactPoint*> *bestContactSeries;
+    vec2 startSeries;
+    vec2 endSeries;
 
     if(m_rotationVelocity < 0.0) {
-        if(isBottomClearanceUsed())
+        if(isBottomClearanceUsed()) {
             bestContactSeries = m_gearPair->contactPointManager().translatedConsecutivelyContactPointsCounterClockDirection();
-        else
+            startSeries = m_gearPair->contactPointManager().translatedConsecutivelyContactPointsCounterClockStart();
+            endSeries = m_gearPair->contactPointManager().translatedConsecutivelyContactPointsCounterClockStop();
+        } else {
             bestContactSeries = m_gearPair->contactPointManager().gearConsecutivelyContactPointsCounterClockDirection();
+            startSeries = m_gearPair->contactPointManager().gearConsecutivelyContactPointsCounterClockStart();
+            endSeries = m_gearPair->contactPointManager().gearConsecutivelyContactPointsCounterClockStop();
+        }
     } else {
-        if(isBottomClearanceUsed())
+        if(isBottomClearanceUsed()) {
             bestContactSeries = m_gearPair->contactPointManager().translatedConsecutivelyContactPointsInClockDirection();
-        else
+            startSeries = m_gearPair->contactPointManager().translatedConsecutivelyContactPointsInClockStart();
+            endSeries = m_gearPair->contactPointManager().translatedConsecutivelyContactPointsInClockStop();
+        } else {
             bestContactSeries = m_gearPair->contactPointManager().gearConsecutivelyContactPointsInClockDirection();
+            startSeries = m_gearPair->contactPointManager().gearConsecutivelyContactPointsInClockStart();
+            endSeries = m_gearPair->contactPointManager().gearConsecutivelyContactPointsInClockStop();
+        }
     }
 
     if(bestContactSeries != nullptr) {
-        QPen pen(Preferences::HoverColor);
+        QPen pen(Preferences::AttentionColor);
         pen.setCapStyle(Qt::RoundCap);
-        pen.setWidth(Preferences::HighlightedLineWidth);
+        pen.setWidth(2 * Preferences::HighlightedLineWidth);
         painter->setPen(pen);
         if(bestContactSeries->size() == 1)
             drawCircle(painter, bestContactSeries->at(0)->contactPosition, Preferences::PointRadius + 1);
@@ -561,29 +573,31 @@ void GraphicsGearPair::paintBestConsecutivePathOfContact(QPainter *painter) cons
             pen.setWidth(0);
             painter->setPen(pen);
 
-            real alphaStart, alphaStop;
-            bool startInDrivingGear, stopInDrivingGear;
 
-            if(glm::length(bestContactSeries->front()->contactPosition) <= m_gearPair->drivingGearPitchRadius()) {
-                vec2 toContactPosition = normalize(bestContactSeries->front()->contactPosition);
-                alphaStart = asin(toContactPosition.y);
+            bool startInDrivingGear, stopInDrivingGear;
+            real alphaStart, alphaStop;
+
+            if(startSeries.x < m_gearPair->drivingGearPitchRadius()) {
                 startInDrivingGear = true;
+                vec2 toContactPosition = normalize(startSeries);
+                alphaStart = asin(toContactPosition.y);
                 drawLine(painter, vec2(0, 0), toContactPosition * m_gearPair->drivingGearPitchRadius());
             } else {
-                vec2 toContactPosition = normalize(bestContactSeries->front()->contactPosition - vec2(m_gearPair->getDistanceOfCenters(), 0));
-                alphaStart = asin(toContactPosition.y);
                 startInDrivingGear = false;
+                vec2 toContactPosition = normalize(startSeries - vec2(m_gearPair->getDistanceOfCenters(), 0));
+                alphaStart = asin(toContactPosition.y);
                 drawLine(painter, vec2(m_gearPair->getDistanceOfCenters(), 0), vec2(m_gearPair->getDistanceOfCenters(), 0) + toContactPosition * m_gearPair->drivenGearPitchRadius());
             }
-            if(glm::length(bestContactSeries->back()->contactPosition) <= m_gearPair->drivingGearPitchRadius()) {
-                vec2 toContactPosition = normalize(bestContactSeries->back()->contactPosition);
-                alphaStop = asin(toContactPosition.y);
+
+            if(endSeries.x < m_gearPair->drivingGearPitchRadius()) {
                 stopInDrivingGear = true;
+                vec2 toContactPosition = normalize(endSeries);
+                alphaStop = asin(toContactPosition.y);
                 drawLine(painter, vec2(0, 0), toContactPosition * m_gearPair->drivingGearPitchRadius());
             } else {
-                vec2 toContactPosition = normalize(bestContactSeries->back()->contactPosition - vec2(m_gearPair->getDistanceOfCenters(), 0));
-                alphaStop = asin(toContactPosition.y);
                 stopInDrivingGear = false;
+                vec2 toContactPosition = normalize(endSeries - vec2(m_gearPair->getDistanceOfCenters(), 0));
+                alphaStop = asin(toContactPosition.y);
                 drawLine(painter, vec2(m_gearPair->getDistanceOfCenters(), 0), vec2(m_gearPair->getDistanceOfCenters(), 0) + toContactPosition * m_gearPair->drivenGearPitchRadius());
             }
 
@@ -600,8 +614,6 @@ void GraphicsGearPair::paintBestConsecutivePathOfContact(QPainter *painter) cons
                 else
                     drawArc(painter, 0, alphaStop, m_gearPair->drivenGearPitchRadius(), vec2(m_gearPair->getDistanceOfCenters(), 0));
             }
-            //TODO: line to start point is drawn not correctly in driven gear!
-            // and whats about the arc?????
         }
     }
 
