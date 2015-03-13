@@ -25,6 +25,11 @@ void GearPairInformation::notValidGearShapeFound() {
 // Verbesserung: Schnittpunkte entfernen!
 // }
 
+void GearPairInformation::matingGearOutlineConstructionFailed() {
+    m_gearConstructionValid = false;
+    changed();
+}
+
 real GearPairInformation::approximatePercentageOfInContactPoints() const {
     //TODO !!!
     //maybe: give a relationship between m_gearCPs size and m_gearWCPs size of m_gearPair foundPoints() ????
@@ -38,6 +43,9 @@ bool GearPairInformation::validGearShapeOfDrivingGear() const {
     return m_gearShapeValid;
 }
 
+void GearPairInformation::objectChanged(ChangingObject *object) {
+    //TODO
+}
 
 void GearPairInformation::informAboutChange(ChangingObjectListener *listener) {
     m_listeners.push_back(listener);

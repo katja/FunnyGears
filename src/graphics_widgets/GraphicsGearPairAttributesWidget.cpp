@@ -104,6 +104,9 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     m_pathOfRealContactCheckBox = new QCheckBox(tr("...path of real contact"), this);
     connect(m_pathOfRealContactCheckBox, SIGNAL(toggled(bool)), this, SLOT(togglePathOfRealContactVisibility(bool)));
 
+    m_pathOfBestContactCheckBox = new QCheckBox(tr("...path of best contact (rotate the gear!)"), this);
+    connect(m_pathOfBestContactCheckBox, SIGNAL(toggled(bool)), this, SLOT(togglePathOfBestContactVisibility(bool)));
+
     m_pitchesCheckBox = new QCheckBox(tr("...pitches"), this);
     connect(m_pitchesCheckBox, SIGNAL(toggled(bool)), this, SLOT(togglePitchesVisibility(bool)));
 
@@ -123,6 +126,7 @@ GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *pare
     showBoxLayout->addWidget(m_selectedGearPointsCheckBox);
     showBoxLayout->addWidget(m_pathOfPossibleContactCheckBox);
     showBoxLayout->addWidget(m_pathOfRealContactCheckBox);
+    showBoxLayout->addWidget(m_pathOfBestContactCheckBox);
     showBoxLayout->addWidget(m_pitchesCheckBox);
     showBoxLayout->addWidget(m_pitchCirclesCheckBox);
 
@@ -226,6 +230,8 @@ void GraphicsGearPairAttributesWidget::updateAttributes() {
     m_selectedGearPointsCheckBox->setChecked(m_currentGearPair->visibilityOfSelectedGearPoints());
     m_pathOfPossibleContactCheckBox->setChecked(m_currentGearPair->visibilityOfPathOfPossibleContact());
     m_pathOfRealContactCheckBox->setChecked(m_currentGearPair->visibilityOfPathOfRealContact());
+    m_pathOfBestContactCheckBox->setChecked(m_currentGearPair->visibilityOfPathOfBestContact());
+    m_pathOfBestContactCheckBox->setEnabled(m_currentGearPair->isRotating());
     m_pitchesCheckBox->setChecked(m_currentGearPair->visibilityOfPitches());
     m_pitchCirclesCheckBox->setChecked(m_currentGearPair->visibilityOfPitchCircles());
 
@@ -327,6 +333,10 @@ void GraphicsGearPairAttributesWidget::togglePathOfPossibleContactVisibility(boo
 
 void GraphicsGearPairAttributesWidget::togglePathOfRealContactVisibility(bool checked) {
     m_currentGearPair->setVisibilityOfPathOfRealContact(checked);
+}
+
+void GraphicsGearPairAttributesWidget::togglePathOfBestContactVisibility(bool checked) {
+    m_currentGearPair->setVisibilityOfPathOfBestContact(checked);
 }
 
 void GraphicsGearPairAttributesWidget::togglePitchesVisibility(bool checked) {

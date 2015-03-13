@@ -42,9 +42,13 @@ public:
     const vector<vec2>& gearPoints() const;
     const vector<ContactPoint*>& gearContactPoints() const;
     const vector<WrongContactPoint*>& gearWrongContactPoints() const;
+    vector<ContactPoint*>* gearConsecutivelyContactPointsInClockDirection() const;
+    vector<ContactPoint*>* gearConsecutivelyContactPointsCounterClockDirection() const;
     const vector<vec2>& translatedGearPoints() const;
     const vector<ContactPoint*>& translatedStillContactPoints() const;
     const vector<WrongContactPoint*>& translatedStillWrongContactPoints() const;
+    vector<ContactPoint*>* translatedConsecutivelyContactPointsInClockDirection() const;
+    vector<ContactPoint*>* translatedConsecutivelyContactPointsCounterClockDirection() const;
 
     vec2 startOfExaminedPitchInDrivenGear() const;
     vec2 endOfExaminedPitchInDrivenGear() const;
@@ -76,11 +80,16 @@ private:
     vector<int>                     m_gearPointsInformationIndex; // information how m_gearPoints, m_gearCPs and m_gearWCPs are linked: positive number => is CP or WCP and number is index of m_gearCPs/m_gearWCPs, negative number => -1 <-> cutting , -2 <-> forbiddenAreaEndPoint
     vector<ContactPoint*>           m_gearCPs; // really good ContactPoints for the gear (gear is best, if only such points exist)
     vector<WrongContactPoint*>      m_gearWCPs; // is arisen from a NCP in special position, bad point for the gear, as it results in a violation of the basic requirement of a gear tooth system
+    vector<ContactPoint*>          *m_gearBestContactInClockDirection;
+    vector<ContactPoint*>          *m_gearBestContactCounterClockDirection;
 
     // chosen points if already translated
     vector<vec2>                    m_translatedGearPoints; // all gear points after translation
     vector<ContactPoint*>           m_notTranslatedGearCPs; // not translated and therefore still in contact, only references! No Copies!
     vector<WrongContactPoint*>      m_notTranslatedGearWCPs; // not translated and therefore still in contact, only references! No Copies!
+    vector<ContactPoint*>          *m_notTranslatedBestContactInClockDirection; // best sequence of m_notTranslatedGearCPs, only references!
+    vector<ContactPoint*>          *m_notTranslatedBestContactCounterClockDirection; // best sequence of m_notTranslatedGearCPs, only references!
+
     // other (pitch and rotation) attributes:
     real                            m_angularPitchRotation; //is negative, if driven gear tooth is described counter clockwise (in screen representation), and positive otherwise
     vec2                            m_examinedPitchStartDirection;
@@ -95,6 +104,7 @@ private:
     void reduceNumberOfNoneContactPoints();
     void copyNoneContactPointsInRelevantPitches();
     void findAllCoveredPoints();
+    void findBestPathOfContact(vector<ContactPoint*> &contactPoints, vector<ContactPoint*> *&bestInClockContactPoints, vector<ContactPoint*> *&bestCounterClockContactPoints); //TODO!!!
 
     // WrongContactPoint* wrongContactPointWhenTurnedBack(vec2 point, vec2 normal, real pitchRadiusDrivenGear);
     uint numberOfNoneErrorContactPoints() const;

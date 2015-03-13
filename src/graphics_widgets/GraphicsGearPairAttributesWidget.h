@@ -39,6 +39,7 @@ private slots:
     void toggleForbiddenAreaInDrivenGear(bool);
     void togglePathOfPossibleContactVisibility(bool);
     void togglePathOfRealContactVisibility(bool);
+    void togglePathOfBestContactVisibility(bool);
     void togglePitchesVisibility(bool);
     void togglePitchCirclesVisibility(bool);
     void toggleRotationOfGears(bool);
@@ -62,6 +63,7 @@ private:
                 *m_drivenGearForbiddenAreaCheckBox,
                 *m_pathOfPossibleContactCheckBox,
                 *m_pathOfRealContactCheckBox,
+                *m_pathOfBestContactCheckBox,
                 *m_pitchesCheckBox,
                 *m_pitchCirclesCheckBox,
                 *m_rotationCheckBox,

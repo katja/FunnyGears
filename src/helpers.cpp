@@ -329,3 +329,8 @@ void drawCircle(QPainter *painter, vec2 center, real radius) {
 void drawLine(QPainter *painter, vec2 start, vec2 end) {
     painter->drawLine(QPointF(start.x, start.y), QPointF(end.x, end.y));
 }
+
+void drawArc(QPainter *painter, real startAngle, real stopAngle, real radius, vec2 center) {
+    vec2 topLeft = center - vec2(radius, radius);
+    painter->drawArc(topLeft.x, topLeft.y, radius * 2, radius * 2, startAngle * 16 * 180 / M_PI, stopAngle * 16 * 180 / M_PI);
+}

@@ -8,7 +8,11 @@
 ContactPointManager::ContactPointManager() :
     m_numberOfInsertedCPs(0),
     m_currentSmallerValueList(new list<ContactPoint*>()),
-    m_currentLargerValueList(new list<ContactPoint*>())
+    m_currentLargerValueList(new list<ContactPoint*>()),
+    m_gearBestContactInClockDirection(nullptr),
+    m_gearBestContactCounterClockDirection(nullptr),
+    m_notTranslatedBestContactInClockDirection(nullptr),
+    m_notTranslatedBestContactCounterClockDirection(nullptr)
 {
 
 }
@@ -135,7 +139,9 @@ void ContactPointManager::processPointsToGear(uint numberOfTeeth, bool isDescrib
     reduceNumberOfNoneContactPoints();
     copyNoneContactPointsInRelevantPitches();
     findAllCoveredPoints();
-        //=> m_gearPoints, m_gearCPs, m_gearWCPs, m_gearPointsInformation, m_gearPointsInformationIndex
+        //=> m_gearPoints, m_gearCPs, m_gearWCPs,
+        //=> m_gearPointsInformation, m_gearPointsInformationIndex
+        //=> m_gearBestContactInClockDirection, m_gearBestContactCounterClockDirection  (may be nullptr!)
 }
 
 //translate gear points with less than angle angleInDegree between their normal and line of centers
@@ -196,73 +202,7 @@ void ContactPointManager::translateForBottomClearance(real bottomClearance, real
             i = 0;
         }
     }
-}
-
-void ContactPointManager::fillLastCuttingPoints(
-    uint foundCuttings,
-    uint currentIndex,
-    ContactPoint *lastContactPoint,
-    ContactPoint *currentContactPoint,
-    real bottomClearance,
-    real maxAngle)
-{
-    if(foundCuttings == 0 || lastContactPoint == nullptr)
-        return;
-
-    bool lastWasTranslated = absolute(lastContactPoint->normalInContact.y) < sin(maxAngle);
-    bool currentWasTranslated = absolute(currentContactPoint->normalInContact.y) < sin(maxAngle);
-
-    if(!lastWasTranslated && !currentWasTranslated) {
-        //all cutting points between stay the same as before (will not be translated)
-        int startIndex = (int)currentIndex - (int)foundCuttings;
-        for(uint i = 0; i < foundCuttings; ++i) {
-            uint index;
-            if(startIndex + (int)i >= 0)
-                index = startIndex + i;
-            else
-                index = m_gearPoints.size() - (startIndex + i);
-            m_translatedGearPoints.push_back(m_gearPoints[index]);
-        }
-    } else {
-        //at least some of the cutting points will be translated
-        real angleOfLast = asin(absolute(lastContactPoint->normalInContact.y));
-        real angleOfCurrent = asin(absolute(currentContactPoint->normalInContact.y));
-
-        vector<real> length(foundCuttings);
-        real completeLength = 0.0;
-        int startIndex = (int)currentIndex - (int)foundCuttings - 1;
-        for(uint i = 0; i <= foundCuttings; ++i) {
-            uint index;
-            if(startIndex + (int)i >= 0)
-                index = startIndex + i;
-            else
-                index = m_gearPoints.size() - (startIndex + i);
-            completeLength += glm::length(m_gearPoints[index + 1] - m_gearPoints[index]);
-            if(i < foundCuttings)
-                length.push_back(completeLength);
-        }
-
-        real angleCoefficient = (angleOfCurrent - angleOfLast) / completeLength;
-        vec2 normalCoefficient = (currentContactPoint->normal - lastContactPoint->normal) * (1.0 / completeLength);
-        startIndex = (int)currentIndex - (int)foundCuttings;
-        for(uint i = 0; i < foundCuttings; ++i) {
-            uint index;
-            if(startIndex + (int)i >= 0)
-                index = startIndex + i;
-            else
-                index = m_gearPoints.size() - (startIndex + i);
-            real angle = angleOfLast + angleCoefficient * length[i];
-            if(absolute(angle) < maxAngle) {
-                //translate point
-                real t = 1.0 - (absolute(angle) / maxAngle);
-                vec2 normal = lastContactPoint->normal + normalCoefficient * length[i];
-                m_translatedGearPoints.push_back(m_gearPoints[index] - t * bottomClearance * normal); // walk in opposite direction of the normal
-            } else {
-                //do not translate
-                m_translatedGearPoints.push_back(m_gearPoints[index]);
-            }
-        }
-    }
+    findBestPathOfContact(m_notTranslatedGearCPs, m_notTranslatedBestContactInClockDirection, m_notTranslatedBestContactCounterClockDirection);
 }
 
 const list< list<ContactPoint*>* >& ContactPointManager::foundPoints() const {
@@ -289,6 +229,14 @@ const vector<WrongContactPoint*>& ContactPointManager::gearWrongContactPoints() 
     return m_gearWCPs;
 }
 
+vector<ContactPoint*>* ContactPointManager::gearConsecutivelyContactPointsInClockDirection() const {
+    return m_gearBestContactInClockDirection;
+}
+
+vector<ContactPoint*>* ContactPointManager::gearConsecutivelyContactPointsCounterClockDirection() const {
+    return m_gearBestContactCounterClockDirection;
+}
+
 const vector<vec2>& ContactPointManager::translatedGearPoints() const {
     return m_translatedGearPoints;
 }
@@ -299,6 +247,14 @@ const vector<ContactPoint*>& ContactPointManager::translatedStillContactPoints()
 }
 const vector<WrongContactPoint*>& ContactPointManager::translatedStillWrongContactPoints() const {
     return m_notTranslatedGearWCPs;
+}
+
+vector<ContactPoint*>* ContactPointManager::translatedConsecutivelyContactPointsInClockDirection() const {
+    return m_notTranslatedBestContactInClockDirection;
+}
+
+vector<ContactPoint*>* ContactPointManager::translatedConsecutivelyContactPointsCounterClockDirection() const {
+    return m_notTranslatedBestContactCounterClockDirection;
 }
 
 vec2 ContactPointManager::startOfExaminedPitchInDrivenGear() const {
@@ -565,11 +521,128 @@ void ContactPointManager::findAllCoveredPoints() {
     assert(m_gearPoints.size() == m_gearPointsInformation.size());
     assert(m_gearPoints.size() == m_gearPointsInformationIndex.size());
 
+    findBestPathOfContact(m_gearCPs, m_gearBestContactInClockDirection, m_gearBestContactCounterClockDirection);
+
     std::cout << "\n\nAfter while loop and securityBreakCondition:  " << securityBreakCondition << "   securityBreak = " << securityBreak << " of treshold: " << securityBreakTreshold << std::endl;
     std::cout << "                 and notYetAtOriginCondition: " << notYetAtOriginCondition << std::endl;
     std::cout << "                 and notAtListEndCondition:   " << notAtListEndCondition << std::endl;
     std::cout << "        distance from first to last point if rotated: " << glm::length(m_gearPoints[0] - glm::rotate(m_gearPoints[m_gearPoints.size() - 1], -m_angularPitchRotation));
     std::cout << "GearPoints have a size of: " << m_gearPoints.size() << std::endl;
+}
+
+void ContactPointManager::findBestPathOfContact(vector<ContactPoint*> &contactPoints, vector<ContactPoint*> *&bestInClockContactPoints, vector<ContactPoint*> *&bestCounterClockContactPoints) {
+    bestInClockContactPoints = nullptr;
+    real bestInClockCoverageAngle = 0;
+    bestCounterClockContactPoints = nullptr;
+    real bestCounterClockCoverageAngle = 0;
+
+    if(contactPoints.empty())
+        return;
+
+    //Find an appropriate starting point
+    uint startWith = 0;
+    if(m_numberOfInsertedCPs > 0) {
+        ContactPoint *previous = contactPoints.back();
+        ContactPoint *next = contactPoints.front();
+        while(((previous->evaluationStep + 1) % m_numberOfInsertedCPs == next->evaluationStep)
+            && (cross(normalize(previous->contactPosition), previous->normalInContact)
+                * cross(normalize(next->contactPosition), next->normalInContact) > 0.0) // same directions of normals
+            && (startWith + 2 < contactPoints.size()))
+        {
+            previous = contactPoints[startWith];
+            ++startWith;
+            next = contactPoints[startWith];
+        }
+    }
+
+    std::cout << "startWith = " << startWith << std::endl;
+
+    vector<ContactPoint*> currentDirectionPoints;
+    real currentCoverageAngle = 0;
+    ContactPoint *cp = contactPoints[startWith];
+    currentDirectionPoints.push_back(cp);
+    real direction = cross(normalize(cp->contactPosition), cp->normalInContact);
+    int currentDirection = (direction > 0.0) ? 1 : -1; // 1 => normal points in clock direction, -1 => normal points in counter clock direction, (always from view of driving gear)
+
+    for(uint i = (startWith + 1) % contactPoints.size(); i != startWith; i = (i + 1) % contactPoints.size()) {
+        std::cout << "i = " << i << " currentDirection = " << currentDirection;
+        ContactPoint *lastCP = cp;
+        cp = contactPoints[i];
+        real direction = cross(normalize(cp->contactPosition), cp->normalInContact);
+        std::cout << ", direction now: " << direction << "  CP = " << *cp << std::endl;
+        if((cp->evaluationStep == lastCP->evaluationStep + 1)
+            && (
+            (direction > 0.0 && currentDirection == 1) ||
+            (direction < 0.0 && currentDirection == -1)
+            ))
+        {
+            std::cout << "added to list" << std::endl;
+            currentDirectionPoints.push_back(cp);
+            currentCoverageAngle = angleBetween(currentDirectionPoints.front()->contactPosition, cp->contactPosition);
+
+        } else {
+            std::cout << "NOT added to list" << std::endl;
+            // Direction or list changed => inspect currently used list and maybe use it as a new best list
+            if(currentDirection == 1) { // in clock direction
+                if(bestInClockCoverageAngle < currentCoverageAngle) {
+                    bestInClockCoverageAngle = currentCoverageAngle;
+                    if(bestInClockContactPoints != nullptr) {
+                        bestInClockContactPoints->clear();
+                        delete bestInClockContactPoints;
+                    }
+                    bestInClockContactPoints = new vector<ContactPoint*>(currentDirectionPoints);
+                }
+            } else { // counter clock direction
+                if(bestCounterClockCoverageAngle < currentCoverageAngle) {
+                    bestCounterClockCoverageAngle = currentCoverageAngle;
+                    if(bestCounterClockContactPoints != nullptr) {
+                        bestCounterClockContactPoints->clear();
+                        delete bestCounterClockContactPoints;
+                    }
+                    bestCounterClockContactPoints = new vector<ContactPoint*>(currentDirectionPoints);
+                }
+            }
+
+            // Initialize for new list/direction
+            currentDirectionPoints.clear();
+            currentDirectionPoints.push_back(cp);
+            currentDirection = (direction > 0.0) ? 1 : -1;
+            currentCoverageAngle = 0;
+        }
+    }
+
+    // Inspect last created currentDirectionPoints list
+    if(currentDirection == 1) { // in clock direction
+        if(bestInClockCoverageAngle < currentCoverageAngle || bestInClockContactPoints == nullptr) {
+            bestInClockCoverageAngle = currentCoverageAngle;
+            if(bestInClockContactPoints != nullptr) {
+                bestInClockContactPoints->clear();
+                delete bestInClockContactPoints;
+            }
+            bestInClockContactPoints = new vector<ContactPoint*>(currentDirectionPoints);
+        }
+    } else { // counter clock direction
+        if(bestCounterClockCoverageAngle < currentCoverageAngle || bestCounterClockContactPoints == nullptr) {
+            bestCounterClockCoverageAngle = currentCoverageAngle;
+            if(bestCounterClockContactPoints != nullptr) {
+                bestCounterClockContactPoints->clear();
+                delete bestCounterClockContactPoints;
+            }
+            bestCounterClockContactPoints = new vector<ContactPoint*>(currentDirectionPoints);
+        }
+    }
+
+    std::cout << "bestInClockContactPoints: ";
+        if(bestInClockContactPoints)
+            std::cout << bestInClockContactPoints->size() << std::endl;
+        else
+            std::cout << "NOOO" << std::endl;
+    std::cout << "bestCounterClockContactPoints: ";
+        if(bestCounterClockContactPoints)
+            std::cout << bestCounterClockContactPoints->size() << std::endl;
+        else
+            std::cout << "NOOO" << std::endl;
+
 }
 
 uint ContactPointManager::numberOfNoneErrorContactPoints() const {
@@ -852,6 +925,73 @@ int ContactPointManager::whichPositionBeforeAngularPitch(ContactPoint *contactPo
     return i;
 }
 
+void ContactPointManager::fillLastCuttingPoints(
+    uint foundCuttings,
+    uint currentIndex,
+    ContactPoint *lastContactPoint,
+    ContactPoint *currentContactPoint,
+    real bottomClearance,
+    real maxAngle)
+{
+    if(foundCuttings == 0 || lastContactPoint == nullptr)
+        return;
+
+    bool lastWasTranslated = absolute(lastContactPoint->normalInContact.y) < sin(maxAngle);
+    bool currentWasTranslated = absolute(currentContactPoint->normalInContact.y) < sin(maxAngle);
+
+    if(!lastWasTranslated && !currentWasTranslated) {
+        //all cutting points between stay the same as before (will not be translated)
+        int startIndex = (int)currentIndex - (int)foundCuttings;
+        for(uint i = 0; i < foundCuttings; ++i) {
+            uint index;
+            if(startIndex + (int)i >= 0)
+                index = startIndex + i;
+            else
+                index = m_gearPoints.size() - (startIndex + i);
+            m_translatedGearPoints.push_back(m_gearPoints[index]);
+        }
+    } else {
+        //at least some of the cutting points will be translated
+        real angleOfLast = asin(absolute(lastContactPoint->normalInContact.y));
+        real angleOfCurrent = asin(absolute(currentContactPoint->normalInContact.y));
+
+        vector<real> length(foundCuttings);
+        real completeLength = 0.0;
+        int startIndex = (int)currentIndex - (int)foundCuttings - 1;
+        for(uint i = 0; i <= foundCuttings; ++i) {
+            uint index;
+            if(startIndex + (int)i >= 0)
+                index = startIndex + i;
+            else
+                index = m_gearPoints.size() - (startIndex + i);
+            completeLength += glm::length(m_gearPoints[index + 1] - m_gearPoints[index]);
+            if(i < foundCuttings)
+                length.push_back(completeLength);
+        }
+
+        real angleCoefficient = (angleOfCurrent - angleOfLast) / completeLength;
+        vec2 normalCoefficient = (currentContactPoint->normal - lastContactPoint->normal) * (1.0 / completeLength);
+        startIndex = (int)currentIndex - (int)foundCuttings;
+        for(uint i = 0; i < foundCuttings; ++i) {
+            uint index;
+            if(startIndex + (int)i >= 0)
+                index = startIndex + i;
+            else
+                index = m_gearPoints.size() - (startIndex + i);
+            real angle = angleOfLast + angleCoefficient * length[i];
+            if(absolute(angle) < maxAngle) {
+                //translate point
+                real t = 1.0 - (absolute(angle) / maxAngle);
+                vec2 normal = lastContactPoint->normal + normalCoefficient * length[i];
+                m_translatedGearPoints.push_back(m_gearPoints[index] - t * bottomClearance * normal); // walk in opposite direction of the normal
+            } else {
+                //do not translate
+                m_translatedGearPoints.push_back(m_gearPoints[index]);
+            }
+        }
+    }
+}
+
 bool ContactPointManager::pointIsCovered(const vec2 &candidate, const ContactPoint &a, const ContactPoint &b) const {
     // in each case two tests to make
     vec2 intersection;
@@ -982,10 +1122,30 @@ void ContactPointManager::clearAllGearLists() {
         delete wcp;
     }
     m_gearWCPs.clear();
+    if(m_gearBestContactInClockDirection != nullptr) {
+        m_gearBestContactInClockDirection->clear();
+        delete m_gearBestContactInClockDirection;
+        m_gearBestContactInClockDirection = nullptr;
+    }
+    if(m_gearBestContactCounterClockDirection != nullptr) {
+        m_gearBestContactCounterClockDirection->clear();
+        delete m_gearBestContactCounterClockDirection;
+        m_gearBestContactCounterClockDirection = nullptr;
+    }
 }
 
 void ContactPointManager::clearAllTranslatedGearLists() {
     m_translatedGearPoints.clear();
-    m_notTranslatedGearCPs.clear(); //TODO: are they copied => necessary to delete the CPs?
-    m_notTranslatedGearWCPs.clear(); //TODO: are they copied => necessary to delete the WCPs?
+    m_notTranslatedGearCPs.clear();
+    m_notTranslatedGearWCPs.clear();
+    if(m_notTranslatedBestContactInClockDirection != nullptr) {
+        m_notTranslatedBestContactInClockDirection->clear();
+        delete m_notTranslatedBestContactInClockDirection;
+        m_notTranslatedBestContactInClockDirection = nullptr;
+    }
+    if(m_notTranslatedBestContactCounterClockDirection != nullptr) {
+        m_notTranslatedBestContactCounterClockDirection->clear();
+        delete m_notTranslatedBestContactCounterClockDirection;
+        m_notTranslatedBestContactCounterClockDirection = nullptr;
+    }
 }

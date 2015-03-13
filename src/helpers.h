@@ -89,6 +89,7 @@ void drawCircle(QPainter *painter, vec2 center, real radius = Preferences::Point
 
 void drawLine(QPainter *painter, vec2 start, vec2 end);
 
+void drawArc(QPainter *painter, real startAngle, real stopAngle, real radius, vec2 center = vec2(0, 0));
 
 
 ////////////////////////////////////

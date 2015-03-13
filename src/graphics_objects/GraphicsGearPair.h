@@ -75,6 +75,9 @@ public:
     void setVisibilityOfPathOfRealContact(bool visible);
     bool visibilityOfPathOfRealContact() const;
 
+    void setVisibilityOfPathOfBestContact(bool visible);
+    bool visibilityOfPathOfBestContact() const;
+
     void setVisibilityOfPitches(bool visible);
     bool visibilityOfPitches() const;
 
@@ -103,6 +106,7 @@ public:
     void paintAdditionals(QPainter *painter, GraphicsMatingSplineGear *gear) const;
     void paintSampledContactPointsDrivingGear(QPainter *painter) const;
     void paintSampledContactPointsDrivenGear(QPainter *painter) const;
+    void paintBestConsecutivePathOfContact(QPainter *painter) const;
     void paintPitchPoint(QPainter *painter) const;
     void paintPathOfPossibleContact(QPainter *painter) const;
     void paintPathOfRealContact(QPainter *painter) const;
@@ -125,6 +129,7 @@ private:
     bool m_selectionOfGearPointsIsVisible;
     bool m_pathOfPossibleContactIsVisible;
     bool m_pathOfRealContactIsVisible;
+    bool m_pathOfBestContactIsVisible;
     bool m_pitchesAreVisible;
     bool m_pitchCirclesAreVisible;
     bool m_isRotating;
