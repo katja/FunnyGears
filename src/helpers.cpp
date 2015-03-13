@@ -346,5 +346,5 @@ void drawArc(QPainter *painter, real startAngle, real stopAngle, real radius, ve
         itAngle += step;
     }
     drawLine(painter, center + radius * vec2(cos(itAngle - step), sin(itAngle - step)),
-                          center + radius * vec2(cos(stopAngle), sin(stopAngle)));
+                          center + radius * vec2(cos(stop), sin(stop)));
 }

@@ -585,7 +585,7 @@ void GraphicsGearPair::paintBestConsecutivePathOfContact(QPainter *painter) cons
             } else {
                 startInDrivingGear = false;
                 vec2 toContactPosition = normalize(startSeries - vec2(m_gearPair->getDistanceOfCenters(), 0));
-                alphaStart = asin(toContactPosition.y);
+                alphaStart = M_PI - asin(toContactPosition.y);
                 drawLine(painter, vec2(m_gearPair->getDistanceOfCenters(), 0), vec2(m_gearPair->getDistanceOfCenters(), 0) + toContactPosition * m_gearPair->drivenGearPitchRadius());
             }
 
@@ -597,7 +597,7 @@ void GraphicsGearPair::paintBestConsecutivePathOfContact(QPainter *painter) cons
             } else {
                 stopInDrivingGear = false;
                 vec2 toContactPosition = normalize(endSeries - vec2(m_gearPair->getDistanceOfCenters(), 0));
-                alphaStop = asin(toContactPosition.y);
+                alphaStop = M_PI - asin(toContactPosition.y);
                 drawLine(painter, vec2(m_gearPair->getDistanceOfCenters(), 0), vec2(m_gearPair->getDistanceOfCenters(), 0) + toContactPosition * m_gearPair->drivenGearPitchRadius());
             }
 
@@ -605,14 +605,14 @@ void GraphicsGearPair::paintBestConsecutivePathOfContact(QPainter *painter) cons
                 real stop = stopInDrivingGear ? alphaStop : 0;
                 drawArc(painter, alphaStart, stop, m_gearPair->drivingGearPitchRadius());
             } else {
-                real stop = stopInDrivingGear ? 0 : alphaStop;
+                real stop = stopInDrivingGear ? M_PI : alphaStop;
                 drawArc(painter, alphaStart, stop, m_gearPair->drivenGearPitchRadius(), vec2(m_gearPair->getDistanceOfCenters(), 0));
             }
             if(startInDrivingGear != stopInDrivingGear) {
                 if(stopInDrivingGear)
                     drawArc(painter, 0, alphaStop, m_gearPair->drivingGearPitchRadius());
                 else
-                    drawArc(painter, 0, alphaStop, m_gearPair->drivenGearPitchRadius(), vec2(m_gearPair->getDistanceOfCenters(), 0));
+                    drawArc(painter, M_PI, alphaStop, m_gearPair->drivenGearPitchRadius(), vec2(m_gearPair->getDistanceOfCenters(), 0));
             }
         }
     }

@@ -699,25 +699,21 @@ real ContactPointManager::contactPositionCoverageAngle(vector<ContactPoint*> &co
 
     //Search for first and last point taken the normal direction as reference
     ContactPoint *firstPoint = contactPoints.front();
-    vec2 matrixTopRow = firstPoint->normalInContact;
+    real direction = cross(normalize(firstPoint->contactPosition), firstPoint->normalInContact);;
+    int listDirection = (direction < 0.0) ? -1 : 1;  //1 => clockwise, -1 => counter clockwise
 
     for(ContactPoint *cp : contactPoints) {
         if(cp != firstPoint) {
-            vec2 translatedContact = cp->contactPosition - firstPoint->contactPosition;
-            if(dot(matrixTopRow, translatedContact) < 0) { //contact position of cp is not on halfplane formed by firstPoint with its normal
+            if(cp->contactPosition.y * listDirection < firstPoint->contactPosition.y * listDirection) {
                 firstPoint = cp;
-                matrixTopRow = cp->normalInContact;
             }
         }
     }
     ContactPoint *lastPoint = contactPoints.back();
-    matrixTopRow = lastPoint->normalInContact;
     for(ContactPoint *cp : contactPoints) {
         if(cp != lastPoint) {
-            vec2 translatedContact = cp->contactPosition - lastPoint->contactPosition;
-            if(dot(matrixTopRow, translatedContact) > 0) {
+            if(cp->contactPosition.y * listDirection > lastPoint->contactPosition.y * listDirection) {
                 lastPoint = cp;
-                matrixTopRow = cp->normalInContact;
             }
         }
     }
