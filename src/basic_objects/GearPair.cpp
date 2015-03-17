@@ -1,4 +1,4 @@
-#include "GearPair.h"
+#include "basic_objects/GearPair.h"
 #include "basic_objects/SplineGear.h"
 #include "basic_objects/Ray.h"
 

@@ -1,8 +1,9 @@
 #ifndef CONTACT_POINT_ITERATOR
 #define CONTACT_POINT_ITERATOR
+
+#include "definitions.h"
 #include "basic_objects/ContactPointIterator.h"
 #include "basic_objects/ContactPointHelpers.h"
-#include "definitions.h"
 
 
 class ContactPointIterator {

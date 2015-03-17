@@ -1,6 +1,6 @@
-#include "graphics_objects/GraphicsInvoluteGear.h"
 #include "helpers.h"
 #include "preferences.h"
+#include "graphics_objects/GraphicsInvoluteGear.h"
 
 const int GraphicsInvoluteGear::Type = GraphicsInvoluteGear::UserType + Type::GraphicsInvoluteGearType;
 

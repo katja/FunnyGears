@@ -1,4 +1,4 @@
-#include "NoEditingSplineState.h"
+#include "graphics_objects/NoEditingSplineState.h"
 
 NoEditingSplineState::NoEditingSplineState(GraphicsSpline *spline) : m_spline(spline) {}
 

@@ -1,6 +1,7 @@
-#include "PenSplineState.h"
+#include "graphics_objects/PenSplineState.h"
 
 PenSplineState::PenSplineState(GraphicsSpline *spline) : m_spline(spline) {}
+
 PenSplineState::~PenSplineState() {}
 
 QRectF PenSplineState::boundingRect() const {

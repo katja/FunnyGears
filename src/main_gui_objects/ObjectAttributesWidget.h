@@ -2,9 +2,9 @@
 #define OBJECT_ATTRIBUTES_WIDGET
 
 #include "stable.h"
-#include "SelectionModel.h"
 #include "graphics_objects/GraphicsItem.h"
 #include "graphics_widgets/GraphicsItemAttributesWidget.h"
+#include "main_gui_objects/SelectionModel.h"
 
 class ObjectAttributesWidget : public QDockWidget {
 

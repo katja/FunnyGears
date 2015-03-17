@@ -2,11 +2,11 @@
 #define OBJECT_SCHEDULE_VIEW_WIDGET
 
 #include "stable.h"
-#include "Model.h"
-#include "ModelTreeView.h"
-#include "SelectionModel.h"
 #include "basic_objects/Spline.h"
 #include "graphics_objects/GraphicsSplineGear.h"
+#include "main_gui_objects/Model.h"
+#include "main_gui_objects/ModelTreeView.h"
+#include "main_gui_objects/SelectionModel.h"
 
 class ObjectScheduleViewWidget : public QDockWidget {
 

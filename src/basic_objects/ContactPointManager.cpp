@@ -1,9 +1,8 @@
+#include "helpers.h"
 #include "basic_objects/ContactPointManager.h"
-
+#include "basic_objects/Ray.h"
 #include "glm/glm.hpp"
 #include "glm/gtx/rotate_vector.hpp"
-#include "helpers.h"
-#include "basic_objects/Ray.h"
 
 ContactPointManager::ContactPointManager() :
     m_numberOfInsertedCPs(0),

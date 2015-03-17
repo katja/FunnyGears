@@ -1,4 +1,4 @@
-#include "GraphicsMatingSplineGear.h"
+#include "graphics_objects/GraphicsMatingSplineGear.h"
 #include "graphics_objects/GraphicsGearPair.h"
 
 GraphicsMatingSplineGear::GraphicsMatingSplineGear(SplineGear *gear, GraphicsGearPair *parent) :

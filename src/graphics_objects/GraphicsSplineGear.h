@@ -3,10 +3,9 @@
 
 #include "stable.h"
 #include "definitions.h"
-#include "graphics_objects/GraphicsSpline.h"
 #include "basic_objects/SplineGear.h"
 #include "basic_objects/GearPair.h"
-
+#include "graphics_objects/GraphicsSpline.h"
 
 class GraphicsSplineGear : public GraphicsSpline {
 

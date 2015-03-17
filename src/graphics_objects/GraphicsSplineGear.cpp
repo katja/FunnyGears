@@ -1,6 +1,6 @@
-#include "graphics_objects/GraphicsSplineGear.h"
 #include "preferences.h"
 #include "helpers.h"
+#include "graphics_objects/GraphicsSplineGear.h"
 #include <glm/glm.hpp>
 
 const int GraphicsSplineGear::Type = GraphicsSplineGear::UserType + Type::GraphicsSplineGearType;

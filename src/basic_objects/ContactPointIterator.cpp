@@ -1,5 +1,5 @@
-#include "ContactPointIterator.h"
 #include "helpers.h"
+#include "basic_objects/ContactPointIterator.h"
 
 ContactPointIterator::ContactPointIterator() :
     m_cpList(nullptr),

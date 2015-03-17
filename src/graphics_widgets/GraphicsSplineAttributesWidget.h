@@ -3,10 +3,10 @@
 
 #include "stable.h"
 #include "definitions.h"
-#include "graphics_widgets/GraphicsItemAttributesWidget.h"
 #include "graphics_objects/GraphicsSpline.h"
-#include "RealValuedSlider.h"
-#include "ChangingObjectListener.h"
+#include "graphics_widgets/GraphicsItemAttributesWidget.h"
+#include "helper_objects/RealValuedSlider.h"
+#include "helper_objects/ChangingObjectListener.h"
 
 class GraphicsSplineAttributesWidget : public GraphicsItemAttributesWidget, public ChangingObjectListener {
 

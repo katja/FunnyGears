@@ -4,7 +4,7 @@
 #include "stable.h"
 #include "definitions.h"
 #include "tool_bars/EditingToolBarListener.h"
-#include "ChangingObject.h"
+#include "helper_objects/ChangingObject.h"
 
 class GraphicsItem : public QGraphicsItem, public EditingToolBarListener, public ChangingObject {
 

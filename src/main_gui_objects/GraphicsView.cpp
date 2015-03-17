@@ -1,6 +1,6 @@
-#include "GraphicsView.h"
 #include "preferences.h"
-#include "Cursor.h"
+#include "main_gui_objects/GraphicsView.h"
+#include "main_gui_objects/Cursor.h"
 
 GraphicsView::GraphicsView(QWidget *parent) : QGraphicsView(parent) {
     initialize();

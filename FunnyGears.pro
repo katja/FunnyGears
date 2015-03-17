@@ -40,6 +40,8 @@ HEADERS = \
     src/basic_objects/*.h \
     src/graphics_objects/*.h \
     src/graphics_widgets/*.h \
+    src/helper_objects/*.h \
+    src/main_gui_objects/*.h \
     src/tool_bars/*.h
 
 SOURCES = \
@@ -47,4 +49,6 @@ SOURCES = \
     src/basic_objects/*.cpp \
     src/graphics_objects/*.cpp \
     src/graphics_widgets/*.cpp \
+    src/helper_objects/*.cpp \
+    src/main_gui_objects/*.cpp \
     src/tool_bars/*.cpp

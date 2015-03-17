@@ -1,8 +1,8 @@
 #ifndef SPLINE_GEAR
 #define SPLINE_GEAR
 
-#include "basic_objects/Spline.h"
 #include "definitions.h"
+#include "basic_objects/Spline.h"
 
 class SplineGear : public Spline {
 public:

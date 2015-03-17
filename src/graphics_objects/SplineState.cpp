@@ -1,4 +1,4 @@
-#include "SplineState.h"
+#include "graphics_objects/SplineState.h"
 
 SplineState::~SplineState() {}
 

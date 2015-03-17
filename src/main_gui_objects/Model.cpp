@@ -1,5 +1,5 @@
-#include "Model.h"
 #include "graphics_objects/GraphicsRootItem.h"
+#include "main_gui_objects/Model.h"
 
 Model::Model(QGraphicsScene *scene, QObject *parent) : QAbstractItemModel(parent), m_scene(scene) {
     std::cout << "Model is created" << std::endl;

@@ -1,5 +1,6 @@
 #ifndef CONTACT_POINT_HELPERS
 #define CONTACT_POINT_HELPERS
+
 #include "definitions.h"
 #include "basic_objects/ContactPoint.h"
 

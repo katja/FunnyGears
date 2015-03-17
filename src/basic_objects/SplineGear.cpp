@@ -1,7 +1,7 @@
-#include "SplineGear.h"
+#include "helpers.h"
+#include "basic_objects/SplineGear.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
-#include "helpers.h"
 
 SplineGear::SplineGear(const Spline &toothOfGear) : m_toothProfile(new Spline(toothOfGear)),
     m_referenceRadius(0.0),

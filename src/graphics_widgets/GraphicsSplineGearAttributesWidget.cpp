@@ -1,6 +1,6 @@
-#include "graphics_widgets/GraphicsSplineGearAttributesWidget.h"
-#include "basic_objects/SplineGear.h"
 #include "helpers.h"
+#include "basic_objects/SplineGear.h"
+#include "graphics_widgets/GraphicsSplineGearAttributesWidget.h"
 
 GraphicsSplineGearAttributesWidget::
 GraphicsSplineGearAttributesWidget(QWidget *parent) : GraphicsItemAttributesWidget(parent)

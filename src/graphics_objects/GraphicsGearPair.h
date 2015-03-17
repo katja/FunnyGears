@@ -3,13 +3,13 @@
 
 #include "stable.h"
 #include "definitions.h"
+#include "basic_objects/GearPair.h"
+#include "basic_objects/ContactPoint.h"
 #include "graphics_objects/GraphicsScheduleItem.h"
 #include "graphics_objects/GraphicsItem.h"
 #include "graphics_objects/GraphicsMatingSplineGear.h"
-#include "basic_objects/GearPair.h"
-#include "basic_objects/ContactPoint.h"
-#include "ChangingObjectListener.h"
-#include "GearPairInformationWidget.h"
+#include "graphics_widgets/GearPairInformationWidget.h"
+#include "helper_objects/ChangingObjectListener.h"
 
 class GraphicsGearPair : public GraphicsScheduleItem, public ChangingObjectListener {
 

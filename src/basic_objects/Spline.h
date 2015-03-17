@@ -1,7 +1,6 @@
 #ifndef SPLINE
 #define SPLINE
 
-#include <iostream>
 #include "definitions.h"
 #include "basic_objects/Ray.h"
 

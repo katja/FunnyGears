@@ -5,8 +5,8 @@
 #include "helpers.h"
 #include "basic_objects/ContactPoint.h"
 #include "basic_objects/ContactPointManager.h"
-#include "ChangingObject.h"
-#include "ChangingObjectListener.h"
+#include "helper_objects/ChangingObject.h"
+#include "helper_objects/ChangingObjectListener.h"
 class SplineGear;
 
 

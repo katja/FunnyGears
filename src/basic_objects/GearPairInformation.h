@@ -2,12 +2,12 @@
 #define GEAR_PAIR_INFORMATION
 
 #include "definitions.h"
-#include "ChangingObject.h"
-#include "ChangingObjectListener.h"
-#include "basic_objects/ContactPointHelpers.h"
 #include "basic_objects/GearPair.h"
 #include "basic_objects/ContactPoint.h"
+#include "basic_objects/ContactPointHelpers.h"
 #include "basic_objects/ContactPointManager.h"
+#include "helper_objects/ChangingObject.h"
+#include "helper_objects/ChangingObjectListener.h"
 
 class GearPairInformation : public ChangingObject, public ChangingObjectListener {
 

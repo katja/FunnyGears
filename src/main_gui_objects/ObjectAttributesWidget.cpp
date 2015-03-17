@@ -1,7 +1,7 @@
-#include "ObjectAttributesWidget.h"
 #include "graphics_widgets/GraphicsSplineAttributesWidget.h"
 #include "graphics_widgets/GraphicsSplineGearAttributesWidget.h"
 #include "graphics_widgets/GraphicsGearPairAttributesWidget.h"
+#include "main_gui_objects/ObjectAttributesWidget.h"
 
 ObjectAttributesWidget::ObjectAttributesWidget(SelectionModel *selectionModel, QWidget *parent)
 : QDockWidget("Object Attributes", parent, Qt::Widget), m_selectionModel(selectionModel) {

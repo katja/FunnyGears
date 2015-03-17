@@ -1,6 +1,6 @@
-#include "GraphicsScene.h"
-#include "SelectionModel.h"
-#include "Model.h"
+#include "main_gui_objects/GraphicsScene.h"
+#include "main_gui_objects/SelectionModel.h"
+#include "main_gui_objects/Model.h"
 
 SelectionModel::SelectionModel(Model *model) : QItemSelectionModel(model), m_model(model) {
     std::cout << "SelectionModel is created" << std::endl;

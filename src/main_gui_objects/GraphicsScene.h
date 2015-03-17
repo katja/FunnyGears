@@ -2,10 +2,10 @@
 #define GRAPHICS_SCENE
 
 #include "stable.h"
+#include "graphics_objects/GraphicsItem.h"
+#include "main_gui_objects/SelectionModel.h"
 #include "tool_bars/EditingToolBarListener.h"
 #include "tool_bars/EditingStatesAndActions.h"
-#include "graphics_objects/GraphicsItem.h"
-#include "SelectionModel.h"
 
 class GraphicsScene : public QGraphicsScene, public EditingToolBarListener {
 

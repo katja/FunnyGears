@@ -1,7 +1,6 @@
-#include "GraphicsGearPair.h"
 #include "preferences.h"
-
 #include "basic_objects/ContactPoint.h"
+#include "graphics_objects/GraphicsGearPair.h"
 
 const int GraphicsGearPair::Type = GraphicsItem::UserType + Type::GraphicsGearPairType;
 
@@ -77,6 +76,7 @@ GraphicsGearPair::GraphicsGearPair(GearPair *gearPair) :
 }
 
 GraphicsGearPair::~GraphicsGearPair() {
+    m_gearPairInformationWidget->close();
     delete m_gearPairInformationWidget;
     delete m_drivingGear;
     delete m_drivenGear;

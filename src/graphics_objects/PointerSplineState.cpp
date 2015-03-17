@@ -1,5 +1,5 @@
-#include "PointerSplineState.h"
 #include "helpers.h"
+#include "graphics_objects/PointerSplineState.h"
 
 PointerSplineState::PointerSplineState(GraphicsSpline *spline) :
     m_spline(spline),

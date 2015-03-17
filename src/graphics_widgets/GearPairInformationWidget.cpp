@@ -1,6 +1,6 @@
-#include "GearPairInformationWidget.h"
 #include "basic_objects/SplineGear.h"
 #include "basic_objects/ContactPointHelpers.h"
+#include "graphics_widgets/GearPairInformationWidget.h"
 
 GearPairInformationWidget::GearPairInformationWidget(GearPair *gearPair) :
     m_gearPair(gearPair),

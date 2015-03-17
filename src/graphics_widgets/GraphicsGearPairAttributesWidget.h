@@ -3,11 +3,11 @@
 
 #include "stable.h"
 #include "definitions.h"
-#include "graphics_widgets/GraphicsItemAttributesWidget.h"
-#include "ChangingObjectListener.h"
 #include "graphics_objects/GraphicsGearPair.h"
-#include "GearPairInformationWidget.h"
-#include "RealValuedSlider.h"
+#include "graphics_widgets/GraphicsItemAttributesWidget.h"
+#include "graphics_widgets/GearPairInformationWidget.h"
+#include "helper_objects/ChangingObjectListener.h"
+#include "helper_objects/RealValuedSlider.h"
 
 class GraphicsGearPairAttributesWidget : public GraphicsItemAttributesWidget, public ChangingObjectListener {
 

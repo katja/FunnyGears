@@ -1,7 +1,7 @@
 #ifndef CHANGING_OBJECT
 #define CHANGING_OBJECT
 
-#include "ChangingObjectListener.h"
+#include "helper_objects/ChangingObjectListener.h"
 
 class ChangingObject {
 

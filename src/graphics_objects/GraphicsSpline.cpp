@@ -1,5 +1,5 @@
-#include "graphics_objects/GraphicsSpline.h"
 #include "helpers.h"
+#include "graphics_objects/GraphicsSpline.h"
 #include "graphics_objects/NoEditingSplineState.h"
 #include "graphics_objects/PointerSplineState.h"
 #include "graphics_objects/PenSplineState.h"

@@ -1,5 +1,5 @@
-#include "YesNoDelegate.h"
-#include "Model.h"
+#include "main_gui_objects/YesNoDelegate.h"
+#include "main_gui_objects/Model.h"
 
 YesNoDelegate::YesNoDelegate(QObject *parent) : QStyledItemDelegate(parent) {
     std::cout << "YesNoDelegate is created" << std::endl;

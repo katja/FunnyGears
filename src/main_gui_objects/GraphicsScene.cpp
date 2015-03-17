@@ -1,6 +1,6 @@
-#include "GraphicsScene.h"
-#include "Cursor.h"
 #include "preferences.h"
+#include "main_gui_objects/GraphicsScene.h"
+#include "main_gui_objects/Cursor.h"
 #include <cmath>
 
 //****************************************************************************

@@ -2,11 +2,11 @@
 #define MAIN_WINDOW
 
 #include "stable.h"
-#include "GraphicsView.h"
-#include "GraphicsScene.h"
-#include "Model.h"
-#include "ObjectScheduleViewWidget.h"
-#include "ObjectAttributesWidget.h"
+#include "main_gui_objects/GraphicsView.h"
+#include "main_gui_objects/GraphicsScene.h"
+#include "main_gui_objects/Model.h"
+#include "main_gui_objects/ObjectScheduleViewWidget.h"
+#include "main_gui_objects/ObjectAttributesWidget.h"
 
 class MainWindow : public QMainWindow {
 

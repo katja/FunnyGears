@@ -2,7 +2,7 @@
 #define MODEL_TREE_VIEW
 
 #include "stable.h"
-#include "Model.h"
+#include "main_gui_objects/Model.h"
 
 class ModelTreeView : public QTreeView {
 

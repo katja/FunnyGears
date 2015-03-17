@@ -1,5 +1,6 @@
 #ifndef PEN_SPLINE_STATE
 #define PEN_SPLINE_STATE
+
 #include "graphics_objects/GraphicsSpline.h"
 
 class PenSplineState : public SplineState {

@@ -1,9 +1,9 @@
 #ifndef TOOL_BAR_MANAGER
 #define TOOL_BAR_MANAGER
 
+#include "stable.h"
 #include "tool_bars/ToolBar.h"
 #include "tool_bars/ToolBarListener.h"
-#include "stable.h"
 
 class ToolBarManager {
 

@@ -1,7 +1,7 @@
 #ifndef PREFERENCES
 #define PREFERENCES
-#include "stable.h"
 
+#include "stable.h"
 
 namespace Preferences {
     extern QColor SelectionColor;

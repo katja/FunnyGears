@@ -4,9 +4,9 @@
 #include "stable.h"
 #include "definitions.h"
 #include "preferences.h"
+#include "basic_objects/Spline.h"
 #include "graphics_objects/GraphicsScheduleItem.h"
 #include "graphics_objects/SplineState.h"
-#include "basic_objects/Spline.h"
 
 class GraphicsSpline : public GraphicsScheduleItem {
 

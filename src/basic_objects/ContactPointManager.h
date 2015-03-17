@@ -2,10 +2,10 @@
 #define CONTACT_POINT_MANAGER
 
 #include "definitions.h"
+#include "stable.h"
 #include "basic_objects/ContactPoint.h"
 #include "basic_objects/ContactPointHelpers.h"
 #include "basic_objects/ContactPointIterator.h"
-#include "stable.h"
 
 class ContactPointManager {
 

@@ -1,5 +1,5 @@
-#include "basic_objects/Spline.h"
 #include "helpers.h"
+#include "basic_objects/Spline.h"
 #include <cmath>
 #include <glm/glm.hpp>
 

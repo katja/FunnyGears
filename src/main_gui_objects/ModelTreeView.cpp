@@ -1,9 +1,9 @@
-#include "ModelTreeView.h"
-#include "YesNoDelegate.h"
 #include "graphics_objects/GraphicsScheduleItem.h"
 #include "graphics_objects/GraphicsSpline.h"
 #include "graphics_objects/GraphicsSplineGear.h"
 #include "graphics_objects/GraphicsGearPair.h"
+#include "main_gui_objects/ModelTreeView.h"
+#include "main_gui_objects/YesNoDelegate.h"
 
 ModelTreeView::ModelTreeView(Model *model, QWidget *parent) : QTreeView(parent), m_model(model) {
     setHeaderHidden(false);

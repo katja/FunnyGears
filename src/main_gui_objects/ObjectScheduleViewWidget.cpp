@@ -1,5 +1,5 @@
-#include "ObjectScheduleViewWidget.h"
-#include "YesNoDelegate.h"
+#include "main_gui_objects/ObjectScheduleViewWidget.h"
+#include "main_gui_objects/YesNoDelegate.h"
 
 #include "graphics_objects/GraphicsSpline.h"
 #include "graphics_objects/GraphicsSplineGear.h"

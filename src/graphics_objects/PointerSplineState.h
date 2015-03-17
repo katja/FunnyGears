@@ -1,5 +1,6 @@
 #ifndef POINTER_SPLINE_STATE
 #define POINTER_SPLINE_STATE
+
 #include "graphics_objects/SplineState.h"
 #include "graphics_objects/GraphicsSpline.h"
 

@@ -1,4 +1,4 @@
-#include "Cursor.h"
+#include "main_gui_objects/Cursor.h"
 
 CursorRental* CursorRental::m_uniqueCursorRental = 0;
 

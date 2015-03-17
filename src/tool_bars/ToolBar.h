@@ -1,5 +1,6 @@
 #ifndef TOOL_BAR
 #define TOOL_BAR
+
 #include "tool_bars/ToolBarListener.h"
 
 class ToolBar {

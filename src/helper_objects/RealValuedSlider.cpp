@@ -1,4 +1,4 @@
-#include "RealValuedSlider.h"
+#include "helper_objects/RealValuedSlider.h"
 
 RealValuedSlider::RealValuedSlider(const QString &title, QWidget *parent) : QGroupBox(title, parent) {
 

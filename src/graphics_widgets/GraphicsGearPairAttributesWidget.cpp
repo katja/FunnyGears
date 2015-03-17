@@ -1,4 +1,4 @@
-#include "GraphicsGearPairAttributesWidget.h"
+#include "graphics_widgets/GraphicsGearPairAttributesWidget.h"
 
 GraphicsGearPairAttributesWidget::GraphicsGearPairAttributesWidget(QWidget *parent) :
     GraphicsItemAttributesWidget(parent)

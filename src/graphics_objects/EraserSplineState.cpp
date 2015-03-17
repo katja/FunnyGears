@@ -1,4 +1,4 @@
-#include "EraserSplineState.h"
+#include "graphics_objects/EraserSplineState.h"
 
 EraserSplineState::EraserSplineState(GraphicsSpline *spline) :
     m_spline(spline),
