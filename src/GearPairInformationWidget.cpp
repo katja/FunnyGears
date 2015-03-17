@@ -27,14 +27,14 @@ GearPairInformationWidget::GearPairInformationWidget(GearPair *gearPair) :
     m_invalidGearShape = new QLabel(this);
     m_invalidGearShape->setTextFormat(Qt::RichText);
     m_invalidGearShape->setText(tr(
-        "<color=#222222>There were normals found in the driving gear with no cut with the gear outline.</color> This means, that the outline has intersections! The mating gear construction is not correct!"));
+        "<font color='#DC001E'><p><b>There were normals found in the driving gear with no cut with the gear outline.</b><br>This means, that the <b>outline has intersections!</b> The mating gear construction is not correct!</p></font>"));
     m_invalidGearShape->setMinimumWidth(3 * minimumWidth);
     m_invalidGearShape->setWordWrap(true);
     m_invalidGearShape->hide();
     m_incorrectGearOutline = new QLabel(this);
     m_incorrectGearOutline->setTextFormat(Qt::RichText);
     m_incorrectGearOutline->setText(tr(
-        "The algorithm for the construction of the mating gear failed! This may happen, if sampling is too vague => so go to 'Rendering Setup' and increase the 'Sampling Rate' and/or decrease the 'Max. drift angle'."));
+        "<font color='#DC001E'><p><b>The algorithm for the construction of the mating gear failed!</b><br>This may happen, if <b>sampling is too vague</b> => so go to 'Rendering Setup' and increase the 'Sampling Rate' and/or decrease the 'Max. drift angle'.</p></font>"));
     m_incorrectGearOutline->setMinimumWidth(3 * minimumWidth);
     m_incorrectGearOutline->setWordWrap(true);
     m_incorrectGearOutline->hide();
