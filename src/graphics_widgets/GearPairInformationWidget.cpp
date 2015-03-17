@@ -132,7 +132,7 @@ GearPairInformationWidget::GearPairInformationWidget(GearPair *gearPair) :
     m_basicSecondRequireC = new QLabel(this);
     m_basicSecondRequireCC = new QLabel(this);
 
-    m_coverageAngleText = new QLabel(tr("Angle, the path of contact covers:"), this);
+    m_coverageAngleText = new QLabel(tr("Contact ratio (angle, the path of contact covers):"), this);
     m_coverageAngleText->setWordWrap(true);
     m_coverageAngleC = new QLabel(this);
     m_coverageAngleCC = new QLabel(this);
@@ -243,9 +243,9 @@ void GearPairInformationWidget::updateInformation() {
     m_percentageOfCPsInPathCC->setText(
         QString::number(m_gearPairInfo->ratioOfCPsToWCPs(cc) * 100.0, 'f', 2) + " %");
     m_coverageAngleC->setText(
-        "????");
+        QString::number(m_gearPairInfo->contactRatio(c), 'f', 3));
     m_coverageAngleCC->setText(
-        "????");
+        QString::number(m_gearPairInfo->contactRatio(cc), 'f', 3));
 }
 
 void GearPairInformationWidget::objectChanged(ChangingObject *object) {

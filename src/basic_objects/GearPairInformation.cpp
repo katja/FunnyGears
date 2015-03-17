@@ -1,5 +1,6 @@
 #include "basic_objects/GearPairInformation.h"
 #include "basic_objects/GearPair.h"
+#include "basic_objects/SplineGear.h"
 
 GearPairInformation::GearPairInformation(GearPair *gearPair) : m_gearPair(gearPair) {
     m_gearPair->informAboutChange(this);
@@ -85,13 +86,20 @@ bool GearPairInformation::secondBasicRequirementOfGearToothSystemIsFulfilled(Tur
         return m_percentagePathOfContactCoversPitch.direction(directionOfDrivingGear) >= 1.0;
 }
 
-real GearPairInformation::ratioOfCPsToWCPs(TurningDirection dir) {
+real GearPairInformation::ratioOfCPsToWCPs(TurningDirection dir) const {
     if(m_gearPair->isBottomClearanceUsed())
         return (real)m_BCnumberOfCPsInContact.direction(dir) /
             (real)(m_BCnumberOfCPsInContact.direction(dir) + m_BCnumberOfWCPsInContact.direction(dir));
     else
         return (real)m_numberOfCPsInContact.direction(dir) /
             (real)(m_numberOfCPsInContact.direction(dir) + m_numberOfWCPsInContact.direction(dir));
+}
+
+real GearPairInformation::contactRatio(TurningDirection dir) const { //German: Profilüberdeckung (epsilon_alpha)
+    if(m_gearPair->isBottomClearanceUsed())
+        return m_BCpercentagePathOfContactCoversPitch.direction(dir);
+    else
+        return m_percentagePathOfContactCoversPitch.direction(dir);
 }
 
 void GearPairInformation::objectChanged(ChangingObject *object) {
@@ -178,8 +186,22 @@ void GearPairInformation::updateSecondRequirement(CalculationState state, Direct
             alphaStop = asin(toContactPosition.y);
         }
 
-        real coverage = alphaStart - alphaStop;
+        if(startInDrivingGear == stopInDrivingGear) {
+            real coverage = alphaStart - alphaStop;
+            real angularPitch = startInDrivingGear ?
+                    (m_gearPair->drivingGear()->angularPitch()) : (m_gearPair->drivenGear()->angularPitch());
+            percentagePathOfContactCoversPitch.setValue(absolute(coverage / angularPitch), dir);
 
-        percentagePathOfContactCoversPitch.setValue(absolute(coverage / m_CPmanager->usedAngularPitch()), dir);
+        } else {
+            real totalCoverage = 0.0;
+            if(startInDrivingGear) {
+                totalCoverage += absolute(alphaStart / m_gearPair->drivingGear()->angularPitch());
+                totalCoverage += absolute(alphaStop / m_gearPair->drivenGear()->angularPitch());
+            } else {
+                totalCoverage += absolute(alphaStart / m_gearPair->drivenGear()->angularPitch());
+                totalCoverage += absolute(alphaStop / m_gearPair->drivingGear()->angularPitch());
+            }
+            percentagePathOfContactCoversPitch.setValue(totalCoverage, dir);
+        }
     }
 }

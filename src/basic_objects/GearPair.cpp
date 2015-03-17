@@ -370,6 +370,7 @@ void GearPair::fillDrivenGearWithGearPoints() {
     } else {
         m_drivenGear->setControlPointsForTooth(m_contactPointManager.gearPoints());
     }
+    changed();
 }
 
 void GearPair::updateBottomClearanceTranslation() {

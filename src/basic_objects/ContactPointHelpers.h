@@ -98,6 +98,8 @@ enum class TurningDirection {
     CounterClockwise
 };
 
+TurningDirection turningDirectionOf(real turningVelocity);
+
 template <class T>
 struct Directions {
 

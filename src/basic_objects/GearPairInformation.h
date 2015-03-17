@@ -24,7 +24,8 @@ public:
     bool firstBasicRequirementOfGearToothSystemIsFulfilled(TurningDirection directionOfDrivingGear) const; // Is true, if for the used outline only valid ContactPoints are used (and gearShapeOfDrivingGearIsValid() and !gearOutlineConstructionOfDrivenGearFailed())
     bool secondBasicRequirementOfGearToothSystemIsFulfilled(TurningDirection directionOfDrivingGear) const; // Is true, if the path of contact covers a whole pitch angle
 
-    real ratioOfCPsToWCPs(TurningDirection directionOfDrivingGear); // value between 0.0 and 1.0, if only CPs are used, 1.0 is returned, if none CPs are used, 0.0 is returned
+    real ratioOfCPsToWCPs(TurningDirection directionOfDrivingGear) const; // value between 0.0 and 1.0, if only CPs are used, 1.0 is returned, if none CPs are used, 0.0 is returned
+    real contactRatio(TurningDirection directionOfDrivingGear) const; //German: Profilüberdeckung (epsilon_alpha) value between 0.0 and >1.0
 
     void objectChanged(ChangingObject *object) override; // from ChangingObjectListener
     void informAboutChange(ChangingObjectListener *listener) override; // from ChangingObject
