@@ -4,13 +4,14 @@
 #include "stable.h"
 #include "definitions.h"
 #include "preferences.h"
+#include "basic_objects/ContactPointHelpers.h"
 class Spline;
 enum class ErrorCode;
 struct ContactPoint;
 struct NoneContactPoint;
 struct WrongContactPoint;
-struct CPcutting;
-struct NCPcutting;
+// struct CPcutting;
+// struct NCPcutting;
 class ContactPointIterator;
 
 
@@ -50,6 +51,13 @@ std::ostream& operator <<(std::ostream &os, const CPcutting &cutting);
 std::ostream& operator <<(std::ostream &os, const NCPcutting &cutting);
 
 std::ostream& operator <<(std::ostream &os, const ContactPointIterator &iterator);
+
+template <typename T>
+std::ostream& operator <<(std::ostream &os, const Directions<T> &directions) {
+    os << "Dir: clockwise: " << directions.direction(TurningDirection::Clockwise);
+    os << ", counterclockwise: " << directions.direction(TurningDirection::CounterClockwise) << "\n";
+    return os;
+}
 
 ////////////////////////////////////
 ////////// OTHER ///////////////////

@@ -39,24 +39,14 @@ public:
     const list< list<ContactPoint*>* >& foundPoints() const;
     const list<ContactPointsWithPosition*>& contactPointsWithPositions() const;
     const list<NoneContactPoint*>& noneContactPoints() const;
-    const vector<vec2>& gearPoints() const;
-    const vector<ContactPoint*>& gearContactPoints() const;
-    const vector<WrongContactPoint*>& gearWrongContactPoints() const;
-    vector<ContactPoint*>* gearConsecutivelyContactPointsInClockDirection() const;
-    vector<ContactPoint*>* gearConsecutivelyContactPointsCounterClockDirection() const;
-    vec2 gearConsecutivelyContactPointsInClockStart() const;
-    vec2 gearConsecutivelyContactPointsInClockStop() const;
-    vec2 gearConsecutivelyContactPointsCounterClockStart() const;
-    vec2 gearConsecutivelyContactPointsCounterClockStop() const;
-    const vector<vec2>& translatedGearPoints() const;
-    const vector<ContactPoint*>& translatedStillContactPoints() const;
-    const vector<WrongContactPoint*>& translatedStillWrongContactPoints() const;
-    vector<ContactPoint*>* translatedConsecutivelyContactPointsInClockDirection() const;
-    vector<ContactPoint*>* translatedConsecutivelyContactPointsCounterClockDirection() const;
-    vec2 translatedConsecutivelyContactPointsInClockStart() const;
-    vec2 translatedConsecutivelyContactPointsInClockStop() const;
-    vec2 translatedConsecutivelyContactPointsCounterClockStart() const;
-    vec2 translatedConsecutivelyContactPointsCounterClockStop() const;
+
+    bool gearPointsWereCreated(CalculationState state = CalculationState::Simple) const;
+    const vector<vec2>& gearPoints(CalculationState state = CalculationState::Simple) const;
+    const vector<ContactPoint*>& gearContactPoints(CalculationState state = CalculationState::Simple) const;
+    const vector<WrongContactPoint*>& gearWrongContactPoints(CalculationState state = CalculationState::Simple) const;
+    vector<ContactPoint*>* gearConsecutivelyContactPoints(TurningDirection direction, CalculationState state = CalculationState::Simple) const;
+    vec2 gearConsecutivelyContactPointsStart(TurningDirection direction, CalculationState state = CalculationState::Simple) const;
+    vec2 gearConsecutivelyContactPointsStop(TurningDirection direction, CalculationState state = CalculationState::Simple) const;
 
     vec2 startOfExaminedPitchInDrivenGear() const;
     vec2 endOfExaminedPitchInDrivenGear() const;
@@ -66,6 +56,9 @@ public:
     real lengthOfPitchesInDrivingGear() const;
 
     real usedAngularPitch() const;
+
+    bool validGearShapeFound() const;
+    bool gearOutlineConstructionFailed() const;
 
 private:
 
@@ -83,30 +76,23 @@ private:
 
     // chosen points for gear
     // (set back, when findAllCoveredPoints() called)
+    GearState<bool>                 m_gearPointsCreated; //is true, as soon as processPointsToGear(...) was called after new points were inserted; false otherwise
     vector<vec2>                    m_gearPoints; // all points for shape of tooth of gear, includes cutting points, NoneContactPoints and forbiddenAreaEndPoints
     vector<OriginInformation>       m_gearPointsInformation; // information about the origin of m_gearPoints (cutting, CP or WCP (from NCP))
     vector<int>                     m_gearPointsInformationIndex; // information how m_gearPoints, m_gearCPs and m_gearWCPs are linked: positive number => is CP or WCP and number is index of m_gearCPs/m_gearWCPs, negative number => -1 <-> cutting , -2 <-> forbiddenAreaEndPoint
     vector<ContactPoint*>           m_gearCPs; // really good ContactPoints for the gear (gear is best, if only such points exist)
     vector<WrongContactPoint*>      m_gearWCPs; // is arisen from a NCP in special position, bad point for the gear, as it results in a violation of the basic requirement of a gear tooth system
-    vector<ContactPoint*>          *m_gearBestContactInClockDirection;
-    vector<ContactPoint*>          *m_gearBestContactCounterClockDirection;
-    vec2                            m_gearBestContactInClockStart,
-                                    m_gearBestContactInClockEnd,
-                                    m_gearBestContactCounterClockStart,
-                                    m_gearBestContactCounterClockEnd;
-
+    Directions< vector<ContactPoint*> *> m_gearBestContact;
+    Directions<vec2>                m_gearBestContactStart;
+    Directions<vec2>                m_gearBestContactStop;
 
     // chosen points if already translated
     vector<vec2>                    m_translatedGearPoints; // all gear points after translation
     vector<ContactPoint*>           m_notTranslatedGearCPs; // not translated and therefore still in contact, only references! No Copies!
     vector<WrongContactPoint*>      m_notTranslatedGearWCPs; // not translated and therefore still in contact, only references! No Copies!
-    vector<ContactPoint*>          *m_notTranslatedBestContactInClockDirection; // best sequence of m_notTranslatedGearCPs, only references!
-    vector<ContactPoint*>          *m_notTranslatedBestContactCounterClockDirection; // best sequence of m_notTranslatedGearCPs, only references!
-    vec2                            m_translatedGearBestContactInClockStart,
-                                    m_translatedGearBestContactInClockEnd,
-                                    m_translatedGearBestContactCounterClockStart,
-                                    m_translatedGearBestContactCounterClockEnd;
-
+    Directions< vector<ContactPoint*> *> m_notTranslatedBestContact; // best sequence of m_notTranslatedGearCPs, only references!
+    Directions<vec2>                m_translatedGearBestContactStart;
+    Directions<vec2>                m_translatedGearBestContactStop;
 
     // other (pitch and rotation) attributes:
     real                            m_angularPitchRotation; //is negative, if driven gear tooth is described counter clockwise (in screen representation), and positive otherwise
@@ -116,6 +102,9 @@ private:
     real                            m_examinedPitchLengthInDrivenGear;
     real                            m_examinedPitchLengthInDrivingGear;
 
+    bool                            m_validGearShapeFound;
+    bool                            m_gearOutlineConstructionFailed;
+
     void setAngularPitch(uint numberOfTeeth, bool isDescribedClockwise);
     bool setExaminedPitch();
     void copyPointsInSuitableLists();
@@ -123,11 +112,8 @@ private:
     void copyNoneContactPointsInRelevantPitches();
     void findAllCoveredPoints();
     void findBestPathOfContact(
-        vector<ContactPoint*> &contactPoints,
-        vector<ContactPoint*> *&bestInClockContactPoints,
-        vector<ContactPoint*> *&bestCounterClockContactPoints,
-        vec2 &startInClock, vec2 &endInClock,
-        vec2 &startCounterClock, vec2 &endCounterClock); //TODO!!!
+        vector<ContactPoint*> &contactPoints, Directions< vector<ContactPoint*> *> &bestContactPoints,
+        Directions<vec2> &start, Directions<vec2> &stop);
 
     // WrongContactPoint* wrongContactPointWhenTurnedBack(vec2 point, vec2 normal, real pitchRadiusDrivenGear);
     uint numberOfNoneErrorContactPoints() const;

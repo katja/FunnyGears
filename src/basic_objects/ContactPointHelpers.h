@@ -3,8 +3,6 @@
 #include "definitions.h"
 #include "basic_objects/ContactPoint.h"
 
-#include "ContactPointHelpers.h"
-
 struct ContactPointsWithPosition {
     int position;
     //  ...
@@ -67,6 +65,57 @@ enum class OriginInformation {
     Cut = 0,
     CP = 1,
     SomethingElse = 999
+};
+
+enum class CalculationState {
+    Simple = 0,
+    BottomClearance = 1
+};
+
+template <class T>
+struct GearState {
+    T simple;
+    T bottomClearance;
+
+    GearState() {}
+    GearState(T simple, T bc) : simple(simple), bottomClearance(bc) {}
+
+    T state(CalculationState state) const {
+        return (state == CalculationState::Simple) ? simple : bottomClearance;
+    }
+
+    void setValue(T value, CalculationState state) {
+        if(state == CalculationState::Simple)
+            simple = value;
+        else
+            bottomClearance = value;
+    }
+};
+
+enum class TurningDirection {
+    Clockwise,
+    CounterClockwise
+};
+
+template <class T>
+struct Directions {
+
+    T clockwise;
+    T counterClockwise;
+
+    Directions() {}
+    Directions(T inClock, T counterClock) : clockwise(inClock), counterClockwise(counterClock) {}
+
+    T direction(TurningDirection dir) const {
+        return (dir == TurningDirection::Clockwise) ? clockwise : counterClockwise;
+    }
+
+    void setValue(T value, TurningDirection dir) {
+        if(dir == TurningDirection::Clockwise)
+            clockwise = value;
+        else
+            counterClockwise = value;
+    }
 };
 
 #endif // CONTACT_POINT_HELPERS

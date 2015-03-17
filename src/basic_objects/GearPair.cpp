@@ -16,16 +16,13 @@ GearPair::GearPair(const SplineGear &drivingGear) :
     m_bottomClearance(DefaultBottomClearance),
     m_bottomClearanceStartAngle(DefaultBottomClearanceStartAngle),
     m_maxDriftAngle(DefaultMaxDrift),
-    m_samplingRate(DefaultSamplingRate),
-    m_gearPairInformation(new GearPairInformation(this))
+    m_samplingRate(DefaultSamplingRate)
 {
-
     m_drivenGear->setNumberOfTeeth(m_drivingGear->numberOfTeeth());
     calculateAgainWithAllAttributes();
 }
 
 GearPair::~GearPair() {
-    delete m_gearPairInformation;
 }
 
 void GearPair::calculateAgainWithAllAttributes() {
@@ -44,7 +41,6 @@ void GearPair::calculateAgainWithNewToothProfile() {
 }
 
 void GearPair::calculateAgainWithUnchangedAttributes() {
-    m_gearPairInformation->setBackAttributes();
     m_contactPointManager.clear(); //deletes all ContactPoint* of the list
 
     m_stepSize = (m_completeToothProfile->upperDomainLimit() - m_completeToothProfile->lowerDomainLimit())
@@ -54,10 +50,7 @@ void GearPair::calculateAgainWithUnchangedAttributes() {
     m_contactPointManager.processPointsToGear(m_drivenGear->numberOfTeeth(), !(m_drivingGear->toothDescribedInClockDirection()));
     m_contactPointManager.translateForBottomClearance(m_bottomClearance, m_bottomClearanceStartAngle); //Kopfspiel
     fillDrivenGearWithGearPoints();
-}
-
-GearPairInformation* GearPair::gearPairInformation() {
-    return m_gearPairInformation;
+    changed();
 }
 
 const ContactPointManager& GearPair::contactPointManager() {
@@ -148,6 +141,21 @@ void GearPair::setSamplingRate(uint samplingRate) {
 
 uint GearPair::samplingRate() const {
     return m_samplingRate;
+}
+
+void GearPair::informAboutChange(ChangingObjectListener *listener) {
+    m_listeners.push_back(listener);
+}
+
+void GearPair::noMoreInformAboutChange(ChangingObjectListener *listener) {
+    m_listeners.remove(listener);
+}
+
+void GearPair::changed() {
+    std::cout << "GearPair changed received and m_listeners: " << m_listeners.size() << std::endl;
+    for(ChangingObjectListener *listener : m_listeners) {
+        listener->objectChanged(this);
+    }
 }
 
 void GearPair::insertPossiblePairingPointsInPointManager() {
@@ -338,7 +346,6 @@ bool GearPair::insertThicknessInContactPoint(ContactPoint& contactPoint) const {
         //As Gear is closed Curve without crossings, every normal should find a cutting!
         std::cerr << "CURIOS THINGS HAPPENED! A ray of the gear hadn't found a cutting!" << std::endl;
         //If no cutting is found, curve has not a form of a gear!
-        m_gearPairInformation->notValidGearShapeFound();
         return false;
     } else {
         real epsilon = 1.0; //prevent finding the point itself as intersection point
@@ -361,7 +368,7 @@ void GearPair::fillDrivenGearWithGearPoints() {
     m_drivenGear->setDegree(1);
 
     if(m_useBottomClearance) {
-        m_drivenGear->setControlPointsForTooth(m_contactPointManager.translatedGearPoints());
+        m_drivenGear->setControlPointsForTooth(m_contactPointManager.gearPoints(CalculationState::BottomClearance));
     } else {
         m_drivenGear->setControlPointsForTooth(m_contactPointManager.gearPoints());
     }

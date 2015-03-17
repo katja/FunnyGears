@@ -4,7 +4,10 @@
 #include "definitions.h"
 #include "ChangingObject.h"
 #include "ChangingObjectListener.h"
-class GearPair;
+#include "basic_objects/ContactPointHelpers.h"
+#include "basic_objects/GearPair.h"
+#include "basic_objects/ContactPoint.h"
+#include "basic_objects/ContactPointManager.h"
 
 class GearPairInformation : public ChangingObject, public ChangingObjectListener {
 
@@ -13,24 +16,46 @@ public:
     virtual ~GearPairInformation();
 
     // Savings of special characteristics in gear pair creation
-    void setBackAttributes();
-    void notValidGearShapeFound(); // called when normals of the gear do not have a cut with the outline => outline has intersections ('<=>' is not correct! Outline may have intersections, but anyway every normal has cuttings with the gear shape!)
-    void matingGearOutlineConstructionFailed(); // called when algorithm of the mating gear construction failed. This may happen, if sampling is too vague => increase sampling rate and/or descrease max sampling angle
+    void update();
 
     // Retrieve information
-    real approximatePercentageOfInContactPoints() const;
-    bool validGearShapeOfDrivingGear() const;
+    real ratioOfCPsToWCPs(TurningDirection directionOfDrivingGear); // value between 0.0 and 1.0, if only CPs are used, 1.0 is returned, if none CPs are used, 0.0 is returned
+    bool gearShapeOfDrivingGearIsValid() const; // false => Normals of the gear do not have a cut with the outline => outline has intersections ('<=>' is not correct! Outline may have intersections, but anyway every normal has cuttings with the gear shape!)
+    bool gearOutlineConstructionOfDrivenGearFailed() const; // Algorithm of the mating gear construction failed. This may happen, if sampling is too vague => increase sampling rate and/or descrease max sampling angle
+
+    bool basicRequirementsOfGearToothSystemAreFulfilled(TurningDirection directionOfDrivingGear) const; // Is true, if first and second basic requirement is fulfilled
+    bool firstBasicRequirementOfGearToothSystemIsFulfilled(TurningDirection directionOfDrivingGear) const; // Is true, if for the used outline only valid ContactPoints are used (and gearShapeOfDrivingGearIsValid() and !gearOutlineConstructionOfDrivenGearFailed())
+    bool secondBasicRequirementOfGearToothSystemIsFulfilled(TurningDirection directionOfDrivingGear) const; // Is true, if the path of contact covers a whole pitch angle
 
     void objectChanged(ChangingObject *object) override; // from ChangingObjectListener
     void informAboutChange(ChangingObjectListener *listener) override; // from ChangingObject
     void noMoreInformAboutChange(ChangingObjectListener *listener) override; // from ChangingObject
-    void changed(); //informs all current ChangingObjectListener to this object about changes
 
 private:
     GearPair *m_gearPair;
-    bool m_gearShapeValid;
-    bool m_gearConstructionValid;
+    const ContactPointManager *m_CPmanager;
     list<ChangingObjectListener*> m_listeners;
+
+    bool             m_informationCalculated;
+    Directions<bool> m_firstRequirement;
+    Directions<uint> m_numberOfCPsInContact;
+    Directions<uint> m_numberOfWCPsInContact;
+    Directions<real> m_percentagePathOfContactCoversPitch;
+
+    bool             m_BCinformationCalculated;
+    Directions<bool> m_BCfirstRequirement;
+    Directions<uint> m_BCnumberOfCPsInContact;
+    Directions<uint> m_BCnumberOfWCPsInContact;
+    Directions<real> m_BCpercentagePathOfContactCoversPitch;
+
+    bool             m_updateNextTime;
+
+    void changed(); //informs all current ChangingObjectListener to this object about changes
+    void updateNecessary();
+    void countDirection(vector<ContactPoint*> &contactPoints, Directions<uint> &numberOfCPsInContact) const;
+    void countDirection(vector<WrongContactPoint*> &wrongContactPoints, Directions<uint> &numberOfCPsInContact) const;
+    void updateFirstRequirement(Directions<bool> &firstRequirement, Directions<uint> numberOfWCPsInContact) const;
+    void updateSecondRequirement(CalculationState state, Directions<real> &percentagePathOfContactCoversPitch) const;
 };
 
 #endif //GEAR_PAIR_INFORMATION

@@ -2,7 +2,7 @@
 #define CONTACT_POINT
 
 #include "definitions.h"
-#include "helpers.h"
+// #include "helpers.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 

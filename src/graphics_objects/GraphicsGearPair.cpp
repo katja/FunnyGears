@@ -531,31 +531,18 @@ void GraphicsGearPair::paintPitchPoint(QPainter *painter) const {
 void GraphicsGearPair::paintBestConsecutivePathOfContact(QPainter *painter) const {
     painter->save();
 
-    vector<ContactPoint*> *bestContactSeries;
-    vec2 startSeries;
-    vec2 endSeries;
+    CalculationState s = CalculationState::Simple;
+    if(isBottomClearanceUsed())
+        s = CalculationState::BottomClearance;
 
+    TurningDirection dir = TurningDirection::Clockwise;
     if(m_rotationVelocity < 0.0) {
-        if(isBottomClearanceUsed()) {
-            bestContactSeries = m_gearPair->contactPointManager().translatedConsecutivelyContactPointsCounterClockDirection();
-            startSeries = m_gearPair->contactPointManager().translatedConsecutivelyContactPointsCounterClockStart();
-            endSeries = m_gearPair->contactPointManager().translatedConsecutivelyContactPointsCounterClockStop();
-        } else {
-            bestContactSeries = m_gearPair->contactPointManager().gearConsecutivelyContactPointsCounterClockDirection();
-            startSeries = m_gearPair->contactPointManager().gearConsecutivelyContactPointsCounterClockStart();
-            endSeries = m_gearPair->contactPointManager().gearConsecutivelyContactPointsCounterClockStop();
-        }
-    } else {
-        if(isBottomClearanceUsed()) {
-            bestContactSeries = m_gearPair->contactPointManager().translatedConsecutivelyContactPointsInClockDirection();
-            startSeries = m_gearPair->contactPointManager().translatedConsecutivelyContactPointsInClockStart();
-            endSeries = m_gearPair->contactPointManager().translatedConsecutivelyContactPointsInClockStop();
-        } else {
-            bestContactSeries = m_gearPair->contactPointManager().gearConsecutivelyContactPointsInClockDirection();
-            startSeries = m_gearPair->contactPointManager().gearConsecutivelyContactPointsInClockStart();
-            endSeries = m_gearPair->contactPointManager().gearConsecutivelyContactPointsInClockStop();
-        }
+        dir = TurningDirection::CounterClockwise;
     }
+
+    vector<ContactPoint*> *bestContactSeries = m_gearPair->contactPointManager().gearConsecutivelyContactPoints(dir, s);
+    vec2 startSeries = m_gearPair->contactPointManager().gearConsecutivelyContactPointsStart(dir, s);
+    vec2 endSeries = m_gearPair->contactPointManager().gearConsecutivelyContactPointsStop(dir, s);
 
     if(bestContactSeries != nullptr) {
         QPen pen(Preferences::AttentionColor);
@@ -585,7 +572,7 @@ void GraphicsGearPair::paintBestConsecutivePathOfContact(QPainter *painter) cons
             } else {
                 startInDrivingGear = false;
                 vec2 toContactPosition = normalize(startSeries - vec2(m_gearPair->getDistanceOfCenters(), 0));
-                alphaStart = M_PI - asin(toContactPosition.y);
+                alphaStart = asin(toContactPosition.y);
                 drawLine(painter, vec2(m_gearPair->getDistanceOfCenters(), 0), vec2(m_gearPair->getDistanceOfCenters(), 0) + toContactPosition * m_gearPair->drivenGearPitchRadius());
             }
 
@@ -597,7 +584,7 @@ void GraphicsGearPair::paintBestConsecutivePathOfContact(QPainter *painter) cons
             } else {
                 stopInDrivingGear = false;
                 vec2 toContactPosition = normalize(endSeries - vec2(m_gearPair->getDistanceOfCenters(), 0));
-                alphaStop = M_PI - asin(toContactPosition.y);
+                alphaStop = asin(toContactPosition.y);
                 drawLine(painter, vec2(m_gearPair->getDistanceOfCenters(), 0), vec2(m_gearPair->getDistanceOfCenters(), 0) + toContactPosition * m_gearPair->drivenGearPitchRadius());
             }
 
@@ -605,14 +592,14 @@ void GraphicsGearPair::paintBestConsecutivePathOfContact(QPainter *painter) cons
                 real stop = stopInDrivingGear ? alphaStop : 0;
                 drawArc(painter, alphaStart, stop, m_gearPair->drivingGearPitchRadius());
             } else {
-                real stop = stopInDrivingGear ? M_PI : alphaStop;
-                drawArc(painter, alphaStart, stop, m_gearPair->drivenGearPitchRadius(), vec2(m_gearPair->getDistanceOfCenters(), 0));
+                real stop = stopInDrivingGear ? 0 : alphaStop;
+                drawArc(painter, M_PI - alphaStart, M_PI - stop, m_gearPair->drivenGearPitchRadius(), vec2(m_gearPair->getDistanceOfCenters(), 0));
             }
             if(startInDrivingGear != stopInDrivingGear) {
                 if(stopInDrivingGear)
                     drawArc(painter, 0, alphaStop, m_gearPair->drivingGearPitchRadius());
                 else
-                    drawArc(painter, M_PI, alphaStop, m_gearPair->drivenGearPitchRadius(), vec2(m_gearPair->getDistanceOfCenters(), 0));
+                    drawArc(painter, M_PI, M_PI - alphaStop, m_gearPair->drivenGearPitchRadius(), vec2(m_gearPair->getDistanceOfCenters(), 0));
             }
         }
     }
@@ -656,16 +643,12 @@ void GraphicsGearPair::paintPathOfPossibleContact(QPainter *painter) const {
 }
 
 void GraphicsGearPair::paintPathOfRealContact(QPainter *painter) const {
-    vector<ContactPoint*> selectedContactPoints;
-    vector<WrongContactPoint*> selectedWrongContactPoints;
-    if(m_gearPair->isBottomClearanceUsed()) {
-        selectedContactPoints = m_gearPair->contactPointManager().translatedStillContactPoints();
-        selectedWrongContactPoints = m_gearPair->contactPointManager().translatedStillWrongContactPoints();
-    } else {
-        selectedContactPoints = m_gearPair->contactPointManager().gearContactPoints();
-        selectedWrongContactPoints = m_gearPair->contactPointManager().gearWrongContactPoints();
-    }
+    CalculationState s = CalculationState::Simple;
+    if(m_gearPair->isBottomClearanceUsed())
+        s = CalculationState::BottomClearance;
 
+    vector<ContactPoint*> selectedContactPoints = m_gearPair->contactPointManager().gearContactPoints(s);
+    vector<WrongContactPoint*> selectedWrongContactPoints = m_gearPair->contactPointManager().gearWrongContactPoints(s);
 
     painter->save();
     for(ContactPoint *cp : selectedContactPoints) {

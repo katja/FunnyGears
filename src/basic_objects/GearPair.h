@@ -3,13 +3,14 @@
 
 #include "definitions.h"
 #include "helpers.h"
-#include "basic_objects/GearPairInformation.h"
 #include "basic_objects/ContactPoint.h"
 #include "basic_objects/ContactPointManager.h"
+#include "ChangingObject.h"
+#include "ChangingObjectListener.h"
 class SplineGear;
 
 
-class GearPair {
+class GearPair : public ChangingObject {
 
 public:
     GearPair(const SplineGear &drivingGear); //Driving gear = treibendes Rad
@@ -19,7 +20,6 @@ public:
     void calculateAgainWithNewToothProfile();
     void calculateAgainWithUnchangedAttributes();
 
-    GearPairInformation* gearPairInformation();
     const ContactPointManager& contactPointManager();
 
     SplineGear* drivingGear() const;
@@ -51,19 +51,20 @@ public:
     void setSamplingRate(uint samplingRate);
     uint samplingRate() const;
 
+    void informAboutChange(ChangingObjectListener *listener) override; // from ChangingObject
+    void noMoreInformAboutChange(ChangingObjectListener *listener) override; // from ChangingObject
+
 private:
     static const real DefaultBottomClearance;
     static const real DefaultBottomClearanceStartAngle;
     static const real DefaultMaxDrift;
     static const uint DefaultSamplingRate;
 
-
     SplineGear *m_drivingGear;
     SplineGear *m_drivenGear;
     real m_drivingGearPitchRadius;
     real m_drivenGearPitchRadius;
     real m_distanceOfCenters;
-    // real m_drivenGearIndependentReferenceRadius;
     real m_module;
     Spline *m_completeToothProfile;
 
@@ -75,8 +76,11 @@ private:
     uint m_samplingRate;
     real m_stepSize;
 
-    GearPairInformation     *m_gearPairInformation;
     ContactPointManager m_contactPointManager;
+
+    list<ChangingObjectListener*> m_listeners;
+
+    void changed();
 
     void insertPossiblePairingPointsInPointManager();
     void insertRefinedContactPoints(real stepValue, real nextStepValue, uint partition);
