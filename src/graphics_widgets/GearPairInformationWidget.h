@@ -17,6 +17,7 @@ public:
 
 protected:
     void showEvent(QShowEvent *event) override; // from QWidget
+    void resizeEvent(QResizeEvent *event) override; // from QWidget
 
 private:
     GearPair            *m_gearPair;
@@ -34,13 +35,24 @@ private:
             *m_module,
             *m_drivingGearNumberOfTeeth,
             *m_drivenGearNumberOfTeeth,
+            *m_drivingGearPitchAngle,
+            *m_drivenGearPitchAngle,
             *m_transmissionRatio,
+            *m_basicRequireText,
             *m_basicRequireC,
             *m_basicRequireCC,
+            *m_basicFirstRequireText,
             *m_basicFirstRequireC,
             *m_basicFirstRequireCC,
+            *m_percentageOfCPsInPathText,
+            *m_percentageOfCPsInPathC,
+            *m_percentageOfCPsInPathCC,
+            *m_basicSecondRequireText,
             *m_basicSecondRequireC,
-            *m_basicSecondRequireCC;
+            *m_basicSecondRequireCC,
+            *m_coverageAngleText,
+            *m_coverageAngleC,
+            *m_coverageAngleCC;
 
     void updateAttentionBoxVisibility(bool invalidGearShapeVisible, bool incorrectGearOutlineVisible);
 

@@ -15,10 +15,8 @@ public:
     GearPairInformation(GearPair *gearPair);
     virtual ~GearPairInformation();
 
-    // Savings of special characteristics in gear pair creation
     void update();
 
-    // Retrieve information
     bool gearShapeOfDrivingGearIsValid() const; // false => Normals of the gear do not have a cut with the outline => outline has intersections ('<=>' is not correct! Outline may have intersections, but anyway every normal has cuttings with the gear shape!)
     bool gearOutlineConstructionOfDrivenGearFailed() const; // Algorithm of the mating gear construction failed. This may happen, if sampling is too vague => increase sampling rate and/or descrease max sampling angle
 

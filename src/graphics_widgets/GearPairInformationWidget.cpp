@@ -63,17 +63,24 @@ GearPairInformationWidget::GearPairInformationWidget(GearPair *gearPair) :
     QLabel *drivingGearText = new QLabel(tr("Driving Gear"), this);
     QLabel *drivenGearText = new QLabel(tr("Driven Gear"), this);
 
-    QLabel *numberOfTeethText = new QLabel(tr("Number of Teeth"), this);
+    QLabel *numberOfTeethText = new QLabel(tr("Number of Teeth:"), this);
     numberOfTeethText->setWordWrap(true);
     m_drivingGearNumberOfTeeth = new QLabel(this);
     m_drivenGearNumberOfTeeth = new QLabel(this);
     numberOfTeethText->setBuddy(m_drivingGearNumberOfTeeth);
+
+    QLabel *pitchAngleText = new QLabel(tr("Angular pitch:"), this);
+    pitchAngleText->setWordWrap(true);
+    m_drivingGearPitchAngle = new QLabel(this);
+    m_drivenGearPitchAngle = new QLabel(this);
+    pitchAngleText->setBuddy(m_drivingGearPitchAngle);
 
     QGroupBox *comparingBox = new QGroupBox(tr("Compare driving and driven gear"), this);
     QGridLayout *comparingLayout = new QGridLayout(comparingBox);
     comparingLayout->setContentsMargins(4, 0, 4, 4);
     comparingLayout->setHorizontalSpacing(6);
     comparingLayout->setVerticalSpacing(3);
+    comparingLayout->setColumnStretch(0, 1);
     for(int column : {0, 1, 2}) {
         comparingLayout->setColumnMinimumWidth(column, minimumWidth);
     }
@@ -88,6 +95,11 @@ GearPairInformationWidget::GearPairInformationWidget(GearPair *gearPair) :
     comparingLayout->addWidget(m_drivingGearNumberOfTeeth,  row, 1, 1, 1, Qt::AlignCenter);
     comparingLayout->addWidget(m_drivenGearNumberOfTeeth,   row, 2, 1, 1, Qt::AlignCenter);
     ++row;
+    comparingLayout->setRowMinimumHeight(row, 2 * minimumHeight);
+    comparingLayout->addWidget(pitchAngleText,              row, 0, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
+    comparingLayout->addWidget(m_drivingGearPitchAngle,     row, 1, 1, 1, Qt::AlignCenter);
+    comparingLayout->addWidget(m_drivenGearPitchAngle,      row, 2, 1, 1, Qt::AlignCenter);
+    ++row;
     comparingLayout->setRowStretch(                         row, 1);
 
     //////////////////
@@ -97,26 +109,40 @@ GearPairInformationWidget::GearPairInformationWidget(GearPair *gearPair) :
     QLabel *counterClockwiseText = new QLabel(tr("Driving gear turns\ncounter clockwise"), this);
     counterClockwiseText->setWordWrap(true);
 
-    QLabel *basicRequireText = new QLabel(tr("Basic requirements of gear tooth system are fulfilled?"), this);
-    basicRequireText->setWordWrap(true);
+    m_basicRequireText = new QLabel(tr("<b>Basic requirements</b> of gear tooth system are fulfilled?"), this);
+    m_basicRequireText->setWordWrap(true);
+    m_basicRequireText->setTextFormat(Qt::RichText);
     m_basicRequireC = new QLabel(this);
     m_basicRequireCC = new QLabel(this);
 
-    QLabel *basicFirstRequireText = new QLabel(tr("First condition of basic requirements is fulfilled?"), this);
-    basicFirstRequireText->setWordWrap(true);
+    m_basicFirstRequireText = new QLabel(tr("<b>First</b> condition of basic requirements is fulfilled?"), this);
+    m_basicFirstRequireText->setWordWrap(true);
+    m_basicFirstRequireText->setTextFormat(Qt::RichText);
     m_basicFirstRequireC = new QLabel(this);
     m_basicFirstRequireCC = new QLabel(this);
 
-    QLabel *basicSecondRequireText = new QLabel(tr("Second condition of basic requirements is fulfilled?"), this);
-    basicSecondRequireText->setWordWrap(true);
+    m_percentageOfCPsInPathText = new QLabel(tr("Ratio of 'good' contact points in path of contact:"), this);
+    m_percentageOfCPsInPathText->setWordWrap(true);
+    m_percentageOfCPsInPathC = new QLabel(this);
+    m_percentageOfCPsInPathCC = new QLabel(this);
+
+    m_basicSecondRequireText = new QLabel(tr("<b>Second</b> condition of basic requirements is fulfilled?"), this);
+    m_basicSecondRequireText->setWordWrap(true);
+    m_basicSecondRequireText->setTextFormat(Qt::RichText);
     m_basicSecondRequireC = new QLabel(this);
     m_basicSecondRequireCC = new QLabel(this);
+
+    m_coverageAngleText = new QLabel(tr("Angle, the path of contact covers:"), this);
+    m_coverageAngleText->setWordWrap(true);
+    m_coverageAngleC = new QLabel(this);
+    m_coverageAngleCC = new QLabel(this);
 
     QGroupBox *qualityBox = new QGroupBox(tr("Quality of gearing"), this);
     QGridLayout *qualityLayout = new QGridLayout(qualityBox);
     qualityLayout->setContentsMargins(4, 0, 4, 4);
     qualityLayout->setHorizontalSpacing(6);
     qualityLayout->setVerticalSpacing(3);
+    qualityLayout->setColumnStretch(0, 1);
     for(int column : {0, 1, 2}) {
         qualityLayout->setColumnMinimumWidth(column, minimumWidth);
     }
@@ -127,19 +153,29 @@ GearPairInformationWidget::GearPairInformationWidget(GearPair *gearPair) :
     qualityLayout->addWidget(counterClockwiseText,      row, 2, 1, 1, Qt::AlignTop | Qt::AlignHCenter);
     ++row;
     qualityLayout->setRowMinimumHeight(row, 3 * minimumHeight);
-    qualityLayout->addWidget(basicRequireText,          row, 0, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
+    qualityLayout->addWidget(m_basicRequireText,        row, 0, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
     qualityLayout->addWidget(m_basicRequireC,           row, 1, 1, 1, Qt::AlignCenter);
     qualityLayout->addWidget(m_basicRequireCC,          row, 2, 1, 1, Qt::AlignCenter);
     ++row;
     qualityLayout->setRowMinimumHeight(row, 3 * minimumHeight);
-    qualityLayout->addWidget(basicFirstRequireText,     row, 0, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
+    qualityLayout->addWidget(m_basicFirstRequireText,   row, 0, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
     qualityLayout->addWidget(m_basicFirstRequireC,      row, 1, 1, 1, Qt::AlignCenter);
     qualityLayout->addWidget(m_basicFirstRequireCC,     row, 2, 1, 1, Qt::AlignCenter);
     ++row;
     qualityLayout->setRowMinimumHeight(row, 3 * minimumHeight);
-    qualityLayout->addWidget(basicSecondRequireText,    row, 0, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
+    qualityLayout->addWidget(m_percentageOfCPsInPathText,row, 0, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
+    qualityLayout->addWidget(m_percentageOfCPsInPathC,  row, 1, 1, 1, Qt::AlignCenter);
+    qualityLayout->addWidget(m_percentageOfCPsInPathCC, row, 2, 1, 1, Qt::AlignCenter);
+    ++row;
+    qualityLayout->setRowMinimumHeight(row, 3 * minimumHeight);
+    qualityLayout->addWidget(m_basicSecondRequireText,  row, 0, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
     qualityLayout->addWidget(m_basicSecondRequireC,     row, 1, 1, 1, Qt::AlignCenter);
     qualityLayout->addWidget(m_basicSecondRequireCC,    row, 2, 1, 1, Qt::AlignCenter);
+    ++row;
+    qualityLayout->setRowMinimumHeight(row, 3 * minimumHeight);
+    qualityLayout->addWidget(m_coverageAngleText,       row, 0, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
+    qualityLayout->addWidget(m_coverageAngleC,          row, 1, 1, 1, Qt::AlignCenter);
+    qualityLayout->addWidget(m_coverageAngleCC,         row, 2, 1, 1, Qt::AlignCenter);
     ++row;
     qualityLayout->setRowStretch(                       row, 1);
 
@@ -184,6 +220,9 @@ void GearPairInformationWidget::updateInformation() {
     m_drivingGearNumberOfTeeth->setText("z = " + QString::number(m_gearPair->drivingGear()->numberOfTeeth()));
     m_drivenGearNumberOfTeeth->setText("z = " + QString::number(m_gearPair->numberOfTeethOfDrivenGear()));
 
+    m_drivingGearPitchAngle->setText("tau = " + QString::number(m_gearPair->drivingGear()->angularPitch() * 180.0 / M_PI) + " °");
+    m_drivenGearPitchAngle->setText("tau = " + QString::number(m_gearPair->drivenGear()->angularPitch() * 180.0 / M_PI) + " °");
+
     TurningDirection c = TurningDirection::Clockwise;
     TurningDirection cc = TurningDirection::CounterClockwise;
 
@@ -199,7 +238,14 @@ void GearPairInformationWidget::updateInformation() {
         (m_gearPairInfo->secondBasicRequirementOfGearToothSystemIsFulfilled(c)) ? "Yes" : "No");
     m_basicSecondRequireCC->setText(
         (m_gearPairInfo->secondBasicRequirementOfGearToothSystemIsFulfilled(cc)) ? "Yes" : "No");
-
+    m_percentageOfCPsInPathC->setText(
+        QString::number(m_gearPairInfo->ratioOfCPsToWCPs(c) * 100.0, 'f', 2) + " %");
+    m_percentageOfCPsInPathCC->setText(
+        QString::number(m_gearPairInfo->ratioOfCPsToWCPs(cc) * 100.0, 'f', 2) + " %");
+    m_coverageAngleC->setText(
+        "????");
+    m_coverageAngleCC->setText(
+        "????");
 }
 
 void GearPairInformationWidget::objectChanged(ChangingObject *object) {
@@ -212,6 +258,15 @@ void GearPairInformationWidget::objectChanged(ChangingObject *object) {
 void GearPairInformationWidget::showEvent(QShowEvent *event) {
     updateInformation();
     QWidget::showEvent(event);
+}
+
+void GearPairInformationWidget::resizeEvent(QResizeEvent *event) {
+    int width = event->size().width() - 350;
+    m_basicRequireText->resize(width, m_basicRequireText->height());
+    m_basicFirstRequireText->resize(width, m_basicFirstRequireText->height());
+    m_percentageOfCPsInPathText->resize(width, m_percentageOfCPsInPathText->height());
+    m_basicSecondRequireText->resize(width, m_basicSecondRequireText->height());
+    m_coverageAngleText->resize(width, m_coverageAngleText->height());
 }
 
 void GearPairInformationWidget::updateAttentionBoxVisibility(bool invalidGearShapeVisible, bool incorrectGearOutlineVisible) {
