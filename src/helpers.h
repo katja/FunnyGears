@@ -4,15 +4,10 @@
 #include "stable.h"
 #include "definitions.h"
 #include "preferences.h"
+#include "basic_objects/Spline.h"
+#include "basic_objects/ContactPoint.h"
 #include "basic_objects/ContactPointHelpers.h"
-class Spline;
-enum class ErrorCode;
-struct ContactPoint;
-struct NoneContactPoint;
-struct WrongContactPoint;
-// struct CPcutting;
-// struct NCPcutting;
-class ContactPointIterator;
+#include "basic_objects/ContactPointIterator.h"
 
 
 ////////////////////////////////////

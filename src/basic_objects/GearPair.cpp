@@ -152,7 +152,6 @@ void GearPair::noMoreInformAboutChange(ChangingObjectListener *listener) {
 }
 
 void GearPair::changed() {
-    std::cout << "GearPair changed received and m_listeners: " << m_listeners.size() << std::endl;
     for(ChangingObjectListener *listener : m_listeners) {
         listener->objectChanged(this);
     }
@@ -344,7 +343,6 @@ bool GearPair::insertThicknessInContactPoint(ContactPoint& contactPoint) const {
     m_drivingGear->getIntersectionPointsWithRay(ray, intersectionPoints);
     if(intersectionPoints.empty()) {
         //As Gear is closed Curve without crossings, every normal should find a cutting!
-        std::cerr << "CURIOS THINGS HAPPENED! A ray of the gear hadn't found a cutting!" << std::endl;
         //If no cutting is found, curve has not a form of a gear!
         return false;
     } else {

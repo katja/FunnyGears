@@ -17,21 +17,32 @@ public:
 
 protected:
     void showEvent(QShowEvent *event) override; // from QWidget
-    void enterEvent(QEvent *event) override; // from QWidget
-    void paintEvent(QPaintEvent *event) override; // from QWidget
 
 private:
     GearPair            *m_gearPair;
     GearPairInformation *m_gearPairInfo;
 
-    QLabel  //*m_validGear,
+    QGroupBox *m_attentionBox;
+    QVBoxLayout *m_attentionLayout;
+    QVBoxLayout *m_layout;
+
+    bool m_showInvalidGearShape;
+    bool m_showIncorrectGearOutline;
+
+    QLabel  *m_invalidGearShape,
+            *m_incorrectGearOutline,
             *m_module,
             *m_drivingGearNumberOfTeeth,
             *m_drivenGearNumberOfTeeth,
             *m_transmissionRatio,
-            *m_basicRequire,
-            *m_basicFirstRequire,
-            *m_basicSecondRequire;
+            *m_basicRequireC,
+            *m_basicRequireCC,
+            *m_basicFirstRequireC,
+            *m_basicFirstRequireCC,
+            *m_basicSecondRequireC,
+            *m_basicSecondRequireCC;
+
+    void updateAttentionBoxVisibility(bool invalidGearShapeVisible, bool incorrectGearOutlineVisible);
 
 };
 

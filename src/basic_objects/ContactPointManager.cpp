@@ -222,8 +222,6 @@ void ContactPointManager::translateForBottomClearance(real bottomClearance, real
         m_translatedGearBestContactStop
         );
 
-    std::cout << "findBestPathOfContact in translateForBottomClearance has: start = " << m_gearBestContactStart << ", stop = " << m_gearBestContactStop << std::endl;
-
     m_gearPointsCreated.bottomClearance = true;
 }
 
@@ -462,15 +460,15 @@ void ContactPointManager::findAllCoveredPoints() {
 
 
     // Do while loop preparations, the conditions for the termination
-    bool notYetAtOriginCondition;
-    bool notAtListEndCondition;
-    bool securityBreakCondition;
+    bool reachedOriginAgainCondition;
+    bool reachedAListEndCondition;
+    bool reachedSecurityBreakCondition;
     uint securityBreak = 0;
     uint securityBreakTreshold = 0;
     if(!m_noneContactPointList.empty())
         securityBreakTreshold += m_noneContactPointList.size() * m_noneContactPointList.front()->points.size(); //every NoneContactPoint has same amound of points
     for(ContactPointsWithPosition *contactPointsWithPosition : m_contactPointsWithPositionList) {
-        securityBreakTreshold += 2 * contactPointsWithPosition->points.size();
+        securityBreakTreshold += contactPointsWithPosition->points.size();
     }
     Ray rayOfPitchEnd(vec2(0, 0), glm::rotate(m_examinedPitchStartDirection, m_angularPitchRotation));
 
@@ -538,11 +536,11 @@ void ContactPointManager::findAllCoveredPoints() {
         }
 
         ++securityBreak;
-        securityBreakCondition = (securityBreak <= securityBreakTreshold);
-        notAtListEndCondition = !it.reachedEnd();
+        reachedSecurityBreakCondition = (securityBreak > securityBreakTreshold);
+        reachedAListEndCondition = it.reachedEnd();
 
         real epsilon = glm::length(m_gearPoints[0] - glm::rotate(it.previousPoint(), -m_angularPitchRotation));
-        if(notAtListEndCondition) {
+        if(!reachedAListEndCondition) {
             vec2 intersection;
             if(rayOfPitchEnd.intersect(it.previousPoint(), it.currentPoint(), intersection, 0.0001)) {
                 real intersectionEpsilon = glm::length(m_gearPoints[0] - glm::rotate(intersection, -m_angularPitchRotation));
@@ -550,9 +548,9 @@ void ContactPointManager::findAllCoveredPoints() {
                     epsilon = intersectionEpsilon;
             }
         }
-        notYetAtOriginCondition = (epsilon > 1.5);
+        reachedOriginAgainCondition = (epsilon < 1.5);
 
-    } while(securityBreakCondition && notYetAtOriginCondition && notAtListEndCondition);
+    } while(!reachedSecurityBreakCondition && !reachedOriginAgainCondition && !reachedAListEndCondition);
 
     assert(m_gearPoints.size() == m_gearPointsInformation.size());
     assert(m_gearPoints.size() == m_gearPointsInformationIndex.size());
@@ -564,20 +562,12 @@ void ContactPointManager::findAllCoveredPoints() {
         m_gearBestContactStop
     );
 
-    std::cout << "findBestPathOfContact in findAllCoveredPoints has: start = " << m_gearBestContactStart << ", stop = " << m_gearBestContactStop << std::endl;
-
-    if(securityBreakCondition || notAtListEndCondition)
+    if(!reachedOriginAgainCondition)
         m_gearOutlineConstructionFailed = true;
     else
         m_gearOutlineConstructionFailed = false;
 
     m_gearPointsCreated.simple = true;
-
-    std::cout << "\n\nAfter while loop and securityBreakCondition:  " << securityBreakCondition << "   securityBreak = " << securityBreak << " of treshold: " << securityBreakTreshold << std::endl;
-    std::cout << "                 and notYetAtOriginCondition: " << notYetAtOriginCondition << std::endl;
-    std::cout << "                 and notAtListEndCondition:   " << notAtListEndCondition << std::endl;
-    std::cout << "        distance from first to last point if rotated: " << glm::length(m_gearPoints[0] - glm::rotate(m_gearPoints[m_gearPoints.size() - 1], -m_angularPitchRotation));
-    std::cout << "GearPoints have a size of: " << m_gearPoints.size() << std::endl;
 }
 
 void ContactPointManager::findBestPathOfContact(

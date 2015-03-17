@@ -58,15 +58,6 @@ void GearPairInformation::update() {
 // Verbesserung: Schnittpunkte entfernen!
 // }
 
-real GearPairInformation::ratioOfCPsToWCPs(TurningDirection dir) {
-    if(m_gearPair->isBottomClearanceUsed())
-        return (real)m_BCnumberOfCPsInContact.direction(dir) /
-            (real)(m_BCnumberOfCPsInContact.direction(dir) + m_BCnumberOfWCPsInContact.direction(dir));
-    else
-        return (real)m_numberOfCPsInContact.direction(dir) /
-            (real)(m_numberOfCPsInContact.direction(dir) + m_numberOfWCPsInContact.direction(dir));
-}
-
 bool GearPairInformation::gearShapeOfDrivingGearIsValid() const {
     return m_CPmanager->validGearShapeFound();
 }
@@ -94,11 +85,18 @@ bool GearPairInformation::secondBasicRequirementOfGearToothSystemIsFulfilled(Tur
         return m_percentagePathOfContactCoversPitch.direction(directionOfDrivingGear) >= 1.0;
 }
 
+real GearPairInformation::ratioOfCPsToWCPs(TurningDirection dir) {
+    if(m_gearPair->isBottomClearanceUsed())
+        return (real)m_BCnumberOfCPsInContact.direction(dir) /
+            (real)(m_BCnumberOfCPsInContact.direction(dir) + m_BCnumberOfWCPsInContact.direction(dir));
+    else
+        return (real)m_numberOfCPsInContact.direction(dir) /
+            (real)(m_numberOfCPsInContact.direction(dir) + m_numberOfWCPsInContact.direction(dir));
+}
+
 void GearPairInformation::objectChanged(ChangingObject *object) {
-    std::cout << "GearPairInformation:   Received an objectChanged!!!!!!!!!!!" << std::endl;
     if(object == m_gearPair) {
         updateNecessary();
-        std::cout << "                     further processed the objectChanged!!!!!!!!!!!" << std::endl;
     }
 }
 
@@ -106,6 +104,7 @@ void GearPairInformation::updateNecessary() {
     m_updateNextTime = true;
     m_informationCalculated = false;
     m_BCinformationCalculated = false;
+    changed();
 }
 
 void GearPairInformation::informAboutChange(ChangingObjectListener *listener) {
@@ -153,9 +152,7 @@ void GearPairInformation::updateFirstRequirement(Directions<bool> &firstRequirem
 }
 
 void GearPairInformation::updateSecondRequirement(CalculationState state, Directions<real> &percentagePathOfContactCoversPitch) const {
-    std::cout << "updateSecondRequirement started" << std::endl;
     for(TurningDirection dir : {TurningDirection::Clockwise, TurningDirection::CounterClockwise}) {
-        std::cout << "updateSecondRequirement - in direction for-loop" << std::endl;
 
         vec2 startSeries = m_CPmanager->gearConsecutivelyContactPointsStart(dir, state);
         vec2 endSeries = m_CPmanager->gearConsecutivelyContactPointsStop(dir, state);
@@ -183,7 +180,6 @@ void GearPairInformation::updateSecondRequirement(CalculationState state, Direct
 
         real coverage = alphaStart - alphaStop;
 
-        std::cout << "updateSecondRequirement was called and alphaStart = " << alphaStart << ", And alphaStop = " << alphaStop << std::endl;
         percentagePathOfContactCoversPitch.setValue(absolute(coverage / m_CPmanager->usedAngularPitch()), dir);
     }
 }

@@ -3,7 +3,6 @@
 #include "basic_objects/ContactPointIterator.h"
 #include "basic_objects/ContactPointHelpers.h"
 #include "definitions.h"
-#include "helpers.h"
 
 
 class ContactPointIterator {
