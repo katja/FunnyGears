@@ -19,9 +19,6 @@ GraphicsSplineGear::GraphicsSplineGear(SplineGear *gear) : GraphicsSpline(gear),
     m_rotationVelocity(0.0),
     m_rotationDegree(0.0)
 {
-
-    std::cout << "GraphicsSplineGear is created" << std::endl;
-
     int partColor = qrand() % 50 + 50;
     m_color = QColor(partColor / 2, partColor, (2 * partColor) % 150);
 
@@ -33,7 +30,6 @@ GraphicsSplineGear::GraphicsSplineGear(SplineGear *gear) : GraphicsSpline(gear),
 }
 
 GraphicsSplineGear::~GraphicsSplineGear() {
-    std::cout << "GraphicsSplineGear is deleted" << std::endl;
 }
 
 int GraphicsSplineGear::type() const {

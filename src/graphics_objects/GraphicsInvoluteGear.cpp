@@ -11,11 +11,9 @@ bool GraphicsInvoluteGear::isGraphicsInvoluteGearItem(QGraphicsItem *item) {
 }
 
 GraphicsInvoluteGear::GraphicsInvoluteGear() : GraphicsScheduleItem() {
-    std::cout << "GraphicsInvoluteGear is created" << std::endl;
 }
 
 GraphicsInvoluteGear::~GraphicsInvoluteGear() {
-    std::cout << "GraphicsInvoluteGear is deleted" << std::endl;
 }
 
 QRectF GraphicsInvoluteGear::boundingRect() const {
@@ -34,7 +32,6 @@ int GraphicsInvoluteGear::type() const {
 }
 
 void GraphicsInvoluteGear::receivedClickOn(QPointF scenePos) {
-    std::cout << "GraphicsInvoluteGear received a click at " << scenePos << std::endl;
 }
 
 QString GraphicsInvoluteGear::defaultName() const {

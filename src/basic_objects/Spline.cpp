@@ -4,7 +4,6 @@
 #include <glm/glm.hpp>
 
 Spline::Spline(uint degree) : m_degree(degree), m_isClosed(false), m_tornToEdges(false) {
-    // std::cout << "Spline is created with default constructor " << std::endl;
     if(m_degree <= 0)
         throw;
     for(uint i = 1; i < m_degree; ++i)
@@ -12,7 +11,6 @@ Spline::Spline(uint degree) : m_degree(degree), m_isClosed(false), m_tornToEdges
 }
 
 Spline::Spline(const Spline &other) {
-    // std::cout << "Spline is created with copy constructor" << std::endl;
     m_knots = vector<real>(other.m_knots);
     m_controlPoints = vector<vec2>(other.m_controlPoints);
     m_degree = other.m_degree;
@@ -21,7 +19,6 @@ Spline::Spline(const Spline &other) {
 }
 
 Spline::Spline(vector<vec2> controlPoints, vector<real> knots) {
-    // std::cout << "Spline is created with given points and knots" << std::endl;
     // m_degree is set on relation between number of knots and number of control points.
     // but if following is not given, m_degree would have to be null or negative! => not possible
     if(knots.size() < controlPoints.size())
@@ -34,12 +31,10 @@ Spline::Spline(vector<vec2> controlPoints, vector<real> knots) {
 }
 
 Spline::Spline(vector<vec2> interpolationPoints) {
-    // std::cout << "Spline should be created here with given points to interpolate, but this is not yet implemented!" << std::endl;
     //TODO!!!
 }
 
 Spline::~Spline() {
-    // std::cout << "Spline is deleted" << std::endl;
 }
 
 Spline& Spline::operator=(const Spline &other) {

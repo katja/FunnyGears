@@ -2,11 +2,9 @@
 #include "main_gui_objects/Model.h"
 
 YesNoDelegate::YesNoDelegate(QObject *parent) : QStyledItemDelegate(parent) {
-    std::cout << "YesNoDelegate is created" << std::endl;
 }
 
 YesNoDelegate::~YesNoDelegate() {
-    std::cout << "YesNoDelegate is deleted" << std::endl;
 }
 
 bool YesNoDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index) {

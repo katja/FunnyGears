@@ -23,7 +23,6 @@ GraphicsSpline::GraphicsSpline(Spline *spline) :
     m_isTangentDrawn(false),
     m_tangentValue(-1.0)
 {
-    std::cout << "GraphicsSpline is created" << std::endl;
 
     m_noEditingState = new NoEditingSplineState(this);
     m_pointerState = new PointerSplineState(this);
@@ -43,7 +42,6 @@ GraphicsSpline::GraphicsSpline(Spline *spline) :
 }
 
 GraphicsSpline::~GraphicsSpline() {
-    std::cout << "GraphicsSpline is deleted" << std::endl;
     delete m_spline;
     delete m_noEditingState;
     delete m_pointerState;

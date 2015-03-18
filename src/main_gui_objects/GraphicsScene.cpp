@@ -16,8 +16,6 @@ GraphicsScene::GraphicsScene(qreal x, qreal y, qreal width, qreal height, QObjec
 }
 
 void GraphicsScene::initialize() {
-    std::cout << "GraphicsScene is created" << std::endl;
-
     m_selectionModel = 0;
     m_selectionChangeInProgress = false;
     m_editingState = Editing::NoEditing;
@@ -27,7 +25,6 @@ void GraphicsScene::initialize() {
 }
 
 GraphicsScene::~GraphicsScene() {
-    std::cout << "GraphicsScene is deleted" << std::endl;
 }
 
 void GraphicsScene::setSelectionModel(SelectionModel *selectionModel) {

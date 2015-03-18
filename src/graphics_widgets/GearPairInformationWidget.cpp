@@ -12,7 +12,6 @@ GearPairInformationWidget::GearPairInformationWidget(GearPair *gearPair) :
     m_showIncorrectGearOutline(false)
 
 {
-    std::cout << "GearPairInformationWidget is created" << std::endl;
     setWindowTitle(tr("Gear Pair Information"));
 
     int minimumWidth = 160;
@@ -194,7 +193,6 @@ GearPairInformationWidget::GearPairInformationWidget(GearPair *gearPair) :
 }
 
 GearPairInformationWidget::~GearPairInformationWidget() {
-    std::cout << "GearPairInformationWidget is deleted" << std::endl;
     delete m_gearPairInfo;
 }
 

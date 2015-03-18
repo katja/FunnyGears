@@ -10,7 +10,6 @@ SplineGear::SplineGear(const Spline &toothOfGear) : m_toothProfile(new Spline(to
     m_minimumDistanceToCenter(-1.0),
     m_maximumDistanceToCenter(-1.0)
 {
-    std::cout << "SplineGear is created" << std::endl;
     update();
 }
 
@@ -21,12 +20,10 @@ SplineGear::SplineGear(const SplineGear &other) : m_toothProfile(new Spline(*oth
     m_minimumDistanceToCenter(other.m_minimumDistanceToCenter),
     m_maximumDistanceToCenter(other.m_maximumDistanceToCenter)
 {
-    std::cout << "SplineGear is created with copy constructor" << std::endl;
     update();
 }
 
 SplineGear::~SplineGear() {
-    std::cout << "SplineGear is deleted" << std::endl;
     delete m_toothProfile;
 }
 

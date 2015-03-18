@@ -57,7 +57,6 @@ GraphicsGearPair::GraphicsGearPair(GearPair *gearPair) :
     m_rotationDegreeDrivenGear(0.0),
     m_finePencilUsed(false)
 {
-    std::cout << "GraphicsGearPair is created" << std::endl;
     m_drivingGear = new GraphicsMatingSplineGear(m_gearPair->drivingGear(), this); // driving gear inserted as child
     m_drivenGear = new GraphicsMatingSplineGear(m_gearPair->drivenGear(), this); // driven gear inserted as child
 
@@ -80,7 +79,6 @@ GraphicsGearPair::~GraphicsGearPair() {
     delete m_gearPairInformationWidget;
     delete m_drivingGear;
     delete m_drivenGear;
-    std::cout << "GraphicsGearPair is deleted" << std::endl;
 }
 
 int GraphicsGearPair::type() const {

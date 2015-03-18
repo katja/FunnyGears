@@ -3,7 +3,6 @@
 CursorRental* CursorRental::m_uniqueCursorRental = 0;
 
 CursorRental::CursorRental() {
-    std::cout << "CursorRental created" << std::endl;
     m_pointerCursor = 0;
     m_penCursor = 0;
     m_eraserCursor = 0;
@@ -12,7 +11,6 @@ CursorRental::CursorRental() {
 }
 
 CursorRental::~CursorRental() {
-    std::cout << "CursorRental deleted" << std::endl;
     delete m_pointerCursor;
     delete m_penCursor;
     delete m_eraserCursor;

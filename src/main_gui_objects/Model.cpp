@@ -2,8 +2,6 @@
 #include "main_gui_objects/Model.h"
 
 Model::Model(QGraphicsScene *scene, QObject *parent) : QAbstractItemModel(parent), m_scene(scene) {
-    std::cout << "Model is created" << std::endl;
-
     m_rootItem = new GraphicsRootItem();
     m_scene->addItem(m_rootItem);
 
@@ -23,7 +21,6 @@ Model::Model(QGraphicsScene *scene, QObject *parent) : QAbstractItemModel(parent
 }
 
 Model::~Model() {
-    std::cout << "Model is deleted" << std::endl;
 }
 
 QModelIndex Model::index(int row, int column, const QModelIndex &parentIndex) const {

@@ -3,13 +3,11 @@
 #include "main_gui_objects/Model.h"
 
 SelectionModel::SelectionModel(Model *model) : QItemSelectionModel(model), m_model(model) {
-    std::cout << "SelectionModel is created" << std::endl;
     connect(this, SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
         this, SLOT(updateSelection(const QItemSelection&, const QItemSelection&)));
 }
 
 SelectionModel::~SelectionModel() {
-    std::cout << "SelectionModel is deleted" << std::endl;
 }
 
 void SelectionModel::sceneSelectionChanged(GraphicsScene *scene) {

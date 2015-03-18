@@ -4,8 +4,6 @@
 #include "tool_bars/ToolBarManager.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), projectChanged(true) {
-    std::cout << "MainWindow is created" << std::endl;
-
     setGeometry(50, 20, 1000, 800);
     setWindowTitle("Funny Gears");
     setWindowIcon(QIcon("Gear.icns"));
@@ -18,7 +16,6 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(par
 }
 
 MainWindow::~MainWindow() {
-    std::cout << "MainWindow is deleted" << std::endl;
 }
 
 QIcon MainWindow::icon() const {

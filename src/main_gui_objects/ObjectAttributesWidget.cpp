@@ -5,7 +5,6 @@
 
 ObjectAttributesWidget::ObjectAttributesWidget(SelectionModel *selectionModel, QWidget *parent)
 : QDockWidget("Object Attributes", parent, Qt::Widget), m_selectionModel(selectionModel) {
-    std::cout << "ObjectAttributesWidget is created" << std::endl;
 
     GraphicsItemAttributesWidget *widget;
 
@@ -29,7 +28,6 @@ ObjectAttributesWidget::ObjectAttributesWidget(SelectionModel *selectionModel, Q
 }
 
 ObjectAttributesWidget::~ObjectAttributesWidget() {
-    std::cout << "ObjectAttributesWidget is deleted" << std::endl;
 }
 
 void ObjectAttributesWidget::selectItem(GraphicsItem *item) {

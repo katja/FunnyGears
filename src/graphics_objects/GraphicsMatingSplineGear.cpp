@@ -5,14 +5,11 @@ GraphicsMatingSplineGear::GraphicsMatingSplineGear(SplineGear *gear, GraphicsGea
     GraphicsSplineGear(gear),
     m_graphicsGearPair(parent)
 {
-    std::cout << "GraphicsMatingSplineGear is created" << std::endl;
     setParentItem(m_graphicsGearPair);
-
     disableUserInteraction();
 }
 
 GraphicsMatingSplineGear::~GraphicsMatingSplineGear() {
-    std::cout << "GraphicsMatingSplineGear is deleted" << std::endl;
 }
 
 void GraphicsMatingSplineGear::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {

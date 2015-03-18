@@ -15,9 +15,6 @@ public:
     GraphicsView(QGraphicsScene *scene, QWidget *parent = 0);
     ~GraphicsView();
 
-    // This method is only for test reasons
-    // Turn it on to measure rendering speed
-    // void paintEvent(QPaintEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;

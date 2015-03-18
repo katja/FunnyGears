@@ -11,7 +11,6 @@ GraphicsView::GraphicsView(QGraphicsScene *scene, QWidget *parent) : QGraphicsVi
 }
 
 void GraphicsView::initialize() {
-    std::cout << "GraphicsView is created" << std::endl;
 
     setCacheMode(QGraphicsView::CacheBackground);
 
@@ -29,16 +28,7 @@ void GraphicsView::initialize() {
 }
 
 GraphicsView::~GraphicsView() {
-    std::cout << "GraphicsView is deleted" << std::endl;
 }
-
-// void GraphicsView::paintEvent(QPaintEvent * event) {
-//     std::cout << "Time Measurement - Drawing all items: ";
-//     QTime *t = new QTime();
-//     t->start();
-//     QGraphicsView::paintEvent(event);
-//     std::cout << "Time painting needed: " << t->elapsed() << std::endl;
-// }
 
 void GraphicsView::wheelEvent(QWheelEvent *event) {
     int spinRange = event->angleDelta().y();

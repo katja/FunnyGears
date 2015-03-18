@@ -9,7 +9,6 @@
 
 ObjectScheduleViewWidget::ObjectScheduleViewWidget(Model *model, QWidget *parent)
 : QDockWidget("Object Schedule", parent, Qt::Widget), m_model(model) {
-    std::cout << "ObjectScheduleViewWidget is created" << std::endl;
 
     m_treeView = new ModelTreeView(m_model);
 
@@ -49,7 +48,6 @@ ObjectScheduleViewWidget::ObjectScheduleViewWidget(Model *model, QWidget *parent
 }
 
 ObjectScheduleViewWidget::~ObjectScheduleViewWidget() {
-    std::cout << "ObjectScheduleViewWidget is deleted" << std::endl;
 }
 
 SelectionModel* ObjectScheduleViewWidget::setSelectionModel(SelectionModel *model) {
