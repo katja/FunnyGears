@@ -1107,15 +1107,13 @@ bool ContactPointManager::intersectLines(vec2 &intersection, vec2 lineAStart, ve
     return false;
 }
 
-// TODO: is the epsilon value e a suitable one? Maybe it catches too much or too less?
 bool ContactPointManager::isPointInTriangle(vec2 point, vec2 a, vec2 b, vec2 c) const {
-    real e = 0.00f;
     vec2 start = a - b;
     vec2 stop = c - b;
     m2x2 betweenStartStop = glm::inverse(m2x2(start, stop));
     vec2 baryz = betweenStartStop * (point - b);
     bool isInTriangle;
-    if(glm::all(glm::greaterThan(baryz, vec2(e,e))) && glm::all(glm::lessThan(baryz, vec2(1.0f - e, 1.0f - e))) && (baryz.x + baryz.y < 1.0f - 2 * e)) {
+    if(glm::all(glm::greaterThan(baryz, vec2(0, 0))) && glm::all(glm::lessThan(baryz, vec2(1.0, 1.0))) && (baryz.x + baryz.y < 1.0)) {
         isInTriangle = true;
     } else {
         isInTriangle = false;

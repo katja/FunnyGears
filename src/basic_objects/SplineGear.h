@@ -251,8 +251,10 @@ public:
      */
     void knotRefinement(real maxDist);
 
-    /** @brief
-     *  TODO
+    /** @brief Sets the first and last control points of the #m_toothProfile to the start
+     *  or respectively end of the #m_toothProfile
+     *
+     *  @see #Spline::cutOffEdges()
      */
     void cutOffEdges();
 

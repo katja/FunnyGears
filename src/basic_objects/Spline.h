@@ -192,7 +192,7 @@ public:
      */
     virtual void knotRefinement(real maxDist);
 
-    /** @brief Sets the first and last control points to the start of the curve
+    /** @brief Sets the first and last control points to the start or respectively end of the curve
      *
      *  This is done by increasing the multiplicity at the appropriate places.
      *  Afterwards the Spline is torn to the edges.

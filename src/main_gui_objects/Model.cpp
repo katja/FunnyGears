@@ -77,7 +77,7 @@ QVariant Model::data(const QModelIndex &index, int role) const {
     }
     GraphicsScheduleItem *item = getInternItemFromIndex(index);
     if(item) {
-        if(role == Qt::DisplayRole || role == Qt::ToolTipRole) { //TODO: do something more suitable for ToolTipRole
+        if(role == Qt::DisplayRole || role == Qt::ToolTipRole) {
             switch(index.column()) {
                 case NAME:
                     return item->name();

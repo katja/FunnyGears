@@ -22,17 +22,17 @@ void Ray::translateInDirection(real delta) {
     m_origin += (delta * m_direction);
 }
 
-//TODO: return a negative value instead of the max???
 real Ray::distanceToPoint(vec2 &point) const {
     //Search the ray ray(t) = origin + t * direction for the shortest distance to point point
-    //Shortest distance exists, where (point - ray(t1)) is vertical to direction
-    // => ((origin + t1 * direction) - point) * direction = 0  as direction is normalized:
+    //Shortest distance exists, where (point - ray(t)) is vertical to direction
+    // => ((origin + t * direction) - point) * direction = 0
+    // as direction is normalized:
     // <=> t = (point - origin) * direction
-    real t1 = glm::dot((point - m_origin), m_direction);
-    if(t1 >= 0.0)
-        return glm::length((m_origin + t1 * m_direction) - point);
+    real t = glm::dot((point - m_origin), m_direction);
+    if(t >= 0.0)
+        return glm::length((m_origin + t * m_direction) - point);
     else
-        return  std::numeric_limits<real>::max();
+        return t;
 }
 
 bool Ray::intersect(vec2 startLine, vec2 endLine, vec2 &intersectionPoint, real epsilon) const {

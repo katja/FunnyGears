@@ -483,7 +483,7 @@ void GraphicsGearPair::paintSampledContactPointsDrivenGear(QPainter *painter) co
     list<ContactPointsWithPosition*> contactPointsWithPositions = m_gearPair->contactPointManager().contactPointsWithPositions();
 
     painter->save();
-    real lightUp = 1.0 / contactPointsWithPositions.size(); //TODO: find better possibility?!
+    real lightUp = 1.0 / contactPointsWithPositions.size();
 
     for(ContactPointsWithPosition *list : contactPointsWithPositions) {
         ContactPoint *lastCP = list->points.front();

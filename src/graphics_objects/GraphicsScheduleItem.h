@@ -80,8 +80,6 @@ private:
     void handleNewParent(QGraphicsItem *newParent);
     void handleChildAdded(QGraphicsItem *newChild);
     void handleChildRemoved(QGraphicsItem *oldChild);
-    void handleSceneChange(QGraphicsScene *newScene);
-
 };
 
 #endif // GRAPHICS_SCHEDULE_ITEM

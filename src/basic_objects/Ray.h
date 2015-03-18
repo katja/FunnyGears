@@ -33,6 +33,9 @@ public:
 
     /**
      * @brief Calculates shortest distance between point and ray.
+     * If given @p point would have the shortest distance to the ray, when ray
+     * would go in reverse direction, a negative value is returned.
+     * @return shortest distance to point or value <0 if 'behind' the ray
      */
     real distanceToPoint(vec2 &point) const;
 

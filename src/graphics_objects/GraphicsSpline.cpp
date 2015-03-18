@@ -34,7 +34,7 @@ GraphicsSpline::GraphicsSpline(Spline *spline) :
     int partColor = qrand() % 512 + 100;
     m_color = QColor(partColor / 5, partColor * 2 / 5, partColor % 256);
 
-    setToolTip("Description of what will happen or what to do"); //TODO: Add description
+    setToolTip("Spline Curve in B-Spline Representation");
     setFlags( QGraphicsItem::ItemIsMovable
             | QGraphicsItem::ItemIsSelectable
             | QGraphicsItem::ItemSendsGeometryChanges
@@ -323,20 +323,6 @@ void GraphicsSpline::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
         painter->setPen(pen);
         painter->drawPath(tangentPath());
     }
-
-    // std::cout << "\n\nURSPUNGSSPLINE:\n" << (*m_spline) << std::endl;
-    // //TODO: delete following
-    // if(m_spline->isValid()) {
-    //     vector<vec2> intersectionPoints;
-    //     vec2 start = m_spline->firstPoint();
-    //     Ray ray(start, -(m_spline->normal(m_spline->lowerDomainLimit())));
-    //     m_spline->getIntersectionPointsWithRay(ray, intersectionPoints);
-
-    //     for(int i = 0; i < intersectionPoints.size(); ++i) {
-    //         painter->drawLine(QPointF(start.x, start.y), QPointF(intersectionPoints[i].x, intersectionPoints[i].y));
-    //         painter->drawEllipse(QPointF(intersectionPoints[i].x, intersectionPoints[i].y), 8, 8);
-    //     }
-    // }
 }
 
 QColor GraphicsSpline::color() const {

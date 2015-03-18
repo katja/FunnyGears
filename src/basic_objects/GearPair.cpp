@@ -273,7 +273,7 @@ ContactPoint* GearPair::contactPointOf(const vec2 &point, const vec2 &normal, re
         if(directionToCutOnPitchRadius.y > 0)
             angleA = -(M_PI - asin(directionToCutOnPitchRadius.y));
         else
-            angleA = +(M_PI + asin(directionToCutOnPitchRadius.y)); //TODO: old code differs here! But I think, this is right solution?
+            angleA = +(M_PI + asin(directionToCutOnPitchRadius.y));
     }
 
     real angleB = angleA * m_drivingGearPitchRadius / m_drivenGearPitchRadius;

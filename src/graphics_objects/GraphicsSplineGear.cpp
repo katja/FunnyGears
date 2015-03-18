@@ -25,7 +25,7 @@ GraphicsSplineGear::GraphicsSplineGear(SplineGear *gear) : GraphicsSpline(gear),
     int partColor = qrand() % 50 + 50;
     m_color = QColor(partColor / 2, partColor, (2 * partColor) % 150);
 
-    setToolTip("Description of what will happen or what to do"); //TODO: Add description
+    setToolTip("Gear");
     setFlags( QGraphicsItem::ItemIsMovable
             | QGraphicsItem::ItemIsSelectable
             | QGraphicsItem::ItemSendsGeometryChanges

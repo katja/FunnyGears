@@ -49,10 +49,9 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
     /** Returns the number of columns for the children of the given parent.
-      * In this implementation the number of columns is independent of the given parent
-      * and always 2. TODO: still correct?
-      */
-
+     * In this implementation the number of columns is independent of the given parent
+     * and always 2.
+     */
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
 
@@ -100,8 +99,6 @@ public:
 signals:
     void layoutChanged(const QList<QPersistentModelIndex> &parents = QList<QPersistentModelIndex>(), QAbstractItemModel::LayoutChangeHint hint = QAbstractItemModel::NoLayoutChangeHint);
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>());
-    // void graphicsItemAdded(QGraphicsItem *graphicsItem);
-    // void graphicsItemRemoved(QGraphicsItem *graphicsItem);
 
 private:
     QGraphicsScene *m_scene;
