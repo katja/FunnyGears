@@ -265,29 +265,30 @@ void SplineGear::updateKnotsAndControlPoints() {
     // control problematic multiple similar knots:
     //... at the beginning:
     uint k_1 = 0;
-    uint l_1 = k_1 + 1;
+    uint k_2 = k_1 + 1;
     //... and at the end:
+    uint l_1 = ppt - 1;
     uint l_2 = ppt; // = givenKnots.size() - 1 - m_degree
-    uint k_2 = ppt - 1;
 
-
-    if(givenKnots[k_1] == givenKnots[l_1] && givenKnots[k_2] == givenKnots[l_2]) {
+    if(givenKnots[k_1] == givenKnots[k_2] && givenKnots[l_1] == givenKnots[l_2]) {
         // problematic are only splines with above condition
-        uint i = 0;
+        uint i = 2; //we already have two equal knots: at k_1 and k_2
         bool foundSame = true;
-        while(i < m_degree - 2 && foundSame) { //we already have two equal knots: at k_1 and l_1
-            i += 1;
-            if(givenKnots[l_1] != givenKnots[l_1 + i])
+        while(i < m_degree && foundSame) {
+            if(givenKnots[k_1] != givenKnots[k_1 + i])
                 foundSame = false;
+            else
+                i += 1;
         }
-        uint similarStartKnots = i + 1;
+        uint similarStartKnots = i;
 
-        i = 0;
+        i = 1; //we already have two equal knots: at l_1 and l_2, but l_2 would be later equal to k_1 (in next tooth)
         foundSame = true;
-        while(i < m_degree - 2 && foundSame) {
-            i += 1;
-            if(givenKnots[k_2] != givenKnots[k_2 - i])
+        while(i < m_degree - 1 && foundSame) {
+            if(givenKnots[l_1] != givenKnots[l_1 - i])
                 foundSame = false;
+            else
+                i += 1;
         }
         uint similarEndKnots = i;
 
@@ -298,10 +299,12 @@ void SplineGear::updateKnotsAndControlPoints() {
             // for a better choice how to carry on, test if a different knot value exists
             i = 1;
             foundSame = true;
-            while(i < m_degree && foundSame) {
+            while(i < m_degree - 1 && foundSame) {
                 if(givenKnots[l_2] != givenKnots[l_2 + i]) {
                     newLastValue = givenKnots[l_2 + i];
                     foundSame = false;
+                } else {
+                    i += 1;
                 }
             }
             knotInterspaces[ppt - 1] = newLastValue - givenKnots[ppt - 1];
