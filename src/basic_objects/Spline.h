@@ -237,7 +237,7 @@ public:
      *
      *  If @p tearToEdges is @b true, clamps start and end to the first and last
      *  control points. This is possible with a specific choice of the knot vector.
-     *  If the spline is @b valid, it sets the first and last n = m_degree + 1
+     *  If the spline is @b valid, it sets the first and last n = m_degree
      *  knot values each to the same value.
      *
      *  If @p tearToEdges is @b false, it replaces the first and last knots with evenly

@@ -751,7 +751,7 @@ int Spline::pointsWithNormalsThroughOrigin(vector<vec2> &samples, real epsilon) 
         return -1;
 
     //Preparation of the sampleValues vector, which holds evaluable knots and one knot value between
-    uint evaluableKnots = m_controlPoints.size() - m_degree;  // former: m_controlPoints.size() + 1 - m_degree;
+    uint evaluableKnots = m_controlPoints.size() - m_degree;
     vector<real> sampleValues(evaluableKnots * 2 - 1);
     //insert all evaluable knots at every second position of sampleValues
     for(uint i = 0; i < evaluableKnots; ++i) {
@@ -788,7 +788,7 @@ int Spline::pointsWithNormalsThroughOrigin(vector<vec2> &samples, real epsilon) 
                 if(b - a < epsilon) {
                     // When there is a corner like it is possible when degree = 1,
                     // the approach above won't work. Therefore this stopping is necessary, too.
-                    samples[foundPoints] = evaluate(a);
+                    samples[foundPoints] = evaluate((a + b) / 2);
                     foundPoints += 1;
                     sign = 0;
                     throughOrigin = 1; //leave the while-loop
