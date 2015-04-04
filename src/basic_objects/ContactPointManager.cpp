@@ -135,9 +135,11 @@ void ContactPointManager::sortLists() {
     } while(!sorted);
 }
 
-void ContactPointManager::processPointsToGear(uint numberOfTeeth, bool isDescribedClockwise) {
+void ContactPointManager::processPointsToGear(uint numberOfTeeth, real pitchRadius, bool isDescribedClockwise) {
     if(m_insertedCPsLists.empty() || numberOfNoneErrorContactPoints() == 0)
         return;
+
+    m_pitchRadiusInDrivenGear = pitchRadius;
 
     setAngularPitch(numberOfTeeth, isDescribedClockwise);
         //=> m_angularPitchRotation
@@ -214,12 +216,7 @@ void ContactPointManager::translateForBottomClearance(real bottomClearance, real
             i = 0;
         }
     }
-    findBestPathOfContact(
-        m_notTranslatedGearCPs,
-        m_notTranslatedBestContact,
-        m_translatedGearBestContactStart,
-        m_translatedGearBestContactStop
-        );
+    findBestPathOfContact(CalculationState::BottomClearance);
 
     m_gearPointsCreated.bottomClearance = true;
 }
@@ -554,12 +551,7 @@ void ContactPointManager::findAllCoveredPoints() {
     assert(m_gearPoints.size() == m_gearPointsInformation.size());
     assert(m_gearPoints.size() == m_gearPointsInformationIndex.size());
 
-    findBestPathOfContact(
-        m_gearCPs,
-        m_gearBestContact,
-        m_gearBestContactStart,
-        m_gearBestContactStop
-    );
+    findBestPathOfContact(CalculationState::Simple);
 
     if(!reachedOriginAgainCondition)
         m_gearOutlineConstructionFailed = true;
@@ -569,43 +561,57 @@ void ContactPointManager::findAllCoveredPoints() {
     m_gearPointsCreated.simple = true;
 }
 
-void ContactPointManager::findBestPathOfContact(
-    vector<ContactPoint*> &contactPoints, Directions< vector<ContactPoint*> *> &bestContactPoints,
-    Directions<vec2> &start, Directions<vec2> &stop)
-{
-    bestContactPoints = Directions< vector<ContactPoint*> *>(nullptr, nullptr);
+void ContactPointManager::findBestPathOfContact(CalculationState calcState) {
+    vector<ContactPoint*> *contactPoints;
+    Directions< vector<ContactPoint*> *> *bestContactPoints;
+    Directions<vec2> *start;
+    Directions<vec2> *stop;
+    if(calcState == CalculationState::Simple) {
+        contactPoints = &m_gearCPs;
+        bestContactPoints = &m_gearBestContact;
+        start = &m_gearBestContactStart;
+        stop = &m_gearBestContactStop;
+
+    } else { //CalculationState::BottomClearance
+        contactPoints = &m_notTranslatedGearCPs;
+        bestContactPoints = &m_notTranslatedBestContact;
+        start = &m_translatedGearBestContactStart;
+        stop = &m_translatedGearBestContactStop;
+    }
+
+    *bestContactPoints = Directions< vector<ContactPoint*> *>(nullptr, nullptr);
     real bestInClockCoverageAngle = 0;
     real bestCounterClockCoverageAngle = 0;
 
-    if(contactPoints.empty())
+    if(contactPoints->empty())
         return;
 
     //Find an appropriate starting point
     uint startWith = 0;
     if(m_numberOfInsertedCPs > 0) {
-        ContactPoint *previous = contactPoints.back();
-        ContactPoint *next = contactPoints.front();
+        ContactPoint *previous = contactPoints->back();
+        ContactPoint *next = contactPoints->front();
         while(((previous->evaluationStep + 1) % m_numberOfInsertedCPs == next->evaluationStep)
             && (cross(normalize(previous->contactPosition), previous->normalInContact)
                 * cross(normalize(next->contactPosition), next->normalInContact) > 0.0) // same directions of normals
-            && (startWith + 2 < contactPoints.size()))
+            && (startWith + 2 < contactPoints->size()))
         {
-            previous = contactPoints[startWith];
+            previous = contactPoints->at(startWith);
             ++startWith;
-            next = contactPoints[startWith];
+            next = contactPoints->at(startWith);
         }
     }
 
     vector<ContactPoint*> currentDirectionPoints;
-    ContactPoint *cp = contactPoints[startWith];
+    ContactPoint *cp = contactPoints->at(startWith);
     currentDirectionPoints.push_back(cp);
     real direction = cross(normalize(cp->contactPosition), cp->normalInContact);
     vec2 begin, end;
     TurningDirection currentDirection = turningDirectionOf(direction); // 1 => normal points in clock direction (=> clockwise), -1 => normal points in counter clock direction, (always from view of driving gear)
 
-    for(uint i = (startWith + 1) % contactPoints.size(); i != startWith; i = (i + 1) % contactPoints.size()) {
+    for(uint i = (startWith + 1) % contactPoints->size(); i != startWith; i = (i + 1) % contactPoints->size()) {
         ContactPoint *lastCP = cp;
-        cp = contactPoints[i];
+        cp = contactPoints->at(i);
         TurningDirection direction = turningDirectionOf(cross(normalize(cp->contactPosition), cp->normalInContact));
         if((cp->evaluationStep == lastCP->evaluationStep + 1)
             && (direction == currentDirection))
@@ -620,25 +626,25 @@ void ContactPointManager::findBestPathOfContact(
             if(currentDirection == TurningDirection::Clockwise && currentCoverageAngle > bestInClockCoverageAngle) {
                 // replace best list with current list
                 bestInClockCoverageAngle = currentCoverageAngle;
-                if(bestContactPoints.clockwise != nullptr) {
-                    bestContactPoints.clockwise->clear();
-                    delete bestContactPoints.clockwise;
+                if(bestContactPoints->clockwise != nullptr) {
+                    bestContactPoints->clockwise->clear();
+                    delete bestContactPoints->clockwise;
                 }
-                bestContactPoints.clockwise = new vector<ContactPoint*>(currentDirectionPoints);
-                start.clockwise = begin;
-                stop.clockwise = end;
+                bestContactPoints->clockwise = new vector<ContactPoint*>(currentDirectionPoints);
+                start->clockwise = begin;
+                stop->clockwise = end;
 
             // Current direction is counter clockwise
             } else if(currentDirection == TurningDirection::CounterClockwise && currentCoverageAngle > bestCounterClockCoverageAngle) {
                 // replace best list with current list
                 bestCounterClockCoverageAngle = currentCoverageAngle;
-                if(bestContactPoints.counterClockwise != nullptr) {
-                    bestContactPoints.counterClockwise->clear();
-                    delete bestContactPoints.counterClockwise;
+                if(bestContactPoints->counterClockwise != nullptr) {
+                    bestContactPoints->counterClockwise->clear();
+                    delete bestContactPoints->counterClockwise;
                 }
-                bestContactPoints.counterClockwise = new vector<ContactPoint*>(currentDirectionPoints);
-                start.counterClockwise = begin;
-                stop.counterClockwise = end;
+                bestContactPoints->counterClockwise = new vector<ContactPoint*>(currentDirectionPoints);
+                start->counterClockwise = begin;
+                stop->counterClockwise = end;
             }
 
             // Initialize for new list/direction
@@ -651,25 +657,25 @@ void ContactPointManager::findBestPathOfContact(
     // Inspect last created currentDirectionPoints list
     real currentCoverageAngle = contactPositionCoverageAngle(currentDirectionPoints, begin, end);
     if(currentDirection == TurningDirection::Clockwise
-        && (currentCoverageAngle > bestInClockCoverageAngle || bestContactPoints.clockwise == nullptr)) {
+        && (currentCoverageAngle > bestInClockCoverageAngle || bestContactPoints->clockwise == nullptr)) {
         bestInClockCoverageAngle = currentCoverageAngle;
-        if(bestContactPoints.clockwise != nullptr) {
-            bestContactPoints.clockwise->clear();
-            delete bestContactPoints.clockwise;
+        if(bestContactPoints->clockwise != nullptr) {
+            bestContactPoints->clockwise->clear();
+            delete bestContactPoints->clockwise;
         }
-        bestContactPoints.clockwise = new vector<ContactPoint*>(currentDirectionPoints);
-        start.clockwise = begin;
-        stop.clockwise = end;
+        bestContactPoints->clockwise = new vector<ContactPoint*>(currentDirectionPoints);
+        start->clockwise = begin;
+        stop->clockwise = end;
     } else if(currentDirection == TurningDirection::CounterClockwise
-        && (currentCoverageAngle > bestCounterClockCoverageAngle || bestContactPoints.counterClockwise == nullptr)) {
+        && (currentCoverageAngle > bestCounterClockCoverageAngle || bestContactPoints->counterClockwise == nullptr)) {
         bestCounterClockCoverageAngle = currentCoverageAngle;
-        if(bestContactPoints.counterClockwise != nullptr) {
-            bestContactPoints.counterClockwise->clear();
-            delete bestContactPoints.counterClockwise;
+        if(bestContactPoints->counterClockwise != nullptr) {
+            bestContactPoints->counterClockwise->clear();
+            delete bestContactPoints->counterClockwise;
         }
-        bestContactPoints.counterClockwise = new vector<ContactPoint*>(currentDirectionPoints);
-        start.counterClockwise = begin;
-        stop.counterClockwise = end;
+        bestContactPoints->counterClockwise = new vector<ContactPoint*>(currentDirectionPoints);
+        start->counterClockwise = begin;
+        stop->counterClockwise = end;
     }
 }
 

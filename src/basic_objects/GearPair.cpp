@@ -47,7 +47,7 @@ void GearPair::calculateAgainWithUnchangedAttributes() {
                     / (m_samplingRate - 1);
 
     insertPossiblePairingPointsInPointManager();
-    m_contactPointManager.processPointsToGear(m_drivenGear->numberOfTeeth(), !(m_drivingGear->toothDescribedInClockDirection()));
+    m_contactPointManager.processPointsToGear(m_drivenGear->numberOfTeeth(), m_drivenGearPitchRadius, !(m_drivingGear->toothDescribedInClockDirection()));
     m_contactPointManager.translateForBottomClearance(m_bottomClearance, m_bottomClearanceStartAngle); //Kopfspiel
     fillDrivenGearWithGearPoints();
     changed();
