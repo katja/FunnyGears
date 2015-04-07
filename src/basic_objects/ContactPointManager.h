@@ -45,8 +45,10 @@ public:
     const vector<ContactPoint*>& gearContactPoints(CalculationState state = CalculationState::Simple) const;
     const vector<WrongContactPoint*>& gearWrongContactPoints(CalculationState state = CalculationState::Simple) const;
     vector<ContactPoint*>* gearConsecutivelyContactPoints(TurningDirection direction, CalculationState state = CalculationState::Simple) const;
-    vec2 gearConsecutivelyContactPointsStart(TurningDirection direction, CalculationState state = CalculationState::Simple) const;
-    vec2 gearConsecutivelyContactPointsStop(TurningDirection direction, CalculationState state = CalculationState::Simple) const;
+    ContactPoint* gearConsecutivelyContactPointsStart(TurningDirection direction, CalculationState state = CalculationState::Simple) const;
+    ContactPoint* gearConsecutivelyContactPointsStop(TurningDirection direction, CalculationState state = CalculationState::Simple) const;
+    real gearConsecutivelyContactPointsCoverageAngle(TurningDirection direction, CalculationState state = CalculationState::Simple) const;
+    vec2 gearConsecutivelyContactPointsCoverageStartOnPitchCircle(TurningDirection direction, CalculationState state = CalculationState::Simple) const;
 
     vec2 startOfExaminedPitchInDrivenGear() const;
     vec2 endOfExaminedPitchInDrivenGear() const;
@@ -83,16 +85,20 @@ private:
     vector<ContactPoint*>           m_gearCPs; // really good ContactPoints for the gear (gear is best, if only such points exist)
     vector<WrongContactPoint*>      m_gearWCPs; // is arisen from a NCP in special position, bad point for the gear, as it results in a violation of the basic requirement of a gear tooth system
     Directions< vector<ContactPoint*> *> m_gearBestContact;
-    Directions<vec2>                m_gearBestContactStart;
-    Directions<vec2>                m_gearBestContactStop;
+    Directions<ContactPoint*>       m_gearBestContactStart;
+    Directions<ContactPoint*>       m_gearBestContactStop;
+    Directions<real>                m_gearBestContactCoverage;
+    Directions<vec2>                m_gearContactPathStartOnPitchCircle;
 
     // chosen points if already translated
     vector<vec2>                    m_translatedGearPoints; // all gear points after translation
     vector<ContactPoint*>           m_notTranslatedGearCPs; // not translated and therefore still in contact, only references! No Copies!
     vector<WrongContactPoint*>      m_notTranslatedGearWCPs; // not translated and therefore still in contact, only references! No Copies!
     Directions< vector<ContactPoint*> *> m_notTranslatedBestContact; // best sequence of m_notTranslatedGearCPs, only references!
-    Directions<vec2>                m_translatedGearBestContactStart;
-    Directions<vec2>                m_translatedGearBestContactStop;
+    Directions<ContactPoint*>       m_translatedGearBestContactStart;
+    Directions<ContactPoint*>       m_translatedGearBestContactStop;
+    Directions<real>                m_translatedGearBestContactCoverage;
+    Directions<vec2>                m_translatedGearContactPathStartOnPitchCircle;
 
     // other (pitch and rotation) attributes:
     real                            m_angularPitchRotation; //is negative, if driven gear tooth is described counter clockwise (in screen representation), and positive otherwise
@@ -113,7 +119,7 @@ private:
     void copyNoneContactPointsInRelevantPitches();
     void findAllCoveredPoints();
     void findBestPathOfContact(CalculationState calcState);
-    ContactPoint* findCPonPitchCircle(vector<ContactPoint*> &contactPoints) const;
+    bool isThereAPointOnPitchCircle(CalculationState calcState, ContactPoint *referencePointOfDrivingGear, vec2 &addToPoint);
 
     // WrongContactPoint* wrongContactPointWhenTurnedBack(vec2 point, vec2 normal, real pitchRadiusDrivenGear);
     uint numberOfNoneErrorContactPoints() const;
@@ -130,7 +136,7 @@ private:
 
     void fillLastCuttingPoints(uint foundCuttings, uint currentIndex, ContactPoint *lastContactPoint, ContactPoint *currentContactPoint, real bottomClearance, real maxAngle);
 
-    real contactPositionCoverageAngle(vector<ContactPoint*> &contactPoints, vec2 &start, vec2 &end) const;
+    real contactPositionCoverageAngle(vector<ContactPoint*> &contactPoints, ContactPoint *&start, ContactPoint *&end) const;
     bool pointIsCovered(const vec2 &candidate, const ContactPoint &a, const ContactPoint &b) const;
     bool contactPointIsCovered(const ContactPoint &candidate, const ContactPoint &a, const ContactPoint &b) const;
     bool intersectLines(real &intersectionValue, vec2 &intersection, vec2 startLine, vec2 stopLine, vec2 startTestLine, vec2 stopTestLine) const;

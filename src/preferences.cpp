@@ -4,7 +4,9 @@ QColor Preferences::SelectionColor(QColor(220, 220, 255)); // light blue
 
 QColor Preferences::HoverColor(QColor(240, 210, 80)); // dark yellow
 
-QColor Preferences::AttentionColor(QColor(220, 0, 30)); // red
+QColor Preferences::AttentionColor(QColor(190, 0, 30)); // red
+
+QColor Preferences::InformationColor(QColor(0, 128, 0)); //dark green
 
 QColor Preferences::BackgroundGridColor(Qt::lightGray);
 

@@ -162,46 +162,7 @@ void GearPairInformation::updateFirstRequirement(Directions<bool> &firstRequirem
 void GearPairInformation::updateSecondRequirement(CalculationState state, Directions<real> &percentagePathOfContactCoversPitch) const {
     for(TurningDirection dir : {TurningDirection::Clockwise, TurningDirection::CounterClockwise}) {
 
-        vec2 startSeries = m_CPmanager->gearConsecutivelyContactPointsStart(dir, state);
-        vec2 endSeries = m_CPmanager->gearConsecutivelyContactPointsStop(dir, state);
-
-        bool startInDrivingGear, stopInDrivingGear;
-        real alphaStart, alphaStop;
-
-        if(startSeries.x < m_gearPair->drivingGearPitchRadius()) {
-            startInDrivingGear = true;
-            alphaStart = asin(normalize(startSeries).y);
-        } else {
-            startInDrivingGear = false;
-            vec2 toContactPosition = normalize(startSeries - vec2(m_gearPair->getDistanceOfCenters(), 0));
-            alphaStart = asin(toContactPosition.y);
-        }
-
-        if(endSeries.x < m_gearPair->drivingGearPitchRadius()) {
-            stopInDrivingGear = true;
-            alphaStop = asin(normalize(endSeries).y);
-        } else {
-            stopInDrivingGear = false;
-            vec2 toContactPosition = normalize(endSeries - vec2(m_gearPair->getDistanceOfCenters(), 0));
-            alphaStop = asin(toContactPosition.y);
-        }
-
-        if(startInDrivingGear == stopInDrivingGear) {
-            real coverage = alphaStart - alphaStop;
-            real angularPitch = startInDrivingGear ?
-                    (m_gearPair->drivingGear()->angularPitch()) : (m_gearPair->drivenGear()->angularPitch());
-            percentagePathOfContactCoversPitch.setValue(absolute(coverage / angularPitch), dir);
-
-        } else {
-            real totalCoverage = 0.0;
-            if(startInDrivingGear) {
-                totalCoverage += absolute(alphaStart / m_gearPair->drivingGear()->angularPitch());
-                totalCoverage += absolute(alphaStop / m_gearPair->drivenGear()->angularPitch());
-            } else {
-                totalCoverage += absolute(alphaStart / m_gearPair->drivenGear()->angularPitch());
-                totalCoverage += absolute(alphaStop / m_gearPair->drivingGear()->angularPitch());
-            }
-            percentagePathOfContactCoversPitch.setValue(totalCoverage, dir);
-        }
+        real coverage = m_CPmanager->gearConsecutivelyContactPointsCoverageAngle(dir, state);
+        percentagePathOfContactCoversPitch.setValue(coverage / m_gearPair->drivingGear()->angularPitch(), dir);
     }
 }

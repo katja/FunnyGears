@@ -107,6 +107,8 @@ public:
     void paintSampledContactPointsDrivingGear(QPainter *painter) const;
     void paintSampledContactPointsDrivenGear(QPainter *painter) const;
     void paintBestConsecutivePathOfContact(QPainter *painter) const;
+    void paintHighlightOfStartAndEndOfPathOfContact(QPainter *painter) const;
+    void paintLinesToStartAndEndOfBestConsecutivePathOfContact(QPainter *painter, vec2 startPath, vec2 endPath) const;
     void paintPitchPoint(QPainter *painter) const;
     void paintPathOfPossibleContact(QPainter *painter) const;
     void paintPathOfRealContact(QPainter *painter) const;

@@ -265,18 +265,32 @@ vector<ContactPoint*>* ContactPointManager::gearConsecutivelyContactPoints(Turni
         return m_notTranslatedBestContact.direction(direction);
 }
 
-vec2 ContactPointManager::gearConsecutivelyContactPointsStart(TurningDirection direction, CalculationState state) const {
+ContactPoint* ContactPointManager::gearConsecutivelyContactPointsStart(TurningDirection direction, CalculationState state) const {
     if(state == CalculationState::Simple)
         return m_gearBestContactStart.direction(direction);
     else //state == CalculationState::BottomClearance
         return m_translatedGearBestContactStart.direction(direction);
 }
 
-vec2 ContactPointManager::gearConsecutivelyContactPointsStop(TurningDirection direction, CalculationState state) const {
+ContactPoint* ContactPointManager::gearConsecutivelyContactPointsStop(TurningDirection direction, CalculationState state) const {
     if(state == CalculationState::Simple)
         return m_gearBestContactStop.direction(direction);
     else //state == CalculationState::BottomClearance
         return m_translatedGearBestContactStop.direction(direction);
+}
+
+real ContactPointManager::gearConsecutivelyContactPointsCoverageAngle(TurningDirection direction, CalculationState state) const {
+    if(state == CalculationState::Simple)
+        return m_gearBestContactCoverage.direction(direction);
+    else //state == CalculationState::BottomClearance
+        return m_translatedGearBestContactCoverage.direction(direction);
+}
+
+vec2 ContactPointManager::gearConsecutivelyContactPointsCoverageStartOnPitchCircle(TurningDirection direction, CalculationState state) const {
+    if(state == CalculationState::Simple)
+        return m_gearContactPathStartOnPitchCircle.direction(direction);
+    else //state == CalculationState::BottomClearance
+        return m_translatedGearContactPathStartOnPitchCircle.direction(direction);
 }
 
 vec2 ContactPointManager::startOfExaminedPitchInDrivenGear() const {
@@ -564,24 +578,33 @@ void ContactPointManager::findAllCoveredPoints() {
 void ContactPointManager::findBestPathOfContact(CalculationState calcState) {
     vector<ContactPoint*> *contactPoints;
     Directions< vector<ContactPoint*> *> *bestContactPoints;
-    Directions<vec2> *start;
-    Directions<vec2> *stop;
+    Directions<ContactPoint*> *start;
+    Directions<ContactPoint*> *stop;
+    Directions<real> *coverageAngle;
+    Directions<vec2> *pointOnPitchCircle;
+
     if(calcState == CalculationState::Simple) {
         contactPoints = &m_gearCPs;
         bestContactPoints = &m_gearBestContact;
         start = &m_gearBestContactStart;
         stop = &m_gearBestContactStop;
+        coverageAngle = &m_gearBestContactCoverage;
+        pointOnPitchCircle = &m_gearContactPathStartOnPitchCircle;
 
     } else { //CalculationState::BottomClearance
         contactPoints = &m_notTranslatedGearCPs;
         bestContactPoints = &m_notTranslatedBestContact;
         start = &m_translatedGearBestContactStart;
         stop = &m_translatedGearBestContactStop;
+        coverageAngle = &m_translatedGearBestContactCoverage;
+        pointOnPitchCircle = &m_translatedGearContactPathStartOnPitchCircle;
     }
 
+    std::cout << "\n*****************\nBegin findBestPathOfContact()" << std::endl;
+
     *bestContactPoints = Directions< vector<ContactPoint*> *>(nullptr, nullptr);
-    real bestInClockCoverageAngle = 0;
-    real bestCounterClockCoverageAngle = 0;
+    real bestInClockCoverageAngle = 0.0;
+    real bestCounterClockCoverageAngle = 0.0;
 
     if(contactPoints->empty())
         return;
@@ -606,7 +629,7 @@ void ContactPointManager::findBestPathOfContact(CalculationState calcState) {
     ContactPoint *cp = contactPoints->at(startWith);
     currentDirectionPoints.push_back(cp);
     real direction = cross(normalize(cp->contactPosition), cp->normalInContact);
-    vec2 begin, end;
+    ContactPoint *begin, *end;
     TurningDirection currentDirection = turningDirectionOf(direction); // 1 => normal points in clock direction (=> clockwise), -1 => normal points in counter clock direction, (always from view of driving gear)
 
     for(uint i = (startWith + 1) % contactPoints->size(); i != startWith; i = (i + 1) % contactPoints->size()) {
@@ -624,6 +647,7 @@ void ContactPointManager::findBestPathOfContact(CalculationState calcState) {
 
             // Current direction is clockwise
             if(currentDirection == TurningDirection::Clockwise && currentCoverageAngle > bestInClockCoverageAngle) {
+                std::cout << "new best clockwise\n" << std::endl;
                 // replace best list with current list
                 bestInClockCoverageAngle = currentCoverageAngle;
                 if(bestContactPoints->clockwise != nullptr) {
@@ -636,6 +660,7 @@ void ContactPointManager::findBestPathOfContact(CalculationState calcState) {
 
             // Current direction is counter clockwise
             } else if(currentDirection == TurningDirection::CounterClockwise && currentCoverageAngle > bestCounterClockCoverageAngle) {
+                std::cout << "new best counterclockwise\n" << std::endl;
                 // replace best list with current list
                 bestCounterClockCoverageAngle = currentCoverageAngle;
                 if(bestContactPoints->counterClockwise != nullptr) {
@@ -658,33 +683,129 @@ void ContactPointManager::findBestPathOfContact(CalculationState calcState) {
     real currentCoverageAngle = contactPositionCoverageAngle(currentDirectionPoints, begin, end);
     if(currentDirection == TurningDirection::Clockwise
         && (currentCoverageAngle > bestInClockCoverageAngle || bestContactPoints->clockwise == nullptr)) {
+        std::cout << "new best clockwise\n" << std::endl;
         bestInClockCoverageAngle = currentCoverageAngle;
         if(bestContactPoints->clockwise != nullptr) {
             bestContactPoints->clockwise->clear();
             delete bestContactPoints->clockwise;
         }
         bestContactPoints->clockwise = new vector<ContactPoint*>(currentDirectionPoints);
-        start->clockwise = begin;
-        stop->clockwise = end;
+        if(currentCoverageAngle > 0.0) {
+            start->clockwise = begin;
+            stop->clockwise = end;
+        } else {
+            start->clockwise = nullptr;
+            stop->clockwise = nullptr;
+        }
     } else if(currentDirection == TurningDirection::CounterClockwise
         && (currentCoverageAngle > bestCounterClockCoverageAngle || bestContactPoints->counterClockwise == nullptr)) {
+        std::cout << "new best counterclockwise\n" << std::endl;
         bestCounterClockCoverageAngle = currentCoverageAngle;
         if(bestContactPoints->counterClockwise != nullptr) {
             bestContactPoints->counterClockwise->clear();
             delete bestContactPoints->counterClockwise;
         }
         bestContactPoints->counterClockwise = new vector<ContactPoint*>(currentDirectionPoints);
-        start->counterClockwise = begin;
-        stop->counterClockwise = end;
+        if(currentCoverageAngle > 0.0) {
+            start->counterClockwise = begin;
+            stop->counterClockwise = end;
+        } else {
+            start->counterClockwise = nullptr;
+            stop->counterClockwise = nullptr;
+        }
+    }
+
+    coverageAngle->setValue(bestInClockCoverageAngle, TurningDirection::Clockwise);
+    coverageAngle->setValue(bestCounterClockCoverageAngle, TurningDirection::CounterClockwise);
+
+    for(TurningDirection dir : {TurningDirection::Clockwise, TurningDirection::CounterClockwise}) {
+        vec2 addTo;
+        ContactPoint *reference = start->direction(dir);
+        if(reference == nullptr || !isThereAPointOnPitchCircle(calcState, reference, addTo)) {
+            //TODO: Save, that gearing not possible??? (when not reference != nullptr)
+            pointOnPitchCircle->setValue(vec2(0, 0), dir);
+            std::cout << "FOUND NO POINT ON PITCH CIRCLE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+
+        } else {
+            std::cout << "FOUND POINT ON PITCH CIRCLE :-)" << std::endl;
+            std::cout << "isThereAPointOnPitchCircle found: " << *(reference) << " to add on this: " << addTo << std::endl;
+            //In contact point of our reference point, the gears meet and we only need
+            //the rotation angle of the driven gear to this point.
+            //Then the "addTo" can be rotated, too, and added to the contact position.
+            //We don't have the rotation angle, but this is easy to calculate, when normal is used :-)
+            vec2 reversedNormal = vec2(-reference->normal);
+            real diffAngle = angleBetween(reference->normalInContact, reversedNormal);
+            real angleDir = cross(reference->normalInContact, reversedNormal);
+            if(angleDir > 0)
+                diffAngle = -diffAngle;
+            pointOnPitchCircle->setValue(glm::rotate(addTo, diffAngle) + reference->contactPosition, dir);
+            std::cout << "point on pitch circle: " << pointOnPitchCircle->direction(dir) << std::endl;
+        }
     }
 }
 
-real ContactPointManager::contactPositionCoverageAngle(vector<ContactPoint*> &contactPoints, vec2 &start, vec2 &end) const {
+bool ContactPointManager::isThereAPointOnPitchCircle(CalculationState calcState, ContactPoint *referencePointOfDrivenGear, vec2 &addToPoint) {
+    std::cout << "isThereAPointOnPitchCircle started" << std::endl;
+    if(referencePointOfDrivenGear == nullptr)
+        return false;
+
+    std::cout << "isThereAPointOnPitchCircle 0" << std::endl;
+
+    vector<vec2> *gearPoints;
+
+    if(calcState == CalculationState::Simple) {
+        if(m_gearCPs.empty() || m_gearPoints.empty())
+            return false;
+        gearPoints = &m_gearPoints;
+
+    } else { // CalculationState::BottomClearance
+        if(m_notTranslatedGearCPs.empty() || m_translatedGearPoints.empty())
+            return false;
+        gearPoints = &m_translatedGearPoints;
+    }
+
+    std::cout << "isThereAPointOnPitchCircle 1" << std::endl;
+
+    bool wasOutsidePitchCircle = glm::length(gearPoints->at(0)) > m_pitchRadiusInDrivenGear;
+
+    //Search from second point up to last and again with first point
+    for(uint i = 1; i <= gearPoints->size(); ++i) {
+        vec2 point = gearPoints->at(i % gearPoints->size());
+
+        if(wasOutsidePitchCircle != (glm::length(point) > m_pitchRadiusInDrivenGear)) {
+
+            vec2 foundPoint = gearPoints->at(i - 1);
+
+            //find cut between this and last point with pitch radius
+            vec2 direction = normalize(gearPoints->at(i) - foundPoint);
+            real valueUnderRoot = square(dot(direction, foundPoint))
+                            - dot(foundPoint, foundPoint)
+                            + square(m_pitchRadiusInDrivenGear);
+            assert(valueUnderRoot >= 0.0); // Can only be < 0 when no cut with pitch circle, what would contradict with the upper "if" statement
+
+            real t;
+            if(wasOutsidePitchCircle)
+                t = -dot(direction, foundPoint) - sqrt(valueUnderRoot); //now inside, so take smaller t
+            else
+                t = -dot(direction, foundPoint) + sqrt(valueUnderRoot); //now outside, so take larger t
+            vec2 pointOnPitchCircle = foundPoint + t * direction;
+            addToPoint = pointOnPitchCircle - referencePointOfDrivenGear->point;
+            return true;
+        }
+    }
+    std::cout << "isThereAPointOnPitchCircle no cut found END" << std::endl;
+    //If this part of code is reached, there was no cut at all
+    return false;
+}
+
+real ContactPointManager::contactPositionCoverageAngle(vector<ContactPoint*> &contactPoints, ContactPoint *&start, ContactPoint *&end) const {
     if(contactPoints.size() <= 1)
         return 0.0;
 
     //Search for first and last point taken the normal direction as reference
     ContactPoint *firstPoint = contactPoints.front();
+    ContactPoint *lastPoint = contactPoints.back();
+
     real direction = cross(normalize(firstPoint->contactPosition), firstPoint->normalInContact);;
     int listDirection = (direction < 0.0) ? -1 : 1;  //1 => clockwise, -1 => counter clockwise
 
@@ -694,18 +815,47 @@ real ContactPointManager::contactPositionCoverageAngle(vector<ContactPoint*> &co
                 firstPoint = cp;
             }
         }
-    }
-    ContactPoint *lastPoint = contactPoints.back();
-    for(ContactPoint *cp : contactPoints) {
         if(cp != lastPoint) {
             if(cp->contactPosition.y * listDirection > lastPoint->contactPosition.y * listDirection) {
                 lastPoint = cp;
             }
         }
     }
-    start = firstPoint->contactPosition;
-    end = lastPoint->contactPosition;
-    return angleBetween(start, end);
+    start = firstPoint;
+    end = lastPoint;
+
+    //We need the covering, or how far a point on the pitch circle has turned between start and end
+    real startAngle = angleBetween(firstPoint->contactPosition, firstPoint->originPoint);
+    real stopAngle = angleBetween(lastPoint->contactPosition, lastPoint->originPoint);
+    real angleDir;
+
+    std::cout << "startAngle:" << startAngle;
+    angleDir = cross(firstPoint->originPoint, firstPoint->contactPosition); // angleDir > 0 => clockwise, angleDir < 0 => counterClockwise
+    if(angleDir * listDirection < 0) //other direction used
+        startAngle = 2.0 * M_PI - startAngle; //flip direction
+    std::cout << "-->" << startAngle << ", stopAngle:" << stopAngle;
+    angleDir = cross(lastPoint->originPoint, lastPoint->contactPosition); // angleDir > 0 => clockwise, angleDir < 0 => counterClockwise
+    if(angleDir * listDirection < 0) //other direction used
+        stopAngle = 2.0 * M_PI - stopAngle; //flip direction
+    std::cout << "-->" << stopAngle;
+    //With this used direction, startAngle must be smaller than stopAngle, as otherwise
+    //listDirection could not exist / the length of contact path would be 0 or negative
+    if(startAngle > stopAngle) {
+        std::cout << "START ANGLE CHANGED AGAIN: ";
+        startAngle = startAngle - 2.0 * M_PI; //Can only happen, if given tooth is near the pitch line
+        std::cout << startAngle << std::endl;
+    }
+
+    real pitchAngle = stopAngle - startAngle;
+    std::cout << " ==> " << pitchAngle << std::endl;
+
+    std::cout << "            from: first:" << firstPoint->point << ", last:" << lastPoint->point << ", direction:" << listDirection << std::endl;
+    std::cout << "            " << (angleBetween(start->contactPosition, end->contactPosition)) * 180 / M_PI << " <-- früher, jetzt --> " << (pitchAngle * 180 / M_PI) << std::endl; //" <-- START ANGLE, STOP ANGLE --> " << stopAngle << " => diff: " << startAngle - stopAngle << " in deg: " << 180 * ((startAngle - stopAngle) / M_PI) << "°" << std::endl;
+
+    // start = m_pitchRadiusInDrivenGear * 0.9 * normalize(start);
+    // end = glm::rotate(start, pitchAngle * listDirection);
+    return pitchAngle;
+    // return angleBetween(start, end);
 
 }
 
@@ -1194,8 +1344,12 @@ void ContactPointManager::clearAllGearLists() {
         delete m_gearBestContact.counterClockwise;
         m_gearBestContact.counterClockwise = nullptr;
     }
-    m_gearBestContactStart = Directions<vec2>(vec2(0, 0), vec2(0, 0));
-    m_gearBestContactStop = Directions<vec2>(vec2(0, 0), vec2(0, 0));
+    m_gearBestContactStart = Directions<ContactPoint*>(nullptr, nullptr);
+    m_gearBestContactStop = Directions<ContactPoint*>(nullptr, nullptr);
+
+    m_gearBestContactCoverage = Directions<real>(0.0, 0.0);
+
+    m_gearContactPathStartOnPitchCircle = Directions<vec2>(vec2(0, 0), vec2(0, 0));
 }
 
 void ContactPointManager::clearAllTranslatedGearLists() {
@@ -1212,6 +1366,10 @@ void ContactPointManager::clearAllTranslatedGearLists() {
         delete m_notTranslatedBestContact.counterClockwise;
         m_notTranslatedBestContact.counterClockwise = nullptr;
     }
-    m_translatedGearBestContactStart = Directions<vec2>(vec2(0, 0), vec2(0, 0));
-    m_translatedGearBestContactStop = Directions<vec2>(vec2(0, 0), vec2(0, 0));
+    m_translatedGearBestContactStart = Directions<ContactPoint*>(nullptr, nullptr);
+    m_translatedGearBestContactStop = Directions<ContactPoint*>(nullptr, nullptr);
+
+    m_translatedGearBestContactCoverage = Directions<real>(0.0, 0.0);
+
+    m_translatedGearContactPathStartOnPitchCircle = Directions<vec2>(vec2(0, 0), vec2(0, 0));
 }

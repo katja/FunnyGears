@@ -345,3 +345,10 @@ void drawArc(QPainter *painter, real startAngle, real stopAngle, real radius, ve
     drawLine(painter, center + radius * vec2(cos(itAngle - step), sin(itAngle - step)),
                           center + radius * vec2(cos(stop), sin(stop)));
 }
+
+void changePen(QPainter *painter, QColor color, real lineWidth, Qt::PenCapStyle cap) {
+    QPen pen(color);
+    pen.setWidth(lineWidth);
+    pen.setCapStyle(cap);
+    painter->setPen(pen);
+}
