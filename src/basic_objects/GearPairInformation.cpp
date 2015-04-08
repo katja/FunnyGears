@@ -52,13 +52,6 @@ void GearPairInformation::update() {
     changed();
 }
 
-// void GearPairInformation::validGearShapeInfoText() const {
-// Dieses Programm betrachtet nur außenverzahnte Stirnräder. Wird eine Kurve als Zahn gewählt,
-// die Schnittpunkte enthält oder eine zu hohe Zähnezahl gewählt, so dass das Treibrad Schnittpunkte
-// aufweist, kann keine korrekte Verzahnung berechnet werden.
-// Verbesserung: Schnittpunkte entfernen!
-// }
-
 bool GearPairInformation::gearShapeOfDrivingGearIsValid() const {
     return m_CPmanager->validGearShapeFound();
 }
@@ -162,7 +155,7 @@ void GearPairInformation::updateFirstRequirement(Directions<bool> &firstRequirem
 void GearPairInformation::updateSecondRequirement(CalculationState state, Directions<real> &percentagePathOfContactCoversPitch) const {
     for(TurningDirection dir : {TurningDirection::Clockwise, TurningDirection::CounterClockwise}) {
 
-        real coverage = m_CPmanager->gearConsecutivelyContactPointsCoverageAngle(dir, state);
-        percentagePathOfContactCoversPitch.setValue(coverage / m_gearPair->drivingGear()->angularPitch(), dir);
+        real coverageAngle = m_CPmanager->gearConsecutivelyContactPointsCoverageAngle(dir, state);
+        percentagePathOfContactCoversPitch.setValue(coverageAngle / m_gearPair->drivingGear()->angularPitch(), dir);
     }
 }
