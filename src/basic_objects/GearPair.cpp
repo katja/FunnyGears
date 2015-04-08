@@ -37,6 +37,7 @@ void GearPair::calculateAgainWithNewToothProfile() {
     if(m_completeToothProfile != nullptr)
         delete m_completeToothProfile;
     m_completeToothProfile = m_drivingGear->completeToothProfile();
+    updateMainQuadrant(normalize((m_completeToothProfile->firstPoint() + m_completeToothProfile->lastPoint()) * 0.5));
     calculateAgainWithUnchangedAttributes();
 }
 
@@ -157,6 +158,17 @@ void GearPair::changed() {
     }
 }
 
+void GearPair::updateMainQuadrant(vec2 middleOfToothProfile) {
+    if(middleOfToothProfile.x > 0 && middleOfToothProfile.y > 0)        // (x, y) = (+, +), down right
+        m_quadrantOfToothProfile = 1;
+    else if(middleOfToothProfile.y > 0)                                 // (x, y) = (-, +), down left
+        m_quadrantOfToothProfile = 2;
+    else if(middleOfToothProfile.x < 0 && middleOfToothProfile.y < 0)   // (x, y) = (-, -), up left
+        m_quadrantOfToothProfile = 3;
+    else                                                                // (x, y) = (+, -), up right
+        m_quadrantOfToothProfile = 4;
+}
+
 void GearPair::insertPossiblePairingPointsInPointManager() {
     real startValue = m_completeToothProfile->lowerDomainLimit();
     vec2 startPoint = m_completeToothProfile->evaluate(startValue);
@@ -270,11 +282,21 @@ ContactPoint* GearPair::contactPointOf(const vec2 &point, const vec2 &normal, re
     } else {
         // cut is on opposite side of pitch point
         // we have to divide the circle somewhere, so use the point opposite of pitch point
-        if(directionToCutOnPitchRadius.y > 0)
+        if(directionToCutOnPitchRadius.y > 0) {
             angleA = -(M_PI - asin(directionToCutOnPitchRadius.y));
-        else
+            if(m_quadrantOfToothProfile == 3) { // we are in quadrant 2
+                angleA = M_PI * 2.0 + angleA;
+            }
+
+        }
+        else {
             angleA = +(M_PI + asin(directionToCutOnPitchRadius.y));
+            if(m_quadrantOfToothProfile == 2) { // we are in quadrant 3
+                angleA = -M_PI * 2.0 + angleA;
+            }
+        }
     }
+    cp->turningAngleToContact = angleA;
 
     real angleB = angleA * m_drivingGearPitchRadius / m_drivenGearPitchRadius;
 
@@ -325,6 +347,7 @@ NoneContactPoint* GearPair::noneContactPointOf(const vec2 &point, const vec2 &no
         vec2 pointOfContact = glm::rotate(ncp->originPoint, angleA);
         vec2 normalInContact = glm::rotate(ncp->originNormal, angleA);
 
+        ncp->turningAnglesToContact.push_back(angleA);
         ncp->points.push_back(glm::rotate((pointOfContact - vec2(m_distanceOfCenters, 0.0)), angleB));
         ncp->normals.push_back(glm::rotate(vec2(-normalInContact.x, -normalInContact.y), angleB));
         ncp->contactPositions.push_back(pointOfContact);

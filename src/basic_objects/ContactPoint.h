@@ -21,6 +21,7 @@ struct ContactPoint {
         originNormal(other.originNormal),
         contactPosition(other.contactPosition),
         normalInContact(other.normalInContact),
+        turningAngleToContact(other.turningAngleToContact),
         forbiddenAreaLength(other.forbiddenAreaLength),
         forbiddenAreaEndPoint(other.forbiddenAreaEndPoint),
         usedLargerValue(other.usedLargerValue),
@@ -37,6 +38,7 @@ struct ContactPoint {
     vec2 originNormal; //Must be normalized! Normal on driving gear
     vec2 contactPosition; //Position where contact took place
     vec2 normalInContact; //Must be normalized! Normal of driving gear in contact point
+    real turningAngleToContact; //From starting position the driving gear has to turn about turningAngleToContact to reach contact position
     real forbiddenAreaLength; //Thickness of the driving gear
     vec2 forbiddenAreaEndPoint; //Opposite point of driving gear transferred to driven gear
     bool usedLargerValue; // In most cases the normal of the driving gear has two cuts with reference radius => originPoint + t * originNormal => if maximum possible value is taken, this attribute is set to true
@@ -67,6 +69,7 @@ struct NoneContactPoint : public ContactPoint {
         originNormal = cp.originNormal;
         contactPosition = vec2(0, 0);
         normalInContact = vec2(0, 0);
+        turningAngleToContact = 0.0;
         forbiddenAreaLength = cp.forbiddenAreaLength;
         forbiddenAreaEndPoint = vec2(0, 0);
         usedLargerValue = true; //is not possible, when no cut with reference radius is available
@@ -80,12 +83,14 @@ struct NoneContactPoint : public ContactPoint {
         normals(other.normals),
         contactPositions(other.contactPositions),
         normalsInContact(other.normalsInContact),
+        turningAnglesToContact(other.turningAnglesToContact),
         examinedIndex(other.examinedIndex)
     {}
     vector<vec2> points; // points, which when chosen for the gear outline, do brake the basic requirement of a gear tooth system!
     vector<vec2> normals; // normals to points above
     vector<vec2> contactPositions; // would be the contact positions of points
     vector<vec2> normalsInContact; // would be the normal in the contact – would NOT go through pitch point!
+    vector<real> turningAnglesToContact; // turning angles to the contact positions
     int examinedIndex; // is possibility to specify a specific position of the NoneContactPoint => points[examinedIndex], normals[examinedIndex], contactPositions[examinedIndex], normalsInContact[examinedIndex]
 
     void rotate(real rotation) {
@@ -104,6 +109,7 @@ struct WrongContactPoint : public ContactPoint {
         normal = ncp.normals[ncp.examinedIndex];
         contactPosition = ncp.contactPositions[ncp.examinedIndex];
         normalInContact = ncp.normalsInContact[ncp.examinedIndex];
+        turningAngleToContact = ncp.turningAnglesToContact[ncp.examinedIndex];
         forbiddenAreaEndPoint = point + normal * ncp.forbiddenAreaLength;
     }
 };

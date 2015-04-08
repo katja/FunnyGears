@@ -67,6 +67,7 @@ private:
     real m_distanceOfCenters;
     real m_module;
     Spline *m_completeToothProfile;
+    int m_quadrantOfToothProfile; //estimation in which quadrant the main of the complete tooth profile is positioned (is necessary for correct turning angles)
 
     bool m_useBottomClearance;
     real m_bottomClearance;
@@ -81,6 +82,8 @@ private:
     list<ChangingObjectListener*> m_listeners;
 
     void changed();
+
+    void updateMainQuadrant(vec2 middleOfToothProfile);
 
     void insertPossiblePairingPointsInPointManager();
     void insertRefinedContactPoints(real stepValue, real nextStepValue, uint partition);
