@@ -6,7 +6,11 @@ QColor Preferences::HoverColor(QColor(240, 210, 80)); // dark yellow
 
 QColor Preferences::AttentionColor(QColor(190, 0, 30)); // red
 
-QColor Preferences::InformationColor(QColor(0, 128, 0)); //dark green
+QColor Preferences::InformationColorA(QColor(0, 128, 0)); //dark green
+
+QColor Preferences::InformationColorB(QColor(130, 167, 0)); //yellow green
+
+QColor Preferences::InformationColorC(QColor(210, 180, 0)); //orange
 
 QColor Preferences::BackgroundGridColor(Qt::lightGray);
 

@@ -88,7 +88,6 @@ private:
     Directions<ContactPoint*>       m_gearBestContactStart;
     Directions<ContactPoint*>       m_gearBestContactStop;
     Directions<real>                m_gearBestContactCoverage;
-    Directions<vec2>                m_gearContactPathStartOnPitchCircle;
 
     // chosen points if already translated
     vector<vec2>                    m_translatedGearPoints; // all gear points after translation
@@ -98,7 +97,6 @@ private:
     Directions<ContactPoint*>       m_translatedGearBestContactStart;
     Directions<ContactPoint*>       m_translatedGearBestContactStop;
     Directions<real>                m_translatedGearBestContactCoverage;
-    Directions<vec2>                m_translatedGearContactPathStartOnPitchCircle;
 
     // other (pitch and rotation) attributes:
     real                            m_angularPitchRotation; //is negative, if driven gear tooth is described counter clockwise (in screen representation), and positive otherwise
@@ -119,7 +117,6 @@ private:
     void copyNoneContactPointsInRelevantPitches();
     void findAllCoveredPoints();
     void findBestPathOfContact(CalculationState calcState);
-    bool isThereAPointOnPitchCircle(CalculationState calcState, ContactPoint *referencePointOfDrivingGear, vec2 &addToPoint);
 
     // WrongContactPoint* wrongContactPointWhenTurnedBack(vec2 point, vec2 normal, real pitchRadiusDrivenGear);
     uint numberOfNoneErrorContactPoints() const;

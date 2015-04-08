@@ -96,6 +96,10 @@ void drawArc(QPainter *painter, real startAngle, real stopAngle, real radius, ve
 
 void changePen(QPainter *painter, QColor color, real lineWidth, Qt::PenCapStyle cap = Qt::SquareCap);
 
+void changePenWidth(QPainter *painter, real lineWidth);
+
+void changePenColor(QPainter *painter, QColor color);
+
 ////////////////////////////////////
 ////////// TEMPLATE HELPERS ////////
 // They are implemented in header file, because this is necessary for templates

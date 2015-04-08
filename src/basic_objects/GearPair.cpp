@@ -4,8 +4,8 @@
 
 const real GearPair::DefaultBottomClearance = 3; //in mm
 const real GearPair::DefaultBottomClearanceStartAngle = 60; //in degree
-const real GearPair::DefaultMaxDrift = 0.26; // ~ 15° //0.05; // ~ 3°
-const uint GearPair::DefaultSamplingRate = 60;//80;
+const real GearPair::DefaultMaxDrift = 0.14; // ~8°
+const uint GearPair::DefaultSamplingRate = 100;
 
 GearPair::GearPair(const SplineGear &drivingGear) :
     m_drivingGear(new SplineGear(drivingGear)),

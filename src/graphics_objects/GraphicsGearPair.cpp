@@ -41,13 +41,13 @@ GraphicsGearPair::GraphicsGearPair(GearPair *gearPair) :
     m_gearPairInformationWidget(new GearPairInformationWidget(gearPair)),
     m_pitchPointIsVisible(false),
     m_drivingGearSamplingIsVisible(true),
-    m_drivenGearSamplingIsVisible(true),
+    m_drivenGearSamplingIsVisible(false),
     m_forbiddenAreaInDrivingGearIsVisible(false),
     m_forbiddenAreaInDrivenGearIsVisible(false),
     m_noneContactPointsAreVisible(false),
-    m_selectionOfGearPointsIsVisible(true),
+    m_selectionOfGearPointsIsVisible(false),
     m_pathOfPossibleContactIsVisible(false),
-    m_pathOfRealContactIsVisible(false),
+    m_pathOfRealContactIsVisible(true),
     m_pathOfBestContactIsVisible(false),
     m_pitchesAreVisible(false),
     m_pitchCirclesAreVisible(false),
@@ -396,9 +396,7 @@ void GraphicsGearPair::paint(QPainter *painter, const QStyleOptionGraphicsItem *
     Q_UNUSED(widget);
 
     if(m_finePencilUsed) {
-        QPen pen = painter->pen();
-        pen.setWidth(0);
-        painter->setPen(pen);
+        changePenWidth(painter, 0);
     }
 
     if(m_isRotating) {
@@ -410,19 +408,17 @@ void GraphicsGearPair::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 
     if(m_pathOfBestContactIsVisible)
         paintBestConsecutivePathOfContact(painter);
-    if(m_pitchPointIsVisible)
-        paintPitchPoint(painter);
     if(m_pathOfPossibleContactIsVisible)
         paintPathOfPossibleContact(painter);
     if(m_pathOfRealContactIsVisible)
         paintPathOfRealContact(painter);
+    if(m_pitchPointIsVisible)
+        paintPitchPoint(painter);
 }
 
 void GraphicsGearPair::paintAdditionals(QPainter *painter, GraphicsMatingSplineGear *gear) const {
     if(m_finePencilUsed) {
-        QPen pen = painter->pen();
-        pen.setWidth(0);
-        painter->setPen(pen);
+        changePenWidth(painter, 0);
     }
     if(gear == m_drivingGear) {
         if(m_pitchCirclesAreVisible)
@@ -462,11 +458,7 @@ void GraphicsGearPair::paintSampledContactPointsDrivingGear(QPainter *painter) c
 
     for(list<ContactPoint*> *l : contactPointsLists) {
         for(ContactPoint *cp : *l) {
-
-            QColor c = getColorFor(cp->evaluationStep);
-            QPen pen = painter->pen();
-            pen.setColor(c);
-            painter->setPen(pen);
+            changePenColor(painter, getColorFor(cp->evaluationStep));
 
             // originPoint, originNormal
             drawCircle(painter, cp->originPoint);
@@ -495,9 +487,7 @@ void GraphicsGearPair::paintSampledContactPointsDrivenGear(QPainter *painter) co
                 c = lightUpColor(c, list->position * lightUp);
             else if(list->position < 0)
                 c = lightUpColor(c, -(list->position * lightUp));
-            QPen pen = painter->pen();
-            pen.setColor(c);
-            painter->setPen(pen);
+            changePenColor(painter, c);
 
             // point (and forbidden area)
             drawCircle(painter, cp->point);
@@ -521,9 +511,7 @@ void GraphicsGearPair::paintSampledContactPointsDrivenGear(QPainter *painter) co
 
 void GraphicsGearPair::paintPitchPoint(QPainter *painter) const {
     painter->save();
-    QPen pen = painter->pen();
-    pen.setColor(Qt::black);
-    painter->setPen(pen);
+    changePenColor(painter, Preferences::AttentionColor);
     drawCircle(painter, vec2(m_gearPair->drivingGearPitchRadius(), 0), Preferences::PointRadius * 2);
     painter->restore();
 }
@@ -544,19 +532,9 @@ void GraphicsGearPair::paintBestConsecutivePathOfContact(QPainter *painter) cons
     ContactPoint *startSeries = m_gearPair->contactPointManager().gearConsecutivelyContactPointsStart(dir, s);
     ContactPoint *endSeries = m_gearPair->contactPointManager().gearConsecutivelyContactPointsStop(dir, s);
     real coverage = m_gearPair->contactPointManager().gearConsecutivelyContactPointsCoverageAngle(dir, s);
-    vec2 startCoverageOnDrivenGear = m_gearPair->contactPointManager().gearConsecutivelyContactPointsCoverageStartOnPitchCircle(dir, s);
-    vec2 centerDrivenGear = vec2(m_gearPair->getDistanceOfCenters(), 0);
-    vec2 startCoverageInDrivenGear = startCoverageOnDrivenGear - centerDrivenGear;
-    vec2 stopCoverageInDrivenGear;
-    if(dir == TurningDirection::Clockwise)
-        stopCoverageInDrivenGear = glm::rotate(startCoverageInDrivenGear, coverage);
-    else
-        stopCoverageInDrivenGear = glm::rotate(startCoverageInDrivenGear, -coverage);
-    real startCoverageInDrivingGearAngle = asin(normalize(startCoverageOnDrivenGear).y) * m_gearPair->transmissionRatio();
-    vec2 startCoverageInDrivingGear = glm::rotate(vec2(m_gearPair->drivingGearPitchRadius(), 0), startCoverageInDrivingGearAngle);
 
-    QColor colorPath = Preferences::InformationColor;
-    QColor colorCoverage = lightUpColor(Preferences::InformationColor);
+    QColor colorPath = Preferences::InformationColorA;
+    QColor colorCoverage = Preferences::InformationColorB;
     real bigLineWidth = m_finePencilUsed ? Preferences::HighlightedLineWidth : 2 * Preferences::HighlightedLineWidth;
     real thinLineWidth = m_finePencilUsed ? 0 : 1;
 
@@ -567,29 +545,25 @@ void GraphicsGearPair::paintBestConsecutivePathOfContact(QPainter *painter) cons
             changePen(painter, colorPath, bigLineWidth, Qt::RoundCap);
             drawCircle(painter, bestContactSeries->at(0)->contactPosition, Preferences::PointRadius + 1);
         } else {
-            ////////////
-            //DRAW MORE INFORMATION
-            //mark lines to start and end of coverage
-            changePen(painter, colorCoverage, thinLineWidth);
-            drawLine(painter, vec2(0, 0), startCoverageInDrivingGear);
-            // drawLine(painter, vec2(0, 0), glm::rotate(startCoverageInDrivingGear, coverage));
-            drawLine(painter, centerDrivenGear, startCoverageOnDrivenGear);
-            drawLine(painter, centerDrivenGear, stopCoverageInDrivenGear + centerDrivenGear);
+            if(cross(startSeries->contactPosition, endSeries->contactPosition) < 0)
+                coverage = -coverage;
             //mark lines to start and end of contact path
             changePen(painter, colorPath, thinLineWidth);
             paintLinesToStartAndEndOfBestConsecutivePathOfContact(painter, startSeries->contactPosition, endSeries->contactPosition);
-            //highlight start and end of contact path
+            //highlight start and end of coverage in contact path
+            changePen(painter, colorCoverage, thinLineWidth);
             drawCircle(painter, startSeries->contactPosition, Preferences::PointRadius + 2);
             drawCircle(painter, endSeries->contactPosition, Preferences::PointRadius + 2);
             //mark coverage by lines
-            changePen(painter, colorCoverage, 0);
-            drawLine(painter, startSeries->contactPosition, vec2(0.0));
-            if(cross(startSeries->contactPosition, endSeries->contactPosition) < 0)
-                drawLine(painter, glm::rotate(startSeries->contactPosition, -coverage), vec2(0.0));
-            else
-                drawLine(painter, glm::rotate(startSeries->contactPosition, +coverage), vec2(0.0));
-            ////////////
-            //DRAW PATH OF CONTACT
+            changePen(painter, colorCoverage, thinLineWidth);
+            vec2 startOnPitch = normalize(startSeries->contactPosition) * m_gearPair->drivingGearPitchRadius();
+            drawLine(painter, startOnPitch, vec2(0.0));
+            drawLine(painter, glm::rotate(startOnPitch, coverage), vec2(0.0));
+            //mark coverage on pitch circle
+            changePen(painter, colorCoverage, bigLineWidth, Qt::RoundCap);
+            real startAngle = asin(normalize(startOnPitch).y);
+            drawArc(painter, startAngle, startAngle + coverage, m_gearPair->drivingGearPitchRadius());
+            //draw path of contact
             changePen(painter, colorPath, bigLineWidth, Qt::RoundCap);
             for(uint i = 1; i < bestContactSeries->size(); ++i) {
                 drawLine(painter, bestContactSeries->at(i - 1)->contactPosition, bestContactSeries->at(i)->contactPosition);
@@ -610,8 +584,7 @@ void GraphicsGearPair::paintHighlightOfStartAndEndOfPathOfContact(QPainter *pain
     }
 
     painter->save();
-    QPen pen(Preferences::InformationColor);
-    painter->setPen(pen);
+    changePenColor(painter, Preferences::InformationColorB);
     ContactPoint *startSeries = m_gearPair->contactPointManager().gearConsecutivelyContactPointsStart(dir, s);
     ContactPoint *endSeries = m_gearPair->contactPointManager().gearConsecutivelyContactPointsStop(dir, s);
     if(startSeries != nullptr)
@@ -669,25 +642,16 @@ void GraphicsGearPair::paintPathOfPossibleContact(QPainter *painter) const {
 
     painter->save();
 
-    QPen pen = painter->pen();
     if(m_finePencilUsed)
-        pen.setColor(Qt::black);
+        changePenColor(painter, Qt::black);
     else
-        pen.setWidth(0);
-    painter->setPen(pen);
+        changePenWidth(painter, 0);
 
     for(list<ContactPoint*> *l : contactPointsLists) {
         for(ContactPoint *cp : *l) {
 
-            QPen pen = painter->pen();
-            QColor c = pen.color();
-
             if(!m_finePencilUsed)
-                c = getColorFor(cp->evaluationStep);
-
-            pen.setColor(c);
-            pen.setBrush(QBrush(c));
-            painter->setPen(pen);
+                changePenColor(painter, getColorFor(cp->evaluationStep));
 
             drawCircle(painter, cp->contactPosition);
             if(m_finePencilUsed)
@@ -710,10 +674,8 @@ void GraphicsGearPair::paintPathOfRealContact(QPainter *painter) const {
     painter->save();
     for(ContactPoint *cp : selectedContactPoints) {
         QColor c = getColorFor(cp->evaluationStep);
-        QPen pen = painter->pen();
-        pen.setColor(c);
-        pen.setBrush(QBrush(c));
-        painter->setPen(pen);
+        changePenColor(painter, c);
+        painter->setBrush(QBrush(c));
 
         drawCircle(painter, cp->contactPosition);
         if(m_finePencilUsed)
@@ -721,13 +683,9 @@ void GraphicsGearPair::paintPathOfRealContact(QPainter *painter) const {
         vec2 endNormal = cp->contactPosition + cp->normalInContact * 20.0;
         drawLine(painter, cp->contactPosition, endNormal);
     }
-    painter->restore();
-    painter->save();
-    QColor c = Preferences::AttentionColor;
-    QPen pen = painter->pen();
-    pen.setColor(c);
-    pen.setBrush(QBrush(c));
-    painter->setPen(pen);
+
+    changePenColor(painter, Preferences::AttentionColor);
+    painter->setBrush(QBrush(Preferences::AttentionColor));
 
     for(ContactPoint *cp : selectedWrongContactPoints) {
         drawCircle(painter, cp->contactPosition);
@@ -743,10 +701,7 @@ void GraphicsGearPair::paintNoneContactPoints(QPainter *painter, bool paintOrigi
     list<NoneContactPoint*> ncps = m_gearPair->contactPointManager().noneContactPoints();
 
     painter->save();
-    QColor orange = QColor(210, 180, 0);
-    QPen pen = painter->pen();
-    pen.setColor(orange);
-    painter->setPen(pen);
+    changePenColor(painter, Preferences::InformationColorB);
 
     for(NoneContactPoint *ncp : ncps) {
         //OriginPoint
@@ -792,10 +747,7 @@ void GraphicsGearPair::paintSelectedGearPoints(QPainter *painter) const {
     vector<vec2> gearPoints = m_gearPair->contactPointManager().gearPoints();
 
     painter->save();
-    QPen pen = painter->pen();
-    pen.setWidth(0);
-    pen.setColor(Preferences::AttentionColor);
-    painter->setPen(pen);
+    changePen(painter, Preferences::AttentionColor, 0);
     for(uint i = 0; i < gearPoints.size(); ++i) {
         drawCircle(painter, gearPoints[i], Preferences::PointRadius + 0.3);
         if(m_finePencilUsed)

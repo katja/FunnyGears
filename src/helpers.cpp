@@ -106,32 +106,17 @@ std::ostream& operator <<(std::ostream &os, const ErrorCode &error) {
     }
 }
 
-    real evaluationValue; //Spline curve of driving gear was evaluated at this value to get this ContactPoint
-    uint evaluationStep; //Evaluation number of ContactPoint
-    vec2 point; //Point on driven gear
-    vec2 normal; //Must be normalized! normal on driven gear
-    vec2 originPoint; //Point on driving gear
-    vec2 originNormal; //Must be normalized! Normal on driving gear
-    vec2 contactPosition; //Position where contact took place
-    vec2 normalInContact; //Must be normalized! Normal of driving gear in contact point
-    real forbiddenAreaLength; //Thickness of the driving gear
-    vec2 forbiddenAreaEndPoint; //Opposite point of driving gear transferred to driven gear
-    bool usedLargerValue; // In most cases the normal of the driving gear has two cuts with reference radius => originPoint + t * originNormal => if maximum possible value is taken, this attribute is set to true
-    bool isCovered; //is set to true, when this point can't become a contact point
-    bool isRotated;
-    ErrorCode error;
-
-
 std::ostream& operator <<(std::ostream &os, const ContactPoint &cp) {
     os << "CONTACT POINT with properties...\n";
     os << "Evaluation value:        " << cp.evaluationValue << "\n";
     os << "Evaluation step:         " << cp.evaluationStep << "\n";
-    os << "Driven gear point:      " << cp.point << "\n";
-    os << "Driven gear normal:     " << cp.normal << "\n";
+    os << "Driven gear point:       " << cp.point << "\n";
+    os << "Driven gear normal:      " << cp.normal << "\n";
     os << "Driving gear point:      " << cp.originPoint << "\n";
     os << "Driving gear normal:     " << cp.originNormal << "\n";
     os << "Contact position point:  " << cp.contactPosition << "\n";
     os << "Contact position normal: " << cp.normalInContact << "\n";
+    os << "Turning angle to contact:" << cp.turningAngleToContact << "\n";
     os << "Forbidden area length:   " << cp.forbiddenAreaLength << "\n";
     os << "Forbidden area end point:" << cp.forbiddenAreaEndPoint << "\n";
     os << "Used larger t value: "     << (cp.usedLargerValue ? "yes" : "no") << "\n";
@@ -155,6 +140,7 @@ std::ostream& operator <<(std::ostream &os, const NoneContactPoint &ncp) {
     os << "Driven gear normal:\n" << ncp.normals << "\n";
     os << "Contact position points:\n" << ncp.contactPositions << "\n";
     os << "Contact position normals:\n" << ncp.normalsInContact << "\n";
+    os << "Turning angles to contact:\n" << ncp.turningAnglesToContact << "\n";
     return os;
 }
 
@@ -162,12 +148,13 @@ std::ostream& operator <<(std::ostream &os, const WrongContactPoint &wcp) {
     os << "WRONG CONTACT POINT with properties...\n";
     os << "Evaluation value:        " << wcp.evaluationValue << "\n";
     os << "Evaluation step:         " << wcp.evaluationStep << "\n";
-    os << "Driven gear point:      " << wcp.point << "\n";
-    os << "Driven gear normal:     " << wcp.normal << "\n";
+    os << "Driven gear point:       " << wcp.point << "\n";
+    os << "Driven gear normal:      " << wcp.normal << "\n";
     os << "Driving gear point:      " << wcp.originPoint << "\n";
     os << "Driving gear normal:     " << wcp.originNormal << "\n";
     os << "Contact position point:  " << wcp.contactPosition << "\n";
     os << "Contact position normal: " << wcp.normalInContact << "\n";
+    os << "Turning angle to contact:" << wcp.turningAngleToContact << "\n";
     os << "Forbidden area length:   " << wcp.forbiddenAreaLength << "\n";
     os << "Forbidden area end point:" << wcp.forbiddenAreaEndPoint << "\n";
     os << "Used larger t value: "     << (wcp.usedLargerValue ? "yes" : "no") << "\n";
@@ -177,13 +164,13 @@ std::ostream& operator <<(std::ostream &os, const WrongContactPoint &wcp) {
 }
 
 std::ostream& operator <<(std::ostream &os, const list< list<ContactPoint*> *> &listsOfContactPoints) {
-    std::cout << "list of lists of ContactPoints – " << listsOfContactPoints.size() << " lists included." << std::endl;
+    os << "list of lists of ContactPoints – " << listsOfContactPoints.size() << " lists included." << std::endl;
     for(list<ContactPoint*> *l : listsOfContactPoints) {
-        std::cout << "-------------------------------\nLIST with " << l->size() << " ContactPoints:" << std::endl;
+        os << "-------------------------------\nLIST with " << l->size() << " ContactPoints:" << std::endl;
         for(ContactPoint *cp : *l) {
-            std::cout << *cp << std::endl;
+            os << *cp << std::endl;
         }
-        std::cout << "-------------------------------" << std::endl;
+        os << "-------------------------------" << std::endl;
     }
     return os;
 }
@@ -350,5 +337,17 @@ void changePen(QPainter *painter, QColor color, real lineWidth, Qt::PenCapStyle 
     QPen pen(color);
     pen.setWidth(lineWidth);
     pen.setCapStyle(cap);
+    painter->setPen(pen);
+}
+
+void changePenWidth(QPainter *painter, real lineWidth) {
+    QPen pen = painter->pen();
+    pen.setWidth(lineWidth);
+    painter->setPen(pen);
+}
+
+void changePenColor(QPainter *painter, QColor color) {
+    QPen pen = painter->pen();
+    pen.setColor(color);
     painter->setPen(pen);
 }

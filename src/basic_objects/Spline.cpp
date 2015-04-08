@@ -63,11 +63,11 @@ vec2 Spline::evaluate(real value) const {
     if((n - m_degree + 1) < 0 || (n - m_degree + 1) >= m_controlPoints.size() || n + 1 >= m_controlPoints.size()) {
         std::cerr << "ATTENTION! PROGRAM WILL QUIT UNEXPECTEDLY IN A MOMENT!!!" << std::endl;
         if((n - m_degree + 1) < 0)
-            std::cerr << "First Condition (< 0)" << std::endl;
+            std::cerr << "1. Condition (< 0) was not met" << std::endl;
         if((n - m_degree + 1) >= m_controlPoints.size())
-            std::cerr << "Seco. Condition (>= size)" << std::endl;
+            std::cerr << "2. Condition (>= size) was not met" << std::endl;
         if(n + 1 >= m_controlPoints.size())
-            std::cerr << "Third Condition (>= size)" << std::endl;
+            std::cerr << "3. Condition (>= size) was not met" << std::endl;
         std::cerr << "Spline has following state:" << std::endl;
         std::cerr << (*this) << std::endl;
         std::cerr << "IF PROGRAM DOES NOT QUIT NOW, BUG WAS FOUND!!!" << std::endl;
@@ -310,7 +310,7 @@ void Spline::cutOffEdges() {
     uint numberOfKnots = m_knots.size();
     int m = m_degree - multiplicity(lowerDomainKnotIndex());
     if(m < 0) {
-        std::cerr << "An ERROR occured! In Spline::cutOffEdges() a negative multiplicity was recognized!" << std::endl;
+        std::cerr << "ERROR! In Spline::cutOffEdges() a negative multiplicity was recognized!" << std::endl;
         return;
     } else if(m == 0) {
         return;
@@ -691,7 +691,7 @@ void Spline::adjustKnots() {
         //assure that there are not more than n = m_degree same knot values
         if(absolute(m_knots.at(i) - lastKnotValue) < 0.00000001) {
             if(m_knots.at(i) - lastKnotValue != 0)
-                std::cout << "ATTENTION!!!!!!! adjustKnots behaves other than in previous states!!!" << std::endl;
+                std::cerr << "ATTENTION! Spline::adjustKnots() had found knots with different values but handled as same value" << std::endl; // Previously only real equality was tested, so if this is found the current state behaves different from previous states!!!
             ++occurences;
             if(occurences > m_degree) {
                 m_knots[i] = lastKnotValue + 1;
