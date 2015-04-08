@@ -1,5 +1,4 @@
-![Funny Gears](/images/FunnyGears.png)
-Funny Gears
+![Funny Gears](/images/FunnyGears.png) Funny Gears
 ===========
 
 Funny Gears lets you play with spur gears in 2D and explore the basic requirement of gearing. You can form and construct your own gears and explore what a mating gear would look like. As the Gears are described by spline curves with a B-Spline basis, the program may also be intereseting for someone who wants to explore the B-Spline representation.
