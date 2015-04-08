@@ -14,7 +14,7 @@ GearPairInformationWidget::GearPairInformationWidget(GearPair *gearPair) :
 {
     setWindowTitle(tr("Gear Pair Information"));
 
-    int minimumWidth = 160;
+    int minimumWidth = 200;
     int minimumHeight = 22;
     setMinimumWidth(3 * minimumWidth + 20);
 
@@ -108,33 +108,55 @@ GearPairInformationWidget::GearPairInformationWidget(GearPair *gearPair) :
     QLabel *counterClockwiseText = new QLabel(tr("Driving gear turns\ncounter clockwise"), this);
     counterClockwiseText->setWordWrap(true);
 
-    m_basicRequireText = new QLabel(tr("<b>Basic requirements</b> of gear tooth system are fulfilled?"), this);
+    //correct (green)   #008000
+    //false (red)       #BE001E
+
+    //dark blue         #000080
+    //dark violet       #800040
+    //blue-violet       #600060
+
+    m_basicRequireTrue = QString(tr("<font color='#008000'><b>Yes</b></font>"));
+
+    m_basicRequireText = new QLabel(tr("<font color='#600060'><b>Basic requirements</b> of gear tooth system are fulfilled?</font>"), this);
     m_basicRequireText->setWordWrap(true);
     m_basicRequireText->setTextFormat(Qt::RichText);
+    m_basicRequireFalse = QString(tr("<font color='#BE001E'><b>No</b><br>Try to satisfy first and second basic requirement</font>"));
     m_basicRequireC = new QLabel(this);
+    m_basicRequireC->setWordWrap(true);
     m_basicRequireCC = new QLabel(this);
+    m_basicRequireCC->setWordWrap(true);
 
-    m_basicFirstRequireText = new QLabel(tr("<b>First</b> condition of basic requirements is fulfilled?"), this);
+    m_basicFirstRequireText = new QLabel(tr("<font color='#000080'><b>First</b> condition of basic requirements is fulfilled?</font>"), this);
     m_basicFirstRequireText->setWordWrap(true);
     m_basicFirstRequireText->setTextFormat(Qt::RichText);
+    m_basicFirstRequireFalse = QString(tr("<font color='#BE001E'><b>No</b><br>Try to eliminate the dark red contact points. (Choose tooth profile where every normal has a cut with the pitch circle.)"));
     m_basicFirstRequireC = new QLabel(this);
+    m_basicFirstRequireC->setWordWrap(true);
     m_basicFirstRequireCC = new QLabel(this);
+    m_basicFirstRequireCC->setWordWrap(true);
 
-    m_percentageOfCPsInPathText = new QLabel(tr("Ratio of 'good' contact points in path of contact:"), this);
+    m_percentageOfCPsInPathText = new QLabel(tr("<font color='#000080'>Ratio of 'good' contact points in path of contact:</font>"), this);
     m_percentageOfCPsInPathText->setWordWrap(true);
     m_percentageOfCPsInPathC = new QLabel(this);
+    m_percentageOfCPsInPathC->setWordWrap(true);
     m_percentageOfCPsInPathCC = new QLabel(this);
+    m_percentageOfCPsInPathCC->setWordWrap(true);
 
-    m_basicSecondRequireText = new QLabel(tr("<b>Second</b> condition of basic requirements is fulfilled?"), this);
+    m_basicSecondRequireText = new QLabel(tr("<font color='#800040'><b>Second</b> condition of basic requirements is fulfilled?</font>"), this);
     m_basicSecondRequireText->setWordWrap(true);
     m_basicSecondRequireText->setTextFormat(Qt::RichText);
+    m_basicSecondRequireFalse = QString(tr("<font color='#BE001E'><b>No</b><br>Try to cover a whole pitch with the path of contact"));
     m_basicSecondRequireC = new QLabel(this);
+    m_basicSecondRequireC->setWordWrap(true);
     m_basicSecondRequireCC = new QLabel(this);
+    m_basicSecondRequireCC->setWordWrap(true);
 
-    m_coverageAngleText = new QLabel(tr("Contact ratio (angle, the path of contact covers):"), this);
+    m_coverageAngleText = new QLabel(tr("<font color='#800040'>Contact ratio (angle, the path of contact covers):</font>"), this);
     m_coverageAngleText->setWordWrap(true);
     m_coverageAngleC = new QLabel(this);
+    m_coverageAngleC->setWordWrap(true);
     m_coverageAngleCC = new QLabel(this);
+    m_coverageAngleCC->setWordWrap(true);
 
     QGroupBox *qualityBox = new QGroupBox(tr("Quality of gearing"), this);
     QGridLayout *qualityLayout = new QGridLayout(qualityBox);
@@ -148,33 +170,33 @@ GearPairInformationWidget::GearPairInformationWidget(GearPair *gearPair) :
 
     row = 0;
     qualityLayout->setRowMinimumHeight(row, 2 * minimumHeight);
-    qualityLayout->addWidget(clockwiseText,             row, 1, 1, 1, Qt::AlignTop | Qt::AlignHCenter);
-    qualityLayout->addWidget(counterClockwiseText,      row, 2, 1, 1, Qt::AlignTop | Qt::AlignHCenter);
+    qualityLayout->addWidget(clockwiseText,             row, 1, 1, 1, Qt::AlignTop | Qt::AlignLeft);
+    qualityLayout->addWidget(counterClockwiseText,      row, 2, 1, 1, Qt::AlignTop | Qt::AlignLeft);
     ++row;
     qualityLayout->setRowMinimumHeight(row, 3 * minimumHeight);
     qualityLayout->addWidget(m_basicRequireText,        row, 0, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
-    qualityLayout->addWidget(m_basicRequireC,           row, 1, 1, 1, Qt::AlignCenter);
-    qualityLayout->addWidget(m_basicRequireCC,          row, 2, 1, 1, Qt::AlignCenter);
+    qualityLayout->addWidget(m_basicRequireC,           row, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
+    qualityLayout->addWidget(m_basicRequireCC,          row, 2, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
     ++row;
     qualityLayout->setRowMinimumHeight(row, 3 * minimumHeight);
     qualityLayout->addWidget(m_basicFirstRequireText,   row, 0, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
-    qualityLayout->addWidget(m_basicFirstRequireC,      row, 1, 1, 1, Qt::AlignCenter);
-    qualityLayout->addWidget(m_basicFirstRequireCC,     row, 2, 1, 1, Qt::AlignCenter);
+    qualityLayout->addWidget(m_basicFirstRequireC,      row, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
+    qualityLayout->addWidget(m_basicFirstRequireCC,     row, 2, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
     ++row;
     qualityLayout->setRowMinimumHeight(row, 3 * minimumHeight);
     qualityLayout->addWidget(m_percentageOfCPsInPathText,row, 0, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
-    qualityLayout->addWidget(m_percentageOfCPsInPathC,  row, 1, 1, 1, Qt::AlignCenter);
-    qualityLayout->addWidget(m_percentageOfCPsInPathCC, row, 2, 1, 1, Qt::AlignCenter);
+    qualityLayout->addWidget(m_percentageOfCPsInPathC,  row, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
+    qualityLayout->addWidget(m_percentageOfCPsInPathCC, row, 2, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
     ++row;
     qualityLayout->setRowMinimumHeight(row, 3 * minimumHeight);
     qualityLayout->addWidget(m_basicSecondRequireText,  row, 0, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
-    qualityLayout->addWidget(m_basicSecondRequireC,     row, 1, 1, 1, Qt::AlignCenter);
-    qualityLayout->addWidget(m_basicSecondRequireCC,    row, 2, 1, 1, Qt::AlignCenter);
+    qualityLayout->addWidget(m_basicSecondRequireC,     row, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
+    qualityLayout->addWidget(m_basicSecondRequireCC,    row, 2, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
     ++row;
     qualityLayout->setRowMinimumHeight(row, 3 * minimumHeight);
     qualityLayout->addWidget(m_coverageAngleText,       row, 0, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
-    qualityLayout->addWidget(m_coverageAngleC,          row, 1, 1, 1, Qt::AlignCenter);
-    qualityLayout->addWidget(m_coverageAngleCC,         row, 2, 1, 1, Qt::AlignCenter);
+    qualityLayout->addWidget(m_coverageAngleC,          row, 1, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
+    qualityLayout->addWidget(m_coverageAngleCC,         row, 2, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
     ++row;
     qualityLayout->setRowStretch(                       row, 1);
 
@@ -225,25 +247,45 @@ void GearPairInformationWidget::updateInformation() {
     TurningDirection cc = TurningDirection::CounterClockwise;
 
     m_basicRequireC->setText(
-        (m_gearPairInfo->basicRequirementsOfGearToothSystemAreFulfilled(c)) ? "Yes" : "No");
+        (m_gearPairInfo->basicRequirementsOfGearToothSystemAreFulfilled(c)
+        ? m_basicRequireTrue : m_basicRequireFalse));
     m_basicRequireCC->setText(
-        (m_gearPairInfo->basicRequirementsOfGearToothSystemAreFulfilled(cc)) ? "Yes" : "No");
+        (m_gearPairInfo->basicRequirementsOfGearToothSystemAreFulfilled(cc)
+        ? m_basicRequireTrue : m_basicRequireFalse));
+
     m_basicFirstRequireC->setText(
-        (m_gearPairInfo->firstBasicRequirementOfGearToothSystemIsFulfilled(c)) ? "Yes" : "No");
+        (m_gearPairInfo->firstBasicRequirementOfGearToothSystemIsFulfilled(c)
+        ? m_basicRequireTrue : m_basicFirstRequireFalse));
     m_basicFirstRequireCC->setText(
-        (m_gearPairInfo->firstBasicRequirementOfGearToothSystemIsFulfilled(cc)) ? "Yes" : "No");
+        (m_gearPairInfo->firstBasicRequirementOfGearToothSystemIsFulfilled(cc)
+        ? m_basicRequireTrue : m_basicFirstRequireFalse));
+
     m_basicSecondRequireC->setText(
-        (m_gearPairInfo->secondBasicRequirementOfGearToothSystemIsFulfilled(c)) ? "Yes" : "No");
+        (m_gearPairInfo->secondBasicRequirementOfGearToothSystemIsFulfilled(c))
+        ? m_basicRequireTrue : m_basicSecondRequireFalse);
     m_basicSecondRequireCC->setText(
-        (m_gearPairInfo->secondBasicRequirementOfGearToothSystemIsFulfilled(cc)) ? "Yes" : "No");
+        (m_gearPairInfo->secondBasicRequirementOfGearToothSystemIsFulfilled(cc))
+        ? m_basicRequireTrue : m_basicSecondRequireFalse);
+
+    QString falseColor(tr("<font color='#BE001E'>"));
+    QString trueColor(tr("<font color='#008000'>"));
+    QString endColor(tr("</font>"));
     m_percentageOfCPsInPathC->setText(
-        QString::number(m_gearPairInfo->ratioOfCPsToWCPs(c) * 100.0, 'f', 2) + " %");
+        ((m_gearPairInfo->firstBasicRequirementOfGearToothSystemIsFulfilled(c)) ? trueColor : falseColor)
+        + QString::number(m_gearPairInfo->ratioOfCPsToWCPs(c) * 100.0, 'f', 2)
+        + " %" + endColor);
     m_percentageOfCPsInPathCC->setText(
-        QString::number(m_gearPairInfo->ratioOfCPsToWCPs(cc) * 100.0, 'f', 2) + " %");
+        ((m_gearPairInfo->firstBasicRequirementOfGearToothSystemIsFulfilled(cc)) ? trueColor : falseColor)
+        + QString::number(m_gearPairInfo->ratioOfCPsToWCPs(cc) * 100.0, 'f', 2)
+        + " %" + endColor);
     m_coverageAngleC->setText(
-        QString::number(m_gearPairInfo->contactRatio(c), 'f', 3));
+        ((m_gearPairInfo->secondBasicRequirementOfGearToothSystemIsFulfilled(c)) ? trueColor : falseColor)
+        + QString::number(m_gearPairInfo->contactRatio(c), 'f', 3)
+        + endColor);
     m_coverageAngleCC->setText(
-        QString::number(m_gearPairInfo->contactRatio(cc), 'f', 3));
+        ((m_gearPairInfo->secondBasicRequirementOfGearToothSystemIsFulfilled(cc)) ? trueColor : falseColor)
+        + QString::number(m_gearPairInfo->contactRatio(cc), 'f', 3)
+        + endColor);
 }
 
 void GearPairInformationWidget::objectChanged(ChangingObject *object) {
@@ -259,7 +301,7 @@ void GearPairInformationWidget::showEvent(QShowEvent *event) {
 }
 
 void GearPairInformationWidget::resizeEvent(QResizeEvent *event) {
-    int width = event->size().width() - 350;
+    int width = event->size().width() - 430;
     m_basicRequireText->resize(width, m_basicRequireText->height());
     m_basicFirstRequireText->resize(width, m_basicFirstRequireText->height());
     m_percentageOfCPsInPathText->resize(width, m_percentageOfCPsInPathText->height());

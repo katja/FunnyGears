@@ -53,6 +53,11 @@ private:
             *m_coverageAngleText,
             *m_coverageAngleC,
             *m_coverageAngleCC;
+    QString m_basicRequireTrue,
+            m_basicRequireFalse,
+            m_basicSecondRequireFalse,
+            m_basicFirstRequireFalse;
+
 
     void updateAttentionBoxVisibility(bool invalidGearShapeVisible, bool incorrectGearOutlineVisible);
 
