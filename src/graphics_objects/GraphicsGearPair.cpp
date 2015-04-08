@@ -701,7 +701,7 @@ void GraphicsGearPair::paintNoneContactPoints(QPainter *painter, bool paintOrigi
     list<NoneContactPoint*> ncps = m_gearPair->contactPointManager().noneContactPoints();
 
     painter->save();
-    changePenColor(painter, Preferences::InformationColorB);
+    changePenColor(painter, Preferences::InformationColorC);
 
     for(NoneContactPoint *ncp : ncps) {
         //OriginPoint
