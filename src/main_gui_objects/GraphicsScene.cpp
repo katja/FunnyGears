@@ -21,7 +21,7 @@ void GraphicsScene::initialize() {
     m_editingState = Editing::NoEditing;
 
     setForegroundBrush(QColor(50, 50, 50, 50));
-    setSceneRect(-1000, -1000, 2000, 2000);
+    setSceneRect(-700, -1000, 2700, 2000);
 }
 
 GraphicsScene::~GraphicsScene() {

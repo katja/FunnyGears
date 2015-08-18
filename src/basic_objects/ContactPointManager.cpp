@@ -135,11 +135,9 @@ void ContactPointManager::sortLists() {
     } while(!sorted);
 }
 
-void ContactPointManager::processPointsToGear(uint numberOfTeeth, real pitchRadius, bool isDescribedClockwise) {
+void ContactPointManager::processPointsToGear(uint numberOfTeeth, bool isDescribedClockwise) {
     if(m_insertedCPsLists.empty() || numberOfNoneErrorContactPoints() == 0)
         return;
-
-    m_pitchRadiusInDrivenGear = pitchRadius;
 
     setAngularPitch(numberOfTeeth, isDescribedClockwise);
         //=> m_angularPitchRotation
@@ -351,11 +349,11 @@ bool ContactPointManager::setExaminedPitch() {
 }
 
 void ContactPointManager::copyPointsInSuitableLists() {
-    //Examine the position of each point relative to the examined pitch
-    //The points, which have a cut with the reference circle, are inserted in the first
-    //list of m_contactPointsWithPositionList
-    //Afterwards this list is copied and each point rotated, when one of the points do
-    //not lie in the examined pitch
+    //Examine each list in m_insertedCPsLists
+    //If forbiddenAreaEndPoint or point of such a list lies in another than
+    //the examined pitch, the list and all points of it are copied and rotated for each
+    //found other pitch in such a way, that the found other pitches all once cover
+    //the examined pitch
 
     //delete old points, if any exist
     deleteSortingLists();
@@ -382,7 +380,7 @@ void ContactPointManager::copyPointsInSuitableLists() {
             }
             firstPositionList->points.push_back(new ContactPoint(*cp));
         }
-        m_contactPointsWithPositionList.push_back(firstPositionList); //insert last list, too, otherwise would be lost
+        m_contactPointsWithPositionList.push_back(firstPositionList);
 
         for(uint i = 0; i < foundPositions.size(); ++i) {
             ContactPointsWithPosition *contactPointsWithPosition = new ContactPointsWithPosition();
@@ -568,6 +566,7 @@ void ContactPointManager::findAllCoveredPoints() {
     m_gearPointsCreated.simple = true;
 }
 
+//TODO: Listendurchnummerierung kann auch in negativer Reihenfolge erfolgen!!! Oder nicht?
 void ContactPointManager::findBestPathOfContact(CalculationState calcState) {
     vector<ContactPoint*> *contactPoints;
     Directions< vector<ContactPoint*> *> *bestContactPoints;

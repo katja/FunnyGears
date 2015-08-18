@@ -48,7 +48,7 @@ void GearPair::calculateAgainWithUnchangedAttributes() {
                     / (m_samplingRate - 1);
 
     insertPossiblePairingPointsInPointManager();
-    m_contactPointManager.processPointsToGear(m_drivenGear->numberOfTeeth(), m_drivenGearPitchRadius, !(m_drivingGear->toothDescribedInClockDirection()));
+    m_contactPointManager.processPointsToGear(m_drivenGear->numberOfTeeth(), !(m_drivingGear->toothDescribedInClockDirection()));
     m_contactPointManager.translateForBottomClearance(m_bottomClearance, m_bottomClearanceStartAngle); //Kopfspiel
     fillDrivenGearWithGearPoints();
     changed();
@@ -332,9 +332,9 @@ NoneContactPoint* GearPair::noneContactPointOf(const vec2 &point, const vec2 &no
 
     // Inspect the ContactPoint cp when the gear turns
     // The exciting points are somewhere near the pitch point.
-    // Therefore examine the angle covered by about 3 pitches, or a maximum of a half
-    // of the gear. In each case those values around the pitch point will be taken.
-    // For all of these: x > 0.
+    // Therefore we examine the angle of 60 degree to each (north and south) of pitch point
+    // We start at 30 degree (pi/6) and sample with m_maxDriftAngle
+    // So for all of the samplings: x > 0.
 
     real startAngle = M_PI / 6.0; // startAngle is measured starting from y-axis
     real endAngle = M_PI - startAngle;

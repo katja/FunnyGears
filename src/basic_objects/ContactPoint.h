@@ -11,7 +11,7 @@ enum class ErrorCode {
 };
 
 struct ContactPoint {
-    ContactPoint() : isCovered(false), isRotated(false), error(ErrorCode::NO_ERROR) {}
+    ContactPoint() : isRotated(false), error(ErrorCode::NO_ERROR) {}
     ContactPoint(const ContactPoint &other) :
         evaluationValue(other.evaluationValue),
         evaluationStep(other.evaluationStep),
@@ -25,7 +25,6 @@ struct ContactPoint {
         forbiddenAreaLength(other.forbiddenAreaLength),
         forbiddenAreaEndPoint(other.forbiddenAreaEndPoint),
         usedLargerValue(other.usedLargerValue),
-        isCovered(other.isCovered),
         isRotated(other.isRotated),
         error(other.error)
     {}
@@ -42,7 +41,6 @@ struct ContactPoint {
     real forbiddenAreaLength; //Thickness of the driving gear
     vec2 forbiddenAreaEndPoint; //Opposite point of driving gear transferred to driven gear
     bool usedLargerValue; // In most cases the normal of the driving gear has two cuts with reference radius => originPoint + t * originNormal => if maximum possible value is taken, this attribute is set to true
-    bool isCovered; //is set to true, when this point can't become a contact point
     bool isRotated;
     ErrorCode error;
 
@@ -74,7 +72,6 @@ struct NoneContactPoint : public ContactPoint {
         forbiddenAreaEndPoint = vec2(0, 0);
         usedLargerValue = true; //is not possible, when no cut with reference radius is available
         examinedIndex = -1;
-        isCovered = cp.isCovered;
         isRotated = cp.isRotated;
         error = ErrorCode::NO_CUT_WITH_REFERENCE_RADIUS;
     }

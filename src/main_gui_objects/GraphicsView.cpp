@@ -25,6 +25,7 @@ void GraphicsView::initialize() {
     setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     stopEditing();
+    zoomToDefault();
 }
 
 GraphicsView::~GraphicsView() {
@@ -114,10 +115,11 @@ void GraphicsView::zoomOut() {
 }
 
 void GraphicsView::zoomToDefault() {
-    fitInView(-0.5 * Preferences::ZoomDefaultX,
-            -0.5 * Preferences::ZoomDefaultY,
-            Preferences::ZoomDefaultX,
-            Preferences::ZoomDefaultY,
-            Qt::KeepAspectRatio);
+    fitInView(
+        Preferences::DefaultViewSceneXStart,
+        Preferences::DefaultViewSceneYStart,
+        Preferences::DefaultViewSceneXStop,
+        Preferences::DefaultViewSceneYStop,
+        Qt::KeepAspectRatio);
     centerOn(0, 0);
 }

@@ -25,6 +25,11 @@ namespace Preferences {
 
     extern qreal ZoomDefaultX;
     extern qreal ZoomDefaultY;
+    extern qreal DefaultViewSceneXStart;
+    extern qreal DefaultViewSceneYStart;
+    extern qreal DefaultViewSceneXStop;
+    extern qreal DefaultViewSceneYStop;
+
 }
 
 #endif // PREFERENCES

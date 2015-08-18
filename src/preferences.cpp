@@ -31,3 +31,8 @@ qreal Preferences::AngularPitchStrokesLength(300.0);
 qreal Preferences::ZoomDefaultX(750.0);
 
 qreal Preferences::ZoomDefaultY(750.0);
+
+qreal Preferences::DefaultViewSceneXStart(-300.0);
+qreal Preferences::DefaultViewSceneYStart(-300.0);
+qreal Preferences::DefaultViewSceneXStop(600.0);
+qreal Preferences::DefaultViewSceneYStop(600.0);

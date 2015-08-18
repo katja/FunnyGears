@@ -591,7 +591,6 @@ void Spline::getIntersectionPointsWithRay(const Ray &ray, vector<vec2> &intersec
             //So, in a whole, we have to examine for the line between control points
             //i and (i+1) the knots:
             //      i - (d - 1) ... i + d + (d - 1) = i + 2 * d - 1
-            //TODO: I don't think that the following is correct!!! What happens, if i == 0????
             else {
                 //TODO: bessere abschätzung möglich? z.b. abstand an der stelle von kontrollpolygon???
                 if(upperDomainLimit(0.0) - lowerDomainLimit() > 0.002) {

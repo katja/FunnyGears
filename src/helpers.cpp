@@ -120,7 +120,6 @@ std::ostream& operator <<(std::ostream &os, const ContactPoint &cp) {
     os << "Forbidden area length:   " << cp.forbiddenAreaLength << "\n";
     os << "Forbidden area end point:" << cp.forbiddenAreaEndPoint << "\n";
     os << "Used larger t value: "     << (cp.usedLargerValue ? "yes" : "no") << "\n";
-    os << "This is a contact point: " << (cp.isCovered ? "no" : "yes") << "\n";
     os << "Error: " << cp.error << "\n";
     return os;
 }
@@ -134,7 +133,6 @@ std::ostream& operator <<(std::ostream &os, const NoneContactPoint &ncp) {
     os << "Forbidden area length:   " << ncp.forbiddenAreaLength << "\n";
     os << "Forbidden area end point:" << ncp.forbiddenAreaEndPoint << "\n";
     os << "Used larger t value: "     << (ncp.usedLargerValue ? "yes" : "no") << "\n";
-    os << "This is a contact point: " << (ncp.isCovered ? "no" : "yes") << "\n";
     os << "Error: " << ncp.error << "\n";
     os << "Driven gear points:\n" << ncp.points << "\n";
     os << "Driven gear normal:\n" << ncp.normals << "\n";
@@ -158,7 +156,6 @@ std::ostream& operator <<(std::ostream &os, const WrongContactPoint &wcp) {
     os << "Forbidden area length:   " << wcp.forbiddenAreaLength << "\n";
     os << "Forbidden area end point:" << wcp.forbiddenAreaEndPoint << "\n";
     os << "Used larger t value: "     << (wcp.usedLargerValue ? "yes" : "no") << "\n";
-    os << "This is a contact point: " << (wcp.isCovered ? "no" : "yes") << "\n";
     os << "Error: " << wcp.error << "\n";
     return os;
 }

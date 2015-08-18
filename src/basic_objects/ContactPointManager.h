@@ -33,7 +33,7 @@ public:
     void sortLists(); // sorts the lists of m_firstCPLists by their size in decreasing order. ContactPoints in each list must already be sorted!!!
 
     // Most important method:
-    void processPointsToGear(uint numberOfTeeth, real pitchRadius, bool isDescribedClockwise);
+    void processPointsToGear(uint numberOfTeeth, bool isDescribedClockwise);
     void translateForBottomClearance(real bottomClearance, real angleInDegree); //translate gear points with less than angle angleInDegree between their normal and line of centers. Needs valid creation of all gear points etc. before (so call createCoveringLists() before!)
 
     const list< list<ContactPoint*>* >& foundPoints() const;
@@ -100,7 +100,6 @@ private:
 
     // other (pitch and rotation) attributes:
     real                            m_angularPitchRotation; //is negative, if driven gear tooth is described counter clockwise (in screen representation), and positive otherwise
-    real                            m_pitchRadiusInDrivenGear;
     vec2                            m_examinedPitchStartDirection;
     vec2                            m_examinedPitchStopDirection;
     vec2                            m_examinedPitchStartDirectionInDrivingGear;
