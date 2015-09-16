@@ -1,24 +1,19 @@
-#LDFLAGS +=  -L/usr/local/opt/qt5/lib
-#LDFLAGS +=  -L/usr/local/opt/
-#
-#CPPFLAGS += -I/usr/local/opt/qt5/include
-#CPPFLAGS += -I/usr/local/opt/
+TARGET = "Funny Gears"      # Default: Name of .pro-file (this file)
 
-QT  +=  core gui \
-        widgets \               # Without this line Qt won't recognise any QtWidgets!
-        opengl widgets          # specify all modules used in the project here!
+QT *= core \                # Should be included by default
+    gui \                   # Should be included by default
+    widgets                 # Without this line Qt won't recognise any QtWidgets!
+
+TEMPLATE = app              # Is anyway default, but can't harm
 
 # Specifies project configuration and compiler options
-# Possible values include:  debug, release, dubug_and_release,
+# Possible values include:  debug, release, debug_and_release,
 #                           ordered (=> SUBDIRS listed are processed in given order)
 #                           warn_on, warn_off (=> print all/fewest possible compiler warnings)
-CONFIG  += debug                # Only during development necessary: Print debugging symbols and information
+CONFIG *= debug             # Only during development necessary: Print debugging symbols and information
 
 # Add C++11 support
-CONFIG  += c++11
-QMAKE_CXXFLAGS += -stdlib=libc++
-QMAKE_CXXFLAGS += -mmacosx-version-min=10.7
-QMAKE_CXXFLAGS += -Wno-deprecated-register # Prevents the warnings, that 'register' variable is deprecated (appears because of glm library)
+CONFIG += c++11
 
 DESTDIR = "app/"                # Project will be build in this directory
 OBJECTS_DIR = "compile/"        # Directory for intermediate objects when compiling
@@ -27,10 +22,11 @@ RCC_DIR = $$OBJECTS_DIR/.rrc
 UI_DIR  = $$OBJECTS_DIR/.ui
 
 INCLUDEPATH += ./src/
-INCLUDEPATH +=  /usr/include
+INCLUDEPATH += /usr/include
 INCLUDEPATH += /usr/local/opt/glm/include #for glm library
 
-ICON = images/Gear.icns      # Mac solution for the icon of the app
+macx: ICON = images/Gear.icns      # Mac solution for the icon of the app
+
 RESOURCES = images.qrc
 
 PRECOMPILED_HEADER = src/stable.h
