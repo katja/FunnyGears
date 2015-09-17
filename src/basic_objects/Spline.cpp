@@ -56,12 +56,19 @@ Spline& Spline::operator=(const Spline &other) {
     return *this;
 }
 
+//TODO: find bug and delete following line:
+#include <bitset>
+
 vec2 Spline::evaluate(real value) const {
     uint n = lowerNextKnot(value); // value is element of range [knot[n], knot[n+1])
     vector<vec2> controlPointsCopy(m_degree + 1);
     //TODO: find bug and delete following lines!
     if((n - m_degree + 1) < 0 || (n - m_degree + 1) >= m_controlPoints.size() || n + 1 >= m_controlPoints.size()) {
         std::cerr << "ATTENTION! PROGRAM WILL QUIT UNEXPECTEDLY IN A MOMENT!!!" << std::endl;
+        std::cerr << "Values are:" << std::endl;
+        std::cerr << "\t n = " << n << " =\t" << std::bitset<(sizeof(n) * 8)>(n) << std::endl;
+        std::cerr << "\t m_degree = " << m_degree << " =\t" << std::bitset<(sizeof(m_degree) * 8)>(m_degree) << std::endl;
+        std::cerr << "\t #ctrl-points = " << m_controlPoints.size() << " =\t" << std::bitset<(sizeof(m_controlPoints.size()) * 8)>(m_controlPoints.size()) << std::endl;
         if((n - m_degree + 1) < 0)
             std::cerr << "1. Condition (< 0) was not met" << std::endl;
         if((n - m_degree + 1) >= m_controlPoints.size())
@@ -644,7 +651,8 @@ void Spline::deBoor(vector<vec2> &controlPoints, real value, real n) const {
 void Spline::deBoor(vector<vec2> &controlPoints, real value, real n, uint degree, uint stop) const {
     if(stop == degree)
         return;
-    assert(controlPoints.size() >= degree + 1 && degree >= 0);
+    assert(controlPoints.size() >= degree + 1 && stop < degree);
+    // assert(controlPoints.size() >= degree + 1 && degree >= 0);
     uint lastIndex = controlPoints.size() - 1;
 
     for(int i = n, index = lastIndex; i > n - degree; --i, --index) {

@@ -163,9 +163,6 @@ void ContactPointManager::translateForBottomClearance(real bottomClearance, real
     clearAllTranslatedGearLists();
 
     real maxAngle = absolute(angleInDegree * M_PI / 180.0);
-    int normalDir = 1; //normals on the right side of point described direction
-    if(m_angularPitchRotation > 0)
-        normalDir = -1; //normals on the left side
 
     ContactPoint *lastContactPoint = nullptr;
     uint foundCuttings = 0;

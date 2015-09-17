@@ -13,13 +13,15 @@ SplineGear::SplineGear(const Spline &toothOfGear) : m_toothProfile(new Spline(to
     update();
 }
 
-SplineGear::SplineGear(const SplineGear &other) : m_toothProfile(new Spline(*other.m_toothProfile)),
+SplineGear::SplineGear(const SplineGear &other) : //m_toothProfile(new Spline(*other.m_toothProfile)),
     m_referenceRadius(other.m_referenceRadius),
     m_numberOfTeeth(other.m_numberOfTeeth),
     m_rotationDirection(other.m_rotationDirection),
     m_minimumDistanceToCenter(other.m_minimumDistanceToCenter),
     m_maximumDistanceToCenter(other.m_maximumDistanceToCenter)
 {
+    // TODO: Use either following line or the last part of first line of copy constructor!
+    m_toothProfile = new Spline(*other.m_toothProfile);
     update();
 }
 

@@ -21,18 +21,20 @@ using vector = typename std::vector<T>;
 template <typename T>
 using list = typename std::list<T>;
 
-enum Type {
-    QGraphicsItemType,
-    GraphicsItemType,
-    //All GraphicsItems go here...
-    GraphicsPointType,
-    GraphicsScheduleItemType,
-    //...and all also GraphicsScheduleItems go here!
-    GraphicsSplineType,
-    GraphicsSplineGearType,
-    GraphicsGearPairType,
-    GraphicsInvoluteGearType,
-    NumberOfTypes
+struct Type {
+    enum Types {
+        QGraphicsItemType,
+        GraphicsItemType,
+        //All GraphicsItems go here...
+        GraphicsPointType,
+        GraphicsScheduleItemType,
+        //...and all also GraphicsScheduleItems go here!
+        GraphicsSplineType,
+        GraphicsSplineGearType,
+        GraphicsGearPairType,
+        GraphicsInvoluteGearType,
+        NumberOfTypes
+    };
 };
 
 #endif // DEFINITIONS
