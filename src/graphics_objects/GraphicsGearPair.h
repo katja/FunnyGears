@@ -122,18 +122,18 @@ private:
 
     GearPairInformationWidget *m_gearPairInformationWidget;
 
-    bool m_pitchPointIsVisible;
-    bool m_drivingGearSamplingIsVisible;
-    bool m_drivenGearSamplingIsVisible;
-    bool m_forbiddenAreaInDrivingGearIsVisible;
-    bool m_forbiddenAreaInDrivenGearIsVisible;
-    bool m_noneContactPointsAreVisible;
-    bool m_selectionOfGearPointsIsVisible;
-    bool m_pathOfPossibleContactIsVisible;
-    bool m_pathOfRealContactIsVisible;
-    bool m_pathOfBestContactIsVisible;
-    bool m_pitchesAreVisible;
-    bool m_pitchCirclesAreVisible;
+    bool m_isPitchPointVisible;
+    bool m_isDrivingGearSamplingVisible;
+    bool m_isDrivenGearSamplingVisible;
+    bool m_isForbiddenAreaInDrivingGearVisible;
+    bool m_isForbiddenAreaInDrivenGearVisible;
+    bool m_areNoneContactPointsVisible;
+    bool m_isSelectionOfGearPointsVisible;
+    bool m_isPathOfPossibleContactVisible;
+    bool m_isPathOfRealContactVisible;
+    bool m_isPathOfBestContactVisible;
+    bool m_arePitchesVisible;
+    bool m_arePitchCirclesVisible;
     bool m_isRotating;
     real m_rotationVelocity;
     real m_rotationDegreeDrivingGear;

@@ -39,18 +39,18 @@ GraphicsGearPair::GraphicsGearPair(GearPair *gearPair) :
     m_drivingGear(nullptr),
     m_drivenGear(nullptr),
     m_gearPairInformationWidget(new GearPairInformationWidget(gearPair)),
-    m_pitchPointIsVisible(false),
-    m_drivingGearSamplingIsVisible(true),
-    m_drivenGearSamplingIsVisible(false),
-    m_forbiddenAreaInDrivingGearIsVisible(false),
-    m_forbiddenAreaInDrivenGearIsVisible(false),
-    m_noneContactPointsAreVisible(false),
-    m_selectionOfGearPointsIsVisible(false),
-    m_pathOfPossibleContactIsVisible(false),
-    m_pathOfRealContactIsVisible(true),
-    m_pathOfBestContactIsVisible(false),
-    m_pitchesAreVisible(false),
-    m_pitchCirclesAreVisible(false),
+    m_isPitchPointVisible(false),
+    m_isDrivingGearSamplingVisible(true),
+    m_isDrivenGearSamplingVisible(false),
+    m_isForbiddenAreaInDrivingGearVisible(false),
+    m_isForbiddenAreaInDrivenGearVisible(false),
+    m_areNoneContactPointsVisible(false),
+    m_isSelectionOfGearPointsVisible(false),
+    m_isPathOfPossibleContactVisible(false),
+    m_isPathOfRealContactVisible(true),
+    m_isPathOfBestContactVisible(false),
+    m_arePitchesVisible(false),
+    m_arePitchCirclesVisible(false),
     m_isRotating(false),
     m_rotationVelocity(0.0),
     m_rotationDegreeDrivingGear(0.0),
@@ -168,110 +168,110 @@ int GraphicsGearPair::bottomClearanceStartAngle() const {
 
 void GraphicsGearPair::setVisibilityOfPitchPoint(bool visible) {
     prepareGeometryChange();
-    m_pitchPointIsVisible = visible;
+    m_isPitchPointVisible = visible;
 }
 
 bool GraphicsGearPair::visibilityOfPitchPoint() const {
-    return m_pitchPointIsVisible;
+    return m_isPitchPointVisible;
 }
 
 void GraphicsGearPair::setVisibilityOfDrivingGearSampling(bool visible) {
     prepareGeometryChange();
-    m_drivingGearSamplingIsVisible = visible;
+    m_isDrivingGearSamplingVisible = visible;
 }
 
 bool GraphicsGearPair::visibilityOfDrivingGearSampling() const {
-    return m_drivingGearSamplingIsVisible;
+    return m_isDrivingGearSamplingVisible;
 }
 
 void GraphicsGearPair::setVisibilityOfDrivenGearSampling(bool visible) {
     prepareGeometryChange();
-    m_drivenGearSamplingIsVisible = visible;
+    m_isDrivenGearSamplingVisible = visible;
 }
 
 bool GraphicsGearPair::visibilityOfDrivenGearSampling() const {
-    return m_drivenGearSamplingIsVisible;
+    return m_isDrivenGearSamplingVisible;
 }
 
 void GraphicsGearPair::setVisibilityOfForbiddenAreaInDrivingGear(bool visible) {
     prepareGeometryChange();
-    m_forbiddenAreaInDrivingGearIsVisible = visible;
+    m_isForbiddenAreaInDrivingGearVisible = visible;
 }
 
 bool GraphicsGearPair::visibilityOfForbiddenAreaInDrivingGear() const {
-    return m_forbiddenAreaInDrivingGearIsVisible;
+    return m_isForbiddenAreaInDrivingGearVisible;
 }
 
 void GraphicsGearPair::setVisibilityOfForbiddenAreaInDrivenGear(bool visible) {
     prepareGeometryChange();
-    m_forbiddenAreaInDrivenGearIsVisible = visible;
+    m_isForbiddenAreaInDrivenGearVisible = visible;
 }
 
 bool GraphicsGearPair::visibilityOfForbiddenAreaInDrivenGear() const {
-    return m_forbiddenAreaInDrivenGearIsVisible;
+    return m_isForbiddenAreaInDrivenGearVisible;
 }
 
 void GraphicsGearPair::setVisibilityOfNoneContactPoints(bool visible) {
     prepareGeometryChange();
-    m_noneContactPointsAreVisible = visible;
+    m_areNoneContactPointsVisible = visible;
 }
 
 bool GraphicsGearPair::visibilityOfNoneContactPoints() const {
-    return m_noneContactPointsAreVisible;
+    return m_areNoneContactPointsVisible;
 }
 
 void GraphicsGearPair::setVisibilityOfSelectedGearPoints(bool visible) {
     prepareGeometryChange();
-    m_selectionOfGearPointsIsVisible = visible;
+    m_isSelectionOfGearPointsVisible = visible;
 }
 
 bool GraphicsGearPair::visibilityOfSelectedGearPoints() const {
-    return m_selectionOfGearPointsIsVisible;
+    return m_isSelectionOfGearPointsVisible;
 }
 
 void GraphicsGearPair::setVisibilityOfPathOfPossibleContact(bool visible) {
     prepareGeometryChange();
-    m_pathOfPossibleContactIsVisible = visible;
+    m_isPathOfPossibleContactVisible = visible;
 }
 
 bool GraphicsGearPair::visibilityOfPathOfPossibleContact() const {
-    return m_pathOfPossibleContactIsVisible;
+    return m_isPathOfPossibleContactVisible;
 }
 
 void GraphicsGearPair::setVisibilityOfPathOfRealContact(bool visible) {
     prepareGeometryChange();
-    m_pathOfRealContactIsVisible = visible;
+    m_isPathOfRealContactVisible = visible;
 }
 
 bool GraphicsGearPair::visibilityOfPathOfRealContact() const {
-    return m_pathOfRealContactIsVisible;
+    return m_isPathOfRealContactVisible;
 }
 
 void GraphicsGearPair::setVisibilityOfPathOfBestContact(bool visible) {
     prepareGeometryChange();
-    m_pathOfBestContactIsVisible = visible;
+    m_isPathOfBestContactVisible = visible;
 }
 
 bool GraphicsGearPair::visibilityOfPathOfBestContact() const {
-    return m_pathOfBestContactIsVisible;
+    return m_isPathOfBestContactVisible;
 }
 
 void GraphicsGearPair::setVisibilityOfPitches(bool visible) {
     prepareGeometryChange();
-    m_pitchesAreVisible = visible;
+    m_arePitchesVisible = visible;
 }
 
 bool GraphicsGearPair::visibilityOfPitches() const {
-    return m_pitchesAreVisible;
+    return m_arePitchesVisible;
 }
 
 void GraphicsGearPair::setVisibilityOfPitchCircles(bool visible) {
     prepareGeometryChange();
-    m_pitchCirclesAreVisible = visible;
+    m_arePitchCirclesVisible = visible;
 }
 
 bool GraphicsGearPair::visibilityOfPitchCircles() const {
-    return m_pitchCirclesAreVisible;
+    return m_arePitchCirclesVisible;
 }
 
 void GraphicsGearPair::setRotating(bool isRotating) {
@@ -373,11 +373,11 @@ QRectF GraphicsGearPair::boundingRect(const GraphicsMatingSplineGear *gear) cons
         return gear->GraphicsSplineGear::normalBoundingRect(5);
     } else { // gear == m_drivenGear
         real max = m_largestDistanceToPoint;
-        if(m_forbiddenAreaInDrivenGearIsVisible)
+        if(m_isForbiddenAreaInDrivenGearVisible)
             max += m_largestNormalOfPoint;
-        if(m_noneContactPointsAreVisible) {
+        if(m_areNoneContactPointsVisible) {
             real maxNCP = m_largestDistanceToNCP;
-            if(m_forbiddenAreaInDrivenGearIsVisible)
+            if(m_isForbiddenAreaInDrivenGearVisible)
                 maxNCP += m_largestNormalOfNCP;
             if(maxNCP > max)
                 max = maxNCP;
@@ -406,13 +406,13 @@ void GraphicsGearPair::paint(QPainter *painter, const QStyleOptionGraphicsItem *
         m_drivenGear->setRotation(m_rotationDegreeDrivenGear);
     }
 
-    if(m_pathOfBestContactIsVisible)
+    if(m_isPathOfBestContactVisible)
         paintBestConsecutivePathOfContact(painter);
-    if(m_pathOfPossibleContactIsVisible)
+    if(m_isPathOfPossibleContactVisible)
         paintPathOfPossibleContact(painter);
-    if(m_pathOfRealContactIsVisible)
+    if(m_isPathOfRealContactVisible)
         paintPathOfRealContact(painter);
-    if(m_pitchPointIsVisible)
+    if(m_isPitchPointVisible)
         paintPitchPoint(painter);
 }
 
@@ -421,31 +421,31 @@ void GraphicsGearPair::paintAdditionals(QPainter *painter, GraphicsMatingSplineG
         changePenWidth(painter, 0);
     }
     if(gear == m_drivingGear) {
-        if(m_pitchCirclesAreVisible)
+        if(m_arePitchCirclesVisible)
             painter->drawPath(circlePath(m_gearPair->drivingGearPitchRadius()));
-        if(m_pitchesAreVisible)
+        if(m_arePitchesVisible)
             painter->drawPath(pitchesPath(m_drivingGear->numberOfTeeth(),
                                             m_gearPair->contactPointManager().startOfExaminedPitchInDrivingGear(),
                                             m_gearPair->contactPointManager().lengthOfPitchesInDrivingGear()));
-        if(m_pathOfBestContactIsVisible)
+        if(m_isPathOfBestContactVisible)
             paintHighlightOfStartAndEndOfPathOfContact(painter);
-        if(m_noneContactPointsAreVisible)
+        if(m_areNoneContactPointsVisible)
             paintNoneContactPoints(painter, true, false);
-        if(m_drivingGearSamplingIsVisible)
+        if(m_isDrivingGearSamplingVisible)
             paintSampledContactPointsDrivingGear(painter);
 
     } else if (gear == m_drivenGear) {
-        if(m_pitchCirclesAreVisible)
+        if(m_arePitchCirclesVisible)
             painter->drawPath(circlePath(m_gearPair->drivenGearPitchRadius()));
-        if(m_pitchesAreVisible)
+        if(m_arePitchesVisible)
             painter->drawPath(pitchesPath(m_drivenGear->numberOfTeeth(),
                                             m_gearPair->contactPointManager().startOfExaminedPitchInDrivenGear(),
                                             m_gearPair->contactPointManager().lengthOfPitchesInDrivenGear()));
-        if(m_noneContactPointsAreVisible)
+        if(m_areNoneContactPointsVisible)
             paintNoneContactPoints(painter, false, true);
-        if(m_drivenGearSamplingIsVisible)
+        if(m_isDrivenGearSamplingVisible)
             paintSampledContactPointsDrivenGear(painter);
-        if(m_selectionOfGearPointsIsVisible)
+        if(m_isSelectionOfGearPointsVisible)
             paintSelectedGearPoints(painter);
 
     } // other things should not happen ^^
@@ -462,7 +462,7 @@ void GraphicsGearPair::paintSampledContactPointsDrivingGear(QPainter *painter) c
 
             // originPoint, originNormal
             drawCircle(painter, cp->originPoint);
-            if(m_forbiddenAreaInDrivingGearIsVisible) {
+            if(m_isForbiddenAreaInDrivingGearVisible) {
                 vec2 endNormal = cp->originPoint - cp->originNormal * cp->forbiddenAreaLength;
                 drawLine(painter, cp->originPoint, endNormal);
             }
@@ -493,14 +493,14 @@ void GraphicsGearPair::paintSampledContactPointsDrivenGear(QPainter *painter) co
             drawCircle(painter, cp->point);
             if(m_finePencilUsed)
                 drawCircle(painter, cp->point, Preferences::SmallPointRadius);
-            if(m_forbiddenAreaInDrivenGearIsVisible) {
+            if(m_isForbiddenAreaInDrivenGearVisible) {
                 vec2 endNormal = cp->point + cp->normal * cp->forbiddenAreaLength;
                 drawLine(painter, cp->point, endNormal);
             }
             // merge following list points by a line:
             if(lastCP != cp) { //not on first point on list
                 drawLine(painter, lastCP->point, cp->point);
-                if(m_forbiddenAreaInDrivenGearIsVisible)
+                if(m_isForbiddenAreaInDrivenGearVisible)
                     drawLine(painter, lastCP->forbiddenAreaEndPoint, cp->forbiddenAreaEndPoint);
                 lastCP = cp;
             }
@@ -707,7 +707,7 @@ void GraphicsGearPair::paintNoneContactPoints(QPainter *painter, bool paintOrigi
         //OriginPoint
         if(paintOriginPoints) {
             drawCircle(painter, ncp->originPoint);
-            if(m_forbiddenAreaInDrivingGearIsVisible) {
+            if(m_isForbiddenAreaInDrivingGearVisible) {
                 vec2 endNormal = ncp->originPoint - ncp->originNormal * ncp->forbiddenAreaLength;
                 drawLine(painter, ncp->originPoint, endNormal);
             }
@@ -727,7 +727,7 @@ void GraphicsGearPair::paintNoneContactPoints(QPainter *painter, bool paintOrigi
                 if(m_finePencilUsed)
                     drawCircle(painter, p, Preferences::SmallPointRadius);
 
-                if(m_forbiddenAreaInDrivenGearIsVisible) {
+                if(m_isForbiddenAreaInDrivenGearVisible) {
                     vec2 endPoint = p + n * ncp->forbiddenAreaLength;
                     if(i > 0)
                         drawLine(painter, previousEndPoint, endPoint);
