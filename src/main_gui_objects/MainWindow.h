@@ -47,7 +47,10 @@ private:
                 *m_toggleObjectAttributesAction,
                 *m_toggleObjectScheduleAction;
 
-    bool projectChanged;
+    QString m_fileName;
+    bool m_fileNameHasBeenSet;
+
+    bool m_projectChanged;
 
     void createMainProgramPart();
     void createMenusAndToolbars();
@@ -61,6 +64,10 @@ private:
     QAction* createAction(QAction *&action, QString name, QString toolTip, QKeySequence shortcut = 0);
 
     bool savedProjectOrOk();
+
+    bool saveProjectWithFileName(QString fileName);
+
+    void parseAndLoad(QString fileName);
 
 private slots:
     void quitProgram();

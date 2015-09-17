@@ -45,9 +45,11 @@
 #include <QPalette>
 #include <QPushButton>
 #include <QSpinBox>
+#include <QStandardPaths>
 #include <QStatusBar>
 #include <QStyledItemDelegate>
 #include <QTabWidget>
+#include <QTextStream>
 #include <QTime>
 #include <QToolBar>
 #include <QToolButton>

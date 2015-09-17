@@ -3,7 +3,12 @@
 #include "main_gui_objects/Cursor.h"
 #include "tool_bars/ToolBarManager.h"
 
-MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), projectChanged(true) {
+MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) :
+    QMainWindow(parent, flags),
+    m_fileName(tr("Untitled")),
+    m_fileNameHasBeenSet(false),
+    m_projectChanged(true)
+{
     setGeometry(50, 20, 1000, 800);
     setWindowTitle("Funny Gears");
     setWindowIcon(QIcon("Gear.icns"));
@@ -163,11 +168,19 @@ void MainWindow::newProject() {
 }
 
 void MainWindow::openProject() {
-    if((projectChanged && savedProjectOrOk()) || !projectChanged) {
-        QString fileName = QFileDialog::getOpenFileName(this, tr("Choose a funny gear project"), QString(), tr(".fg"));
-        if(!fileName.isEmpty())
-            ;// TODO: loadFile(fileName);
-    }
+    //Ask user for saving of changes before opening a new file
+    if(!((m_projectChanged && savedProjectOrOk()) || !m_projectChanged))
+        return;
+
+    QString fileName = QFileDialog::getOpenFileName(
+        this,
+        tr("Choose a funny gear project"),
+        QStandardPaths::displayName(QStandardPaths::HomeLocation),
+        tr("Funny Gears Files (*.fg)")
+    );
+    QFile file(fileName);
+    if(file.exists())
+        parseAndLoad(fileName);
 }
 
 bool MainWindow::savedProjectOrOk() {
@@ -186,11 +199,36 @@ bool MainWindow::savedProjectOrOk() {
 }
 
 bool MainWindow::saveProject() {
-    return true;
+    if(!m_fileNameHasBeenSet)
+        return saveAsProject();
+    return saveProjectWithFileName(m_fileName);
 }
 
 bool MainWindow::saveAsProject() {
-    return true;
+    std::cout << "saveAsProject" << std::endl;
+    QString fileName = QFileDialog::getSaveFileName(
+        this,
+        tr("Choose a filename and a folder to save your project"),
+        tr("MyFunnyGearsProject"),
+        tr("Funny Gears Files (*.fg)")
+    );
+    if(fileName.isEmpty())
+        return false;
+    return saveProjectWithFileName(fileName);
+}
+
+bool MainWindow::saveProjectWithFileName(QString fileName) {
+    QFile file(fileName);
+    if(file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+        out << "blub\n blub2 \n    blub 3 \n bluuuu bbbbb  bbb 4" << endl;
+        //TODO: input real data above
+        file.close();
+        m_fileName = fileName;
+        m_projectChanged = false;
+        return true;
+    }
+    return false;
 }
 
 void MainWindow::openColorDialog() {
@@ -199,4 +237,25 @@ void MainWindow::openColorDialog() {
     else
         m_colorDialog->open();
     m_toggleColorDialogAction->setChecked(m_colorDialog->isVisible());
+}
+
+void MainWindow::parseAndLoad(QString fileName) {
+    QFile file(fileName);
+
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return;
+
+    QVector<QString*> splitted;
+    QTextStream in(&file);
+    QString line = in.readLine();
+    while(line != nullptr) {
+        splitted.append(new QString(line.trimmed()));
+        line = in.readLine();
+    }
+    file.close();
+    m_fileName = fileName;
+
+    for(QString *command : splitted) {
+        std::cout << command->toStdString() << std::endl;
+    }
 }
