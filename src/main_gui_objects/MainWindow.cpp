@@ -85,7 +85,7 @@ void MainWindow::createFileMenuAndToolbar() {
         SIGNAL(triggered()), this, SLOT(newProject()));
     connect(createAction(m_openAction,  tr("Open"),  tr("open saved objects"), QKeySequence::Open),
         SIGNAL(triggered()), this, SLOT(openProject()));
-    connect(createAction(m_openAddAction,  tr("OpenAdd"),  tr("add saved objects"), QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_O)),
+    connect(createAction(m_openAddAction,  tr("Open Add"),  tr("add saved objects"), QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_O)),
         SIGNAL(triggered()), this, SLOT(openAddProject()));
     connect(createAction(m_saveAction,  tr("Save"),  tr("save current objects"), QKeySequence::Save),
         SIGNAL(triggered()), this, SLOT(saveProject()));
@@ -176,7 +176,7 @@ void MainWindow::openProject() {
     if(!((m_projectChanged && savedProjectOrOk()) || !m_projectChanged))
         return;
 
-    //TODO: delete all current objects!
+    m_model->removeAll();
 
     QString fileName = QFileDialog::getOpenFileName(
         this,

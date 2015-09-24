@@ -169,6 +169,16 @@ bool Model::remove(QModelIndex index) {
     return true;
 }
 
+void Model::removeAll() {
+    while(hasChildren()) {
+        GraphicsScheduleItem *item = getInternItemFromIndex(index(0, 0, QModelIndex()));
+        beginRemoveRows(QModelIndex(), 0, 1);
+        m_scene->removeItem(item);
+        delete item;
+        endRemoveRows();
+    }
+}
+
 void Model::clearSelection() {
     m_rootItem->clearSelection();
 }

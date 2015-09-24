@@ -81,6 +81,7 @@ public:
 
     bool addItem(GraphicsScheduleItem *newItem, GraphicsScheduleItem *parent = 0);
     bool remove(QModelIndex index);
+    void removeAll();
 
     /** Clears the selection of every iten in the model
      */
