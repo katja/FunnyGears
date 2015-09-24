@@ -9,17 +9,30 @@ void print(std::string s) {
     std::cout << s << std::endl;
 }
 
-bool Parser::applyModelWith(const QString &savedFGProjectText, Model *model) const {
+bool Parser::applyModelWith(const QString &savedFGProjectText, Model *model, QString *errorText) const {
     if(model == nullptr)
         return false;
     QString::const_iterator startScope = savedFGProjectText.cbegin();
     QString::const_iterator endScope = savedFGProjectText.cend();
     QString::const_iterator nextScope = QString::const_iterator(endScope);
 
-    QString symbol = findNextSymbol(startScope, endScope, nextScope);
-    if(symbol != "funny_gears_project")
+    try {
+        QString symbol = findNextSymbol(startScope, endScope, nextScope);
+        if(symbol != "funny_gears_project") {
+            throw QString(" funny_gears_project missing");
+        }
+    } catch(QString e) {
+        if(errorText != nullptr)
+            *errorText = e;
         return false;
-    return parseFunnyGearsProject(model, startScope, endScope);
+    }
+    try {
+        return parseFunnyGearsProject(model, startScope, endScope); //TODO: can catch be reached???
+    } catch(QString e) {
+        if(errorText != nullptr)
+            *errorText = e.prepend("Error when parsing funny_gears_project::");
+        return false;
+    }
 }
 
 //Handles text INSIDE <funny_gears_project> scope
@@ -36,11 +49,11 @@ bool Parser::parseFunnyGearsProject(
         GraphicsScheduleItem *item = nullptr;
         QString symbol = findNextSymbol(startItemScope, endItemScope, nextItemScope);
         if(symbol != "graphics_schedule_item")
-            return false;
+            throw QString(" graphics_schedule_item is missing");
         try {
             item = parseGraphicsScheduleItem(startItemScope, endItemScope);
         } catch(QString e) {
-            std::cerr << "Error when parsing scope of graphics_schedule_item::" << e.toStdString() << std::endl;
+            throw e.prepend("graphics_schedule_item::");
             return false;
         }
         model->addItem(item);
@@ -355,7 +368,6 @@ Spline* Parser::parseSpline(
         try {
             real value = parseReal(stepToNextSpace(startItemScope, endItemScope));
             knots.push_back(value);
-            std::cout << "knot inserted: " << value << std::endl;
         } catch(QString e) {
             throw e.prepend("knots::"); return nullptr;
         }
@@ -378,11 +390,7 @@ Spline* Parser::parseSpline(
     if(!nothingLeftBetween(nextItemScope, endScope))
         std::cerr << "ATTENTION: spline allows only knots and control points!" << std::endl;
 
-    Spline *spline = new Spline(controlPoints, knots);
-    std::cout << "Spline created:" << *spline << std::endl;
-    return spline;
-
-    // return new Spline(controlPoints, knots);
+    return new Spline(controlPoints, knots);
 }
 
 // Handles text INSIDE <spline_gear> scope
@@ -404,20 +412,15 @@ SplineGear* Parser::parseSplineGear(
     }
     Spline *toothProfile = nullptr;
 
-    std::cerr << "parse spline now for tooth_profile" << std::endl;
     try {
         toothProfile = parseSpline(startItemScope, endItemScope);
     } catch(QString e) {
         throw e.prepend("tooth_profile::"); return nullptr;
     }
-    std::cerr << "                     tooth_profile created" << std::endl;
-    std::cerr << "create SplineGear with tooth_profile" << std::endl;
     SplineGear *splineGear = new SplineGear(*toothProfile);
-    std::cerr << "                     SplineGear created" << std::endl;
     delete toothProfile;
     toothProfile = nullptr;
 
-    std::cerr << "set properties of splineGear:" << std::endl;
     //test for number_of_teeth
     startItemScope = nextItemScope;
     endItemScope = endScope;
@@ -592,9 +595,7 @@ uint Parser::parseUInt(const QString &text) const {
 real Parser::parseReal(const QString &text) const
 {
     bool ok;
-    std::cout << "text: " << text.toStdString() << ", ---> " << text.toDouble();
     real value = text.toDouble(&ok);
-    std::cout << " =? " << value << std::endl;
     if(!ok)
         throw QString(" real not recognized");
     return value;
@@ -658,65 +659,51 @@ QString Parser::findNextSymbol(
     QString::const_iterator &endScope,
     QString::const_iterator &nextScope) const
 {
-    bool output = false;
-    if(output) print("findNextSymbol called...");
-
     //use yet another const_iterator for the iteration from startScope to endScope
     QString::const_iterator iter = startScope;
 
     //find start of next symbol
-    if(output) print("find start of next symbol...");
     while(iter != endScope && *iter != QString("<")) { //QString::compare((*iter), tr("<"), Qt::CaseInsensitive) != 0) {
         ++iter;
     }
-    if(output) print("...found start of next symbol: " + ((iter == endScope) ? "_end_" : iter->decomposition().toStdString()));
-    if(iter == endScope)
-        return QString();
+    if(iter == endScope) {
+        throw QString(" reached end of scope while searching for a '<'"); return QString();
+    }
 
     //read symbol name
-    if(output) print("read symbol name...");
     ++iter;
     QString symbol;
     while(iter != endScope && *iter != QString(">")) {
         symbol += *iter;
         ++iter;
     }
-    if(output) print("...read symbol name: " + ((iter == endScope) ? "_reached_end_" : symbol.toStdString()));
-    if(iter == endScope)
+    if(iter == endScope) {
+        throw QString(" reached end of scope while reading symbol name (" + symbol + ")");
         return QString();
+    }
 
     //set new startScope (points to first place after closing the symbol)
     startScope = iter + 1;
 
     //construct closing symbol
-    if(output) print("construct closing symbol...");
     QString closingSymbol = QString("</" + symbol + ">");
-    if(output) print("...constructed closing symbol:" + closingSymbol.toStdString());
 
     //find closing symbol
-    if(output) print("find closing symbol...");
     int distToNextOccurence = nextOccurenceOf(closingSymbol, iter, endScope);
     iter = iter + distToNextOccurence + closingSymbol.length();
     if(distToNextOccurence < 0) {
-        //set a symbol for parsing error:
-        std::cerr << "PARSING ERROR – found only one occurence of " << symbol.toStdString() << std::endl;
+        throw (QString(" found only one occurence of '" + symbol +"'"));
         return QString();
     } else if(iter > endScope) {
-        //set a symbol for parsing error:
-        std::cerr << "PARSING ERROR – found only one occurence of '" << symbol.toStdString() << "' in inspected range" << std::endl;
+        throw QString(" found only one occurence of '" + symbol + "' in inspected range");
         return QString();
     }
-    if(output) print("... found closing symbol");
 
     //set new endScope (points to first place of closing the stop symbol ("<"))
     //and new nextScope (points to first place after the current symbols sphere of influence)
     //ATTENTION: nextScope may point anywhere behind the savedFGProjectText!!!
     endScope = iter - closingSymbol.length();
     nextScope = iter;
-
-    if(output) print("found inner text:");
-    if(output) print((innerText(startScope, endScope)).toStdString());
-    if(output) print("...findNextSymbol finished\n");
 
     return symbol;
 }

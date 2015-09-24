@@ -85,6 +85,8 @@ void MainWindow::createFileMenuAndToolbar() {
         SIGNAL(triggered()), this, SLOT(newProject()));
     connect(createAction(m_openAction,  tr("Open"),  tr("open saved objects"), QKeySequence::Open),
         SIGNAL(triggered()), this, SLOT(openProject()));
+    connect(createAction(m_openAddAction,  tr("OpenAdd"),  tr("add saved objects"), QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_O)),
+        SIGNAL(triggered()), this, SLOT(openAddProject()));
     connect(createAction(m_saveAction,  tr("Save"),  tr("save current objects"), QKeySequence::Save),
         SIGNAL(triggered()), this, SLOT(saveProject()));
     connect(createAction(m_saveAsAction,tr("Save As"),  tr("save current objects in new file"), QKeySequence::SaveAs),
@@ -93,6 +95,7 @@ void MainWindow::createFileMenuAndToolbar() {
     m_fileMenu = menuBar()->addMenu(tr("File"));
     m_fileMenu->addAction(m_newAction);
     m_fileMenu->addAction(m_openAction);
+    m_fileMenu->addAction(m_openAddAction);
     m_fileMenu->addAction(m_saveAction);
     m_fileMenu->addAction(m_saveAsAction);
 
@@ -100,6 +103,7 @@ void MainWindow::createFileMenuAndToolbar() {
     m_fileToolBar->setIconSize(QSize(16, 16));
     m_fileToolBar->addAction(m_newAction);
     m_fileToolBar->addAction(m_openAction);
+    m_fileToolBar->addAction(m_openAddAction);
     m_fileToolBar->addAction(m_saveAction);
     m_fileToolBar->addAction(m_saveAsAction);
 }
@@ -172,12 +176,29 @@ void MainWindow::openProject() {
     if(!((m_projectChanged && savedProjectOrOk()) || !m_projectChanged))
         return;
 
+    //TODO: delete all current objects!
+
     QString fileName = QFileDialog::getOpenFileName(
         this,
         tr("Choose a funny gear project"),
         QStandardPaths::displayName(QStandardPaths::HomeLocation),
         tr("Funny Gears Files (*.fg)")
     );
+    openProject(fileName);
+}
+
+void MainWindow::openAddProject() {
+    //Do not ask the user for saving as current objects won't be deleted
+    QString fileName = QFileDialog::getOpenFileName(
+        this,
+        tr("Choose a funny gear project to add"),
+        QStandardPaths::displayName(QStandardPaths::HomeLocation),
+        tr("Funny Gears Files (*.fg)")
+    );
+    openProject(fileName);
+}
+
+void MainWindow::openProject(QString fileName) {
     QFile file(fileName);
     if(file.exists()) {
         QString parsingError;
@@ -187,7 +208,7 @@ void MainWindow::openProject() {
                 tr("Stopped loading the file"), //text
                 QMessageBox::Ok, //standard buttons
                 this); //parent
-            messageBox.setInformativeText("Could not parse the file correctly.\nIf you wrote the file yourselves, check ???.\nIf it was created by saving a former project, probably something happened to the file. If not, please contact the software maintainer.");
+            messageBox.setInformativeText("Could not parse the file correctly.\nIf you wrote the file yourselves, check the grammar. (Look at error text below.)");
             messageBox.setDetailedText(parsingError);
             messageBox.setDefaultButton(QMessageBox::Ok);
             messageBox.exec();
@@ -270,9 +291,10 @@ bool MainWindow::parseAndLoad(QString fileName, QString *parsingError) {
     file.close();
     m_fileName = fileName;
 
-    if(!m_parser.applyModelWith(fileContent, m_model)) {
+    QString errorText;
+    if(!m_parser.applyModelWith(fileContent, m_model, &errorText)) {
         if(parsingError != nullptr)
-            *parsingError = "More information should go here!";
+            *parsingError = errorText;
         return false;
     }
     return true;

@@ -40,6 +40,7 @@ private:
                 *m_aboutAction,
                 *m_newAction,
                 *m_openAction,
+                *m_openAddAction,
                 *m_saveAction,
                 *m_saveAsAction,
                 *m_toggleFileToolBarAction,
@@ -78,7 +79,11 @@ private slots:
     bool saveProject();
     bool saveAsProject();
     void openProject();
+    void openAddProject();
     void openColorDialog();
+
+private:
+    void openProject(QString fileName);
 };
 
 

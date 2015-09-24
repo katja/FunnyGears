@@ -17,7 +17,7 @@ public:
     Parser() {}
     virtual ~Parser() {}
 
-    bool applyModelWith(const QString &savedFGProjectText, Model *model) const;
+    bool applyModelWith(const QString &savedFGProjectText, Model *model, QString *errorText) const;
 
 private:
     bool parseFunnyGearsProject(
