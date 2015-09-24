@@ -179,8 +179,20 @@ void MainWindow::openProject() {
         tr("Funny Gears Files (*.fg)")
     );
     QFile file(fileName);
-    if(file.exists())
-        parseAndLoad(fileName);
+    if(file.exists()) {
+        QString parsingError;
+        if(!parseAndLoad(fileName, &parsingError)) {
+            QMessageBox messageBox(QMessageBox::Warning, //icon
+                tr("Stopped loading the file"), //title (is ignored on Mac OS X)
+                tr("Stopped loading the file"), //text
+                QMessageBox::Ok, //standard buttons
+                this); //parent
+            messageBox.setInformativeText("Could not parse the file correctly.\nIf you wrote the file yourselves, check ???.\nIf it was created by saving a former project, probably something happened to the file. If not, please contact the software maintainer.");
+            messageBox.setDetailedText(parsingError);
+            messageBox.setDefaultButton(QMessageBox::Ok);
+            messageBox.exec();
+        }
+    }
 }
 
 bool MainWindow::savedProjectOrOk() {
@@ -239,23 +251,29 @@ void MainWindow::openColorDialog() {
     m_toggleColorDialogAction->setChecked(m_colorDialog->isVisible());
 }
 
-void MainWindow::parseAndLoad(QString fileName) {
+bool MainWindow::parseAndLoad(QString fileName, QString *parsingError) {
     QFile file(fileName);
 
-    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        return;
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        if(parsingError != nullptr)
+            *parsingError = tr("Could not open the file.");
+        return false;
+    }
 
-    QVector<QString*> splitted;
+    QString fileContent;
     QTextStream in(&file);
     QString line = in.readLine();
     while(line != nullptr) {
-        splitted.append(new QString(line.trimmed()));
+        fileContent.append(line.trimmed());
         line = in.readLine();
     }
     file.close();
     m_fileName = fileName;
 
-    for(QString *command : splitted) {
-        std::cout << command->toStdString() << std::endl;
+    if(!m_parser.applyModelWith(fileContent, m_model)) {
+        if(parsingError != nullptr)
+            *parsingError = "More information should go here!";
+        return false;
     }
+    return true;
 }

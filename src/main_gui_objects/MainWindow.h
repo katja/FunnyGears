@@ -7,6 +7,7 @@
 #include "main_gui_objects/Model.h"
 #include "main_gui_objects/ObjectScheduleViewWidget.h"
 #include "main_gui_objects/ObjectAttributesWidget.h"
+#include "parsing_and_serializing/Parser.h"
 
 class MainWindow : public QMainWindow {
 
@@ -47,6 +48,7 @@ private:
                 *m_toggleObjectAttributesAction,
                 *m_toggleObjectScheduleAction;
 
+    Parser m_parser;
     QString m_fileName;
     bool m_fileNameHasBeenSet;
 
@@ -67,7 +69,7 @@ private:
 
     bool saveProjectWithFileName(QString fileName);
 
-    void parseAndLoad(QString fileName);
+    bool parseAndLoad(QString fileName, QString *ok = nullptr);
 
 private slots:
     void quitProgram();

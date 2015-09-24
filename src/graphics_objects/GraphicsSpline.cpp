@@ -323,6 +323,10 @@ void GraphicsSpline::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     }
 }
 
+void GraphicsSpline::setColor(QColor color) {
+    m_color = color;
+}
+
 QColor GraphicsSpline::color() const {
     return m_color;
 }

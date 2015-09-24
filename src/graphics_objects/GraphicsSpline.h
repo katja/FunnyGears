@@ -58,6 +58,7 @@ public:
     virtual QPainterPath tangentPath() const;
 
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;  // from QGraphicsItem
+    void setColor(QColor);
     QColor color() const;
 
     void receivedClickOn(QPointF scenePos) override; // from GraphicsItem

@@ -38,6 +38,7 @@ HEADERS = \
     src/graphics_widgets/*.h \
     src/helper_objects/*.h \
     src/main_gui_objects/*.h \
+    src/parsing_and_serializing/*.h \
     src/tool_bars/*.h
 
 SOURCES = \
@@ -47,4 +48,5 @@ SOURCES = \
     src/graphics_widgets/*.cpp \
     src/helper_objects/*.cpp \
     src/main_gui_objects/*.cpp \
+    src/parsing_and_serializing/*.cpp \
     src/tool_bars/*.cpp
