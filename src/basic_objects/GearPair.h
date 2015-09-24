@@ -9,50 +9,78 @@
 #include "helper_objects/ChangingObjectListener.h"
 class SplineGear;
 
-
+/** Represents a pair of gears
+ *
+ *  The given SplineGear drivingGear is copied and the class holds every time a reference
+ *  of drivingGear and drivenGear. So it is always possible to set f. ex. the numberOfTeeth
+ *  even if the SplineGears (drivingGear/drivenGear) are not valid (!isValid())
+ *  But most other methods rely on the validness. See the discription at each method.
+ */
 class GearPair : public ChangingObject {
 
 public:
     GearPair(const SplineGear &drivingGear); //Driving gear = treibendes Rad
-    ~GearPair();
+    virtual ~GearPair();
 
+    /** Complete update of the GearPair
+     *  Calculates m_drivingGearPitchRadius, m_module, m_drivenGearPitchRadius and
+     *  m_distanceOfCenters and continues the update with calculateAgainWithNewToothProfile()
+     */
     void calculateAgainWithAllAttributes();
+
+    /** Updates the m_completeToothProfile, the main quadrant...
+     *  Checks validness (isValid()) and if it does not succeed, calls only
+     *  calculateAgainWithUnchangedAttributes().
+     *  Otherwise the former m_completeToothProfile is deleted and a new one
+     *  calculated out of the current m_drivingGear. The main quadrant is set again and
+     *  the update continues with calculateAgainWithUnchangedAttributes()
+     */
     void calculateAgainWithNewToothProfile();
+
+    /** Updates all points of driven gear
+     *  Deletes information of m_contactPointManager, calculates sampling interval and
+     *  then calculates pairing points and therefore the drivne gear
+     *  If !isValid() only the state of m_contactPointManager is set back and changed()
+     *  is called
+     */
     void calculateAgainWithUnchangedAttributes();
 
-    const ContactPointManager& contactPointManager();
 
-    SplineGear* drivingGear() const;
-    SplineGear* drivenGear() const;
+    const ContactPointManager& contactPointManager(); //should be possible with !isValid()
 
-    void setNumberOfTeethOfDrivenGear(uint numberOfTeeth);
-    uint numberOfTeethOfDrivenGear() const;
+    SplineGear* drivingGear() const; //possible with !isValid()
+    SplineGear* drivenGear() const; //possible with !isValid()
 
-    real module() const;
-    real transmissionRatio() const;  //German: Übersetzung(sverhältnis)
+    void setNumberOfTeethOfDrivenGear(uint numberOfTeeth); //possible with !isValid()
+    uint numberOfTeethOfDrivenGear() const; //possible with !isValid()
 
-    real drivingGearPitchRadius() const;
-    real drivenGearPitchRadius() const;
+    real module() const; //possible with !isValid() (but doesn't make sense)
+    real transmissionRatio() const;  //German: Übersetzung(sverhältnis)  //possible with !isValid() (if driving gear has 0 teeth, 0 is returned)
 
-    real getDistanceOfCenters() const;
+    real drivingGearPitchRadius() const; //possible with !isValid() (but doesn't make sense)
+    real drivenGearPitchRadius() const; //possible with !isValid() (but doesn't make sense)
 
-    void setBottomClearance(real bottomClearance, real startAngleInDegree);
-    real bottomClearance() const;
-    real bottomClearanceStartAngle() const;
+    real getDistanceOfCenters() const; //possible with !isValid() (but doesn't make sense)
 
-    void useBottomClearance(bool useIt);
-    bool isBottomClearanceUsed() const;
+    void setBottomClearance(real bottomClearance, real startAngleInDegree);  //possible with !isValid()
+    real bottomClearance() const; //possible with !isValid()
+    real bottomClearanceStartAngle() const; //possible with !isValid()
 
-    void setMaxDriftAngleInDegree(real degree);
-    void setMaxDriftAngle(real rad);
-    real maxDriftAngleInDegree() const;
-    real maxDriftAngle() const; // in rad
+    void useBottomClearance(bool useIt); //possible with !isValid() (only saves this setting, does no recalculation)
+    bool isBottomClearanceUsed() const;  //possible with !isValid()
 
-    void setSamplingRate(uint samplingRate);
-    uint samplingRate() const;
+    void setMaxDriftAngleInDegree(real degree); //possible with !isValid()
+    void setMaxDriftAngle(real rad); //possible with !isValid()
+    real maxDriftAngleInDegree() const; //possible with !isValid()
+    real maxDriftAngle() const; // in rad, possible with !isValid()
 
-    void informAboutChange(ChangingObjectListener *listener) override; // from ChangingObject
-    void noMoreInformAboutChange(ChangingObjectListener *listener) override; // from ChangingObject
+    void setSamplingRate(uint samplingRate); //possible with !isValid()
+    uint samplingRate() const; //possible with !isValid()
+
+    void informAboutChange(ChangingObjectListener *listener) override; // from ChangingObject, possible with !isValid()
+    void noMoreInformAboutChange(ChangingObjectListener *listener) override; // from ChangingObject, possible with !isValid()
+
+    bool isValid() const; //possible with !isValid()
 
 private:
     static const real DefaultBottomClearance;
@@ -71,9 +99,9 @@ private:
 
     bool m_useBottomClearance;
     real m_bottomClearance;
-    real m_bottomClearanceStartAngle;
+    real m_bottomClearanceStartAngle; //in degree
 
-    real m_maxDriftAngle;
+    real m_maxDriftAngle; //in rad
     uint m_samplingRate;
     real m_stepSize;
 
@@ -81,20 +109,20 @@ private:
 
     list<ChangingObjectListener*> m_listeners;
 
-    void changed();
+    void changed(); //possible with !isValid()
 
-    void updateMainQuadrant(vec2 middleOfToothProfile);
+    void updateMainQuadrant(vec2 middleOfToothProfile); //method on its own is possible with !isValid(), but one should calculate the middleOfToothProfile before, which is only possible when isValid()
 
-    void insertPossiblePairingPointsInPointManager();
-    void insertRefinedContactPoints(real stepValue, real nextStepValue, uint partition);
-    void createAndInsertContactPoint(const vec2 &point, const vec2 &normal, real evalValue);
-    ContactPoint* contactPointOf(const vec2 &point, const vec2 &normal, real evalValue, real t, bool usedLargerValue) const;
-    NoneContactPoint* noneContactPointOf(const vec2 &point, const vec2 &normal, real stepValue) const;
-    bool insertThicknessInContactPoint(ContactPoint& contactPoint) const;
+    void insertPossiblePairingPointsInPointManager(); //only possible when isValid()
+    void insertRefinedContactPoints(real stepValue, real nextStepValue, uint partition); //only possible when isValid()
+    void createAndInsertContactPoint(const vec2 &point, const vec2 &normal, real evalValue); //method on its own is possible with !isValid(), but one should calculate the middleOfToothProfile before, which is only possible when isValid()
+    ContactPoint* contactPointOf(const vec2 &point, const vec2 &normal, real evalValue, real t, bool usedLargerValue) const; //method on its own is possible with !isValid(), but one should calculate the middleOfToothProfile before, which is only possible when isValid()
+    NoneContactPoint* noneContactPointOf(const vec2 &point, const vec2 &normal, real stepValue) const; //method on its own is possible with !isValid(), but one should calculate the middleOfToothProfile before, which is only possible when isValid()
+    bool insertThicknessInContactPoint(ContactPoint& contactPoint) const; //method on its own is possible with !isValid(), but one should calculate the middleOfToothProfile before, which is only possible when isValid()
 
-    void fillDrivenGearWithGearPoints();
-    void updateBottomClearanceTranslation();
+    void fillDrivenGearWithGearPoints(); //only possible when isValid()
+    void updateBottomClearanceTranslation(); //only possible when isValid()
 
-    vec2 normalAt(real value) const;
+    vec2 normalAt(real value) const; //MUST NOT BE CALLED, when !isValid(). Validness is not checked here!!!
 };
 #endif // GEAR_PAIR

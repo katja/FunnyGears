@@ -34,24 +34,29 @@ void GearPair::calculateAgainWithAllAttributes() {
 }
 
 void GearPair::calculateAgainWithNewToothProfile() {
-    if(m_completeToothProfile != nullptr)
-        delete m_completeToothProfile;
-    m_completeToothProfile = m_drivingGear->completeToothProfile();
-    updateMainQuadrant(normalize((m_completeToothProfile->firstPoint() + m_completeToothProfile->lastPoint()) * 0.5));
+    if(isValid()) {
+        if(m_completeToothProfile != nullptr)
+            delete m_completeToothProfile;
+        m_completeToothProfile = m_drivingGear->completeToothProfile();
+        updateMainQuadrant(normalize((m_completeToothProfile->firstPoint() + m_completeToothProfile->lastPoint()) * 0.5));
+    }
     calculateAgainWithUnchangedAttributes();
 }
 
 void GearPair::calculateAgainWithUnchangedAttributes() {
     m_contactPointManager.clear(); //deletes all ContactPoint* of the list
 
-    m_stepSize = (m_completeToothProfile->upperDomainLimit() - m_completeToothProfile->lowerDomainLimit())
-                    / (m_samplingRate - 1);
+    if(isValid()) {
+        m_stepSize = (m_completeToothProfile->upperDomainLimit() - m_completeToothProfile->lowerDomainLimit())
+                        / (m_samplingRate - 1);
 
-    insertPossiblePairingPointsInPointManager();
-    m_contactPointManager.processPointsToGear(m_drivenGear->numberOfTeeth(), !(m_drivingGear->toothDescribedInClockDirection()));
-    m_contactPointManager.translateForBottomClearance(m_bottomClearance, m_bottomClearanceStartAngle); //Kopfspiel
-    fillDrivenGearWithGearPoints();
+        insertPossiblePairingPointsInPointManager();
+        m_contactPointManager.processPointsToGear(m_drivenGear->numberOfTeeth(), !(m_drivingGear->toothDescribedInClockDirection()));
+        m_contactPointManager.translateForBottomClearance(m_bottomClearance, m_bottomClearanceStartAngle); //Kopfspiel
+        fillDrivenGearWithGearPoints();
+    }
     changed();
+
 }
 
 const ContactPointManager& GearPair::contactPointManager() {
@@ -78,6 +83,8 @@ real GearPair::module() const {
     return m_module;
 }
 real GearPair::transmissionRatio() const {
+    if(m_drivingGear->numberOfTeeth() == 0)
+        return 0;
     return -(static_cast<real>(m_drivenGear->numberOfTeeth()) / static_cast<real>(m_drivingGear->numberOfTeeth()));
 }
 
@@ -152,6 +159,10 @@ void GearPair::noMoreInformAboutChange(ChangingObjectListener *listener) {
     m_listeners.remove(listener);
 }
 
+bool GearPair::isValid() const {
+    return m_drivingGear->isValid();
+}
+
 void GearPair::changed() {
     for(ChangingObjectListener *listener : m_listeners) {
         listener->objectChanged(this);
@@ -170,6 +181,8 @@ void GearPair::updateMainQuadrant(vec2 middleOfToothProfile) {
 }
 
 void GearPair::insertPossiblePairingPointsInPointManager() {
+    if(!isValid())
+        return;
     real startValue = m_completeToothProfile->lowerDomainLimit();
     vec2 startPoint = m_completeToothProfile->evaluate(startValue);
     vec2 nextNormal = normalAt(startValue);
@@ -201,6 +214,8 @@ void GearPair::insertPossiblePairingPointsInPointManager() {
 
 //It is really important, that the points with smaller evaluationValues are inserted first!!!
 void GearPair::insertRefinedContactPoints(real evalValue, real nextStepValue, uint partition) {
+    if(!isValid())
+        return;
     vec2 normal = normalAt(evalValue);
     vec2 nextNormal = normalAt(nextStepValue);
 
@@ -386,6 +401,8 @@ bool GearPair::insertThicknessInContactPoint(ContactPoint& contactPoint) const {
 }
 
 void GearPair::fillDrivenGearWithGearPoints() {
+    if(!isValid())
+        return;
     m_drivenGear->setDegree(1);
 
     if(m_useBottomClearance) {
@@ -397,6 +414,8 @@ void GearPair::fillDrivenGearWithGearPoints() {
 }
 
 void GearPair::updateBottomClearanceTranslation() {
+    if(!isValid())
+        return;
     m_contactPointManager.translateForBottomClearance(m_bottomClearance, m_bottomClearanceStartAngle);
     fillDrivenGearWithGearPoints();
 }

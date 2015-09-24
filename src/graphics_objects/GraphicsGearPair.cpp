@@ -326,6 +326,8 @@ bool GraphicsGearPair::finePencilUsed() const {
 }
 
 void GraphicsGearPair::updateBoundingRect() {
+    if(!m_gearPair->isValid())
+        return;
     list< list<ContactPoint*> *> foundPoints = m_gearPair->contactPointManager().foundPoints();
     m_largestDistanceToPoint = 0;
     m_largestNormalOfPoint = 0;
@@ -394,6 +396,8 @@ QRectF GraphicsGearPair::boundingRect() const {
 void GraphicsGearPair::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Q_UNUSED(option);
     Q_UNUSED(widget);
+    if(!m_gearPair->isValid())
+        return;
 
     if(m_finePencilUsed) {
         changePenWidth(painter, 0);
@@ -417,6 +421,8 @@ void GraphicsGearPair::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 }
 
 void GraphicsGearPair::paintAdditionals(QPainter *painter, GraphicsMatingSplineGear *gear) const {
+    if(!m_gearPair->isValid())
+        return;
     if(m_finePencilUsed) {
         changePenWidth(painter, 0);
     }
@@ -452,6 +458,8 @@ void GraphicsGearPair::paintAdditionals(QPainter *painter, GraphicsMatingSplineG
 }
 
 void GraphicsGearPair::paintSampledContactPointsDrivingGear(QPainter *painter) const {
+    if(!m_gearPair->isValid())
+        return;
     list< list<ContactPoint*> *> contactPointsLists = m_gearPair->contactPointManager().foundPoints();
 
     painter->save();
@@ -472,6 +480,8 @@ void GraphicsGearPair::paintSampledContactPointsDrivingGear(QPainter *painter) c
 }
 
 void GraphicsGearPair::paintSampledContactPointsDrivenGear(QPainter *painter) const {
+    if(!m_gearPair->isValid())
+        return;
     list<ContactPointsWithPosition*> contactPointsWithPositions = m_gearPair->contactPointManager().contactPointsWithPositions();
 
     painter->save();
@@ -517,7 +527,8 @@ void GraphicsGearPair::paintPitchPoint(QPainter *painter) const {
 }
 
 void GraphicsGearPair::paintBestConsecutivePathOfContact(QPainter *painter) const {
-    // paintBestConsecutivePathOfContactInformations(painter);
+    if(!m_gearPair->isValid())
+        return;
 
     CalculationState s = CalculationState::Simple;
     if(isBottomClearanceUsed())
@@ -574,6 +585,8 @@ void GraphicsGearPair::paintBestConsecutivePathOfContact(QPainter *painter) cons
 }
 
 void GraphicsGearPair::paintHighlightOfStartAndEndOfPathOfContact(QPainter *painter) const {
+    if(!m_gearPair->isValid())
+        return;
     CalculationState s = CalculationState::Simple;
     if(isBottomClearanceUsed())
         s = CalculationState::BottomClearance;
@@ -638,6 +651,9 @@ void GraphicsGearPair::paintLinesToStartAndEndOfBestConsecutivePathOfContact(QPa
 }
 
 void GraphicsGearPair::paintPathOfPossibleContact(QPainter *painter) const {
+    if(!m_gearPair->isValid())
+        return;
+
     list< list<ContactPoint*> *> contactPointsLists = m_gearPair->contactPointManager().foundPoints();
 
     painter->save();
@@ -664,6 +680,9 @@ void GraphicsGearPair::paintPathOfPossibleContact(QPainter *painter) const {
 }
 
 void GraphicsGearPair::paintPathOfRealContact(QPainter *painter) const {
+    if(!m_gearPair->isValid())
+        return;
+
     CalculationState s = CalculationState::Simple;
     if(m_gearPair->isBottomClearanceUsed())
         s = CalculationState::BottomClearance;
@@ -698,6 +717,9 @@ void GraphicsGearPair::paintPathOfRealContact(QPainter *painter) const {
 }
 
 void GraphicsGearPair::paintNoneContactPoints(QPainter *painter, bool paintOriginPoints, bool paintTargetPoints) const {
+    if(!m_gearPair->isValid())
+        return;
+
     list<NoneContactPoint*> ncps = m_gearPair->contactPointManager().noneContactPoints();
 
     painter->save();
@@ -744,6 +766,9 @@ void GraphicsGearPair::paintNoneContactPoints(QPainter *painter, bool paintOrigi
 }
 
 void GraphicsGearPair::paintSelectedGearPoints(QPainter *painter) const {
+    if(!m_gearPair->isValid())
+        return;
+
     vector<vec2> gearPoints = m_gearPair->contactPointManager().gearPoints();
 
     painter->save();
