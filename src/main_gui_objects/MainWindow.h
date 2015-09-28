@@ -2,6 +2,7 @@
 #define MAIN_WINDOW
 
 #include "stable.h"
+#include "helper_objects/ProjectChangesTracker.h"
 #include "main_gui_objects/GraphicsView.h"
 #include "main_gui_objects/GraphicsScene.h"
 #include "main_gui_objects/Model.h"
@@ -49,11 +50,11 @@ private:
                 *m_toggleObjectAttributesAction,
                 *m_toggleObjectScheduleAction;
 
+    ProjectChangesTracker m_changesTracker;
+
     Parser m_parser;
     QString m_fileName;
     bool m_fileNameHasBeenSet;
-
-    bool m_projectChanged;
 
     void createMainProgramPart();
     void createMenusAndToolbars();
@@ -83,7 +84,7 @@ private slots:
     void openColorDialog();
 
 private:
-    void openProject(QString fileName);
+    bool openProject(QString fileName);
 };
 
 

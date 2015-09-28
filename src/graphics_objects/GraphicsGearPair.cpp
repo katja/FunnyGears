@@ -57,6 +57,7 @@ GraphicsGearPair::GraphicsGearPair(GearPair *gearPair) :
     m_rotationDegreeDrivenGear(0.0),
     m_finePencilUsed(false)
 {
+    std::cout << "GraphicsGearPair is created" << std::endl;
     m_drivingGear = new GraphicsMatingSplineGear(m_gearPair->drivingGear(), this); // driving gear inserted as child
     m_drivenGear = new GraphicsMatingSplineGear(m_gearPair->drivenGear(), this); // driven gear inserted as child
 
@@ -75,10 +76,17 @@ GraphicsGearPair::GraphicsGearPair(GearPair *gearPair) :
 }
 
 GraphicsGearPair::~GraphicsGearPair() {
+    //m_drivenGear and m_drivenGear are not deleted, as they are expected to be listed
+    //in the model as correct GraphicsScheduleItems
+    //=> they are deleted by the model
+    //TODO: maybe better ask for if they still exist?
+    //everywhere: delete... + ...=0
+    //ask if(m_...) delete ...
+    std::cout << "GraphicsGearPair is ..." << std::endl;
     m_gearPairInformationWidget->close();
     delete m_gearPairInformationWidget;
-    delete m_drivingGear;
-    delete m_drivenGear;
+    delete m_gearPair;
+    std::cout << "deleted" << std::endl;
 }
 
 int GraphicsGearPair::type() const {

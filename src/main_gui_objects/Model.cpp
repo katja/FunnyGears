@@ -1,5 +1,6 @@
 #include "graphics_objects/GraphicsRootItem.h"
 #include "main_gui_objects/Model.h"
+#include <algorithm>
 
 Model::Model(QGraphicsScene *scene, QObject *parent) : QAbstractItemModel(parent), m_scene(scene) {
     m_rootItem = new GraphicsRootItem();
@@ -35,9 +36,9 @@ QModelIndex Model::index(int row, int column, const QModelIndex &parentIndex) co
 }
 
 QModelIndex Model::parent(const QModelIndex &index) const {
-    GraphicsScheduleItem *child = getInternItemFromIndex(index);
-    if(child) {
-        GraphicsScheduleItem *parent = child->parent();
+    GraphicsScheduleItem *item = getItemFromIndex(index);
+    if(item) {
+        GraphicsScheduleItem *parent = item->parent();
         if(parent == m_rootItem)
             return QModelIndex();
         else
@@ -48,10 +49,10 @@ QModelIndex Model::parent(const QModelIndex &index) const {
 
 bool Model::hasChildren(const QModelIndex &parentIndex) const {
     GraphicsScheduleItem *parent = getInternItemFromIndex(parentIndex);
-    if(!parent) {
-        return false;
-    } else {
+    if(parent) {
         return (parent->numberOfChildren() > 0);
+    } else {
+        return false;
     }
 }
 
@@ -74,14 +75,10 @@ QVariant Model::data(const QModelIndex &index, int role) const {
     }
     GraphicsScheduleItem *item = getInternItemFromIndex(index);
     if(item) {
-        if(role == Qt::DisplayRole || role == Qt::ToolTipRole) {
-            switch(index.column()) {
-                case NAME:
-                    return item->name();
-                default:
-                    return QVariant();
-            }
-        } else if (role == Qt::DecorationRole && index.column() == VISIBILITY) {
+        if(index.column() == NAME && (role == Qt::DisplayRole || role == Qt::ToolTipRole)) {
+            return item->name();
+        } else
+        if(index.column() == VISIBILITY && role == Qt::DecorationRole) {
             if(item->isVisible())
                 return QIcon(":/images/EyeOpen.png");
             else
@@ -160,23 +157,57 @@ bool Model::addItem(GraphicsScheduleItem *newItem, GraphicsScheduleItem *parent)
 bool Model::remove(QModelIndex index) {
     if(!index.isValid())
         return false;
-    GraphicsScheduleItem *item = getInternItemFromIndex(index);
+    GraphicsScheduleItem *item = getItemFromIndex(index);
 
+    if(!item) { // m_rootItem or not valid item
+        return false;
+    }
+    emit rowsAboutToBeRemoved();
     beginRemoveRows(index.parent(), index.row(), index.row() + 1);
     m_scene->removeItem(item);
     delete item;
     endRemoveRows();
+    emit rowsFinishedRemoval();
     return true;
 }
 
-void Model::removeAll() {
-    while(hasChildren()) {
-        GraphicsScheduleItem *item = getInternItemFromIndex(index(0, 0, QModelIndex()));
-        beginRemoveRows(QModelIndex(), 0, 1);
-        m_scene->removeItem(item);
-        delete item;
-        endRemoveRows();
+bool Model::remove(QModelIndexList indices) {
+    if(indices.empty())
+        return true;
+    QList<int> rowsToDelete;
+    for(QModelIndex index : indices) {
+        // Choose only one entry per row for the deletion – all have the same internal pointers
+        if(index.column() == 0) {
+            // Only first level items can be deleted, others are deleted with their parents
+            if(index.parent() == QModelIndex()) {
+                rowsToDelete.append(index.row());
+            }
+        }
     }
+    if(rowsToDelete.empty())
+        return true;
+    // sort rows to first remove the once further "below"
+    // otherwise wrong rows may be deleted as row/child numbers can change by deleting first the upper items
+    std::sort(rowsToDelete.begin(), rowsToDelete.end()); //sorted ascending
+
+    // iterate from back to front (descending) and delete rows and GraphicsScheduleItems
+    bool allRemoved = true;
+    emit rowsAboutToBeRemoved();
+    QList<int>::iterator it = rowsToDelete.end();
+    do {
+        --it;
+        allRemoved &= removeRow(*it);
+    } while(it != rowsToDelete.begin());
+    emit rowsFinishedRemoval();
+    return allRemoved;
+}
+
+void Model::removeAll() {
+    emit rowsAboutToBeRemoved();
+    while(hasChildren()) {
+        removeRow(rowCount() - 1);
+    }
+    emit rowsFinishedRemoval();
 }
 
 void Model::clearSelection() {
@@ -192,6 +223,29 @@ GraphicsScheduleItem* Model::getItemFromIndex(const QModelIndex &index) const {
 
 QModelIndex Model::getIndexFromItem(GraphicsScheduleItem *item) const {
     return createIndex(item->childNumber(), 0, item);
+}
+
+void Model::endInsertRows() {
+    QAbstractItemModel::endInsertRows();
+}
+
+bool Model::removeRow(int row, QModelIndex parent) {
+    QModelIndex indexx = index(row, 0, parent);
+    bool allRemoved = true;
+    if(hasChildren(indexx)) {
+        int numberOfChildren = rowCount(indexx);
+        for(int i = numberOfChildren - 1; i >= 0; --i) {
+            allRemoved &= removeRow(i, indexx);
+        }
+    }
+    GraphicsScheduleItem *item = getItemFromIndex(indexx);
+    if(!item) // m_rootItem or not valid
+        return false;
+    beginRemoveRows(parent, row, row);
+    m_scene->removeItem(item);
+    delete item;
+    endRemoveRows();
+    return allRemoved;
 }
 
 GraphicsScheduleItem* Model::getInternItemFromIndex(const QModelIndex &index) const {

@@ -121,13 +121,6 @@ void ObjectScheduleViewWidget::addInvoluteGear() {
     m_model->addItem(gear);
 }
 
-//Helpermethod for removeItems()
-bool isBelow(QModelIndex &a, QModelIndex &b) {
-    if(a.row() < b.row())
-        return false;
-    else
-        return true;
-}
 void ObjectScheduleViewWidget::removeItems() {
     QModelIndexList selectedItems = m_treeView->selectedIndexes();
 
@@ -148,22 +141,7 @@ void ObjectScheduleViewWidget::removeItems() {
     askPermissionDialog.setDefaultButton(QMessageBox::Yes);
     int answer = askPermissionDialog.exec();
     if(answer == QMessageBox::Yes) { // = 1 => dialog accepted => delete items
-
-        //sort items from bottom to top, otherwise row number will be useless after first rows are deleted
-        qSort(selectedItems.begin(), selectedItems.end(), isBelow);
-
-        //only delete entries, whose line (row) was marked fully!
-        foreach(QModelIndex index, selectedItems) {
-            int markedColumnsCounter = 1;
-            foreach(QModelIndex index2, selectedItems) {
-                if(index.row() == index2.row() && index.column() < index2.column()) {
-                    ++markedColumnsCounter;
-                }
-            }
-            if(markedColumnsCounter >= m_model->columnCount()) {
-                m_model->remove(index);
-            }
-        }
+        m_model->remove(selectedItems);
     }
 }
 

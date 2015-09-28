@@ -6,8 +6,7 @@
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) :
     QMainWindow(parent, flags),
     m_fileName(tr("Untitled")),
-    m_fileNameHasBeenSet(false),
-    m_projectChanged(true)
+    m_fileNameHasBeenSet(false)
 {
     setGeometry(50, 20, 1000, 800);
     setWindowTitle("Funny Gears");
@@ -173,10 +172,8 @@ void MainWindow::newProject() {
 
 void MainWindow::openProject() {
     //Ask user for saving of changes before opening a new file
-    if(!((m_projectChanged && savedProjectOrOk()) || !m_projectChanged))
+    if(!((m_changesTracker.hasChanges() && savedProjectOrOk()) || !m_changesTracker.hasChanges()))
         return;
-
-    m_model->removeAll();
 
     QString fileName = QFileDialog::getOpenFileName(
         this,
@@ -184,7 +181,13 @@ void MainWindow::openProject() {
         QStandardPaths::displayName(QStandardPaths::HomeLocation),
         tr("Funny Gears Files (*.fg)")
     );
-    openProject(fileName);
+    m_model->removeAll();
+    if(openProject(fileName)) {
+        m_fileName = fileName;
+        m_fileNameHasBeenSet = true;
+    } else {
+        m_fileNameHasBeenSet = false;
+    }
 }
 
 void MainWindow::openAddProject() {
@@ -195,25 +198,29 @@ void MainWindow::openAddProject() {
         QStandardPaths::displayName(QStandardPaths::HomeLocation),
         tr("Funny Gears Files (*.fg)")
     );
-    openProject(fileName);
+    if(openProject(fileName))
+        ; //TODO: is it necessary to inform m_changesTracker??? m_projectChanged = true;
 }
 
-void MainWindow::openProject(QString fileName) {
+bool MainWindow::openProject(QString fileName) {
     QFile file(fileName);
-    if(file.exists()) {
-        QString parsingError;
-        if(!parseAndLoad(fileName, &parsingError)) {
-            QMessageBox messageBox(QMessageBox::Warning, //icon
-                tr("Stopped loading the file"), //title (is ignored on Mac OS X)
-                tr("Stopped loading the file"), //text
-                QMessageBox::Ok, //standard buttons
-                this); //parent
-            messageBox.setInformativeText("Could not parse the file correctly.\nIf you wrote the file yourselves, check the grammar. (Look at error text below.)");
-            messageBox.setDetailedText(parsingError);
-            messageBox.setDefaultButton(QMessageBox::Ok);
-            messageBox.exec();
-        }
+    if(!file.exists())
+        return false;
+
+    QString parsingError;
+    if(!parseAndLoad(fileName, &parsingError)) {
+        QMessageBox messageBox(QMessageBox::Warning, //icon
+            tr("Stopped loading the file"), //title (is ignored on Mac OS X)
+            tr("Stopped loading the file"), //text
+            QMessageBox::Ok, //standard buttons
+            this); //parent
+        messageBox.setInformativeText("Could not parse the file correctly.\nIf you wrote the file yourselves, check the grammar. (Look at error text below.)");
+        messageBox.setDetailedText(parsingError);
+        messageBox.setDefaultButton(QMessageBox::Ok);
+        messageBox.exec();
+        return false;
     }
+    return true;
 }
 
 bool MainWindow::savedProjectOrOk() {
@@ -247,6 +254,7 @@ bool MainWindow::saveAsProject() {
     );
     if(fileName.isEmpty())
         return false;
+    m_fileNameHasBeenSet = true;
     return saveProjectWithFileName(fileName);
 }
 
@@ -258,7 +266,7 @@ bool MainWindow::saveProjectWithFileName(QString fileName) {
         //TODO: input real data above
         file.close();
         m_fileName = fileName;
-        m_projectChanged = false;
+        m_changesTracker.setBackChanges();
         return true;
     }
     return false;

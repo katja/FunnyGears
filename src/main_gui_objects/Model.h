@@ -4,6 +4,40 @@
 #include "stable.h"
 #include "graphics_objects/GraphicsScheduleItem.h"
 
+/** Model (tree) of the ModelTreeView and the whole scene
+ *  Responsible for adding, organising and removing items
+ *
+ *  Holds a tree of all GraphicsScheduleItems – the root of the tree is an GraphicsRootItem
+ *  and is created in the initializer. //TODO: and deleted again???!!!
+ *  This root item is added to the QGraphicsScene scene, too, so all other items of the
+ *  model are added as children of this root item. It is not visible, as it has no graphic
+ *  representation.
+ *
+ *  To be able to use the ModelTreeView in the ObjectScheduleViewWidget it uses Qt's
+ *  QAbstractItemModel. Therefore it has implementations of the methods index(), parent(),
+ *  hasChildren(), rowCount(), columnCount(), data(), setData(), headerData() and flags().
+ *
+ *  Qt uses objects of QModelIndex to represent the data in a QAbstractItemModel. The Model
+ *  used here has a fixed number of columns (described in enum DATA). The number of rows
+ *  complies with the number of children of the root item and may grow and shrink. In every
+ *  cell of one row is saved the same internal pointer – the pointer to the corresponding
+ *  GraphicsScheduleItem. It only differs when data() is called. Depending on the column
+ *  data() calls the name() or the isVisible() on the GraphicsScheduleItem. It is no good
+ *  design to have these same pointers saved several times in each row. But this approach
+ *  makes the connection to the tree view easier.
+ *
+ *  When items are deleted it is very essential to inform other components of the removal.
+ *  Qt provides and demandes therefore the beginRemoveRows() and the endRemoveRows() methods.
+ *  As Model provides methods to remove many items at once but internal handles this by
+ *  removing item by item, two new signals are introduced by class Model.
+ *  QAbstractItemModel::beginRemoveRows(const QModelIndex &parent, int first, int last)
+ *  emits the signal QAbstractItemModel::rowsAboutToBeRemoved(const QModelIndex &parent, int first, int last)
+ *  Inspired by this the signal rowsAboutToBeRemoved() is emitted before any item is removed
+ *  (and also before the beginRemoveRows(...) is called, therefore even before the first
+ *  QAbstractItemModel::rowsAboutToBeRemoved(...) signal is emitted)
+ *  And after all the removal has finished (and also the last endRemoveRows() had been called)
+ *  signal rowsFinishedRemoval() is emitted.
+ */
 class Model : public QAbstractItemModel {
 
 Q_OBJECT
@@ -36,7 +70,6 @@ public:
      */
     QModelIndex parent(const QModelIndex &index) const; //When reimplementing this function in a subclass, be careful to avoid calling QModelIndex member functions, such as QModelIndex::parent(), since indexes belonging to your model will simply call your implementation, leading to infinite recursion.
 
-    //Not necessary, but if implementation of rowCount is expensive, it would be good:
     /** Returns true, if the corresponding GraphicsScheduleItem is found and has any
      *  children; otherwise returns false.
      */
@@ -80,10 +113,43 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const; //The base class implementation returns a combination of flags that enables the item (ItemIsEnabled) and allows it to be selected (ItemIsSelectable). ItemIsEditable must be returned!
 
     bool addItem(GraphicsScheduleItem *newItem, GraphicsScheduleItem *parent = 0);
+
+    /** @brief Removes the single row item with QModelIndex index
+     *
+     *  The row to which index belongs, is removed. To inform other components about the
+     *  removal and the completion of the removal, the signals rowsAboutToBeRemoved() and
+     *  rowsFinishedRemoval are emitted.
+     *  @return true if the row of the index could properly be removed
+     */
     bool remove(QModelIndex index);
+
+    /** @brief Removes all top level rows, which the given QModelIndexList indices belong to
+     *
+     *  In fact it only deletes the rows, if an item of indices in column 0 is given.
+     *  A QModelIndex with another column is not handles at all. But it is expected that
+     *  all items of a row are listed in indices, as they all belong to the row.
+     *  All QModelIndexes which are not top level items, that means they have another parent
+     *  than the root item, are only deleted, if their parent is given in indices, too.
+     *
+     *  To prevent other components of trying to access items, while the removal is in
+     *  progress, the signal rowsAboutToBeRemoved() is emitted before the first item is
+     *  removed. The signal rowsFinishedRemoval is emitted when the whole removal is
+     *  finished.
+     *  @return true if every row given by the indices could be properly removed or when
+     *               no row is given by indices, false otherwise
+     */
+    bool remove(QModelIndexList indices);
+
+    /** @brief Removes all items of the Model except the root item
+     *
+     *  To prevent other components of trying to access items, while the removal is in
+     *  progress, the signal rowsAboutToBeRemoved() is emitted before the first item is
+     *  removed. The signal rowsFinishedRemoval is emitted when the whole removal is
+     *  finished.
+     */
     void removeAll();
 
-    /** Clears the selection of every iten in the model
+    /** Clears the selection of every item in the model
      */
     void clearSelection();
 
@@ -98,13 +164,26 @@ public:
     QModelIndex getIndexFromItem(GraphicsScheduleItem *item) const;
 
 signals:
-    void layoutChanged(const QList<QPersistentModelIndex> &parents = QList<QPersistentModelIndex>(), QAbstractItemModel::LayoutChangeHint hint = QAbstractItemModel::NoLayoutChangeHint);
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>());
+    // void rowsAboutToBeRemoved(const QModelIndex &parent, int first, int last);
+    void rowsAboutToBeRemoved();
+    void rowsFinishedRemoval();
+
+protected:
+    void endInsertRows();
 
 private:
     QGraphicsScene *m_scene;
     GraphicsScheduleItem *m_rootItem;
     QHash< Data, QHash<Qt::ItemDataRole, QString> > m_headHash;
+
+    /** @brief Removes the given row
+     *
+     *  This method does not emit necessary signals to inform other components of the removal!
+     *  It acts only as a helper method for the public methods to remove items! Do not use
+     *  it in another way!
+     */
+    bool removeRow(int row, QModelIndex parent = QModelIndex());
 
     /** Returns a pointer to the GraphicsScheduleItem, which belongs to the given QModelIndex.
      *  If Index is not valid or no corresponding GraphicsScheduleItem can be found
