@@ -30,7 +30,7 @@ class Model;
  *
  *  Special handling is needed before removing one or especially many GraphicsItems. This
  *  is only allowed by the Model model. While objects are removed, no signals are sent
- *  either way. Afterwards a signal is emitted.
+ *  either way. Afterwards the selection is updated with the current selection of the model.
  */
 class SelectionModel : public QItemSelectionModel {
 
@@ -51,8 +51,8 @@ public slots:
 
 private slots:
     void updateSelection(const QItemSelection &selected, const QItemSelection &deselected);
-    void pauseSelectionConnection();
-    void continueSelectionConnection();
+    void prepareRowRemoval();
+    void continueAfterRowRemoval();
 
 private:
     Model *m_model;
@@ -61,9 +61,12 @@ private:
 
     bool m_connectionsAreActivated;
 
+    void pauseSelectionConnection();
+    void continueSelectionConnection();
+
+    void deselectAll();
     void changeSelectionInModel(GraphicsScheduleItem *item, QItemSelectionModel::SelectionFlags command = QItemSelectionModel::Select);
     void reportSelectionCount();
-
 };
 
 #endif // SELECTION_MODEL

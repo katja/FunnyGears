@@ -10,9 +10,9 @@ SelectionModel::SelectionModel(Model *model) :
     connect(this, SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
         this, SLOT(updateSelection(const QItemSelection&, const QItemSelection&)));
     connect(m_model, SIGNAL(rowsAboutToBeRemoved()),
-        this, SLOT(pauseSelectionConnection()));
+        this, SLOT(prepareRowRemoval()));
     connect(m_model, SIGNAL(rowsFinishedRemoval()),
-        this, SLOT(continueSelectionConnection()));
+        this, SLOT(continueAfterRowRemoval()));
 }
 
 SelectionModel::~SelectionModel() {
@@ -40,6 +40,12 @@ void SelectionModel::sceneSelectionChanged(GraphicsScene *scene) {
     reportSelectionCount();
 }
 
+// Maybe it seems like it would be easier to use the selection() method, here.
+// But as every no longer selected GraphicsScheduleItem needs to be deselected, this would
+// result in first deselcting all selected items and then again selecting the current
+// selected ones. So this would mean more selection changes of the GraphicsScheduleItems
+// On the other hand, implemented like at the moment, there is the cost to search for
+// special items in the QLists, which is not negligible
 void SelectionModel::updateSelection(const QItemSelection &selected, const QItemSelection &deselected) {
     if(!m_connectionsAreActivated)
         return;
@@ -64,13 +70,32 @@ void SelectionModel::updateSelection(const QItemSelection &selected, const QItem
     reportSelectionCount();
 }
 
+void SelectionModel::prepareRowRemoval() {
+    // Important to first pause all selections. Otherwise deselection would result in a bad access!
+    pauseSelectionConnection();
+    // Deselect all selected items to prevent inaccurate access
+    deselectAll();
+}
+
+void SelectionModel::continueAfterRowRemoval() {
+    //assure, that no selection of the GraphicsScheduleItems is active and m_selectedItems is empty
+    deselectAll();
+    continueSelectionConnection();
+    updateSelection(selection(), QItemSelection());
+}
 void SelectionModel::pauseSelectionConnection() {
     m_connectionsAreActivated = false;
 }
+
 void SelectionModel::continueSelectionConnection() {
     m_connectionsAreActivated = true;
+}
+
+void SelectionModel::deselectAll() {
+    for(GraphicsScheduleItem *item : m_selectedItems) {
+        item->setSelected(false);
+    }
     m_selectedItems.clear();
-    updateSelection(selection(), QItemSelection());
 }
 
 void SelectionModel::changeSelectionInModel(GraphicsScheduleItem *item, QItemSelectionModel::SelectionFlags command) {
