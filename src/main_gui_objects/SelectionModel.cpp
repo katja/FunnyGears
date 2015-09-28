@@ -91,4 +91,11 @@ void SelectionModel::reportSelectionCount() {
     } else {
         emit noneOrManyGraphicsItemsSelected();
     }
+    for(QModelIndex index : selection().indexes()) {
+        if(index.parent() == QModelIndex()) {
+            emit topLevelItemsAreSelected();
+            return;
+        }
+    }
+    emit noTopLevelItemsAreSelected();
 }

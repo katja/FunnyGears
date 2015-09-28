@@ -43,6 +43,8 @@ public:
 signals:
     void oneGraphicsItemSelected(GraphicsItem *item);
     void noneOrManyGraphicsItemsSelected();
+    void topLevelItemsAreSelected(); //at least one top level item is in current selection
+    void noTopLevelItemsAreSelected(); //no top level items are in current selection
 
 public slots:
     void sceneSelectionChanged(GraphicsScene *scene);

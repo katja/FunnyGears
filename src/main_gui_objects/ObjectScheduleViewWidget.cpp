@@ -58,6 +58,8 @@ SelectionModel* ObjectScheduleViewWidget::setSelectionModel(SelectionModel *mode
 
     connect(m_selectionModel, SIGNAL(oneGraphicsItemSelected(GraphicsItem*)), this, SLOT(addActionsFor(GraphicsItem*)));
     connect(m_selectionModel, SIGNAL(noneOrManyGraphicsItemsSelected()), this, SLOT(removeAdditionalActions()));
+    connect(m_selectionModel, SIGNAL(topLevelItemsAreSelected()), this, SLOT(enableRemoveItemButton()));
+    connect(m_selectionModel, SIGNAL(noTopLevelItemsAreSelected()), this, SLOT(disableRemoveItemButton()));
 
     return oldModel;
 }
@@ -88,6 +90,14 @@ void ObjectScheduleViewWidget::removeAdditionalActions() {
     m_spline = nullptr;
     m_pairGearAction->setEnabled(false);
     m_graphicsSplineGear = nullptr;
+}
+
+void ObjectScheduleViewWidget::enableRemoveItemButton() {
+    m_removeItemButton->setEnabled(true);
+}
+
+void ObjectScheduleViewWidget::disableRemoveItemButton() {
+    m_removeItemButton->setEnabled(false);
 }
 
 void ObjectScheduleViewWidget::addSpline() {

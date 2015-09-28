@@ -21,11 +21,16 @@ public:
 private slots:
     void addActionsFor(GraphicsItem*);
     void removeAdditionalActions();
+    void enableRemoveItemButton();
+    void disableRemoveItemButton();
+
     void addSpline();
     void addGearTooth();
     void addGearPair();
     void addInvoluteGear();
+
     void removeItems();
+
 
 private:
     ModelTreeView *m_treeView;
