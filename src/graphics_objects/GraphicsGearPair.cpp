@@ -76,14 +76,15 @@ GraphicsGearPair::GraphicsGearPair(GearPair *gearPair) :
 }
 
 GraphicsGearPair::~GraphicsGearPair() {
-    //m_drivenGear and m_drivenGear are not deleted, as they are expected to be listed
-    //in the model as correct GraphicsScheduleItems
-    //=> they are deleted by the model
-    //TODO: maybe better ask for if they still exist?
-    //everywhere: delete... + ...=0
-    //ask if(m_...) delete ...
     std::cout << "GraphicsGearPair is ..." << std::endl;
+    noMoreInformAboutChange(m_gearPairInformationWidget);
     m_gearPairInformationWidget->close();
+    if(scene() != 0) {
+        scene()->removeItem(m_drivingGear);
+        scene()->removeItem(m_drivenGear);
+    }
+    delete m_drivingGear;
+    delete m_drivenGear;
     delete m_gearPairInformationWidget;
     delete m_gearPair;
     std::cout << "deleted" << std::endl;

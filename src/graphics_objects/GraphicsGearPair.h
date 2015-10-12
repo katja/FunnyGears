@@ -11,6 +11,19 @@
 #include "graphics_widgets/GearPairInformationWidget.h"
 #include "helper_objects/ChangingObjectListener.h"
 
+/** Representation of a gear pair – holds internally two GraphicsSplineGears
+ *
+ *  Is responsible to show the user all possible information of the gearing
+ *  In the initialization it needs a GearPair, it takes control of.
+ *  So the given GearPair pointer is deleted, when the deconstructor is called!
+ *
+ *  For both gears of the GearPair a GraphicsSplineGear is created and both are installed
+ *  as children of the GraphicsGearPair. Thus they are shown on a GraphicsScene. They
+ *  are again deleted in the destructor.
+ *
+ *  A special information widget is provided to show more information about the quality
+ *  of the gearing. When the GraphicsGearPair is deleted it is closed an deleted, too.
+ */
 class GraphicsGearPair : public GraphicsScheduleItem, public ChangingObjectListener {
 
 public:
