@@ -156,7 +156,11 @@ void Spline::setDegree(uint degree) {
         if(m_tornToEdges && isValid())
             makeDifferentLastKnots();
         for(uint i = m_degree; i < degree; ++i) {
-            m_knots.push_back((m_knots.at(m_knots.size() - 1) + 1));
+            // special case when no control points and degree was 1
+            if(m_knots.empty())
+                m_knots.push_back(1);
+            else
+                m_knots.push_back((m_knots.at(m_knots.size() - 1) + 1));
             m_degree += 1;
         }
     } else { // m_degree > degree
@@ -165,7 +169,6 @@ void Spline::setDegree(uint degree) {
             m_degree -= 1;
         }
     }
-
     //State changed in a valid state. As the knot vector may be completely bumfuzzled,
     //an adjustment (check an adaption) of all knots has to be done.
     if(!wasValid && isValid()) {
@@ -484,7 +487,7 @@ bool Spline::isValidMessages(std::ostream &os) const {
 bool Spline::isValid() const {
     if(m_degree <= 0)
         return false;
-    if(m_controlPoints.size() != m_knots.size() - m_degree + 1)
+    if(m_controlPoints.size() != m_knots.size() + 1 - m_degree)
         return false;
     return m_controlPoints.size() > m_degree; //first visible for degree + 1 control points
 }
