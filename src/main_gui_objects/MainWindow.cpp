@@ -50,6 +50,9 @@ void MainWindow::createMainProgramPart() {
 
     m_objectSchedule  = new ObjectScheduleViewWidget(m_model, this);
 
+// TRACKING OF CHANGES
+    m_changesTracker.trackChangesOf(m_model);
+
 // SELECTION THINGS
     m_objectAttributesWidget = new ObjectAttributesWidget(selectionModel, this);
     m_scene->setSelectionModel(selectionModel);
@@ -181,6 +184,10 @@ void MainWindow::openProject() {
         QStandardPaths::displayName(QStandardPaths::HomeLocation),
         tr("Funny Gears Files (*.fg)")
     );
+    if(fileName == nullptr) {
+        return;
+    }
+
     m_model->removeAll();
     if(openProject(fileName)) {
         m_fileName = fileName;

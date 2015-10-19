@@ -215,6 +215,7 @@ GearPairInformationWidget::GearPairInformationWidget(GearPair *gearPair) :
 }
 
 GearPairInformationWidget::~GearPairInformationWidget() {
+    m_gearPairInfo->noMoreInformAboutChange(this);
     delete m_gearPairInfo;
 }
 

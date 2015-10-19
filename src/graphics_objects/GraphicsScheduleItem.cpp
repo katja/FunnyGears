@@ -11,12 +11,11 @@ bool GraphicsScheduleItem::isGraphicsScheduleItem(QGraphicsItem *item) {
     return false;
 }
 
-GraphicsScheduleItem::GraphicsScheduleItem() : GraphicsItem() {
-    m_name = "";
-    m_parent = 0;
+GraphicsScheduleItem::GraphicsScheduleItem() : GraphicsItem(), m_parent(0), m_name("") {
 }
 
 GraphicsScheduleItem::~GraphicsScheduleItem() {
+    std::cout << "GraphicsScheduleItem is deleted" << std::endl;
 }
 
 int GraphicsScheduleItem::type() const {

@@ -3,6 +3,7 @@
 
 #include "stable.h"
 #include "graphics_objects/GraphicsScheduleItem.h"
+#include "helper_objects/ChangingObjectResponder.h"
 
 /** Model (tree) of the ModelTreeView and the whole scene
  *  Responsible for adding, organising and removing items
@@ -45,7 +46,7 @@
  *  And after all the removal has finished (and also the last endRemoveRows() had been called)
  *  signal rowsFinishedRemoval() is emitted.
  */
-class Model : public QAbstractItemModel {
+class Model : public QAbstractItemModel, public ChangingObjectResponder {
 
 Q_OBJECT
 
@@ -173,19 +174,20 @@ public:
      */
     QModelIndex getIndexFromItem(GraphicsScheduleItem *item) const;
 
+    bool hasChanged() const override; // from ChangingObjectResponder
+    void clearChanges() override; // from ChangingObjectResponder
+
 signals:
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>());
     // void rowsAboutToBeRemoved(const QModelIndex &parent, int first, int last);
     void rowsAboutToBeRemoved();
     void rowsFinishedRemoval();
 
-protected:
-    void endInsertRows();
-
 private:
     QGraphicsScene *m_scene;
     GraphicsScheduleItem *m_rootItem;
     QHash< Data, QHash<Qt::ItemDataRole, QString> > m_headHash;
+    bool m_changed;
 
     /** @brief Removes the given (top level) row
      *
@@ -194,6 +196,23 @@ private:
      *  it in another way!
      */
     bool removeRow(int row);
+
+    /** @brief Removes all dependencies and deletes item
+     */
+    void deleteItem(GraphicsScheduleItem *item);
+
+    /** @brief Informs all current ChangingObjectListener to this object about changes
+     */
+    // void changed();
+
+    bool haveItemsChanged() const;
+
+    void clearChangedInItems();
+
+
+    /** @brief Like @see changed() but also emits dataChanged(const QModelIndex&, const QModelIndex&, const QVector<int>& = QVector<int> ()))
+     */
+    void dataChanged(const QModelIndex &index);
 
     /** Returns a pointer to the GraphicsScheduleItem, which belongs to the given QModelIndex.
      *  If Index is not valid or no corresponding GraphicsScheduleItem can be found

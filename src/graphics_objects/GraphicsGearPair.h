@@ -50,7 +50,7 @@ public:
     uint numberOfTeethOfDrivenGear() const;
 
     void setDrivingGearEnabled(bool enabled);
-    bool isDrivingGearEnabled();
+    bool isDrivingGearEnabled() const;
 
     void useBottomClearance(bool useIt);
     bool isBottomClearanceUsed() const;

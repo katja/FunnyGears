@@ -5,8 +5,14 @@
 #include "definitions.h"
 #include "tool_bars/EditingToolBarListener.h"
 #include "helper_objects/ChangingObject.h"
+#include "helper_objects/ChangingObjectResponder.h"
 
-class GraphicsItem : public QGraphicsItem, public EditingToolBarListener, public ChangingObject {
+/* GraphicsItem provides two sorts of tracking of changes: One for immediate reaction (ChangingObject)
+and one for asking for reaction (ChangingObjectResponder).
+In changed() both variants are used. All ChangingObjectListener are informed and the intern
+status of GraphicsItem is set to changed. */
+
+class GraphicsItem : public QGraphicsItem, public EditingToolBarListener, public ChangingObject, public ChangingObjectResponder {
 
 public:
     static const int Type;// = GraphicsItem::UserType + Type::GraphicsItemType;
@@ -29,9 +35,13 @@ public:
     void informAboutChange(ChangingObjectListener *listener) override; // from ChangingObject
     void noMoreInformAboutChange(ChangingObjectListener *listener) override; // from ChangingObject
     void changed();
+    bool hasChanged() const override; // from ChangingObjectResponder
+    void clearChanges() override; // from ChangingObjectResponder
 
-private:
+protected:
     list<ChangingObjectListener*> m_changingListeners;
+    bool m_changed;
+
 };
 
 #endif // GRAPHICS_ITEM

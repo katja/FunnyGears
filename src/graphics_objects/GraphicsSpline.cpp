@@ -64,16 +64,19 @@ const Spline* GraphicsSpline::spline() const {
 void GraphicsSpline::changeDegree(int degree) {
     prepareGeometryChange();
     m_spline->setDegree(degree);
+    m_changed = true;
 }
 
 void GraphicsSpline::changeTornToEdges(bool tearToEdges) {
     prepareGeometryChange();
     m_spline->setTornToEdges(tearToEdges);
+    m_changed = true;
 }
 
 void GraphicsSpline::setVisibleControlPolygon(bool isVisible) {
     prepareGeometryChange();
     m_isControlPolygonVisible = isVisible;
+    m_changed = true;
 }
 
 bool GraphicsSpline::isControlPolygonVisible() {
@@ -86,10 +89,10 @@ void GraphicsSpline::setTangentDrawn(bool draw) {
             m_tangentValue = m_spline->lowerDomainLimit();
         if(m_tangentValue >= m_spline->upperDomainLimit())
             m_tangentValue = m_spline->upperDomainLimit();
-
     }
     prepareGeometryChange();
     m_isTangentDrawn = draw;
+    m_changed = true;
 }
 
 bool GraphicsSpline::isTangentDrawn() const {
@@ -100,6 +103,7 @@ void GraphicsSpline::setTangentValue(real value) {
     adjustInSplineRange(value);
     prepareGeometryChange();
     m_tangentValue = value;
+    m_changed = true;
 }
 
 real GraphicsSpline::tangentValue() {
@@ -117,6 +121,7 @@ void GraphicsSpline::refineSpline() {
         m_spline->knotRefinement(maxDist);
         maxDist = maxDist / 2.0;
     } while(numberOfControlPointsBefore == m_spline->numberOfControlPoints());
+    m_changed = true;
 }
 
 void GraphicsSpline::addPoint(QPointF scenePos) {
@@ -138,6 +143,7 @@ void GraphicsSpline::removePointNear(QPointF scenePos) {
     for(uint i = 0; i < controlPoints.size(); ++i) {
         if((positionOfPoint(i) - scenePos).manhattanLength() <= 5) {
             removePoint(i);
+            m_changed = true;
             return;
         }
     }
@@ -325,6 +331,7 @@ void GraphicsSpline::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
 
 void GraphicsSpline::setColor(QColor color) {
     m_color = color;
+    m_changed = true;
 }
 
 QColor GraphicsSpline::color() const {
@@ -354,6 +361,7 @@ void GraphicsSpline::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
 void GraphicsSpline::mouseMovePointEvent(uint index, QGraphicsSceneMouseEvent *event) {
     prepareGeometryChange();
     m_spline->moveControlPoint(index, event->pos());
+    m_changed = true;
     GraphicsItem::changed();
 }
 

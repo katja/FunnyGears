@@ -91,6 +91,7 @@ bool GraphicsSplineGear::isBasePitchVisible() const {
 void GraphicsSplineGear::setBasePitchVisibility(bool isVisible) {
     prepareGeometryChange();
     m_isBasePitchVisible = isVisible;
+    m_changed = true;
 }
 
 bool GraphicsSplineGear::isReferenceCircleVisible() const {
@@ -100,6 +101,7 @@ bool GraphicsSplineGear::isReferenceCircleVisible() const {
 void GraphicsSplineGear::setReferenceCircleVisibility(bool isVisible) {
     prepareGeometryChange();
     m_isReferenceCircleVisible = isVisible;
+    m_changed = true;
 }
 
 bool GraphicsSplineGear::isRotating() const {
@@ -109,6 +111,7 @@ bool GraphicsSplineGear::isRotating() const {
 void GraphicsSplineGear::setRotating(bool isAnimated) {
     prepareGeometryChange();
     m_isRotating = isAnimated;
+    m_changed = true;
 }
 
 real GraphicsSplineGear::rotationVelocity() const {
@@ -118,6 +121,7 @@ real GraphicsSplineGear::rotationVelocity() const {
 void GraphicsSplineGear::setRotationVelocity(real velocity) {
     prepareGeometryChange();
     m_rotationVelocity = velocity;
+    m_changed = true;
 }
 
 GearPair* GraphicsSplineGear::constructAMatingGear() const {

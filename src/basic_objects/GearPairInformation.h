@@ -9,6 +9,26 @@
 #include "helper_objects/ChangingObject.h"
 #include "helper_objects/ChangingObjectListener.h"
 
+/** Holds information about how good or bad the quality of the gearing is
+ *
+ *  Uses a GearPair and its ContactPointManager to get the informations.
+ *  Therefore is initialized with a GearPair to work on.
+ *
+ *  Installs itself as a ChangingObjectListener to the GearPair. So when the GearPair
+ *  changes (GearPair::informAboutChange()) it is informed with objectChanged(GearPair*)
+ *
+ *  Is at the same time a ChangingObject, too. This is necessary especially for the
+ *  GearPairInformationWidget. As soon as the information of the GearPairInformation has
+ *  changed, a corresponding GearPairInformationWidget should update its view
+ *
+ *  To avoid unnecessary calculations, the informations of a GearPairInformation object
+ *  are only computed, if the corresponding GearPairInformationWidget is visible.
+ *  Therefore the GearPairInformationWidget calls the update() on the GearPairInformation.
+ *
+ *  If used with a GearPairInformationWidget (normal case) the GearPairInformationWidget
+ *  constructs a GearPairInformation and also deletes it again, when it is destroyed itself.
+ */
+
 class GearPairInformation : public ChangingObject, public ChangingObjectListener {
 
 public:

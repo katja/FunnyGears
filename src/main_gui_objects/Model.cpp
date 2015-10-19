@@ -101,7 +101,7 @@ bool Model::setData(const QModelIndex &index, const QVariant &value, int role) {
     } else {
         return false;
     }
-    emit dataChanged(index, index);
+    dataChanged(index);
     return true;
 }
 
@@ -110,7 +110,7 @@ bool Model::toggleValue(const QModelIndex &index) {
     if(item) {
         if(index.column() == VISIBILITY)
             item->toggleVisibility();
-        emit dataChanged(index, index);
+        dataChanged(index);
         return true;
     }
     return false;
@@ -143,6 +143,7 @@ bool Model::addItem(GraphicsScheduleItem *newItem) {
     beginInsertRows(QModelIndex(), lastRow, lastRow + 1);
     newItem->setParentItem(m_rootItem);
     endInsertRows();
+    m_changed = true;
     return true;
 }
 
@@ -157,10 +158,10 @@ bool Model::remove(QModelIndex index) {
     }
     emit rowsAboutToBeRemoved();
     beginRemoveRows(index.parent(), index.row(), index.row());
-    m_scene->removeItem(item);
-    delete item;
+    deleteItem(item);
     endRemoveRows();
     emit rowsFinishedRemoval();
+    m_changed = true;
     return true;
 }
 
@@ -192,11 +193,16 @@ bool Model::remove(QModelIndexList indices) {
         allRemoved &= removeRow(*it);
     } while(it != rowsToDelete.begin());
     emit rowsFinishedRemoval();
+    m_changed = true;
     return allRemoved;
 }
 
 void Model::removeAll() {
     emit rowsAboutToBeRemoved();
+    // actually the status change should happen afterwards, but if realised there, it changes,
+    // even if no item had been there before (or an additional boolean would be necessary)
+    if(hasChildren())
+        m_changed = true;
     while(hasChildren()) {
         removeRow(rowCount() - 1);
     }
@@ -218,8 +224,16 @@ QModelIndex Model::getIndexFromItem(GraphicsScheduleItem *item) const {
     return createIndex(item->childNumber(), 0, item);
 }
 
-void Model::endInsertRows() {
-    QAbstractItemModel::endInsertRows();
+bool Model::hasChanged() const {
+    if(!m_changed) {
+        return haveItemsChanged();
+    }
+    return m_changed; //true
+}
+
+void Model::clearChanges() {
+    clearChangedInItems();
+    m_changed = false;
 }
 
 bool Model::removeRow(int row) {
@@ -228,10 +242,32 @@ bool Model::removeRow(int row) {
     if(!item) // m_rootItem or not valid
         return false;
     beginRemoveRows(QModelIndex(), row, row);
-    m_scene->removeItem(item);
-    delete item;
+    deleteItem(item);
     endRemoveRows();
     return true;
+}
+
+void Model::deleteItem(GraphicsScheduleItem *item) {
+    m_scene->removeItem(item);
+    delete item;
+}
+
+bool Model::haveItemsChanged() const {
+    for(int i = 0; i < m_rootItem->numberOfChildren(); ++i) {
+        if(m_rootItem->child(i)->hasChanged())
+            return true;
+    }
+    return false;
+}
+
+void Model::clearChangedInItems() {
+    for(int i = 0; i < m_rootItem->numberOfChildren(); ++i) {
+        m_rootItem->child(i)->clearChanges();
+    }
+}
+
+void Model::dataChanged(const QModelIndex &index) {
+    emit dataChanged(index, index);
 }
 
 GraphicsScheduleItem* Model::getInternItemFromIndex(const QModelIndex &index) const {

@@ -52,10 +52,6 @@ void GraphicsSplineAttributesWidget::setItem(QGraphicsItem *graphicsItem) {
         updateAttributes();
         m_currentSpline->informAboutChange(this);
     }
-    else {
-        m_currentSpline = nullptr;
-        std::cerr << "ERROR! GraphicsSplineAttributesWidget::setItem(QGraphicsItem*) got an item which was not a GraphicsSpline!" << std::endl;
-    }
 }
 
 bool GraphicsSplineAttributesWidget::worksOnItem(QGraphicsItem *graphicsItem) {

@@ -11,6 +11,7 @@ GearPairInformation::GearPairInformation(GearPair *gearPair) : m_gearPair(gearPa
 }
 
 GearPairInformation::~GearPairInformation() {
+    m_gearPair->noMoreInformAboutChange(this);
 }
 
 void GearPairInformation::update() {

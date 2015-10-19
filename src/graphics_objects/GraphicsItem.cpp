@@ -12,7 +12,7 @@ bool GraphicsItem::isGraphicsItem(QGraphicsItem *item) {
     return false;
 }
 
-GraphicsItem::GraphicsItem(GraphicsItem *parent) : QGraphicsItem(parent) {
+GraphicsItem::GraphicsItem(GraphicsItem *parent) : QGraphicsItem(parent), m_changed(true) {
 }
 
 int GraphicsItem::type() const {
@@ -37,7 +37,15 @@ void GraphicsItem::noMoreInformAboutChange(ChangingObjectListener *listener) {
 }
 
 void GraphicsItem::changed() {
+    m_changed = true;
     for(ChangingObjectListener* listener : m_changingListeners) {
         listener->objectChanged(this);
     }
+}
+
+bool GraphicsItem::hasChanged() const {
+    return m_changed;
+}
+void GraphicsItem::clearChanges() {
+    m_changed = false;
 }

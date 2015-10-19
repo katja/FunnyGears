@@ -18,11 +18,13 @@ GearPair::GearPair(const SplineGear &drivingGear) :
     m_maxDriftAngle(DefaultMaxDrift),
     m_samplingRate(DefaultSamplingRate)
 {
+    std::cout << "GearPair is created" << std::endl;
     m_drivenGear->setNumberOfTeeth(m_drivingGear->numberOfTeeth());
     calculateAgainWithAllAttributes();
 }
 
 GearPair::~GearPair() {
+    std::cout << "GearPair is deleted" << std::endl;
 }
 
 void GearPair::calculateAgainWithAllAttributes() {

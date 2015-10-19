@@ -147,15 +147,17 @@ void GraphicsGearPair::setDrivingGearEnabled(bool enabled) {
     else
         m_drivingGear->disableUserInteraction();
     m_drivingGear->setVisibleControlPolygon(enabled);
+    m_changed = true;
 }
 
-bool GraphicsGearPair::isDrivingGearEnabled() {
+bool GraphicsGearPair::isDrivingGearEnabled() const {
     return m_drivingGear->isUserInteractionEnabled();
 }
 
 void GraphicsGearPair::useBottomClearance(bool useIt) {
     prepareGeometryChange();
     m_gearPair->useBottomClearance(useIt);
+    m_changed = true;
 }
 
 bool GraphicsGearPair::isBottomClearanceUsed() const {
@@ -165,6 +167,7 @@ bool GraphicsGearPair::isBottomClearanceUsed() const {
 void GraphicsGearPair::setBottomClearance(int bottomClearance, int startAngle) {
     prepareGeometryChange();
     m_gearPair->setBottomClearance((real)bottomClearance, (real)startAngle);
+    m_changed = true;
 }
 
 int GraphicsGearPair::bottomClearance() const {
@@ -178,6 +181,7 @@ int GraphicsGearPair::bottomClearanceStartAngle() const {
 void GraphicsGearPair::setVisibilityOfPitchPoint(bool visible) {
     prepareGeometryChange();
     m_isPitchPointVisible = visible;
+    m_changed = true;
 }
 
 bool GraphicsGearPair::visibilityOfPitchPoint() const {
@@ -187,6 +191,7 @@ bool GraphicsGearPair::visibilityOfPitchPoint() const {
 void GraphicsGearPair::setVisibilityOfDrivingGearSampling(bool visible) {
     prepareGeometryChange();
     m_isDrivingGearSamplingVisible = visible;
+    m_changed = true;
 }
 
 bool GraphicsGearPair::visibilityOfDrivingGearSampling() const {
@@ -196,6 +201,7 @@ bool GraphicsGearPair::visibilityOfDrivingGearSampling() const {
 void GraphicsGearPair::setVisibilityOfDrivenGearSampling(bool visible) {
     prepareGeometryChange();
     m_isDrivenGearSamplingVisible = visible;
+    m_changed = true;
 }
 
 bool GraphicsGearPair::visibilityOfDrivenGearSampling() const {
@@ -205,6 +211,7 @@ bool GraphicsGearPair::visibilityOfDrivenGearSampling() const {
 void GraphicsGearPair::setVisibilityOfForbiddenAreaInDrivingGear(bool visible) {
     prepareGeometryChange();
     m_isForbiddenAreaInDrivingGearVisible = visible;
+    m_changed = true;
 }
 
 bool GraphicsGearPair::visibilityOfForbiddenAreaInDrivingGear() const {
@@ -214,6 +221,7 @@ bool GraphicsGearPair::visibilityOfForbiddenAreaInDrivingGear() const {
 void GraphicsGearPair::setVisibilityOfForbiddenAreaInDrivenGear(bool visible) {
     prepareGeometryChange();
     m_isForbiddenAreaInDrivenGearVisible = visible;
+    m_changed = true;
 }
 
 bool GraphicsGearPair::visibilityOfForbiddenAreaInDrivenGear() const {
@@ -223,6 +231,7 @@ bool GraphicsGearPair::visibilityOfForbiddenAreaInDrivenGear() const {
 void GraphicsGearPair::setVisibilityOfNoneContactPoints(bool visible) {
     prepareGeometryChange();
     m_areNoneContactPointsVisible = visible;
+    m_changed = true;
 }
 
 bool GraphicsGearPair::visibilityOfNoneContactPoints() const {
@@ -232,6 +241,7 @@ bool GraphicsGearPair::visibilityOfNoneContactPoints() const {
 void GraphicsGearPair::setVisibilityOfSelectedGearPoints(bool visible) {
     prepareGeometryChange();
     m_isSelectionOfGearPointsVisible = visible;
+    m_changed = true;
 }
 
 bool GraphicsGearPair::visibilityOfSelectedGearPoints() const {
@@ -241,6 +251,7 @@ bool GraphicsGearPair::visibilityOfSelectedGearPoints() const {
 void GraphicsGearPair::setVisibilityOfPathOfPossibleContact(bool visible) {
     prepareGeometryChange();
     m_isPathOfPossibleContactVisible = visible;
+    m_changed = true;
 }
 
 bool GraphicsGearPair::visibilityOfPathOfPossibleContact() const {
@@ -250,6 +261,7 @@ bool GraphicsGearPair::visibilityOfPathOfPossibleContact() const {
 void GraphicsGearPair::setVisibilityOfPathOfRealContact(bool visible) {
     prepareGeometryChange();
     m_isPathOfRealContactVisible = visible;
+    m_changed = true;
 }
 
 bool GraphicsGearPair::visibilityOfPathOfRealContact() const {
@@ -259,6 +271,7 @@ bool GraphicsGearPair::visibilityOfPathOfRealContact() const {
 void GraphicsGearPair::setVisibilityOfPathOfBestContact(bool visible) {
     prepareGeometryChange();
     m_isPathOfBestContactVisible = visible;
+    m_changed = true;
 }
 
 bool GraphicsGearPair::visibilityOfPathOfBestContact() const {
@@ -268,6 +281,7 @@ bool GraphicsGearPair::visibilityOfPathOfBestContact() const {
 void GraphicsGearPair::setVisibilityOfPitches(bool visible) {
     prepareGeometryChange();
     m_arePitchesVisible = visible;
+    m_changed = true;
 }
 
 bool GraphicsGearPair::visibilityOfPitches() const {
@@ -277,6 +291,7 @@ bool GraphicsGearPair::visibilityOfPitches() const {
 void GraphicsGearPair::setVisibilityOfPitchCircles(bool visible) {
     prepareGeometryChange();
     m_arePitchCirclesVisible = visible;
+    m_changed = true;
 }
 
 bool GraphicsGearPair::visibilityOfPitchCircles() const {
@@ -286,6 +301,7 @@ bool GraphicsGearPair::visibilityOfPitchCircles() const {
 void GraphicsGearPair::setRotating(bool isRotating) {
     prepareGeometryChange();
     m_isRotating = isRotating;
+    m_changed = true;
 }
 
 bool GraphicsGearPair::isRotating() const {
@@ -295,6 +311,7 @@ bool GraphicsGearPair::isRotating() const {
 void GraphicsGearPair::setRotationVelocity(real velocity) {
     prepareGeometryChange();
     m_rotationVelocity = velocity;
+    m_changed = true;
 }
 
 real GraphicsGearPair::rotationVelocity() const {
@@ -307,6 +324,7 @@ void GraphicsGearPair::setSamplingRate(int samplingRate) {
     prepareGeometryChange();
     m_gearPair->setSamplingRate((uint)samplingRate);
     m_gearPair->calculateAgainWithUnchangedAttributes();
+    m_changed = true;
 }
 
 int GraphicsGearPair::samplingRate() const {
@@ -319,6 +337,7 @@ void GraphicsGearPair::setMaxDriftAngleInDegree(int maxDriftAngle) {
     prepareGeometryChange();
     m_gearPair->setMaxDriftAngleInDegree(maxDriftAngle);
     m_gearPair->calculateAgainWithUnchangedAttributes();
+    m_changed = true;
 }
 
 int GraphicsGearPair::maxDriftAngleInDegree() const {
@@ -328,6 +347,7 @@ int GraphicsGearPair::maxDriftAngleInDegree() const {
 void GraphicsGearPair::setFinePencil(bool isFinePencil) {
     prepareGeometryChange();
     m_finePencilUsed = isFinePencil;
+    m_changed = true;
 }
 
 bool GraphicsGearPair::finePencilUsed() const {

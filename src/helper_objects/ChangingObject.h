@@ -3,6 +3,12 @@
 
 #include "helper_objects/ChangingObjectListener.h"
 
+/* Should hold a list or something like that to manage all ChangingObjectListeners
+ * So if the ChangingObject changes, it can inform them by calling objectChanged(this)
+ * on them.
+ * Therefore it is essential, that the ChangingObjectListeners call noMoreInformAboutChange(...)
+ * when their destructor is called!
+ */
 class ChangingObject {
 
 public:
