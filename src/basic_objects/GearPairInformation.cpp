@@ -25,8 +25,8 @@ void GearPairInformation::update() {
             vector<WrongContactPoint*> wrongContactPoints = m_CPmanager->gearWrongContactPoints(state);
 
             //Remark: better would probably be variables packed in a GearState and without
-            //        an if-else here, but as this resulted in a much unreadable code, I
-            //        switched back to this not very nice if statement.
+            //        an if-else here. But in a first try this approach resulted in an ugly
+            //        (unreadable) code. So I switched back to this not very nice if statement.
 
             if(state == CalculationState::Simple) {
                 countDirection(contactPoints, m_numberOfCPsInContact);
