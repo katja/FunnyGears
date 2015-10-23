@@ -22,6 +22,7 @@ public:
 
 protected:
     void keyPressEvent(QKeyEvent *event);
+    void closeEvent(QCloseEvent *event);
 
 private:
     GraphicsView                *m_view;
@@ -74,7 +75,6 @@ private:
     bool parseAndLoad(QString fileName, QString *ok = nullptr);
 
 private slots:
-    void quitProgram();
     void about();
     void newProject();
     bool saveProject();

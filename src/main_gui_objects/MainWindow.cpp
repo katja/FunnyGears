@@ -38,6 +38,18 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     QMainWindow::keyPressEvent(event);
 }
 
+void MainWindow::closeEvent(QCloseEvent *event) {
+    // Ask user for saving of changes before closing
+    if(!((m_changesTracker.hasChanges() && savedProjectOrOk()) || !m_changesTracker.hasChanges())) {
+        event->ignore();
+        return;
+    }
+    // Delete all GraphicsItems first, to be sure that none of them stays open and thus
+    // prevents the program from shutting down (like f.ex. the GearPairInformationWidget)
+    m_model->removeAll();
+    QMainWindow::closeEvent(event);
+}
+
 void MainWindow::createMainProgramPart() {
 // GRAPHICSSCENE THINGS
     m_scene = new GraphicsScene(this);
@@ -74,7 +86,7 @@ void MainWindow::createProgramMenu() {
     connect(createAction(m_aboutAction, tr("About"), tr("about the program")),
         SIGNAL(triggered()), this, SLOT(about()));
     connect(createAction(m_exitAction,  tr("Exit"),  tr("quit program"), QKeySequence::Quit),
-        SIGNAL(triggered()), this, SLOT(quitProgram()));
+        SIGNAL(triggered()), this, SLOT(close()));
 
     m_programMenu = menuBar()->addMenu(tr("Funny Gears"));
     m_programMenu->addAction(m_aboutAction);
@@ -156,10 +168,6 @@ QAction* MainWindow::createAction(QAction *&action, QString name, QString toolTi
     if(shortcut != 0)
         action->setShortcut(shortcut);
     return action;
-}
-
-void MainWindow::quitProgram() {
-    close();
 }
 
 void MainWindow::about() {
