@@ -3,6 +3,7 @@
 #include "graphics_widgets/GearPairInformationWidget.h"
 
 GearPairInformationWidget::GearPairInformationWidget(GearPair *gearPair) :
+    QWidget(0, Qt::Dialog),
     m_gearPair(gearPair),
     m_gearPairInfo(nullptr),
     m_attentionBox(nullptr),
